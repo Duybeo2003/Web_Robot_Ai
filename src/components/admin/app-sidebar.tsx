@@ -87,7 +87,7 @@ export function AppSidebar() {
               Thoát Admin
             </Link>
           </Button>
-          <Button variant="ghost" className="w-full justify-start text-destructive" onClick={() => signOut()}>
+          <Button variant="ghost" className="w-full justify-start text-destructive" onClick={() => signOut({ callbackUrl: "/" })}>
             Đăng xuất
           </Button>
         </div>

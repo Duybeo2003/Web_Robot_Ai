@@ -10,6 +10,14 @@ import { useAuthModal } from "@/store/use-auth-modal";
 import { useCartUI } from "@/store/use-cart-ui";
 import { useCartStore } from "@/lib/store/cart";
 import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 function CartBadge() {
   const totalItems = useCartStore((state) => state.totalItems);
@@ -96,11 +104,47 @@ export function Header() {
 
           {/* User / Login */}
           {session ? (
-            <Link href={session.user.role === "ADMIN" ? "/admin" : "/profile"}>
-              <Button variant="ghost" size="icon" className="hover:text-primary" title="Tài khoản">
+            <DropdownMenu>
+              <DropdownMenuTrigger className="hover:text-primary h-10 w-10 flex items-center justify-center rounded-md hover:bg-accent transition-colors" title="Tài khoản">
                 <UserIcon className="h-5 w-5" />
-              </Button>
-            </Link>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 mt-2">
+                <DropdownMenuLabel className="font-normal">
+                  <div className="flex flex-col space-y-1">
+                    <p className="text-sm font-medium leading-none">
+                      {session.user.name || (session.user.role === "ADMIN" ? "Quản trị viên" : "Tài khoản của tôi")}
+                    </p>
+                    <p className="text-xs leading-none text-muted-foreground">
+                      {session.user.email || (session.user as any).phoneNumber || ""}
+                    </p>
+                  </div>
+                </DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {session.user.role === "ADMIN" ? (
+                  <Link href="/admin">
+                    <DropdownMenuItem className="cursor-pointer">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>Bảng điều khiển</span>
+                    </DropdownMenuItem>
+                  </Link>
+                ) : (
+                  <Link href="/profile">
+                    <DropdownMenuItem className="cursor-pointer">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>Hồ sơ cá nhân</span>
+                    </DropdownMenuItem>
+                  </Link>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem 
+                  className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Đăng xuất</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           ) : (
             <Button variant="ghost" size="icon" onClick={openModal} className="hover:text-primary" title="Đăng nhập">
               <UserIcon className="h-5 w-5" />

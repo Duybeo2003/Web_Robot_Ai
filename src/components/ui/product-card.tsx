@@ -3,7 +3,10 @@ import Image from "next/image";
 import { Truck } from "lucide-react";
 
 export function ProductCard({ product, action }: { product: any, action?: React.ReactNode }) {
-  const discountPercent = Math.floor(Math.random() * 30) + 10;
+  // Calculate a deterministic discount percent based on the product ID to avoid hydration mismatch
+  const discountPercent = product?.id 
+    ? (product.id.charCodeAt(0) + product.id.charCodeAt(product.id.length - 1)) % 30 + 10 
+    : 15;
   
   return (
     <div className="group relative bg-white flex flex-col hover:shadow-lg transition-all duration-300 rounded-sm border border-transparent hover:border-border overflow-hidden">
