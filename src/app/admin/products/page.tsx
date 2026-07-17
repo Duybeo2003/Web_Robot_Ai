@@ -8,6 +8,9 @@ import {
   TableRow,
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
+import { Button } from "@/components/ui/button"
+import Link from "next/link"
+import { Plus, Edit } from "lucide-react"
 
 const prisma = new PrismaClient()
 
@@ -18,9 +21,17 @@ export default async function AdminProductsPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Sản phẩm</h2>
-        <p className="text-muted-foreground">Quản lý danh sách sản phẩm của cửa hàng.</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Sản phẩm</h2>
+          <p className="text-muted-foreground">Quản lý danh sách sản phẩm của cửa hàng.</p>
+        </div>
+        <Link href="/admin/products/new">
+          <Button className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+            <Plus className="w-4 h-4 mr-2" />
+            Thêm Mới
+          </Button>
+        </Link>
       </div>
       
       <div className="rounded-md border bg-white">
@@ -33,6 +44,7 @@ export default async function AdminProductsPage() {
               <TableHead>Giá bán</TableHead>
               <TableHead>Tồn kho</TableHead>
               <TableHead>Trạng thái</TableHead>
+              <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -48,16 +60,27 @@ export default async function AdminProductsPage() {
                   <TableCell className="font-medium text-xs text-muted-foreground">{product.id.slice(0, 8).toUpperCase()}</TableCell>
                   <TableCell className="font-medium">{product.title}</TableCell>
                   <TableCell>
-                    <Badge variant="outline">{product.categoryId || "Chưa phân loại"}</Badge>
+                    <Badge variant="outline" className="bg-neutral-50 text-neutral-600">
+                      {product.type === 'ROBOT_STEM' ? 'Robot Thông Minh' :
+                       product.type === 'KIT_ARDUINO' ? 'Kit Arduino' :
+                       product.type === 'DO_CHOI_LOGIC' ? 'Đồ chơi Logic' : 'Khác'}
+                    </Badge>
                   </TableCell>
                   <TableCell>
                     {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(product.price))}
                   </TableCell>
                   <TableCell>{product.inventoryCount}</TableCell>
                   <TableCell>
-                    <Badge variant={product.inventoryCount > 0 ? "default" : "destructive"}>
+                    <Badge className={product.inventoryCount > 0 ? "bg-[#FF5722] hover:bg-[#FF5722]/90 text-white" : "bg-neutral-300 text-neutral-600"}>
                       {product.inventoryCount > 0 ? "Còn hàng" : "Hết hàng"}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <Link href={`/admin/products/${product.id}`}>
+                      <Button variant="ghost" size="icon" className="h-8 w-8 text-neutral-500 hover:text-[#FF5722]">
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))

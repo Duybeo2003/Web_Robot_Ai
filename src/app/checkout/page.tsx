@@ -93,70 +93,74 @@ export default function CheckoutPage() {
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
-      <h1 className="text-4xl font-heading font-bold mb-10 text-foreground tracking-tight">Thanh toán</h1>
+    <div className="container mx-auto px-4 py-8 bg-[#F5F5F5] min-h-screen">
+      <h1 className="text-3xl font-heading font-bold mb-8 text-foreground tracking-tight uppercase text-[#FF5722]">Thanh toán</h1>
       
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-16">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 lg:gap-12">
         {/* Form Section */}
         <div className="lg:col-span-7">
-          <form onSubmit={handleSubmit} className="space-y-10">
+          <form onSubmit={handleSubmit} className="space-y-8 bg-white p-6 md:p-8 rounded-sm shadow-sm border border-neutral-100">
             <div className="space-y-6">
-              <h2 className="text-2xl font-heading font-semibold border-b border-border/50 pb-3">Thông tin giao hàng</h2>
+              <h2 className="text-xl font-heading font-bold border-b border-neutral-100 pb-3 flex items-center gap-2">
+                Thông tin giao hàng
+              </h2>
               
-              <div className="space-y-3 max-w-md">
-                <Label htmlFor="receiverPhone" className="text-muted-foreground">Số điện thoại người nhận</Label>
+              <div className="space-y-3">
+                <Label htmlFor="receiverPhone" className="text-neutral-600 font-medium">Số điện thoại người nhận <span className="text-red-500">*</span></Label>
                 <Input 
                   id="receiverPhone" 
                   required 
                   placeholder="0912345678"
                   value={formData.receiverPhone}
                   onChange={(e) => setFormData({...formData, receiverPhone: e.target.value})}
+                  className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
                 />
               </div>
 
-              <div className="space-y-3 max-w-md">
-                <Label htmlFor="shippingAddress" className="text-muted-foreground">Địa chỉ nhận hàng chi tiết</Label>
+              <div className="space-y-3">
+                <Label htmlFor="shippingAddress" className="text-neutral-600 font-medium">Địa chỉ nhận hàng chi tiết <span className="text-red-500">*</span></Label>
                 <Input 
                   id="shippingAddress" 
                   required 
                   placeholder="Số nhà, Tên đường, Phường/Xã, Quận/Huyện, Tỉnh/Thành phố"
                   value={formData.shippingAddress}
                   onChange={(e) => setFormData({...formData, shippingAddress: e.target.value})}
+                  className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
                 />
               </div>
             </div>
 
-            <div className="space-y-6">
-              <h2 className="text-2xl font-heading font-semibold border-b border-border/50 pb-3">Phương thức thanh toán</h2>
+            <div className="space-y-6 pt-4 border-t border-neutral-100">
+              <h2 className="text-xl font-heading font-bold border-b border-neutral-100 pb-3 flex items-center gap-2">Phương thức thanh toán</h2>
               <RadioGroup 
                 value={formData.paymentMethod} 
                 onValueChange={(val: any) => setFormData({...formData, paymentMethod: val})}
                 className="space-y-3"
               >
-                <div className="flex items-center space-x-4 border border-border p-5 rounded-sm cursor-pointer hover:border-primary/50 transition-colors bg-card">
+                <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-neutral-50/50">
                   <RadioGroupItem value="COD" id="cod" />
-                  <Label htmlFor="cod" className="cursor-pointer font-medium flex-1">Thanh toán khi nhận hàng (COD)</Label>
+                  <Label htmlFor="cod" className="cursor-pointer font-bold text-neutral-700 flex-1">Thanh toán khi nhận hàng (COD)</Label>
                 </div>
-                <div className="flex items-center space-x-4 border border-border p-5 rounded-sm cursor-pointer hover:border-primary/50 transition-colors bg-card">
+                <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-neutral-50/50">
                   <RadioGroupItem value="BANK_TRANSFER" id="bank" />
-                  <Label htmlFor="bank" className="cursor-pointer font-medium flex-1">Chuyển khoản ngân hàng (Thủ công)</Label>
+                  <Label htmlFor="bank" className="cursor-pointer font-bold text-neutral-700 flex-1">Chuyển khoản ngân hàng (Thủ công)</Label>
                 </div>
               </RadioGroup>
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 text-red-600 rounded-xl font-medium text-sm border border-red-100">
+              <div className="p-4 bg-red-50 text-[#E30019] rounded-sm font-medium text-sm border border-red-100">
                 {error}
               </div>
             )}
 
-            <div className="pt-4 max-w-md">
-              <Button type="submit" disabled={loading} className="w-full h-14 text-lg rounded-sm flex items-center justify-center">
+            <div className="pt-6">
+              <Button type="submit" disabled={loading} className="w-full h-14 text-lg font-bold rounded-sm flex items-center justify-center bg-[#FF5722] hover:bg-[#E64A19] text-white transition-colors">
                 {loading ? <Loader2 className="w-5 h-5 animate-spin mr-2" /> : <Lock className="w-5 h-5 mr-2" />}
-                {loading ? "Đang xử lý..." : "Đặt hàng an toàn"}
+                {loading ? "Đang xử lý..." : "ĐẶT HÀNG NGAY"}
               </Button>
-              <div className="flex items-center justify-center mt-4 text-sm text-muted-foreground">
-                <ShieldCheck className="w-4 h-4 mr-1 text-secondary" />
+              <div className="flex items-center justify-center mt-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+                <ShieldCheck className="w-4 h-4 mr-1 text-green-600" />
                 <span>Mọi thông tin đều được mã hoá bảo mật 256-bit</span>
               </div>
             </div>
@@ -165,38 +169,38 @@ export default function CheckoutPage() {
 
         {/* Order Summary */}
         <div className="lg:col-span-5">
-          <div className="bg-card p-8 rounded-sm border border-border sticky top-24 shadow-sm">
-            <h2 className="text-2xl font-heading font-semibold mb-8">Tóm tắt đơn hàng</h2>
+          <div className="bg-white p-6 rounded-sm border border-neutral-100 sticky top-24 shadow-sm">
+            <h2 className="text-xl font-heading font-bold mb-6 border-b border-neutral-100 pb-3">Tóm tắt đơn hàng</h2>
             
-            <div className="space-y-6 mb-8 max-h-[400px] overflow-y-auto pr-2">
+            <div className="space-y-4 mb-6 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
               {items.map((item) => (
-                <div key={item.id} className="flex gap-4">
-                  <div className="w-20 h-20 bg-muted rounded-sm overflow-hidden border border-border shrink-0">
-                    {item.imageUrl && <img src={item.imageUrl} alt="" className="w-full h-full object-cover" />}
+                <div key={item.id} className="flex gap-4 p-3 border border-neutral-100 rounded-sm hover:border-neutral-200 transition-colors">
+                  <div className="w-20 h-20 bg-white rounded-sm overflow-hidden border border-neutral-100 shrink-0 p-1">
+                    {item.imageUrl && <img src={item.imageUrl} alt="" className="w-full h-full object-contain" />}
                   </div>
                   <div className="flex-1 text-sm flex flex-col justify-center">
-                    <p className="font-semibold line-clamp-2 text-foreground">{item.title}</p>
-                    <p className="text-muted-foreground mt-1">Số lượng: {item.quantity}</p>
+                    <p className="font-medium line-clamp-2 text-foreground mb-1">{item.title}</p>
+                    <p className="text-neutral-500 text-xs font-medium">Số lượng: <span className="text-foreground">{item.quantity}</span></p>
                   </div>
-                  <div className="font-semibold text-sm flex items-center">
+                  <div className="font-bold text-[#E30019] text-sm flex items-center">
                     {formatPrice(item.price * item.quantity)}
                   </div>
                 </div>
               ))}
             </div>
 
-            <div className="border-t border-border pt-6 space-y-4">
-              <div className="flex justify-between text-muted-foreground">
+            <div className="border-t border-neutral-100 pt-6 space-y-4">
+              <div className="flex justify-between text-neutral-600 font-medium">
                 <span>Tạm tính</span>
                 <span>{formatPrice(calculatedTotal)}</span>
               </div>
-              <div className="flex justify-between text-muted-foreground">
+              <div className="flex justify-between text-neutral-600 font-medium">
                 <span>Phí vận chuyển</span>
-                <span>Miễn phí</span>
+                <span className="text-green-600">Miễn phí</span>
               </div>
-              <div className="flex justify-between font-bold text-2xl pt-4 border-t border-border">
-                <span className="font-heading">Tổng cộng</span>
-                <span className="text-primary">{formatPrice(calculatedTotal)}</span>
+              <div className="flex justify-between font-bold text-xl pt-4 border-t border-neutral-100">
+                <span className="font-heading uppercase">Tổng cộng</span>
+                <span className="text-[#E30019] text-2xl">{formatPrice(calculatedTotal)}</span>
               </div>
             </div>
           </div>

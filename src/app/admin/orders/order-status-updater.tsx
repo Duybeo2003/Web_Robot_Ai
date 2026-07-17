@@ -66,7 +66,7 @@ export function OrderStatusUpdater({
           <SelectItem value="PENDING">Chờ xử lý</SelectItem>
           <SelectItem value="PROCESSING">Đang chuẩn bị</SelectItem>
           <SelectItem value="SHIPPED">Đang giao</SelectItem>
-          <SelectItem value="DELIVERED">Đã giao</SelectItem>
+          <SelectItem value="COMPLETED">Đã giao thành công</SelectItem>
           <SelectItem value="CANCELLED">Đã hủy</SelectItem>
         </SelectContent>
       </Select>
