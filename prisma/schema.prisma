@@ -1,0 +1,272 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  USER
+  ADMIN
+}
+
+enum OrderStatus {
+  PENDING
+  PROCESSING
+  SHIPPED
+  COMPLETED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  UNPAID
+  PAID
+  REFUNDED
+}
+
+enum PaymentMethod {
+  COD
+  BANK_TRANSFER
+}
+
+enum ProductType {
+  NUTRITION
+  TECH_DEVICE
+  DIGITAL_CONTENT
+}
+
+enum WarrantyStatus {
+  ACTIVE
+  EXPIRED
+  VOID
+}
+
+enum RmaStatus {
+  PENDING
+  APPROVED
+  REJECTED
+  COMPLETED
+}
+
+// ------------------------------------------------------
+// 1. NextAuth v5 Models (Passwordless + OAuth)
+// ------------------------------------------------------
+model User {
+  id            String    @id @default(cuid())
+  name          String?
+  email         String?   @unique
+  emailVerified DateTime?
+  image         String?
+  phoneNumber   String?   @unique
+  role          Role      @default(USER)
+  
+  accounts      Account[]
+  sessions      Session[]
+  orders        Order[]
+  warranties    Warranty[]
+  returnRequests ReturnRequest[]
+  cart          Cart?
+
+  createdAt     DateTime  @default(now())
+  updatedAt     DateTime  @updatedAt
+  deletedAt     DateTime? // Soft Delete
+
+  @@index([createdAt])
+}
+
+model OtpCode {
+  id          String   @id @default(cuid())
+  phoneNumber String
+  code        String
+  expiresAt   DateTime
+
+  createdAt   DateTime @default(now())
+
+  @@index([phoneNumber])
+  @@index([createdAt])
+}
+
+model Account {
+  id                 String  @id @default(cuid())
+  userId             String
+  type               String
+  provider           String
+  providerAccountId  String
+  refresh_token      String?  @db.Text
+  access_token       String?  @db.Text
+  expires_at         Int?
+  token_type         String?
+  scope              String?
+  id_token           String?  @db.Text
+  session_state      String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+  @@index([userId])
+}
+
+model Session {
+  id           String   @id @default(cuid())
+  sessionToken String   @unique
+  userId       String
+  expires      DateTime
+  user         User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+}
+
+// ------------------------------------------------------
+// 2. E-commerce Models
+// ------------------------------------------------------
+model Category {
+  id          String    @id @default(cuid())
+  name        String
+  description String?
+  products    Product[]
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([createdAt])
+}
+
+model Product {
+  id             String      @id @default(cuid())
+  title          String
+  slug           String      @unique
+  description    String      @db.Text
+  price          Decimal     @db.Decimal(10, 2)
+  type           ProductType @default(NUTRITION)
+  sku            String?     @unique
+  inventoryCount Int         @default(0)
+  imageUrl       String?
+  
+  categoryId     String?
+  category       Category?   @relation(fields: [categoryId], references: [id])
+  
+  orderItems     OrderItem[]
+  cartItems      CartItem[]
+  warranties     Warranty[]
+
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  deletedAt      DateTime?   // Soft Delete
+
+  @@index([categoryId])
+  @@index([slug])
+  @@index([createdAt])
+}
+
+model Cart {
+  id        String     @id @default(cuid())
+  userId    String     @unique
+  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items     CartItem[]
+
+  createdAt DateTime   @default(now())
+  updatedAt DateTime   @updatedAt
+
+  @@index([userId])
+  @@index([createdAt])
+}
+
+model CartItem {
+  id        String  @id @default(cuid())
+  cartId    String
+  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int     @default(1)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cartId])
+  @@index([productId])
+}
+
+model Order {
+  id              String        @id @default(cuid())
+  userId          String
+  user            User          @relation(fields: [userId], references: [id])
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  
+  // Logistics & Payment
+  shippingAddress String?       @db.Text
+  receiverPhone   String?
+  paymentMethod   PaymentMethod @default(COD)
+  paymentStatus   PaymentStatus @default(UNPAID)
+  
+  // State Machine for Kanban / Order processing
+  status          OrderStatus   @default(PENDING)
+  
+  items           OrderItem[]
+  returnRequests  ReturnRequest[]
+  
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  deletedAt       DateTime?     // Soft Delete
+
+  @@index([userId])
+  @@index([status])
+  @@index([createdAt])
+}
+
+model OrderItem {
+  id              String  @id @default(cuid())
+  orderId         String
+  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  productId       String
+  product         Product @relation(fields: [productId], references: [id])
+  quantity        Int     @default(1)
+  priceAtPurchase Decimal @db.Decimal(10, 2)
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+// ------------------------------------------------------
+// 3. Post-Sale & Support Models
+// ------------------------------------------------------
+model Warranty {
+  id           String         @id @default(cuid())
+  serialNumber String         @unique
+  status       WarrantyStatus @default(ACTIVE)
+  startDate    DateTime       @default(now())
+  endDate      DateTime
+  
+  userId       String
+  user         User           @relation(fields: [userId], references: [id])
+  productId    String
+  product      Product        @relation(fields: [productId], references: [id])
+
+  createdAt    DateTime       @default(now())
+  updatedAt    DateTime       @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+  @@index([createdAt])
+}
+
+model ReturnRequest {
+  id          String    @id @default(cuid())
+  userId      String
+  user        User      @relation(fields: [userId], references: [id])
+  orderId     String
+  order       Order     @relation(fields: [orderId], references: [id])
+  
+  reason      String    @db.Text
+  imageUrl    String?   // Proof of defect
+  status      RmaStatus @default(PENDING)
+  
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([userId])
+  @@index([orderId])
+  @@index([status])
+  @@index([createdAt])
+}
