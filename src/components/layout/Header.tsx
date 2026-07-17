@@ -72,12 +72,14 @@ export function Header() {
           <div className="hidden lg:flex items-center gap-4 mr-4 text-sm font-medium">
             <div className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors">
               <Phone className="w-4 h-4 text-primary" />
-              <span>0383.565.888</span>
+              <span>0385.333.111</span>
             </div>
-            <div className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors">
-              <MessageCircle className="w-4 h-4 text-primary" />
+            <Link href="https://zalo.me/0385333111" target="_blank" className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors text-[#0068FF]">
+              <svg viewBox="0 0 24 24" width="20" height="20" className="fill-current">
+                <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
+              </svg>
               <span>Zalo Tư Vấn</span>
-            </div>
+            </Link>
           </div>
 
           {/* Theme Toggle */}
@@ -152,13 +154,19 @@ export function Header() {
           {/* Quick Links */}
           <nav className="flex items-center gap-6">
             <Link href="/shop/robot-giao-duc" className="text-sm font-medium hover:text-white/80 transition-colors">
-              Robot mBot Lập Trình
+              Robot AI Giáo Dục
             </Link>
             <Link href="/shop/kit-arduino" className="text-sm font-medium hover:text-white/80 transition-colors">
               Kit Tự Học Arduino
             </Link>
             <Link href="/shop/do-choi-logic" className="text-sm font-medium hover:text-white/80 transition-colors">
               Đồ Chơi Chuyển Động 3D
+            </Link>
+            <Link href="/huong-dan" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Hướng Dẫn Sử Dụng
+            </Link>
+            <Link href="/giao-duc" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Các Bài Viết Giáo Dục
             </Link>
             <Link href="/flash-sale" className="text-sm font-bold text-yellow-300 hover:text-yellow-100 transition-colors flex items-center gap-1">
               🔥 KHUYẾN MÃI HOT

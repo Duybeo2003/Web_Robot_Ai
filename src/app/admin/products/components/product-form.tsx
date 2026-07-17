@@ -105,7 +105,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           <Textarea 
             id="description" 
             value={formData.description}
-            onChange={(e) => setFormData({...formData, description: e.target.value})}
+            onChange={(e: any) => setFormData({...formData, description: e.target.value})}
             rows={5}
             required
           />

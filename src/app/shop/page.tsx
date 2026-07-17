@@ -3,6 +3,7 @@ import { MOCK_PRODUCTS } from "@/lib/mock-data";
 import Link from "next/link";
 import Image from "next/image";
 import { AddToCartButton } from "./components/add-to-cart-button";
+import { ProductCard } from "@/components/ui/product-card";
 import { Search } from "lucide-react";
 
 export const revalidate = 0; // Dynamic page due to searchParams
@@ -123,86 +124,23 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-2 md:gap-4">
           {products.map((product: any) => {
-            const discountPercent = Math.floor(Math.random() * 30) + 10;
             return (
-              <div key={product.id} className="group relative border border-border bg-white overflow-hidden flex flex-col hover:border-[#FF5722] hover:shadow-xl transition-all duration-200">
-                
-                {/* Top Left Badges */}
-                <div className="absolute top-0 left-0 z-10 flex flex-col items-start">
-                  <div className="bg-[#E30019] text-white text-[11px] font-bold px-2 py-0.5 rounded-br-lg rounded-tr-sm shadow-sm">
-                    Giảm {discountPercent}%
-                  </div>
-                  <div className="bg-white/80 backdrop-blur-sm text-[#0066FF] text-[10px] font-medium px-1 mt-0.5">
-                    Có giảm thêm
-                  </div>
-                </div>
-
-                {/* Top Right Brand Info */}
-                <div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-70">
-                  <div className="w-4 h-4 bg-orange-500 rounded-full text-white flex items-center justify-center text-[8px] font-bold">R</div>
-                  <span className="text-[9px] font-bold text-neutral-500 uppercase">RoboEd</span>
-                </div>
-
-                {/* Gift Floating Element (Mock) */}
-                {(product.inventoryCount || 0) % 2 !== 0 && (
-                  <div className="absolute top-1/4 right-2 z-10 flex flex-col items-center">
-                    <div className="bg-[#AA0000] text-white text-[9px] font-bold px-2 py-0.5 rounded-full mb-1 flex items-center gap-1 shadow-md">
-                      <span>🎁</span> QUÀ TẶNG
-                    </div>
-                  </div>
-                )}
-                
-                {/* Product Image */}
-                <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full overflow-hidden block bg-white p-6 mt-4">
-                  {product.imageUrl ? (
-                    <Image
-                      src={product.imageUrl}
-                      alt={product.title}
-                      fill
-                      className="object-contain group-hover:scale-105 transition-transform duration-500 p-2"
-                      sizes="(max-width: 768px) 100vw, 250px"
-                    />
-                  ) : (
-                    <div className="w-full h-full bg-muted flex items-center justify-center">
-                      <span className="text-muted-foreground text-sm">No image</span>
-                    </div>
-                  )}
-                </Link>
-                
-                <div className="p-3 md:p-4 flex flex-col flex-1 border-t border-neutral-100">
-                  <div className="mb-2">
-                    <span className="bg-[#3b82f6] text-white text-[10px] font-medium px-1.5 py-0.5 mr-2 inline-block">
-                      Nhắn tin | Giảm giá thêm
-                    </span>
-                  </div>
-                  <Link href={`/shop/${product.slug}`}>
-                    <h3 className="font-medium text-sm line-clamp-2 hover:text-primary transition-colors text-foreground min-h-[40px] leading-tight">
-                      {product.title}
-                    </h3>
-                  </Link>
-                  <div className="mt-auto pt-3">
-                    <div className="flex items-center gap-2 flex-wrap mb-3">
-                      <p className="text-xs text-neutral-400 line-through">
-                        {formatPrice(Number(product.price) * (1 + discountPercent/100))}
-                      </p>
-                      <p className="text-base md:text-lg font-bold text-[#E30019]">
-                        {formatPrice(Number(product.price))}
-                      </p>
-                    </div>
-                    
-                    <AddToCartButton 
-                      product={{
-                        id: product.id,
-                        title: product.title,
-                        price: Number(product.price),
-                        slug: product.slug,
-                        imageUrl: product.imageUrl || "",
-                      }}
-                    />
-                  </div>
-                </div>
-              </div>
-            )
+              <ProductCard 
+                key={product.id}
+                product={product} 
+                action={
+                  <AddToCartButton 
+                    product={{
+                      id: product.id,
+                      title: product.title,
+                      price: Number(product.price),
+                      slug: product.slug,
+                      imageUrl: product.imageUrl || "",
+                    }}
+                  />
+                }
+              />
+            );
           })}
         </div>
       )}
