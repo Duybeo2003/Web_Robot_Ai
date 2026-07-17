@@ -124,10 +124,9 @@ export function Header() {
                 <span className="font-bold">Danh mục sản phẩm</span>
               </div>
               <div className="flex flex-col py-2">
-                <Link href="/shop/robot-giao-duc" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Robot Giáo Dục</Link>
-                <Link href="/shop/kit-arduino" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Kit Arduino & Mạch</Link>
-                <Link href="/shop/do-choi-logic" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Đồ Chơi Tư Duy Logic</Link>
-                <Link href="/shop/phu-kien" className="px-4 py-3 hover:bg-muted font-medium text-sm">Phụ Kiện STEM</Link>
+                <Link href="/shop?type=ROBOT_STEM" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Robot Giáo Dục</Link>
+                <Link href="/shop?type=KIT_ARDUINO" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Kit Tự Học Arduino</Link>
+                <Link href="/shop?type=DO_CHOI_LOGIC" className="px-4 py-3 hover:bg-muted font-medium text-sm">Đồ Chơi Tư Duy Logic</Link>
               </div>
             </SheetContent>
           </Sheet>
@@ -144,23 +143,22 @@ export function Header() {
             
             {/* Dropdown Menu */}
             <div className="absolute top-full left-0 w-full bg-white text-foreground shadow-lg border border-border hidden group-hover:flex flex-col z-50">
-              <Link href="/shop/robot-giao-duc" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Robot Giáo Dục</Link>
-              <Link href="/shop/kit-arduino" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Kit Arduino & Mạch</Link>
-              <Link href="/shop/do-choi-logic" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Đồ Chơi Tư Duy</Link>
-              <Link href="/shop/phu-kien" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium">Phụ Kiện STEM</Link>
+              <Link href="/shop?type=ROBOT_STEM" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Robot Giáo Dục</Link>
+              <Link href="/shop?type=KIT_ARDUINO" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Kit Tự Học Arduino</Link>
+              <Link href="/shop?type=DO_CHOI_LOGIC" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium">Đồ Chơi Tư Duy Logic</Link>
             </div>
           </div>
 
           {/* Quick Links */}
           <nav className="flex items-center gap-6">
-            <Link href="/shop/robot-giao-duc" className="text-sm font-medium hover:text-white/80 transition-colors">
+            <Link href="/shop?type=ROBOT_STEM" className="text-sm font-medium hover:text-white/80 transition-colors">
               Robot AI Giáo Dục
             </Link>
-            <Link href="/shop/kit-arduino" className="text-sm font-medium hover:text-white/80 transition-colors">
+            <Link href="/shop?type=KIT_ARDUINO" className="text-sm font-medium hover:text-white/80 transition-colors">
               Kit Tự Học Arduino
             </Link>
-            <Link href="/shop/do-choi-logic" className="text-sm font-medium hover:text-white/80 transition-colors">
-              Đồ Chơi Chuyển Động 3D
+            <Link href="/shop?type=DO_CHOI_LOGIC" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Đồ Chơi Tư Duy Logic
             </Link>
             <Link href="/huong-dan" className="text-sm font-medium hover:text-white/80 transition-colors">
               Hướng Dẫn Sử Dụng
