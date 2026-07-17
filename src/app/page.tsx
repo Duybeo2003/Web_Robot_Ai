@@ -9,23 +9,25 @@ import { FlashSaleCarousel } from "@/components/ui/flash-sale-carousel";
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
-  const robotProducts = await prisma.product.findMany({
+  const serializeProduct = (p: any) => ({ ...p, price: Number(p.price) });
+
+  const robotProducts = (await prisma.product.findMany({
     where: { type: 'ROBOT_STEM' },
     take: 8,
     orderBy: { createdAt: "desc" },
-  });
+  })).map(serializeProduct);
   
-  const kitProducts = await prisma.product.findMany({
+  const kitProducts = (await prisma.product.findMany({
     where: { type: 'KIT_ARDUINO' },
     take: 8,
     orderBy: { createdAt: "desc" },
-  });
+  })).map(serializeProduct);
   
-  const logicProducts = await prisma.product.findMany({
+  const logicProducts = (await prisma.product.findMany({
     where: { type: 'DO_CHOI_LOGIC' },
     take: 8,
     orderBy: { createdAt: "desc" },
-  });
+  })).map(serializeProduct);
 
   // Combine some products for the Flash Sale
   const flashSaleProducts = [...robotProducts.slice(0, 2), ...kitProducts.slice(0, 2), ...logicProducts.slice(0, 2)];

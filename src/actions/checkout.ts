@@ -4,6 +4,7 @@ import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { PaymentMethod } from "@prisma/client"
 import { revalidatePath } from "next/cache"
+import { sendOrderConfirmationEmail } from "./email"
 
 export async function processCheckout(data: {
   shippingAddress: string
@@ -70,6 +71,11 @@ export async function processCheckout(data: {
 
       return newOrder
     })
+
+    // 5. Send Order Confirmation Email in the background
+    if (session.user.email) {
+      sendOrderConfirmationEmail(session.user.email, order.id, order.totalAmount.toNumber()).catch(console.error)
+    }
 
     revalidatePath("/admin/orders")
     return { success: true, orderId: order.id }

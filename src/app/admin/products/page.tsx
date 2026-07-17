@@ -71,8 +71,13 @@ export default async function AdminProductsPage() {
                   </TableCell>
                   <TableCell>{product.inventoryCount}</TableCell>
                   <TableCell>
-                    <Badge className={product.inventoryCount > 0 ? "bg-[#FF5722] hover:bg-[#FF5722]/90 text-white" : "bg-neutral-300 text-neutral-600"}>
-                      {product.inventoryCount > 0 ? "Còn hàng" : "Hết hàng"}
+                    <Badge className={
+                      product.inventoryCount === 0 ? "bg-neutral-300 text-neutral-600" :
+                      product.inventoryCount < 5 ? "bg-red-500 hover:bg-red-600 text-white animate-pulse" :
+                      "bg-[#FF5722] hover:bg-[#FF5722]/90 text-white"
+                    }>
+                      {product.inventoryCount === 0 ? "Hết hàng" :
+                       product.inventoryCount < 5 ? `Sắp hết (${product.inventoryCount})` : "Còn hàng"}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 import Credentials from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   adapter: PrismaAdapter(prisma),
@@ -18,6 +19,42 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "mock-secret",
     }),
     Credentials({
+      id: "credentials-password",
+      name: "Tài khoản / Mật khẩu",
+      credentials: {
+        email: { label: "Email", type: "email", placeholder: "admin@gmail.com" },
+        password: { label: "Mật khẩu", type: "password" },
+      },
+      async authorize(credentials) {
+        if (!credentials?.email || !credentials?.password) return null;
+        
+        const email = credentials.email as string;
+        const password = credentials.password as string;
+
+        const user = await prisma.user.findUnique({
+          where: { email },
+        });
+
+        if (!user || !user.password) {
+          return null; // Không tìm thấy hoặc đăng nhập bằng social
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+          return null;
+        }
+
+        return {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          image: user.image,
+          role: user.role,
+        };
+      }
+    }),
+    Credentials({
+      id: "credentials-otp",
       name: "Phone Number (OTP)",
       credentials: {
         phone: { label: "Phone Number", type: "text", placeholder: "e.g. 0912345678" },

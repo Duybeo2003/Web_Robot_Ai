@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient, Prisma, ProductType } from "@prisma/client";
 
 const prisma = new PrismaClient();
 
-const newProducts = [
+const newProducts: Prisma.ProductCreateInput[] = [
   // ================= ROBOT STEM =================
   {
     title: "Robot Alpha Mini - Lập trình AI thông minh",

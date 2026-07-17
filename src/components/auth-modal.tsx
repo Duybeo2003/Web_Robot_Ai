@@ -25,8 +25,11 @@ export function AuthModal() {
   const { isOpen, closeModal } = useAuthModal()
   
   const [step, setStep] = useState<1 | 2>(1)
+  const [loginMethod, setLoginMethod] = useState<"otp" | "password">("password")
   const [phone, setPhone] = useState("+84")
   const [otp, setOtp] = useState("")
+  const [email, setEmail] = useState("")
+  const [password, setPassword] = useState("")
   const [isLoading, setIsLoading] = useState(false)
   const [error, setError] = useState("")
   const [countdown, setCountdown] = useState(0)
@@ -45,8 +48,11 @@ export function AuthModal() {
     if (!isOpen) {
       setTimeout(() => {
         setStep(1)
+        setLoginMethod("password")
         setPhone("+84")
         setOtp("")
+        setEmail("")
+        setPassword("")
         setError("")
         setCountdown(0)
       }, 300)
@@ -88,7 +94,7 @@ export function AuthModal() {
     setIsLoading(true)
     
     // next-auth signIn with custom credentials provider
-    const result = await signIn("credentials", {
+    const result = await signIn("credentials-otp", {
       phone,
       otp,
       redirect: false,
@@ -114,6 +120,31 @@ export function AuthModal() {
     }).catch(() => setIsLoading(false))
   }
 
+  const handlePasswordLogin = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault()
+    setError("")
+    if (!email || !password) {
+      setError("Vui lòng nhập email và mật khẩu.")
+      return
+    }
+
+    setIsLoading(true)
+    const result = await signIn("credentials-password", {
+      email,
+      password,
+      redirect: false,
+    })
+    setIsLoading(false)
+
+    if (result?.error) {
+      setError("Email hoặc mật khẩu không chính xác.")
+    } else {
+      await update()
+      closeModal()
+      window.location.reload()
+    }
+  }
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <DialogContent className="sm:max-w-[400px] rounded-sm p-6 sm:p-8 bg-[#F9F8F6] border-stone-200 shadow-none">
@@ -137,29 +168,79 @@ export function AuthModal() {
 
           {step === 1 ? (
             <div className="animate-in fade-in slide-in-from-left-4 duration-300">
-              <form onSubmit={handleSendOtp} className="space-y-5">
-                <div className="space-y-2">
-                  <Label htmlFor="phone" className="text-sm font-medium text-[#2C2C2C]">Số điện thoại</Label>
-                  <Input
-                    id="phone"
-                    type="tel"
-                    placeholder="+84..."
-                    value={phone}
-                    onChange={(e) => setPhone(e.target.value)}
-                    className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
-                    autoComplete="tel"
+              {loginMethod === "otp" ? (
+                <form onSubmit={handleSendOtp} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone" className="text-sm font-medium text-[#2C2C2C]">Số điện thoại</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      placeholder="+84..."
+                      value={phone}
+                      onChange={(e) => setPhone(e.target.value)}
+                      className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+                      autoComplete="tel"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 rounded-sm text-base font-medium bg-[#C86B5A] hover:bg-[#C86B5A]/90 text-white transition-colors" 
                     disabled={isLoading}
-                  />
-                </div>
-                <Button 
-                  type="submit" 
-                  className="w-full h-12 rounded-sm text-base font-medium bg-[#C86B5A] hover:bg-[#C86B5A]/90 text-white transition-colors" 
-                  disabled={isLoading}
+                  >
+                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                    Tiếp tục bằng SĐT
+                  </Button>
+                </form>
+              ) : (
+                <form onSubmit={handlePasswordLogin} className="space-y-5">
+                  <div className="space-y-2">
+                    <Label htmlFor="email" className="text-sm font-medium text-[#2C2C2C]">Email</Label>
+                    <Input
+                      id="email"
+                      type="email"
+                      placeholder="admin@gmail.com"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="password" className="text-sm font-medium text-[#2C2C2C]">Mật khẩu</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="••••••••"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+                      disabled={isLoading}
+                    />
+                  </div>
+                  <Button 
+                    type="submit" 
+                    className="w-full h-12 rounded-sm text-base font-medium bg-[#C86B5A] hover:bg-[#C86B5A]/90 text-white transition-colors" 
+                    disabled={isLoading}
+                  >
+                    {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
+                    Đăng nhập
+                  </Button>
+                </form>
+              )}
+
+              <div className="mt-4 flex justify-center">
+                <button
+                  type="button"
+                  className="text-sm font-medium text-[#C86B5A] hover:underline"
+                  onClick={() => {
+                    setError("")
+                    setLoginMethod(loginMethod === "otp" ? "password" : "otp")
+                  }}
                 >
-                  {isLoading ? <Loader2 className="mr-2 h-5 w-5 animate-spin" /> : null}
-                  Tiếp tục
-                </Button>
-              </form>
+                  {loginMethod === "otp" ? "Đăng nhập bằng Mật Khẩu" : "Đăng nhập bằng OTP (SĐT)"}
+                </button>
+              </div>
 
               <div className="relative py-6">
                 <div className="absolute inset-0 flex items-center">

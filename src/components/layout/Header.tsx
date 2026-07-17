@@ -96,7 +96,7 @@ export function Header() {
 
           {/* User / Login */}
           {session ? (
-            <Link href={session.user.role === "ADMIN" ? "/admin" : "/portal"}>
+            <Link href={session.user.role === "ADMIN" ? "/admin" : "/profile"}>
               <Button variant="ghost" size="icon" className="hover:text-primary" title="Tài khoản">
                 <UserIcon className="h-5 w-5" />
               </Button>

@@ -8,6 +8,7 @@ import { AuthModal } from "@/components/auth-modal";
 import { CartSheet } from "@/components/cart-sheet";
 import { CartSyncer } from "@/components/cart-syncer";
 import { Toaster } from "@/components/ui/sonner";
+import { StoreWrapper } from "@/components/layout/store-wrapper";
 
 const lora = Lora({
   variable: "--font-heading",
@@ -37,12 +38,16 @@ export default function RootLayout({
     >
       <body className="min-h-full flex flex-col bg-background/95" suppressHydrationWarning>
         <Providers>
-          <Header />
+          <StoreWrapper>
+            <Header />
+          </StoreWrapper>
           <main className="flex-1 flex flex-col">{children}</main>
-          <Footer />
-          <AuthModal />
-          <CartSheet />
-          <CartSyncer />
+          <StoreWrapper>
+            <Footer />
+            <AuthModal />
+            <CartSheet />
+            <CartSyncer />
+          </StoreWrapper>
           <Toaster />
         </Providers>
       </body>
