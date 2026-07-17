@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { BarChart3, Package, ShoppingCart, Settings, Users, ArrowLeft } from "lucide-react"
+import { BarChart3, Package, ShoppingCart, Settings, Users, ArrowLeft, LogOut } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"

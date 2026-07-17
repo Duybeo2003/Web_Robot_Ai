@@ -72,44 +72,44 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
 
           {/* Dynamic Specs based on ProductType */}
           <div className="mb-8 p-6 bg-card rounded-sm border border-border">
-            {product.type === "NUTRITION" && (
-              <>
-                <h3 className="text-xl font-heading font-bold mb-4 text-foreground">Thông tin Dinh dưỡng</h3>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex justify-between border-b border-border/50 pb-2">
-                    <span>Khẩu phần</span>
-                    <span className="font-medium text-foreground">1 thanh / 1 gói</span>
+            {product.type === 'ROBOT_STEM' && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg border-b border-stone-200 pb-2">Tính năng thông minh</h3>
+                <ul className="space-y-2 text-sm text-[#2C2C2C]/80">
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#C86B5A] mt-1.5 shrink-0" />
+                    <span>Tích hợp AI & lập trình qua khối lệnh (Scratch)</span>
                   </li>
-                  <li className="flex justify-between border-b border-border/50 pb-2">
-                    <span>Lượng Calo</span>
-                    <span className="font-medium text-foreground">Vừa đủ cho năng lượng nhanh</span>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#C86B5A] mt-1.5 shrink-0" />
+                    <span>Điều khiển qua ứng dụng di động</span>
                   </li>
-                  <li className="flex justify-between pb-2">
-                    <span>Cam kết</span>
-                    <span className="font-medium text-secondary">Không đường tinh luyện</span>
+                  <li className="flex items-start gap-2">
+                    <div className="w-1.5 h-1.5 rounded-full bg-[#C86B5A] mt-1.5 shrink-0" />
+                    <span>Kết nối IoT và Bluetooth 5.0</span>
                   </li>
                 </ul>
-              </>
+              </div>
             )}
 
-            {product.type === "TECH_DEVICE" && (
-              <>
-                <h3 className="text-xl font-heading font-bold mb-4 text-foreground">Thông số kỹ thuật</h3>
-                <ul className="space-y-3 text-muted-foreground">
-                  <li className="flex justify-between border-b border-border/50 pb-2">
-                    <span>Vi điều khiển</span>
-                    <span className="font-medium text-foreground">ESP32-S3 (AI-enabled)</span>
-                  </li>
-                  <li className="flex justify-between border-b border-border/50 pb-2">
-                    <span>Màn hình hiển thị</span>
-                    <span className="font-medium text-foreground">1.54" LCD IPS</span>
-                  </li>
-                  <li className="flex justify-between pb-2">
-                    <span>Tính năng</span>
-                    <span className="font-medium text-foreground">Trợ lý giọng nói, Quản lý Pomodoro</span>
-                  </li>
-                </ul>
-              </>
+            {product.type === 'KIT_ARDUINO' && (
+              <div className="space-y-4">
+                <h3 className="font-semibold text-lg border-b border-stone-200 pb-2">Thông số kỹ thuật</h3>
+                <div className="grid grid-cols-2 gap-4 text-sm">
+                  <div>
+                    <span className="block text-[#2C2C2C]/60">Vi điều khiển</span>
+                    <span className="font-medium">ATmega328P</span>
+                  </div>
+                  <div>
+                    <span className="block text-[#2C2C2C]/60">Điện áp hoạt động</span>
+                    <span className="font-medium">5V DC</span>
+                  </div>
+                  <div>
+                    <span className="block text-[#2C2C2C]/60">Chân I/O</span>
+                    <span className="font-medium">14 Digital, 6 Analog</span>
+                  </div>
+                </div>
+              </div>
             )}
           </div>
 

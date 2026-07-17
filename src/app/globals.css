@@ -35,59 +35,59 @@
 }
 
 :root {
-  /* Wabi-Sabi Colors */
-  --background: #F9F8F6; /* Oatmeal */
+  /* Vibrant E-commerce Colors (Xiaomi-style) */
+  --background: #F5F5F5; /* Light Gray for page background */
   --foreground: #2C2C2C; /* Deep Charcoal */
   --card: #FFFFFF;
   --card-foreground: #2C2C2C;
   --popover: #FFFFFF;
   --popover-foreground: #2C2C2C;
   
-  --primary: #C86B5A; /* Muted Terracotta */
+  --primary: #FF6700; /* Vivid Orange */
   --primary-foreground: #FFFFFF;
   
-  --secondary: #8A9A86; /* Sage Green */
+  --secondary: #FF4A00; /* Darker Orange for hover/accents */
   --secondary-foreground: #FFFFFF;
   
-  --muted: #EFECE5;
-  --muted-foreground: #7A7A7A;
+  --muted: #F3F4F6; /* Tailwind gray-100 */
+  --muted-foreground: #6B7280; /* Tailwind gray-500 */
   
-  --accent: #E5E3DF;
-  --accent-foreground: #2C2C2C;
+  --accent: #FEF0E6; /* Light Orange accent */
+  --accent-foreground: #FF6700;
   
-  --destructive: #A34E4E;
+  --destructive: #EF4444; /* Standard Red */
   --destructive-foreground: #FFFFFF;
   
-  --border: #E5E3DF;
-  --input: #E5E3DF;
-  --ring: #C86B5A;
+  --border: #E5E7EB; /* Tailwind gray-200 */
+  --input: #E5E7EB;
+  --ring: #FF6700;
   
   --radius: 0.25rem; /* Flat, rounded-sm */
 }
 
 .dark {
-  --background: #1C1B1A;
-  --foreground: #EFECE5;
-  --card: #252423;
-  --card-foreground: #EFECE5;
-  --popover: #252423;
-  --popover-foreground: #EFECE5;
+  --background: #121212;
+  --foreground: #F3F4F6;
+  --card: #1F2937;
+  --card-foreground: #F3F4F6;
+  --popover: #1F2937;
+  --popover-foreground: #F3F4F6;
   
-  --primary: #B25A4B;
+  --primary: #FF6700;
   --primary-foreground: #FFFFFF;
   
-  --secondary: #748471;
+  --secondary: #FF4A00;
   --secondary-foreground: #FFFFFF;
   
-  --muted: #33312F;
-  --muted-foreground: #9A9A9A;
+  --muted: #374151;
+  --muted-foreground: #9CA3AF;
   
-  --accent: #33312F;
-  --accent-foreground: #EFECE5;
+  --accent: #374151;
+  --accent-foreground: #F3F4F6;
   
-  --border: #403E3C;
-  --input: #403E3C;
-  --ring: #B25A4B;
+  --border: #374151;
+  --input: #374151;
+  --ring: #FF6700;
 }
 
 @layer base {
@@ -110,9 +110,17 @@
     @apply bg-background border border-border;
   }
   .glass-card {
-    @apply bg-card border border-border hover:border-primary/30 transition-all duration-300;
+    @apply bg-card border border-border hover:border-primary transition-colors duration-200;
   }
   .text-gradient {
     @apply text-primary;
+  }
+  
+  /* E-commerce specific utilities */
+  .badge-flash-sale {
+    @apply absolute top-0 left-0 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 z-10;
+  }
+  .badge-gift {
+    @apply flex items-center justify-center bg-red-600 text-white rounded-full text-xs font-bold px-2 py-1 mt-2;
   }
 }

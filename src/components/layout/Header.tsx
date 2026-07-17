@@ -4,7 +4,7 @@ import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "next-themes";
-import { Moon, Sun, ShoppingCart, User as UserIcon, LogOut, LayoutDashboard, Menu } from "lucide-react";
+import { Moon, Sun, ShoppingCart, User as UserIcon, LogOut, LayoutDashboard, Menu, Cpu, Search, Phone, MessageCircle } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthModal } from "@/store/use-auth-modal";
 import { useCartUI } from "@/store/use-cart-ui";
@@ -39,101 +39,131 @@ export function Header() {
     setMounted(true);
   }, []);
 
-  const NavLinks = () => (
-    <>
-      <Link href="/shop" className="text-sm font-medium font-manrope text-[#2C2C2C]/80 hover:text-[#C86B5A] transition-colors relative group">
-        Cửa hàng
-        <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#C86B5A] transition-all duration-300 group-hover:w-full"></span>
-      </Link>
-      <Link href="/academy" className="text-sm font-medium font-manrope text-[#2C2C2C]/80 hover:text-[#C86B5A] transition-colors relative group">
-        Học viện
-        <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#C86B5A] transition-all duration-300 group-hover:w-full"></span>
-      </Link>
-      <Link href="/portal/warranty" className="text-sm font-medium font-manrope text-[#2C2C2C]/80 hover:text-[#C86B5A] transition-colors relative group">
-        Bảo hành
-        <span className="absolute -bottom-1 left-0 w-0 h-[2px] bg-[#C86B5A] transition-all duration-300 group-hover:w-full"></span>
-      </Link>
-    </>
-  );
-
   return (
-    <header className="sticky top-0 z-50 w-full bg-[#F9F8F6]/80 backdrop-blur-md border-b border-stone-200">
-      <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-        <div className="flex items-center gap-8">
-          <Link href="/" className="font-bold text-2xl font-lora tracking-tight text-[#2C2C2C] hover:opacity-80 transition-opacity">
-            RoboEd
-          </Link>
-          <nav className="hidden md:flex gap-6">
-            <NavLinks />
-          </nav>
+    <header className="w-full bg-white border-b border-border">
+      {/* Top Bar - Logo, Search, Actions */}
+      <div className="container mx-auto px-4 py-4 flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
+          <div className="bg-primary text-white p-2 rounded-lg">
+            <Cpu className="w-6 h-6" />
+          </div>
+          <span className="font-bold text-2xl tracking-tight text-primary">
+            ROBOT THÔNG MINH
+          </span>
+        </Link>
+
+        {/* Search Bar */}
+        <div className="flex-1 max-w-2xl hidden md:flex items-center">
+          <div className="relative w-full">
+            <input 
+              type="text" 
+              placeholder="Tìm kiếm robot, kit STEM, đồ chơi logic..." 
+              className="w-full h-10 pl-4 pr-10 border border-primary/50 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            />
+            <button className="absolute right-0 top-0 h-10 w-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+              <Search className="h-5 w-5" />
+            </button>
+          </div>
         </div>
 
-        <div className="flex items-center gap-3 sm:gap-4">
+        {/* Contact & Actions */}
+        <div className="flex items-center gap-4 shrink-0">
+          <div className="hidden lg:flex items-center gap-4 mr-4 text-sm font-medium">
+            <div className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors">
+              <Phone className="w-4 h-4 text-primary" />
+              <span>0383.565.888</span>
+            </div>
+            <div className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors">
+              <MessageCircle className="w-4 h-4 text-primary" />
+              <span>Zalo Tư Vấn</span>
+            </div>
+          </div>
+
           {/* Theme Toggle */}
           {mounted && (
             <Button
               variant="ghost"
               size="icon"
-              className="rounded-sm text-[#2C2C2C] hover:bg-stone-200/50 hidden sm:flex"
+              className="hidden sm:flex hover:text-primary"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             >
               {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
             </Button>
           )}
 
-          {/* Cart Button */}
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            className="rounded-sm relative text-[#2C2C2C] hover:bg-stone-200/50" 
-            title="Giỏ hàng"
-            onClick={openCart}
-          >
+          {/* User / Login */}
+          {session ? (
+            <Link href={session.user.role === "ADMIN" ? "/admin" : "/portal"}>
+              <Button variant="ghost" size="icon" className="hover:text-primary" title="Tài khoản">
+                <UserIcon className="h-5 w-5" />
+              </Button>
+            </Link>
+          ) : (
+            <Button variant="ghost" size="icon" onClick={openModal} className="hover:text-primary" title="Đăng nhập">
+              <UserIcon className="h-5 w-5" />
+            </Button>
+          )}
+
+          {/* Cart */}
+          <Button variant="ghost" size="icon" className="relative hover:text-primary" onClick={openCart} title="Giỏ hàng">
             <ShoppingCart className="h-5 w-5" />
             <CartBadge />
           </Button>
 
-          {/* User Actions */}
-          {session ? (
-            <div className="flex items-center gap-2">
-              <Link href={session.user.role === "ADMIN" ? "/admin" : "/portal"} title="Bảng điều khiển">
-                <Button variant="ghost" size="icon" className="rounded-sm text-[#2C2C2C] hover:bg-stone-200/50">
-                  {session.user.role === "ADMIN" ? <LayoutDashboard className="h-5 w-5" /> : <UserIcon className="h-5 w-5" />}
-                </Button>
-              </Link>
-              <Button variant="outline" size="sm" onClick={() => signOut()} className="rounded-sm font-medium font-manrope gap-2 hidden sm:flex border-stone-200 text-[#2C2C2C] hover:bg-stone-100">
-                <LogOut className="w-4 h-4" /> Đăng xuất
-              </Button>
-            </div>
-          ) : (
-            <Button 
-              variant="default" 
-              size="sm" 
-              onClick={openModal}
-              className="rounded-sm font-medium font-manrope bg-[#C86B5A] hover:bg-[#C86B5A]/90 text-white transition-colors"
-            >
-              Đăng nhập
-            </Button>
-          )}
-
-          {/* Mobile Menu */}
+          {/* Mobile Menu Toggle */}
           <Sheet>
-            <SheetTrigger className="md:hidden">
-              <div className="flex h-10 w-10 items-center justify-center rounded-sm text-[#2C2C2C] hover:bg-stone-200/50">
-                <Menu className="h-5 w-5" />
-              </div>
+            <SheetTrigger className="lg:hidden flex h-10 w-10 items-center justify-center hover:text-primary">
+              <Menu className="h-6 w-6" />
             </SheetTrigger>
-            <SheetContent side="left" className="bg-[#F9F8F6] border-stone-200 w-[280px]">
-              <div className="flex flex-col gap-6 mt-8">
-                <NavLinks />
-                {session && (
-                  <Button variant="outline" size="sm" onClick={() => signOut()} className="rounded-sm font-medium font-manrope justify-start border-stone-200 text-[#2C2C2C] hover:bg-stone-100 w-full mt-4">
-                    <LogOut className="w-4 h-4 mr-2" /> Đăng xuất
-                  </Button>
-                )}
+            <SheetContent side="left" className="w-[300px] p-0">
+              <div className="p-4 bg-primary text-white flex items-center gap-2">
+                <Menu className="h-5 w-5" />
+                <span className="font-bold">Danh mục sản phẩm</span>
+              </div>
+              <div className="flex flex-col py-2">
+                <Link href="/shop/robot-giao-duc" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Robot Giáo Dục</Link>
+                <Link href="/shop/kit-arduino" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Kit Arduino & Mạch</Link>
+                <Link href="/shop/do-choi-logic" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Đồ Chơi Tư Duy Logic</Link>
+                <Link href="/shop/phu-kien" className="px-4 py-3 hover:bg-muted font-medium text-sm">Phụ Kiện STEM</Link>
               </div>
             </SheetContent>
           </Sheet>
+        </div>
+      </div>
+
+      {/* Bottom Nav - Orange Background */}
+      <div className="w-full bg-primary text-primary-foreground hidden lg:block">
+        <div className="container mx-auto px-4 h-12 flex items-center gap-8">
+          {/* Category Dropdown */}
+          <div className="relative group h-full flex items-center cursor-pointer bg-secondary px-4 min-w-[200px]">
+            <Menu className="h-5 w-5 mr-2" />
+            <span className="font-bold text-sm">DANH MỤC</span>
+            
+            {/* Dropdown Menu */}
+            <div className="absolute top-full left-0 w-full bg-white text-foreground shadow-lg border border-border hidden group-hover:flex flex-col z-50">
+              <Link href="/shop/robot-giao-duc" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Robot Giáo Dục</Link>
+              <Link href="/shop/kit-arduino" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Kit Arduino & Mạch</Link>
+              <Link href="/shop/do-choi-logic" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium border-b border-border">Đồ Chơi Tư Duy</Link>
+              <Link href="/shop/phu-kien" className="px-4 py-3 hover:text-primary hover:bg-muted transition-colors text-sm font-medium">Phụ Kiện STEM</Link>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <nav className="flex items-center gap-6">
+            <Link href="/shop/robot-giao-duc" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Robot mBot Lập Trình
+            </Link>
+            <Link href="/shop/kit-arduino" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Kit Tự Học Arduino
+            </Link>
+            <Link href="/shop/do-choi-logic" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Đồ Chơi Chuyển Động 3D
+            </Link>
+            <Link href="/flash-sale" className="text-sm font-bold text-yellow-300 hover:text-yellow-100 transition-colors flex items-center gap-1">
+              🔥 KHUYẾN MÃI HOT
+            </Link>
+          </nav>
         </div>
       </div>
     </header>

@@ -32,9 +32,9 @@ enum PaymentMethod {
 }
 
 enum ProductType {
-  NUTRITION
-  TECH_DEVICE
-  DIGITAL_CONTENT
+  ROBOT_STEM
+  KIT_ARDUINO
+  DO_CHOI_LOGIC
 }
 
 enum WarrantyStatus {
@@ -139,7 +139,7 @@ model Product {
   slug           String      @unique
   description    String      @db.Text
   price          Decimal     @db.Decimal(10, 2)
-  type           ProductType @default(NUTRITION)
+  type           ProductType @default(ROBOT_STEM)
   sku            String?     @unique
   inventoryCount Int         @default(0)
   imageUrl       String?
