@@ -1,5 +1,6 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
+import { CancelOrderButton } from "./components/cancel-order-button"
 
 import { Package, Clock, CheckCircle, Truck, XCircle } from "lucide-react"
 
@@ -90,10 +91,15 @@ export default async function OrdersPage() {
               </div>
               
               <div className="bg-neutral-50 px-4 py-3 flex items-center justify-between border-t border-neutral-200">
-                <span className="text-sm text-neutral-600">Thành tiền:</span>
-                <span className="text-lg font-bold text-[#FF5722]">
-                  {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(order.totalAmount))}
-                </span>
+                <div className="flex items-center gap-4">
+                  <span className="text-sm text-neutral-600">Thành tiền:</span>
+                  <span className="text-lg font-bold text-[#FF5722]">
+                    {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(order.totalAmount))}
+                  </span>
+                </div>
+                {order.status === 'PENDING' && (
+                  <CancelOrderButton orderId={order.id} />
+                )}
               </div>
             </div>
           ))}

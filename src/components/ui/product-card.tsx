@@ -9,7 +9,7 @@ export function ProductCard({ product, action }: { product: any, action?: React.
     : 15;
   
   return (
-    <div className="group relative bg-white flex flex-col hover:shadow-lg transition-all duration-300 rounded-sm border border-transparent hover:border-border overflow-hidden">
+    <div className="group relative bg-white h-full flex flex-col hover:shadow-lg transition-all duration-300 rounded-sm border border-transparent hover:border-border overflow-hidden">
       
       {/* Badges */}
       <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">
@@ -55,11 +55,11 @@ export function ProductCard({ product, action }: { product: any, action?: React.
           </h3>
         </Link>
         <div className="mt-auto pt-3 pb-1">
-          <div className="flex items-center gap-2 flex-wrap">
+          <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
             <p className="text-[11px] md:text-xs text-neutral-400 line-through">
               {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(product.price) * (1 + discountPercent/100))}
             </p>
-            <p className="text-base md:text-lg font-bold text-[#E30019]">
+            <p className="text-base md:text-lg font-bold text-[#E30019] leading-none sm:leading-normal">
               {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(product.price))}
             </p>
           </div>
@@ -68,11 +68,11 @@ export function ProductCard({ product, action }: { product: any, action?: React.
 
       {/* Action Area or Free Shipping Bar */}
       {action ? (
-        <div className="px-3 md:px-4 pb-3 md:pb-4 mt-auto">
+        <div className="px-3 md:px-4 pb-3 md:pb-4 shrink-0">
           {action}
         </div>
       ) : (
-        <div className="w-full bg-[#FF5722] text-white py-2 text-center text-[11px] md:text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E64A19] transition-colors mt-auto tracking-wide">
+        <div className="w-full bg-[#FF5722] text-white py-2 text-center text-[11px] md:text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0">
           <Truck className="w-4 h-4" />
           Miễn phí giao hàng
         </div>

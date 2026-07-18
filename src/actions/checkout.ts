@@ -84,3 +84,55 @@ export async function processCheckout(data: {
     return { error: error.message || "Có lỗi xảy ra khi xử lý đơn hàng." }
   }
 }
+
+export async function processVNPayMock(orderId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { error: "Unauthorized" }
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    })
+    
+    if (order?.userId !== session.user.id) return { error: "Unauthorized" }
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: {
+        paymentStatus: "PAID",
+        status: "PROCESSING" 
+      }
+    })
+
+    revalidatePath("/profile/orders")
+    revalidatePath("/admin/orders")
+    return { success: true }
+  } catch (e: any) {
+    return { error: "Failed to process mock payment" }
+  }
+}
+
+export async function cancelOrder(orderId: string) {
+  const session = await auth()
+  if (!session?.user?.id) return { error: "Unauthorized" }
+
+  try {
+    const order = await prisma.order.findUnique({
+      where: { id: orderId }
+    })
+    
+    if (order?.userId !== session.user.id) return { error: "Unauthorized" }
+    if (order?.status !== "PENDING") return { error: "Chỉ có thể hủy đơn hàng đang chờ xử lý." }
+
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: "CANCELLED" }
+    })
+
+    revalidatePath("/profile/orders")
+    revalidatePath("/admin/orders")
+    return { success: true }
+  } catch (e: any) {
+    return { error: "Lỗi hủy đơn hàng" }
+  }
+}

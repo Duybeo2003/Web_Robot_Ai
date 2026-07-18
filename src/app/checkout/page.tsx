@@ -30,7 +30,7 @@ export default function CheckoutPage() {
   const [formData, setFormData] = useState({
     shippingAddress: "",
     receiverPhone: "",
-    paymentMethod: "COD" as "COD" | "BANK_TRANSFER"
+    paymentMethod: "COD" as "COD" | "BANK_TRANSFER" | "VNPAY"
   })
 
   useEffect(() => {
@@ -56,7 +56,7 @@ export default function CheckoutPage() {
     const res = await processCheckout({
       shippingAddress: formData.shippingAddress,
       receiverPhone: formData.receiverPhone,
-      paymentMethod: formData.paymentMethod,
+      paymentMethod: formData.paymentMethod === "VNPAY" ? "BANK_TRANSFER" : formData.paymentMethod,
       cartItems: items.map(i => ({ productId: i.id, quantity: i.quantity }))
     })
 
@@ -65,7 +65,11 @@ export default function CheckoutPage() {
       setLoading(false)
     } else if (res.success) {
       clearCart() // Clear local Zustand cart
-      router.push(`/checkout/success/${res.orderId}`)
+      if (formData.paymentMethod === "VNPAY") {
+        router.push(`/checkout/vnpay-mock?orderId=${res.orderId}&amount=${calculatedTotal}`)
+      } else {
+        router.push(`/checkout/success/${res.orderId}`)
+      }
     }
   }
 
@@ -144,6 +148,10 @@ export default function CheckoutPage() {
                 <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-neutral-50/50">
                   <RadioGroupItem value="BANK_TRANSFER" id="bank" />
                   <Label htmlFor="bank" className="cursor-pointer font-bold text-neutral-700 flex-1">Chuyển khoản ngân hàng (Thủ công)</Label>
+                </div>
+                <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-blue-50/50 border-blue-100">
+                  <RadioGroupItem value="VNPAY" id="vnpay" />
+                  <Label htmlFor="vnpay" className="cursor-pointer font-bold text-[#005BAA] flex-1">Thanh toán qua VNPay (Trực tuyến)</Label>
                 </div>
               </RadioGroup>
             </div>

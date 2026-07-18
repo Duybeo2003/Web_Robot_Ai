@@ -58,7 +58,7 @@ export function Footer() {
             <ul className="space-y-3 text-sm text-neutral-300">
               <li><Link href="/portal/orders" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Đơn hàng</Link></li>
               <li><Link href="/cart" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Giỏ hàng</Link></li>
-              <li><Link href="/portal" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Thông tin tài khoản</Link></li>
+              <li><Link href="/profile" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Thông tin tài khoản</Link></li>
             </ul>
           </div>
 

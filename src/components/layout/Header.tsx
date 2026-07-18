@@ -17,6 +17,7 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
 
 function CartBadge() {
@@ -109,16 +110,18 @@ export function Header() {
                 <UserIcon className="h-5 w-5" />
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-56 mt-2">
-                <DropdownMenuLabel className="font-normal">
-                  <div className="flex flex-col space-y-1">
-                    <p className="text-sm font-medium leading-none">
-                      {session.user.name || (session.user.role === "ADMIN" ? "Quản trị viên" : "Tài khoản của tôi")}
-                    </p>
-                    <p className="text-xs leading-none text-muted-foreground">
-                      {session.user.email || (session.user as any).phoneNumber || ""}
-                    </p>
-                  </div>
-                </DropdownMenuLabel>
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {session.user.name || (session.user.role === "ADMIN" ? "Quản trị viên" : "Tài khoản của tôi")}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {session.user.email || (session.user as any).phoneNumber || ""}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 {session.user.role === "ADMIN" ? (
                   <Link href="/admin">
@@ -210,7 +213,7 @@ export function Header() {
             <Link href="/giao-duc" className="text-sm font-medium hover:text-white/80 transition-colors">
               Các Bài Viết Giáo Dục
             </Link>
-            <Link href="/flash-sale" className="text-sm font-bold text-yellow-300 hover:text-yellow-100 transition-colors flex items-center gap-1">
+            <Link href="/shop?sale=true" className="text-sm font-bold text-yellow-300 hover:text-yellow-100 transition-colors flex items-center gap-1">
               🔥 KHUYẾN MÃI HOT
             </Link>
           </nav>

@@ -91,12 +91,40 @@ export function ProductForm({ initialData }: { initialData?: any }) {
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="imageUrl">URL Hình ảnh</Label>
+          <Label htmlFor="imageUrl">Hình ảnh Sản phẩm</Label>
+          <div className="flex gap-4 items-center">
+            {formData.imageUrl && (
+              <img src={formData.imageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-md border bg-neutral-50" />
+            )}
+            <Input 
+              type="file" 
+              accept="image/*"
+              onChange={async (e) => {
+                const file = e.target.files?.[0];
+                if (!file) return;
+                const data = new FormData();
+                data.append('file', file);
+                toast.loading('Đang tải ảnh lên...', { id: 'upload' });
+                try {
+                  const res = await fetch('/api/upload', { method: 'POST', body: data });
+                  const result = await res.json();
+                  if (result.success) {
+                    setFormData({...formData, imageUrl: result.url});
+                    toast.success('Tải ảnh thành công', { id: 'upload' });
+                  } else {
+                    toast.error(result.error || 'Lỗi tải ảnh', { id: 'upload' });
+                  }
+                } catch (err) {
+                  toast.error('Lỗi kết nối', { id: 'upload' });
+                }
+              }}
+            />
+          </div>
           <Input 
             id="imageUrl" 
             value={formData.imageUrl}
             onChange={(e) => setFormData({...formData, imageUrl: e.target.value})}
-            placeholder="https://example.com/image.png"
+            placeholder="Hoặc nhập URL trực tiếp..."
           />
         </div>
 

@@ -50,6 +50,27 @@ export default async function AdminDashboardPage() {
     revenue: d.revenue
   }))
 
+  // Top 5 Products by Sales
+  const topProductsRaw = await prisma.orderItem.groupBy({
+    by: ['productId'],
+    _sum: { quantity: true },
+    orderBy: { _sum: { quantity: 'desc' } },
+    take: 5
+  })
+  
+  const topProducts = await Promise.all(
+    topProductsRaw.map(async (p) => {
+      const product = await prisma.product.findUnique({ where: { id: p.productId } })
+      return {
+        id: product?.id,
+        title: product?.title,
+        price: product?.price,
+        imageUrl: product?.imageUrl,
+        sold: p._sum.quantity || 0
+      }
+    })
+  )
+
   return (
     <div className="space-y-6">
       <div>
@@ -58,6 +79,7 @@ export default async function AdminDashboardPage() {
       </div>
       
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
+        {/* ... Metric Cards ... */}
         <Card className="relative overflow-hidden group hover:shadow-lg transition-all duration-300 border-none bg-gradient-to-br from-white to-stone-50">
           <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform duration-300">
             <DollarSign className="w-16 h-16 text-[#C86B5A]" />
@@ -128,8 +150,35 @@ export default async function AdminDashboardPage() {
         </Card>
       </div>
       
-      <div className="grid gap-4 md:grid-cols-1 lg:grid-cols-3">
-        <RevenueChart data={chartData} />
+      <div className="grid gap-6 md:grid-cols-1 lg:grid-cols-3">
+        <div className="lg:col-span-2">
+          <RevenueChart data={chartData} />
+        </div>
+        
+        <Card className="border-none shadow-sm">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold">Top Sản Phẩm Bán Chạy</CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-6">
+              {topProducts.length === 0 ? (
+                <p className="text-sm text-neutral-500">Chưa có dữ liệu bán hàng.</p>
+              ) : (
+                topProducts.map((product, index) => (
+                  <div key={product.id} className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-neutral-100 rounded-sm p-1 shrink-0">
+                      {product.imageUrl && <img src={product.imageUrl} alt="" className="w-full h-full object-contain" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground truncate">{product.title}</p>
+                      <p className="text-xs text-neutral-500 mt-1">Đã bán: <span className="font-bold text-[#FF5722]">{product.sold}</span> chiếc</p>
+                    </div>
+                  </div>
+                ))
+              )}
+            </div>
+          </CardContent>
+        </Card>
       </div>
     </div>
   )
