@@ -2,6 +2,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { PrismaClient } from "@prisma/client"
 import { DollarSign, ShoppingCart, Users, Package } from "lucide-react"
 import { RevenueChart } from "@/components/admin/revenue-chart"
+import Image from "next/image"
 import { subDays, format } from "date-fns"
 
 const prisma = new PrismaClient()
@@ -167,7 +168,11 @@ export default async function AdminDashboardPage() {
                 topProducts.map((product, index) => (
                   <div key={product.id} className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-neutral-100 rounded-sm p-1 shrink-0">
-                      {product.imageUrl && <img src={product.imageUrl} alt="" className="w-full h-full object-contain" />}
+                      {product.imageUrl && (
+                        <div className="relative w-full h-full">
+                          <Image src={product.imageUrl} alt="" fill className="object-contain" sizes="40px" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="text-sm font-medium text-foreground truncate">{product.title}</p>

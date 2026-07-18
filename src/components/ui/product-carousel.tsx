@@ -17,6 +17,7 @@ interface ProductCarouselProps {
   subLinkText: string;
   products: any[];
   badgeColor?: string; // e.g., "bg-[#FF3300]"
+  userWishlistIds?: string[];
 }
 
 export function ProductCarousel({
@@ -24,7 +25,8 @@ export function ProductCarousel({
   categoryLink,
   subLinkText,
   products,
-  badgeColor = "bg-[#FF3300]"
+  badgeColor = "bg-[#FF3300]",
+  userWishlistIds = []
 }: ProductCarouselProps) {
   if (!products || products.length === 0) return null;
 
@@ -61,7 +63,7 @@ export function ProductCarousel({
               {products.map((product) => (
                 <CarouselItem key={product.id} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <div className="p-1">
-                    <ProductCard product={product} />
+                    <ProductCard product={product} isWished={userWishlistIds.includes(product.id)} />
                   </div>
                 </CarouselItem>
               ))}

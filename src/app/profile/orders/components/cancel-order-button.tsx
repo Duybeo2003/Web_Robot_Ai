@@ -1,7 +1,7 @@
 "use client"
 import { Button } from "@/components/ui/button"
 import { useState } from "react"
-import { cancelOrder } from "@/actions/checkout"
+import { cancelOrder } from "@/actions/order"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
 

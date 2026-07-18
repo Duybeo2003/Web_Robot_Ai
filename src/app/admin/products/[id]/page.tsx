@@ -6,9 +6,15 @@ const prisma = new PrismaClient()
 
 export default async function EditProductPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const product = await prisma.product.findUnique({
-    where: { id: resolvedParams.id }
-  })
+  
+  const [product, categories] = await Promise.all([
+    prisma.product.findUnique({
+      where: { id: resolvedParams.id }
+    }),
+    prisma.category.findMany({
+      orderBy: { name: 'asc' }
+    })
+  ])
 
   if (!product) {
     notFound()
@@ -21,7 +27,7 @@ export default async function EditProductPage({ params }: { params: Promise<{ id
         <p className="text-muted-foreground">Cập nhật thông tin chi tiết cho sản phẩm: {product.title}</p>
       </div>
       
-      <ProductForm initialData={product} />
+      <ProductForm initialData={product} categories={categories} />
     </div>
   )
 }

@@ -13,9 +13,10 @@ import Autoplay from "embla-carousel-autoplay"
 
 interface FlashSaleCarouselProps {
   products: any[];
+  userWishlistIds?: string[];
 }
 
-export function FlashSaleCarousel({ products }: FlashSaleCarouselProps) {
+export function FlashSaleCarousel({ products, userWishlistIds = [] }: FlashSaleCarouselProps) {
   const plugin = React.useRef(
     Autoplay({ delay: 3000, stopOnInteraction: true })
   )
@@ -51,7 +52,7 @@ export function FlashSaleCarousel({ products }: FlashSaleCarouselProps) {
               {products.map((product) => (
                 <CarouselItem key={`flash-${product.id}`} className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4">
                   <div className="p-1">
-                    <ProductCard product={product} />
+                    <ProductCard product={product} isWished={userWishlistIds.includes(product.id)} />
                   </div>
                 </CarouselItem>
               ))}

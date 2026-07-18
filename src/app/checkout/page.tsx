@@ -11,6 +11,8 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group"
 import { ShoppingBag, Loader2, ArrowRight, ShieldCheck, Lock } from "lucide-react"
+import { validateCoupon } from "@/actions/coupon"
+import Image from "next/image"
 
 export default function CheckoutPage() {
   const { data: session, status } = useSession()
@@ -32,6 +34,9 @@ export default function CheckoutPage() {
     receiverPhone: "",
     paymentMethod: "COD" as "COD" | "BANK_TRANSFER" | "VNPAY"
   })
+
+  const [couponInput, setCouponInput] = useState("")
+  const [appliedDiscount, setAppliedDiscount] = useState(0)
 
   useEffect(() => {
     setMounted(true)
@@ -65,8 +70,9 @@ export default function CheckoutPage() {
       setLoading(false)
     } else if (res.success) {
       clearCart() // Clear local Zustand cart
+      const finalTotal = calculatedTotal - (calculatedTotal * (appliedDiscount / 100));
       if (formData.paymentMethod === "VNPAY") {
-        router.push(`/checkout/vnpay-mock?orderId=${res.orderId}&amount=${calculatedTotal}`)
+        router.push(`/checkout/vnpay-mock?orderId=${res.orderId}&amount=${finalTotal}`)
       } else {
         router.push(`/checkout/success/${res.orderId}`)
       }
@@ -184,7 +190,11 @@ export default function CheckoutPage() {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-4 p-3 border border-neutral-100 rounded-sm hover:border-neutral-200 transition-colors">
                   <div className="w-20 h-20 bg-white rounded-sm overflow-hidden border border-neutral-100 shrink-0 p-1">
-                    {item.imageUrl && <img src={item.imageUrl} alt="" className="w-full h-full object-contain" />}
+                    {item.imageUrl && (
+                      <div className="relative w-full h-full">
+                        <Image src={item.imageUrl} alt="" fill className="object-contain" sizes="80px" />
+                      </div>
+                    )}
                   </div>
                   <div className="flex-1 text-sm flex flex-col justify-center">
                     <p className="font-medium line-clamp-2 text-foreground mb-1">{item.title}</p>
@@ -197,18 +207,66 @@ export default function CheckoutPage() {
               ))}
             </div>
 
+            {/* Coupon Section */}
+            <div className="mb-6 pt-4 border-t border-neutral-100">
+              <Label htmlFor="coupon" className="text-neutral-600 font-medium mb-2 block">Mã giảm giá</Label>
+              <div className="flex gap-2">
+                <Input 
+                  id="coupon"
+                  placeholder="Nhập ROBOED10..."
+                  value={couponInput}
+                  onChange={(e) => setCouponInput(e.target.value)}
+                  className="flex-1"
+                  disabled={appliedDiscount > 0}
+                />
+                <Button 
+                  type="button"
+                  variant={appliedDiscount > 0 ? "outline" : "default"}
+                  onClick={async () => {
+                    if (appliedDiscount > 0) {
+                      setAppliedDiscount(0)
+                      setCouponInput("")
+                    } else {
+                      if (!couponInput) return;
+                      const res = await validateCoupon(couponInput);
+                      if (res.success && res.discountPercent) {
+                        setAppliedDiscount(res.discountPercent)
+                      } else {
+                        alert(res.error || "Mã giảm giá không hợp lệ!")
+                      }
+                    }
+                  }}
+                >
+                  {appliedDiscount > 0 ? "Hủy" : "Áp dụng"}
+                </Button>
+              </div>
+              {appliedDiscount > 0 && (
+                <p className="text-sm text-green-600 mt-2 font-medium">Đã áp dụng mã giảm giá {appliedDiscount}%</p>
+              )}
+            </div>
+
             <div className="border-t border-neutral-100 pt-6 space-y-4">
               <div className="flex justify-between text-neutral-600 font-medium">
                 <span>Tạm tính</span>
                 <span>{formatPrice(calculatedTotal)}</span>
               </div>
+              
+              {appliedDiscount > 0 && (
+                <div className="flex justify-between text-green-600 font-medium">
+                  <span>Giảm giá ({appliedDiscount}%)</span>
+                  <span>-{formatPrice(calculatedTotal * (appliedDiscount / 100))}</span>
+                </div>
+              )}
+              
               <div className="flex justify-between text-neutral-600 font-medium">
                 <span>Phí vận chuyển</span>
                 <span className="text-green-600">Miễn phí</span>
               </div>
               <div className="flex justify-between font-bold text-xl pt-4 border-t border-neutral-100">
                 <span className="font-heading uppercase">Tổng cộng</span>
-                <span className="text-[#E30019] text-2xl">{formatPrice(calculatedTotal)}</span>
+                <span className="text-[#E30019] text-2xl">
+                  {formatPrice(calculatedTotal - (calculatedTotal * (appliedDiscount / 100)))}
+                </span>
               </div>
             </div>
           </div>

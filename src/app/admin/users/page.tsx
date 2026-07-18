@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
+import { UserActions } from "./components/user-actions"
 
 const prisma = new PrismaClient()
 
@@ -38,6 +39,7 @@ export default async function AdminUsersPage() {
               <TableHead>Ngày tham gia</TableHead>
               <TableHead>Số đơn hàng</TableHead>
               <TableHead>Vai trò</TableHead>
+              <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -60,6 +62,9 @@ export default async function AdminUsersPage() {
                     <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
                       {user.role}
                     </Badge>
+                  </TableCell>
+                  <TableCell className="text-right">
+                    <UserActions userId={user.id} currentRole={user.role} />
                   </TableCell>
                 </TableRow>
               ))

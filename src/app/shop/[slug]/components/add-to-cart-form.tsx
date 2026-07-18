@@ -48,7 +48,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
       {/* Action Buttons */}
       <Button 
         onClick={handleAddToCart}
-        className="flex-1 h-14 rounded-2xl text-base font-bold shadow-lg hover:shadow-xl transition-all gap-2"
+        className="flex-1 h-14 rounded-sm text-base font-bold shadow-md hover:shadow-xl transition-all gap-2 bg-[#FF5722] hover:bg-[#E64A19] text-white hover:-translate-y-0.5"
       >
         <ShoppingCart className="w-5 h-5" />
         Thêm vào giỏ
@@ -60,7 +60,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
           addItem({ ...product, quantity })
           // Redirect to checkout in the future
         }}
-        className="flex-1 h-14 rounded-2xl text-base font-bold shadow-md hover:shadow-lg transition-all gap-2 bg-slate-900 text-white hover:bg-slate-800"
+        className="flex-1 h-14 rounded-sm text-base font-bold shadow-sm hover:shadow-md transition-all gap-2 bg-neutral-900 text-white hover:bg-neutral-800 hover:-translate-y-0.5"
       >
         <ShoppingBag className="w-5 h-5" />
         Mua ngay

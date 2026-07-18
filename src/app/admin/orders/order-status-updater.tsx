@@ -57,30 +57,36 @@ export function OrderStatusUpdater({
   }
 
   return (
-    <div className="flex flex-col gap-2">
-      <Select value={status} onValueChange={(val) => handleStatusChange(val as string)} disabled={loading}>
-        <SelectTrigger className="w-[130px] h-8 text-xs">
-          <SelectValue placeholder="Trạng thái đơn" />
-        </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="PENDING">Chờ xử lý</SelectItem>
-          <SelectItem value="PROCESSING">Đang chuẩn bị</SelectItem>
-          <SelectItem value="SHIPPED">Đang giao</SelectItem>
-          <SelectItem value="COMPLETED">Đã giao thành công</SelectItem>
-          <SelectItem value="CANCELLED">Đã hủy</SelectItem>
-        </SelectContent>
-      </Select>
+    <div className="flex flex-col gap-3">
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-muted-foreground">Tiến trình giao hàng</label>
+        <Select value={status} onValueChange={(val) => handleStatusChange(val as string)} disabled={loading}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Trạng thái đơn" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="PENDING">Chờ xử lý</SelectItem>
+            <SelectItem value="PROCESSING">Đang chuẩn bị</SelectItem>
+            <SelectItem value="SHIPPED">Đang giao</SelectItem>
+            <SelectItem value="COMPLETED">Đã giao thành công</SelectItem>
+            <SelectItem value="CANCELLED">Đã hủy</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
       
-      <Select value={payStatus} onValueChange={(val) => handlePaymentChange(val as string)} disabled={loading}>
-        <SelectTrigger className="h-8 w-[140px] text-xs">
-          <SelectValue placeholder="Thanh toán" />
-        </SelectTrigger>
+      <div className="space-y-1.5">
+        <label className="text-xs font-medium text-muted-foreground">Tình trạng thanh toán</label>
+        <Select value={payStatus} onValueChange={(val) => handlePaymentChange(val as string)} disabled={loading}>
+          <SelectTrigger className="w-full">
+            <SelectValue placeholder="Thanh toán" />
+          </SelectTrigger>
         <SelectContent>
           <SelectItem value="UNPAID">Chưa thanh toán</SelectItem>
           <SelectItem value="PAID">Đã thanh toán</SelectItem>
           <SelectItem value="REFUNDED">Đã hoàn tiền</SelectItem>
         </SelectContent>
       </Select>
+      </div>
     </div>
   )
 }

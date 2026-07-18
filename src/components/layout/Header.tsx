@@ -19,6 +19,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuGroup,
 } from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
 
 function CartBadge() {
   const totalItems = useCartStore((state) => state.totalItems);
@@ -43,10 +44,19 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const { openModal } = useAuthModal();
   const { openCart } = useCartUI();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
 
   return (
     <header className="w-full bg-white border-b border-border">
@@ -64,16 +74,18 @@ export function Header() {
 
         {/* Search Bar */}
         <div className="flex-1 max-w-2xl hidden md:flex items-center">
-          <div className="relative w-full">
+          <form onSubmit={handleSearch} className="relative w-full">
             <input 
               type="text" 
               placeholder="Tìm kiếm robot, kit STEM, đồ chơi logic..." 
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="w-full h-10 pl-4 pr-10 border border-primary/50 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
             />
-            <button className="absolute right-0 top-0 h-10 w-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
+            <button type="submit" className="absolute right-0 top-0 h-10 w-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors">
               <Search className="h-5 w-5" />
             </button>
-          </div>
+          </form>
         </div>
 
         {/* Contact & Actions */}

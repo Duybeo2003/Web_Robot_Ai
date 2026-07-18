@@ -69,6 +69,8 @@ model User {
   warranties    Warranty[]
   returnRequests ReturnRequest[]
   cart          Cart?
+  reviews       Review[]
+  wishlists     Wishlist[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -145,12 +147,20 @@ model Product {
   inventoryCount Int         @default(0)
   imageUrl       String?
   
+  // Promotional Fields
+  originalPrice    Decimal?  @db.Decimal(10, 2)
+  flashSaleActive  Boolean   @default(false)
+  flashSaleEndDate DateTime?
+  flashSaleStock   Int?
+  
   categoryId     String?
   category       Category?   @relation(fields: [categoryId], references: [id])
   
   orderItems     OrderItem[]
   cartItems      CartItem[]
   warranties     Warranty[]
+  reviews        Review[]
+  wishlists      Wishlist[]
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -159,6 +169,8 @@ model Product {
   @@index([categoryId])
   @@index([slug])
   @@index([createdAt])
+  @@index([type, price])
+  @@index([price])
 }
 
 model Cart {
@@ -270,4 +282,51 @@ model ReturnRequest {
   @@index([orderId])
   @@index([status])
   @@index([createdAt])
+}
+
+// ------------------------------------------------------
+// 4. Marketing & Social Models
+// ------------------------------------------------------
+model Coupon {
+  id              String   @id @default(cuid())
+  code            String   @unique
+  discountPercent Int
+  usageLimit      Int?
+  usageCount      Int      @default(0)
+  isActive        Boolean  @default(true)
+  expiresAt       DateTime?
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Review {
+  id          String   @id @default(cuid())
+  rating      Int      // 1-5
+  comment     String   @db.Text
+  
+  userId      String
+  user        User     @relation(fields: [userId], references: [id])
+  productId   String
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
+
+model Wishlist {
+  id        String   @id @default(cuid())
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+
+  @@unique([userId, productId])
+  @@index([userId])
+  @@index([productId])
 }

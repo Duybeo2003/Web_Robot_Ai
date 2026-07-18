@@ -4,14 +4,14 @@ import Image from "next/image"
 export function ProductGallery({ imageUrl, title }: { imageUrl: string | null, title: string }) {
   return (
     <div className="flex flex-col gap-4">
-      <div className="aspect-square bg-muted rounded-sm overflow-hidden border border-border relative group">
+      <div className="aspect-square bg-white rounded-md shadow-sm border border-neutral-100 relative group overflow-hidden p-8">
         {imageUrl ? (
           <Image 
             src={imageUrl} 
             alt={title} 
             fill
             priority
-            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
+            className="object-contain transition-transform duration-700 ease-out group-hover:scale-105 p-8"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         ) : (

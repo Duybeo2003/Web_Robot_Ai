@@ -9,6 +9,7 @@ import {
   Tooltip,
 } from "recharts"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
+import { useEffect, useState } from "react"
 
 interface RevenueData {
   date: string
@@ -16,6 +17,27 @@ interface RevenueData {
 }
 
 export function RevenueChart({ data }: { data: RevenueData[] }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <Card className="col-span-1 lg:col-span-3">
+        <CardHeader>
+          <CardTitle className="text-xl font-bold">Doanh Thu 7 Ngày Gần Nhất</CardTitle>
+          <CardDescription>
+            Tổng hợp doanh thu từ các đơn hàng thành công.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="h-[350px] w-full bg-neutral-100 animate-pulse rounded-md"></div>
+        </CardContent>
+      </Card>
+    )
+  }
+
   return (
     <Card className="col-span-1 lg:col-span-3">
       <CardHeader>

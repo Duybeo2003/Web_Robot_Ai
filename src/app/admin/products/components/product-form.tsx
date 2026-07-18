@@ -9,17 +9,23 @@ import { Textarea } from "@/components/ui/textarea"
 import { upsertProduct } from "@/actions/admin"
 import { toast } from "sonner"
 import { Loader2 } from "lucide-react"
+import Image from "next/image"
 
-export function ProductForm({ initialData }: { initialData?: any }) {
+export function ProductForm({ initialData, categories = [] }: { initialData?: any, categories?: any[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [formData, setFormData] = useState({
     title: initialData?.title || "",
     description: initialData?.description || "",
     price: initialData?.price ? Number(initialData.price) : 0,
-    type: initialData?.type || "ROBOT_STEM",
+    type: initialData?.type || "ROBOT_STEM", // fallback enum
+    categoryId: initialData?.categoryId || categories[0]?.id || "", // new category link
     inventoryCount: initialData?.inventoryCount || 0,
     imageUrl: initialData?.imageUrl || "",
+    originalPrice: initialData?.originalPrice ? Number(initialData.originalPrice) : 0,
+    flashSaleActive: initialData?.flashSaleActive || false,
+    flashSaleEndDate: initialData?.flashSaleEndDate ? new Date(initialData.flashSaleEndDate).toISOString().slice(0, 16) : "",
+    flashSaleStock: initialData?.flashSaleStock || 0,
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -39,7 +45,7 @@ export function ProductForm({ initialData }: { initialData?: any }) {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl bg-white p-6 rounded-md border">
+    <form onSubmit={handleSubmit} className="space-y-6 max-w-2xl bg-white p-6 rounded-md border shadow-sm">
       <div className="space-y-4">
         <div className="space-y-2">
           <Label htmlFor="title">Tên sản phẩm</Label>
@@ -51,23 +57,40 @@ export function ProductForm({ initialData }: { initialData?: any }) {
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="type">Phân loại</Label>
-          <select 
-            id="type"
-            value={formData.type}
-            onChange={(e) => setFormData({...formData, type: e.target.value})}
-            className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-          >
-            <option value="ROBOT_STEM">Robot Thông Minh</option>
-            <option value="KIT_ARDUINO">Kit Arduino</option>
-            <option value="DO_CHOI_LOGIC">Đồ chơi Logic</option>
-          </select>
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="categoryId">Danh mục</Label>
+            <select 
+              id="categoryId"
+              value={formData.categoryId}
+              onChange={(e) => setFormData({...formData, categoryId: e.target.value})}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:border-orange-500"
+            >
+              {categories.length > 0 ? categories.map((cat) => (
+                <option key={cat.id} value={cat.id}>{cat.name}</option>
+              )) : (
+                <option value="">-- Chưa có danh mục --</option>
+              )}
+            </select>
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="type">Loại cũ (Fallback)</Label>
+            <select 
+              id="type"
+              value={formData.type}
+              onChange={(e) => setFormData({...formData, type: e.target.value})}
+              className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:border-orange-500"
+            >
+              <option value="ROBOT_STEM">Robot Thông Minh</option>
+              <option value="KIT_ARDUINO">Kit Arduino</option>
+              <option value="DO_CHOI_LOGIC">Đồ chơi Logic</option>
+            </select>
+          </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label htmlFor="price">Giá bán (VNĐ)</Label>
+            <Label htmlFor="price">Giá bán hiện tại (VNĐ)</Label>
             <Input 
               id="price" 
               type="number"
@@ -78,23 +101,81 @@ export function ProductForm({ initialData }: { initialData?: any }) {
             />
           </div>
           <div className="space-y-2">
-            <Label htmlFor="inventoryCount">Tồn kho</Label>
+            <Label htmlFor="originalPrice">Giá gốc (VNĐ) - Tuỳ chọn</Label>
             <Input 
-              id="inventoryCount" 
+              id="originalPrice" 
               type="number"
               min="0"
-              value={formData.inventoryCount}
-              onChange={(e) => setFormData({...formData, inventoryCount: Number(e.target.value)})}
-              required
+              value={formData.originalPrice}
+              onChange={(e) => setFormData({...formData, originalPrice: Number(e.target.value)})}
             />
           </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="inventoryCount">Tồn kho chung</Label>
+          <Input 
+            id="inventoryCount" 
+            type="number"
+            min="0"
+            value={formData.inventoryCount}
+            onChange={(e) => setFormData({...formData, inventoryCount: Number(e.target.value)})}
+            required
+          />
+        </div>
+
+        {/* Flash Sale Section */}
+        <div className="border rounded-md p-4 bg-orange-50/30 space-y-4">
+          <div className="flex items-center justify-between">
+            <div>
+              <Label className="text-base font-bold text-orange-600">Flash Sale & Khuyến Mãi</Label>
+              <p className="text-xs text-muted-foreground">Kích hoạt để hiển thị banner Flash Sale và bộ đếm ngược.</p>
+            </div>
+            <label className="relative inline-flex items-center cursor-pointer">
+              <input 
+                type="checkbox" 
+                className="sr-only peer"
+                checked={formData.flashSaleActive}
+                onChange={(e) => setFormData({...formData, flashSaleActive: e.target.checked})}
+              />
+              <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-orange-500"></div>
+            </label>
+          </div>
+
+          {formData.flashSaleActive && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+              <div className="space-y-2">
+                <Label htmlFor="flashSaleEndDate">Thời gian kết thúc</Label>
+                <Input 
+                  id="flashSaleEndDate" 
+                  type="datetime-local"
+                  value={formData.flashSaleEndDate}
+                  onChange={(e) => setFormData({...formData, flashSaleEndDate: e.target.value})}
+                  required={formData.flashSaleActive}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="flashSaleStock">Số lượng Flash Sale</Label>
+                <Input 
+                  id="flashSaleStock" 
+                  type="number"
+                  min="0"
+                  value={formData.flashSaleStock}
+                  onChange={(e) => setFormData({...formData, flashSaleStock: Number(e.target.value)})}
+                  required={formData.flashSaleActive}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="imageUrl">Hình ảnh Sản phẩm</Label>
           <div className="flex gap-4 items-center">
             {formData.imageUrl && (
-              <img src={formData.imageUrl} alt="Preview" className="w-16 h-16 object-cover rounded-md border bg-neutral-50" />
+              <div className="relative w-16 h-16 shrink-0">
+                <Image src={formData.imageUrl} alt="Preview" fill className="object-cover rounded-md border bg-neutral-50" sizes="64px" />
+              </div>
             )}
             <Input 
               type="file" 

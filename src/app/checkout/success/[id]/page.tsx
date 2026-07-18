@@ -21,12 +21,15 @@ export default async function CheckoutSuccessPage({ params }: { params: Promise<
 
   return (
     <div className="container mx-auto px-4 py-16 bg-[#F5F5F5] min-h-[70vh] flex items-center justify-center">
-      <div className="bg-white p-8 md:p-12 rounded-sm shadow-sm border border-neutral-100 max-w-2xl w-full text-center">
-        <div className="w-20 h-20 bg-green-50 rounded-full flex items-center justify-center mx-auto mb-6">
-          <CheckCircle2 className="w-12 h-12 text-green-500" />
+      <div className="bg-white p-8 md:p-12 rounded-sm shadow-xl shadow-green-500/10 border border-green-100 max-w-2xl w-full text-center relative overflow-hidden">
+        <div className="absolute top-0 left-0 w-full h-2 bg-gradient-to-r from-green-400 to-[#FF5722]"></div>
+        
+        <div className="w-24 h-24 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-8 relative">
+          <div className="absolute inset-0 bg-green-200 rounded-full animate-ping opacity-30"></div>
+          <CheckCircle2 className="w-14 h-14 text-green-600 relative z-10" />
         </div>
         
-        <h1 className="text-3xl font-heading font-bold text-foreground mb-4 uppercase text-[#FF5722]">
+        <h1 className="text-3xl md:text-4xl font-heading font-black text-foreground mb-4 uppercase text-[#FF5722]">
           Đặt Hàng Thành Công!
         </h1>
         

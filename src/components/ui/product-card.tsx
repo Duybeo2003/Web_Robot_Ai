@@ -1,29 +1,31 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Truck } from "lucide-react";
+import { WishlistButton } from "@/components/ui/wishlist-button";
 
-export function ProductCard({ product, action }: { product: any, action?: React.ReactNode }) {
-  // Calculate a deterministic discount percent based on the product ID to avoid hydration mismatch
-  const discountPercent = product?.id 
-    ? (product.id.charCodeAt(0) + product.id.charCodeAt(product.id.length - 1)) % 30 + 10 
-    : 15;
+export function ProductCard({ product, action, isWished = false }: { product: any, action?: React.ReactNode, isWished?: boolean }) {
+  const currentPrice = Number(product.price);
+  const originalPrice = product.originalPrice ? Number(product.originalPrice) : null;
+  const hasDiscount = originalPrice && originalPrice > currentPrice;
+  const discountPercent = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
   
   return (
     <div className="group relative bg-white h-full flex flex-col hover:shadow-lg transition-all duration-300 rounded-sm border border-transparent hover:border-border overflow-hidden">
       
       {/* Badges */}
-      <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">
-        <div className="bg-[#E30019] text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm">
-          Giảm {discountPercent}%
+      {hasDiscount && (
+        <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">
+          <div className="bg-[#E30019] text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm">
+            Giảm {discountPercent}%
+          </div>
+          <div className="text-[#0066FF] text-[9px] md:text-[10px] font-semibold px-2 bg-white/90 backdrop-blur-sm rounded-br-md">
+            Có giảm thêm
+          </div>
         </div>
-        <div className="text-[#0066FF] text-[9px] md:text-[10px] font-semibold px-2 bg-white/90 backdrop-blur-sm rounded-br-md">
-          Có giảm thêm
-        </div>
-      </div>
+      )}
 
-      <div className="absolute top-2 right-2 z-10 flex items-center gap-1 opacity-60">
-        <div className="w-4 h-4 bg-neutral-200 text-neutral-500 rounded-full flex items-center justify-center text-[8px] font-bold">R</div>
-        <span className="text-[8px] font-semibold text-neutral-400 uppercase tracking-wider">ROBOED</span>
+      <div className="absolute top-2 right-2 z-10">
+        <WishlistButton productId={product.id} initiallyWished={isWished} />
       </div>
 
       {/* Image Container */}
@@ -56,11 +58,13 @@ export function ProductCard({ product, action }: { product: any, action?: React.
         </Link>
         <div className="mt-auto pt-3 pb-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
-            <p className="text-[11px] md:text-xs text-neutral-400 line-through">
-              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(product.price) * (1 + discountPercent/100))}
-            </p>
+            {hasDiscount && (
+              <p className="text-[11px] md:text-xs text-neutral-400 line-through">
+                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice)}
+              </p>
+            )}
             <p className="text-base md:text-lg font-bold text-[#E30019] leading-none sm:leading-normal">
-              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(product.price))}
+              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentPrice)}
             </p>
           </div>
         </div>

@@ -2,6 +2,7 @@
 
 import { useCartStore } from "@/lib/store/cart";
 import Link from "next/link";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 
@@ -40,7 +41,9 @@ export default function CartPage() {
             <div key={item.id} className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-6 items-center">
               <div className="w-24 h-24 bg-muted rounded-xl overflow-hidden shrink-0">
                 {item.imageUrl ? (
-                  <img src={item.imageUrl} alt={item.title} className="w-full h-full object-cover" />
+                  <div className="relative w-full h-full">
+                    <Image src={item.imageUrl} alt={item.title} fill className="object-cover" sizes="96px" />
+                  </div>
                 ) : (
                   <div className="w-full h-full bg-primary/10 flex items-center justify-center text-primary font-bold text-xs">RoboEd</div>
                 )}

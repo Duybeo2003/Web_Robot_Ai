@@ -31,7 +31,7 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     <Button 
       size="icon" 
       onClick={handleAddToCart}
-      className="rounded-full shadow-md hover:shadow-lg transition-all"
+      className="rounded-full shadow-md hover:shadow-xl transition-all bg-[#FF5722] hover:bg-[#E64A19] text-white hover:-translate-y-1"
     >
       <ShoppingCart className="w-4 h-4" />
     </Button>
