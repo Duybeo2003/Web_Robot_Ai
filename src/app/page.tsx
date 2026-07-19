@@ -22,7 +22,11 @@ export default async function Home() {
     userWishlistIds = wishlistItems.map(w => w.productId);
   }
 
-  const serializeProduct = (p: any) => ({ ...p, price: Number(p.price) });
+  const serializeProduct = (p: any) => ({
+  ...p,
+  price: Number(p.price),
+  originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
+});
 
   const robotProducts = (await prisma.product.findMany({
     where: { type: 'ROBOT_STEM' },

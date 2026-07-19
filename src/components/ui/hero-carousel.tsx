@@ -3,6 +3,7 @@
 import * as React from "react"
 import Image from "next/image"
 import { Button } from "@/components/ui/button"
+import { theme } from "@/components/ui/theme"
 import {
   Carousel,
   CarouselContent,
@@ -13,17 +14,17 @@ import {
 import Autoplay from "embla-carousel-autoplay"
 
 export function HeroCarousel() {
-  const plugin = React.useRef(
+  const autoplay = React.useMemo(() =>
     Autoplay({ delay: 4000, stopOnInteraction: true })
-  )
+  , []);
 
   return (
     <section className="w-full bg-white pt-4 pb-4">
       <div className="container mx-auto px-4">
         <Carousel
-          plugins={[plugin.current]}
-          onMouseEnter={plugin.current.stop}
-          onMouseLeave={plugin.current.reset}
+          plugins={[autoplay]}
+          onMouseEnter={() => autoplay.stop?.()}
+          onMouseLeave={() => autoplay.reset?.()}
           opts={{
             align: "start",
             loop: true,
@@ -43,10 +44,10 @@ export function HeroCarousel() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex flex-col justify-center px-6 md:px-12">
                   <div className="text-white space-y-2 md:space-y-4 max-w-lg">
-                    <span className="px-2 py-1 bg-[#FF5722] text-[10px] md:text-xs font-bold uppercase rounded-sm inline-block">Khai trương hồng phát</span>
-                    <h2 className="text-2xl md:text-5xl font-bold leading-tight">ROBOT GIÁO DỤC <br/><span className="text-[#FF5722]">SỐ 1 VIỆT NAM</span></h2>
+                    <span className="px-2 py-1 text-[10px] md:text-xs font-bold uppercase rounded-sm inline-block" style={{ backgroundColor: theme.primary }}>Khai trương hồng phát</span>
+                    <h2 className="text-2xl md:text-5xl font-bold leading-tight">ROBOT GIÁO DỤC <br/><span style={{ color: theme.primary }}>SỐ 1 VIỆT NAM</span></h2>
                     <p className="hidden md:block text-base opacity-90">Giảm giá lên đến 50% cho tất cả các bộ Kit STEM và Robot Lập Trình.</p>
-                    <Button size="sm" className="bg-[#FF5722] hover:bg-[#E64A19] text-white font-bold px-6 md:h-12 mt-2 md:mt-4 text-xs md:text-base">
+                    <Button size="sm" className="hover:bg-[#E64A19] text-white font-bold px-6 md:h-12 mt-2 md:mt-4 text-xs md:text-base" style={{ backgroundColor: theme.primary }}>
                       MUA NGAY
                     </Button>
                   </div>
@@ -64,10 +65,10 @@ export function HeroCarousel() {
                 />
                 <div className="absolute inset-0 bg-gradient-to-l from-black/80 to-transparent flex flex-col justify-center items-end px-6 md:px-12 text-right">
                   <div className="text-white space-y-2 md:space-y-4 max-w-lg">
-                    <span className="px-2 py-1 bg-[#2196F3] text-[10px] md:text-xs font-bold uppercase rounded-sm inline-block">Mới ra mắt</span>
-                    <h2 className="text-2xl md:text-5xl font-bold leading-tight">PHÁT TRIỂN <br/><span className="text-[#2196F3]">TƯ DUY LOGIC</span></h2>
+                    <span className="px-2 py-1 text-[10px] md:text-xs font-bold uppercase rounded-sm inline-block" style={{ backgroundColor: theme.secondary }}>Mới ra mắt</span>
+                    <h2 className="text-2xl md:text-5xl font-bold leading-tight">PHÁT TRIỂN <br/><span style={{ color: theme.secondary }}>TƯ DUY LOGIC</span></h2>
                     <p className="hidden md:block text-base opacity-90">Bộ sưu tập đồ chơi trí tuệ xếp hình 3D cao cấp.</p>
-                    <Button size="sm" className="bg-[#2196F3] hover:bg-[#1976D2] text-white font-bold px-6 md:h-12 mt-2 md:mt-4 text-xs md:text-base">
+                    <Button size="sm" className="hover:bg-[#1976D2] text-white font-bold px-6 md:h-12 mt-2 md:mt-4 text-xs md:text-base" style={{ backgroundColor: theme.secondary }}>
                       KHÁM PHÁ
                     </Button>
                   </div>

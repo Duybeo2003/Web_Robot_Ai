@@ -17,9 +17,10 @@ interface FlashSaleCarouselProps {
 }
 
 export function FlashSaleCarousel({ products, userWishlistIds = [] }: FlashSaleCarouselProps) {
-  const plugin = React.useRef(
+  const plugin = React.useMemo(() =>
     Autoplay({ delay: 3000, stopOnInteraction: true })
-  )
+  , []);
+
 
   if (!products || products.length === 0) return null;
 
@@ -39,9 +40,9 @@ export function FlashSaleCarousel({ products, userWishlistIds = [] }: FlashSaleC
         
         <div className="bg-[#FF3300] pb-6 px-4 md:px-8 rounded-b-lg relative shadow-lg">
           <Carousel
-            plugins={[plugin.current]}
-            onMouseEnter={plugin.current.stop}
-            onMouseLeave={plugin.current.reset}
+            plugins={[plugin]}
+            onMouseEnter={() => plugin.stop?.()}
+            onMouseLeave={() => plugin.reset?.()}
             opts={{
               align: "start",
               loop: true,

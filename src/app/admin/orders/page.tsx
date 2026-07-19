@@ -69,7 +69,24 @@ export default async function AdminOrdersPage() {
                 </TableCell>
               </TableRow>
             ) : (
-              orders.map((order) => (
+              orders.map((order) => {
+                // Serialize Decimal/Date for client component
+                const serializedOrder = {
+                  ...order,
+                  totalAmount: Number(order.totalAmount),
+                  createdAt: order.createdAt.toISOString(),
+                  updatedAt: order.updatedAt.toISOString(),
+                  items: order.items.map((item) => ({
+                    ...item,
+                    priceAtPurchase: Number(item.priceAtPurchase),
+                    product: {
+                      ...item.product,
+                      price: Number(item.product.price),
+                      originalPrice: item.product.originalPrice ? Number(item.product.originalPrice) : null,
+                    },
+                  })),
+                }
+                return (
                 <TableRow key={order.id} className="hover:bg-muted/30 transition-colors">
                   <TableCell className="font-mono text-xs font-medium">{order.id.slice(0, 8).toUpperCase()}</TableCell>
                   <TableCell>
@@ -93,10 +110,11 @@ export default async function AdminOrdersPage() {
                     {getOrderStatusBadge(order.status)}
                   </TableCell>
                   <TableCell className="text-right">
-                    <OrderDetailsModal order={order} />
+                    <OrderDetailsModal order={serializedOrder} />
                   </TableCell>
                 </TableRow>
-              ))
+                )
+              })
             )}
           </TableBody>
         </Table>

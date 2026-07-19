@@ -1,7 +1,8 @@
 "use client"
 
 import { useState, useTransition } from "react"
-import { Heart } from "lucide-react"
+import { Heart } from "lucide-react";
+import { theme } from "@/components/ui/theme";
 import { toggleWishlist } from "@/actions/wishlist"
 import { toast } from "sonner"
 import { useSession } from "next-auth/react"
@@ -39,10 +40,10 @@ export function WishlistButton({ productId, initiallyWished = false }: { product
     <button 
       onClick={handleToggle}
       disabled={isPending}
-      className="p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white text-neutral-500 hover:text-[#FF5722] transition-colors focus:outline-none"
+      className={`p-2 rounded-full bg-white/80 backdrop-blur-sm shadow-sm hover:bg-white transition-colors focus:outline-none ${isWished ? 'text-primary' : 'text-neutral-500 hover:text-primary'}`}
       title="Yêu thích"
     >
-      <Heart className={`w-5 h-5 ${isWished ? "fill-[#FF5722] text-[#FF5722]" : ""}`} />
+      <Heart className={`w-5 h-5 ${isWished ? 'fill-primary text-primary' : ''}`} />
     </button>
   )
 }

@@ -64,7 +64,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const userId = session?.user?.id
   
   let isWished = false
-  let userWishlistIds: string[] = []
+  let userWishlistIds: string[] = [];
+const sanitizedProduct = { ...product, price: Number(product.price), originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined };
   
   if (userId) {
     const wishlistItems = await prisma.wishlist.findMany({
@@ -173,7 +174,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
         </div>
       </div>
 
-      <ProductTabs product={{ ...product, price: Number(product.price) } as any} />
+      <ProductTabs product={sanitizedProduct} />
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (

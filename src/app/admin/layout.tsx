@@ -1,30 +1,31 @@
-import { redirect } from "next/navigation"
-import { auth } from "@/auth"
-import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar"
-import { AppSidebar } from "@/components/admin/app-sidebar"
-import { PrismaClient } from "@prisma/client"
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/admin/app-sidebar";
+import { PrismaClient } from "@prisma/client";
+import Breadcrumbs from "@/components/admin/breadcrumbs";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default async function AdminLayout({
   children,
 }: {
-  children: React.ReactNode
+  children: React.ReactNode;
 }) {
-  const session = await auth()
+  const session = await auth();
 
   if (!session?.user?.id) {
-    redirect("/")
+    redirect("/");
   }
 
-  // Double check role in DB just to be safe
+  // Verify role
   const user = await prisma.user.findUnique({
     where: { id: session.user.id },
     select: { role: true },
-  })
+  });
 
   if (user?.role !== "ADMIN") {
-    redirect("/")
+    redirect("/");
   }
 
   return (
@@ -39,6 +40,8 @@ export default async function AdminLayout({
             <span className="text-[#0066FF]">Bảng điều khiển</span>
           </div>
         </header>
+        {/* Breadcrumb navigation */}
+        <Breadcrumbs />
         <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
           <div className="max-w-7xl mx-auto w-full">
             {children}
@@ -46,5 +49,5 @@ export default async function AdminLayout({
         </main>
       </div>
     </SidebarProvider>
-  )
+  );
 }

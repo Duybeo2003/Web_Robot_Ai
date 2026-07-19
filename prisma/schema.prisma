@@ -330,3 +330,19 @@ model Wishlist {
   @@index([userId])
   @@index([productId])
 }
+
+model AuditLog {
+  id          String   @id @default(cuid())
+  userId      String?
+  action      String
+  model       String
+  recordId    String?
+  before      Json?
+  after       Json?
+  timestamp   DateTime @default(now())
+
+  @@index([userId])
+  @@index([model])
+  @@index([action])
+  @@index([timestamp])
+}

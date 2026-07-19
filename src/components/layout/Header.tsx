@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
@@ -23,13 +24,9 @@ import { useRouter } from "next/navigation";
 
 function CartBadge() {
   const totalItems = useCartStore((state) => state.totalItems);
-  const [mounted, setMounted] = useState(false);
+  // Removed mounted state; component renders directly
 
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  if (!mounted || totalItems === 0) return null;
+  if (totalItems === 0) return null;
 
   return (
     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#C86B5A] text-[10px] text-white font-bold animate-in zoom-in duration-300">

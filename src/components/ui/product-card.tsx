@@ -1,9 +1,11 @@
 import Link from "next/link";
 import Image from "next/image";
 import { Truck } from "lucide-react";
+import { Product } from "@/types/product";
+import { theme } from "@/components/ui/theme";
 import { WishlistButton } from "@/components/ui/wishlist-button";
 
-export function ProductCard({ product, action, isWished = false }: { product: any, action?: React.ReactNode, isWished?: boolean }) {
+export function ProductCard({ product, action, isWished = false }: { product: Product, action?: React.ReactNode, isWished?: boolean }) {
   const currentPrice = Number(product.price);
   const originalPrice = product.originalPrice ? Number(product.originalPrice) : null;
   const hasDiscount = originalPrice && originalPrice > currentPrice;
@@ -15,10 +17,10 @@ export function ProductCard({ product, action, isWished = false }: { product: an
       {/* Badges */}
       {hasDiscount && (
         <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">
-          <div className="bg-[#E30019] text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm">
+          <div className="text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm" style={{ backgroundColor: theme.primary }}>
             Giảm {discountPercent}%
           </div>
-          <div className="text-[#0066FF] text-[9px] md:text-[10px] font-semibold px-2 bg-white/90 backdrop-blur-sm rounded-br-md">
+          <div className="text-[9px] md:text-[10px] font-semibold px-2 bg-white/90 backdrop-blur-sm rounded-br-md" style={{ color: theme.secondary }}>
             Có giảm thêm
           </div>
         </div>
@@ -52,7 +54,7 @@ export function ProductCard({ product, action, isWished = false }: { product: an
           </span>
         </div>
         <Link href={`/shop/${product.slug}`}>
-          <h3 className="font-medium text-sm md:text-base line-clamp-2 hover:text-[#FF5722] transition-colors text-neutral-800 min-h-[44px] leading-snug">
+          <h3 className="font-medium text-sm md:text-base line-clamp-2 transition-colors text-neutral-800 min-h-[44px] leading-snug" style={{ color: theme.primary }}>
             {product.title}
           </h3>
         </Link>
@@ -76,7 +78,7 @@ export function ProductCard({ product, action, isWished = false }: { product: an
           {action}
         </div>
       ) : (
-        <div className="w-full bg-[#FF5722] text-white py-2 text-center text-[11px] md:text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0">
+        <div className="w-full text-white py-2 text-center text-[11px] md:text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0" style={{ backgroundColor: theme.primary }}>
           <Truck className="w-4 h-4" />
           Miễn phí giao hàng
         </div>

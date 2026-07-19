@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+
 import * as React from "react"
 
 const MOBILE_BREAKPOINT = 768
