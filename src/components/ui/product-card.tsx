@@ -78,10 +78,10 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
           {action}
         </div>
       ) : (
-        <div className="w-full text-white py-2 text-center text-[11px] md:text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0" style={{ backgroundColor: theme.primary }}>
+        <Link href={`/shop/${product.slug}`} className="w-full text-white py-2 text-center text-[11px] md:text-xs font-semibold flex items-center justify-center gap-2 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0 block" style={{ backgroundColor: theme.primary }}>
           <Truck className="w-4 h-4" />
           Miễn phí giao hàng
-        </div>
+        </Link>
       )}
     </div>
   );

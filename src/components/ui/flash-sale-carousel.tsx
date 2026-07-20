@@ -33,7 +33,7 @@ export function FlashSaleCarousel({ products, userWishlistIds = [] }: FlashSaleC
               <span className="text-yellow-300 mr-2">⚡</span> FLASH SALE
             </h2>
             <div className="hidden md:flex items-center text-sm ml-4 border-l border-white/30 pl-4 gap-2">
-              <span>Gọi <strong className="underline">0385356588</strong> hoặc <strong className="underline">nhắn tin Zalo</strong> để nhận tư vấn khuyến mại</span>
+              <span>Gọi <strong className="underline">0385.333.111</strong> hoặc <strong className="underline">nhắn tin Zalo</strong> để nhận tư vấn khuyến mại</span>
             </div>
           </div>
         </div>

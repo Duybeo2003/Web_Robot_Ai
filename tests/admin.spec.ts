@@ -64,7 +64,10 @@ test.describe('Admin Dashboard', () => {
 
     const verifyBtn = page.locator('button', { hasText: 'Xác nhận' });
     await expect(verifyBtn).toBeEnabled({ timeout: 10000 });
-    await verifyBtn.click();
+    await Promise.all([
+      page.waitForNavigation(),
+      verifyBtn.click(),
+    ]);
 
     // Wait for login to complete (modal closes or user is authenticated)
     await expect(page.locator('button[title="Tài khoản"]')).toBeVisible({ timeout: 10000 });

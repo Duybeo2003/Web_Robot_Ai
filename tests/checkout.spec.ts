@@ -71,7 +71,10 @@ test.describe('E-commerce Checkout Flow', () => {
     await otpInputs.last().pressSequentially(otpCode);
 
     const verifyBtn = page.locator('button', { hasText: 'Xác nhận' });
-    await verifyBtn.click();
+    await Promise.all([
+      page.waitForNavigation(),
+      verifyBtn.click(),
+    ]);
 
     // 8. After login, the page reloads or auth state updates
     try {
