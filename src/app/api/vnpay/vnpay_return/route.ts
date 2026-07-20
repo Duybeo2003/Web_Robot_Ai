@@ -3,6 +3,8 @@ import { verifyVnPayReturn } from '@/lib/vnpay';
 import { prisma } from '@/lib/prisma';
 import { revalidatePath } from 'next/cache';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(req: Request) {
   const { searchParams } = new URL(req.url);
   
