@@ -3,8 +3,9 @@ generator client {
 }
 
 datasource db {
-  provider = "mysql"
-  url      = env("DATABASE_URL")
+  provider = "postgresql"
+  url = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
 }
 
 enum Role {
@@ -101,12 +102,12 @@ model Account {
   type               String
   provider           String
   providerAccountId  String
-  refresh_token      String?  @db.Text
-  access_token       String?  @db.Text
+  refresh_token      String?  
+  access_token       String?  
   expires_at         Int?
   token_type         String?
   scope              String?
-  id_token           String?  @db.Text
+  id_token           String?  
   session_state      String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -144,7 +145,7 @@ model Product {
   id             String      @id @default(cuid())
   title          String
   slug           String      @unique
-  description    String      @db.Text
+  description    String      
   price          Decimal     @db.Decimal(10, 2)
   type           ProductType @default(ROBOT_STEM)
   sku            String?     @unique
@@ -213,7 +214,7 @@ model Order {
   totalAmount     Decimal       @db.Decimal(10, 2)
   
   // Logistics & Payment
-  shippingAddress String?       @db.Text
+  shippingAddress String?       
   receiverPhone   String?
   paymentMethod   PaymentMethod @default(COD)
   paymentStatus   PaymentStatus @default(UNPAID)
@@ -276,7 +277,7 @@ model ReturnRequest {
   orderId     String
   order       Order     @relation(fields: [orderId], references: [id])
   
-  reason      String    @db.Text
+  reason      String    
   imageUrl    String?   // Proof of defect
   status      RmaStatus @default(PENDING)
   
@@ -308,7 +309,7 @@ model Coupon {
 model Review {
   id          String   @id @default(cuid())
   rating      Int      // 1-5
-  comment     String   @db.Text
+  comment     String   
   
   userId      String
   user        User     @relation(fields: [userId], references: [id])
@@ -368,7 +369,7 @@ model InventoryTransaction {
   quantity    Int
   costPrice   Decimal?                 @db.Decimal(10, 2)
   reference   String?                  // E.g., PO number or Order ID
-  note        String?                  @db.Text
+  note        String?                  
   userId      String?
   user        User?                    @relation(fields: [userId], references: [id])
   createdAt   DateTime                 @default(now())
@@ -385,7 +386,7 @@ model Article {
   id          String   @id @default(cuid())
   title       String
   slug        String   @unique
-  content     String   @db.LongText
+  content     String   
   thumbnail   String?
   published   Boolean  @default(false)
   tags        String?  // Comma-separated tags

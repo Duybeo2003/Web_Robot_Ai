@@ -21,9 +21,18 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
     return { title: "Không tìm thấy sản phẩm" }
   }
 
+  const title = `${product.title} - RoboEd`;
+  const description = product.description.substring(0, 160);
+
   return {
-    title: `${product.title} - RoboEd`,
-    description: product.description.substring(0, 160),
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      images: product.imageUrl ? [product.imageUrl] : [],
+      type: "website",
+    }
   }
 }
 

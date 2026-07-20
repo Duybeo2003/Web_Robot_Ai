@@ -22,8 +22,24 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
-  title: "RoboEd - Premium EdTech & Nutrition",
-  description: "Modern organic nutrition & sleek educational tech devices.",
+  title: "RoboEd - Đồ chơi Công nghệ & Giáo dục STEM",
+  description: "Cửa hàng RoboEd chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM giúp phát triển tư duy logic và kỹ năng lập trình cho trẻ.",
+  openGraph: {
+    title: "RoboEd - Đồ chơi Công nghệ & Giáo dục STEM",
+    description: "Cửa hàng RoboEd chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM.",
+    url: "https://roboed.vn",
+    siteName: "RoboEd",
+    images: [
+      {
+        url: "/images/og-image.jpg",
+        width: 1200,
+        height: 630,
+        alt: "RoboEd - Đồ chơi Công nghệ",
+      },
+    ],
+    locale: "vi_VN",
+    type: "website",
+  },
 };
 
 export default function RootLayout({
