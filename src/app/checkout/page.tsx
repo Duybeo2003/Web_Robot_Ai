@@ -62,7 +62,8 @@ export default function CheckoutPage() {
       shippingAddress: formData.shippingAddress,
       receiverPhone: formData.receiverPhone,
       paymentMethod: formData.paymentMethod === "VNPAY" ? "BANK_TRANSFER" : formData.paymentMethod,
-      cartItems: items.map(i => ({ productId: i.id, quantity: i.quantity }))
+      cartItems: items.map(i => ({ productId: i.id, quantity: i.quantity })),
+      couponCode: appliedDiscount > 0 ? couponInput : undefined
     })
 
     if (res.error) {
@@ -72,7 +73,7 @@ export default function CheckoutPage() {
       clearCart() // Clear local Zustand cart
       const finalTotal = calculatedTotal - (calculatedTotal * (appliedDiscount / 100));
       if (formData.paymentMethod === "VNPAY") {
-        router.push(`/checkout/vnpay-mock?orderId=${res.orderId}&amount=${finalTotal}`)
+        router.push(`/api/vnpay/create_url?orderId=${res.orderId}&amount=${finalTotal}`)
       } else {
         router.push(`/checkout/success/${res.orderId}`)
       }

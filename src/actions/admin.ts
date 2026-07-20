@@ -41,6 +41,43 @@ export async function updateOrderStatus(orderId: string, data: { status?: string
   }
 }
 
+export async function pushOrderToLogistics(orderId: string, provider: 'GHN' | 'GHTK') {
+  const session = await auth()
+  if (!session?.user?.id) return { success: false, error: "Unauthorized" }
+
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  })
+
+  if (user?.role !== "ADMIN") return { success: false, error: "Unauthorized" }
+
+  try {
+    const order = await prisma.order.findUnique({ where: { id: orderId } })
+    if (!order) return { success: false, error: "Order not found" }
+
+    // MOCK: Giả lập đẩy đơn qua API của hãng vận chuyển
+    console.log(`[LOGISTICS] Pushing order ${orderId} to ${provider}...`)
+    
+    // Fallback: nếu gọi API thật sẽ có đoạn fetch() ở đây
+    const trackingCode = `${provider}-${Date.now().toString().slice(-6)}`
+    
+    // Cập nhật trạng thái đơn hàng thành SHIPPED
+    await prisma.order.update({
+      where: { id: orderId },
+      data: { status: 'SHIPPED' },
+    })
+
+    revalidatePath("/admin/orders")
+    revalidatePath("/profile/orders")
+    return { success: true, trackingCode }
+  } catch (error) {
+    console.error(`Failed to push order to ${provider}:`, error)
+    return { success: false, error: `Failed to push order to ${provider}` }
+  }
+}
+
+
 export async function upsertProduct(data: any, id?: string) {
   const session = await auth()
   if (!session?.user?.id) return { success: false, error: "Unauthorized" }

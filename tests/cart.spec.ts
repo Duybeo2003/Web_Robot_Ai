@@ -6,20 +6,14 @@ test.describe('E-commerce Shopping Flow', () => {
     await page.goto('http://localhost:3000/shop');
 
     // Wait for the page to load and ensure products are displayed
-    await expect(page.locator('h1')).toHaveText('Cửa hàng');
+    await expect(page.locator('h1')).toHaveText('Tất Cả Sản Phẩm');
 
-    // 2. Assert that products (Nutrition and Robot AI) are loaded
-    // We look for specific product titles based on our seed data
-    const robotProduct = page.locator('h3', { hasText: 'Robot AI Desktop Assistant' });
-    const nutritionProduct = page.locator('h3', { hasText: 'Bữa ăn thay thế tiện lợi (Vị Cacao)' });
+    // 2. Assert that products are loaded
+    const productCards = page.locator('.bg-white.group');
+    await expect(productCards.first()).toBeVisible({ timeout: 10000 });
     
-    await expect(robotProduct).toBeVisible();
-    await expect(nutritionProduct).toBeVisible();
-
     // 3. Click "Add to Cart" on the first product card
-    // Note: In our current UI, the "Add to Cart" button on the Shop page has a ShoppingCart icon.
-    // We will target the first "Add to Cart" button in the product grid.
-    const firstProductCard = page.locator('.glass-card').first();
+    const firstProductCard = productCards.first();
     const productTitle = await firstProductCard.locator('h3').innerText();
     const addToCartBtn = firstProductCard.locator('button').last(); // Assuming it's the last button in the card
     

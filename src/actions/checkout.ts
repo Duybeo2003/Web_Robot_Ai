@@ -11,6 +11,7 @@ export async function processCheckout(data: {
   receiverPhone: string
   paymentMethod: PaymentMethod
   cartItems: { productId: string; quantity: number }[]
+  couponCode?: string
 }) {
   const session = await auth()
   if (!session?.user?.id) {
@@ -48,6 +49,25 @@ export async function processCheckout(data: {
           priceAtPurchase: price, // mapping database price (CRITICAL)
         }
       })
+      
+      // 1.5 Handle Coupon
+      if (data.couponCode) {
+        const coupon = await tx.coupon.findUnique({ where: { code: data.couponCode } })
+        if (coupon && coupon.isActive) {
+          const now = new Date()
+          const isValid = (!coupon.expiresAt || coupon.expiresAt > now) && 
+                          (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit);
+          
+          if (isValid) {
+            totalAmount = totalAmount - (totalAmount * (coupon.discountPercent / 100));
+            // increment usage count
+            await tx.coupon.update({
+              where: { id: coupon.id },
+              data: { usageCount: { increment: 1 } }
+            })
+          }
+        }
+      }
 
       // 2 & 3. Create the Order with the verified total amount
       const newOrder = await tx.order.create({

@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { BarChart3, Package, ShoppingCart, Settings, Users, ArrowLeft, LogOut, Tags, Star, Ticket, ListTree } from "lucide-react"
+import { BarChart3, Package, ShoppingCart, Settings, Users, ArrowLeft, LogOut, Tags, Star, Ticket, ListTree, BookOpen, LayoutDashboard } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -25,16 +25,23 @@ const overviewGroup = [
 
 const salesGroup = [
   { title: "Đơn hàng", url: "/admin/orders", icon: ShoppingCart },
+  { title: "Đổi/Trả (RMA)", url: "/admin/returns", icon: Package },
   { title: "Đánh giá", url: "/admin/reviews", icon: Star },
 ]
 
 const productGroup = [
   { title: "Sản phẩm", url: "/admin/products", icon: Package },
+  { title: "Kho hàng", url: "/admin/inventory", icon: Package },
   { title: "Danh mục", url: "/admin/categories", icon: ListTree },
 ]
 
 const marketingGroup = [
-  { title: "Khuyến mãi", url: "/admin/coupons", icon: Ticket },
+  { title: "Mã giảm giá", url: "/admin/coupons", icon: Ticket },
+  { title: "Bài viết (Blog)", url: "/admin/articles", icon: BookOpen },
+]
+
+const reportGroup = [
+  { title: "Báo cáo", url: "/admin/reports", icon: LayoutDashboard },
 ]
 
 const systemGroup = [
@@ -97,6 +104,8 @@ export function AppSidebar() {
         {renderGroup("Kho hàng", productGroup)}
         <div className="px-4 py-2 opacity-50"><SidebarSeparator /></div>
         {renderGroup("Tiếp thị", marketingGroup)}
+        <div className="px-4 py-2 opacity-50"><SidebarSeparator /></div>
+        {renderGroup("Báo cáo", reportGroup)}
         <div className="px-4 py-2 opacity-50"><SidebarSeparator /></div>
         {renderGroup("Hệ thống", systemGroup)}
       </SidebarContent>

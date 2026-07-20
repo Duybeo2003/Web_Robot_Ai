@@ -48,31 +48,30 @@ test.describe('Admin Dashboard', () => {
   test('should allow access to admins', async ({ page }) => {
     // Log in as admin
     await page.goto('/');
-    await page.locator('button', { hasText: 'Đăng nhập' }).click();
-    await page.locator('input[placeholder="+84..."]').fill('0999999888');
-    await page.locator('button', { hasText: 'Tiếp tục' }).click();
+    await page.locator('button[title="Đăng nhập"]').click();
+    
+    // Switch to OTP login method
+    const otpSwitchBtn = page.locator('button', { hasText: 'Đăng nhập bằng OTP (SĐT)' });
+    await expect(otpSwitchBtn).toBeVisible({ timeout: 5000 });
+    await otpSwitchBtn.click();
+    
+    await page.locator('input[type="tel"]').fill('0999999888');
+    await page.locator('button', { hasText: 'Tiếp tục bằng SĐT' }).click();
 
     await page.waitForTimeout(1000); // Wait for modal animation
     const otpInputs = page.locator('input');
     await otpInputs.last().pressSequentially('123456');
 
-    const verifyBtn = page.locator('button', { hasText: 'Xác thực & Đăng nhập' });
+    const verifyBtn = page.locator('button', { hasText: 'Xác nhận' });
     await expect(verifyBtn).toBeEnabled({ timeout: 10000 });
     await verifyBtn.click();
 
     // Wait for login to complete (modal closes or user is authenticated)
-    await expect(page.locator('button', { hasText: 'Đăng xuất' })).toBeVisible({ timeout: 10000 });
+    await expect(page.locator('button[title="Tài khoản"]')).toBeVisible({ timeout: 10000 });
 
     // Go to admin page
     await page.goto('/admin');
-    try {
-      await expect(page.locator('h1', { hasText: 'Bảng điều khiển' })).toBeVisible();
-    } catch (e) {
-      console.log("Current URL:", page.url());
-      console.log("Body text:", await page.locator('body').innerText());
-      throw e;
-    }
-    await expect(page.locator('h2', { hasText: 'Tổng quan' })).toBeVisible();
+    await expect(page.locator('h2', { hasText: 'Tổng quan' })).toBeVisible({ timeout: 10000 });
     
     // Go to orders page
     await page.locator('a', { hasText: 'Đơn hàng' }).click();

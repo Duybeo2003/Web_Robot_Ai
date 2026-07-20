@@ -5,6 +5,7 @@ import { useCartStore } from "@/lib/store/cart"
 import { useCartUI } from "@/store/use-cart-ui"
 import { Button } from "@/components/ui/button"
 import { Minus, Plus, ShoppingCart, ShoppingBag } from "lucide-react"
+import { useRouter } from "next/navigation"
 
 interface AddToCartProps {
   product: {
@@ -20,6 +21,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
   const [quantity, setQuantity] = useState(1)
   const addItem = useCartStore((state) => state.addItem)
   const openCart = useCartUI((state) => state.openCart)
+  const router = useRouter()
 
   const handleAddToCart = () => {
     addItem({ ...product, quantity })
@@ -58,7 +60,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
         variant="secondary"
         onClick={() => {
           addItem({ ...product, quantity })
-          // Redirect to checkout in the future
+          router.push('/checkout')
         }}
         className="flex-1 h-14 rounded-sm text-base font-bold shadow-sm hover:shadow-md transition-all gap-2 bg-neutral-900 text-white hover:bg-neutral-800 hover:-translate-y-0.5"
       >

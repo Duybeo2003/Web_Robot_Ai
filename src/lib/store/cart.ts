@@ -16,8 +16,6 @@ interface CartStore {
   removeItem: (id: string) => void;
   updateQuantity: (id: string, quantity: number) => void;
   clearCart: () => void;
-  get totalItems(): number;
-  get totalPrice(): number;
 }
 
 export const useCartStore = create<CartStore>()(
@@ -51,12 +49,6 @@ export const useCartStore = create<CartStore>()(
         });
       },
       clearCart: () => set({ items: [] }),
-      get totalItems() {
-        return get().items.reduce((total, item) => total + item.quantity, 0);
-      },
-      get totalPrice() {
-        return get().items.reduce((total, item) => total + item.price * item.quantity, 0);
-      },
     }),
     {
       name: 'roboed-cart',

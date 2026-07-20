@@ -22,7 +22,8 @@ import { useRouter } from "next/navigation"
 export function CartSheet() {
   const router = useRouter()
   const { isOpen, closeCart } = useCartUI()
-  const { items, updateQuantity, removeItem, totalPrice } = useCartStore()
+  const { items, updateQuantity, removeItem } = useCartStore()
+  const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0)
   
   // Prevent hydration mismatch
   const [mounted, setMounted] = useState(false)

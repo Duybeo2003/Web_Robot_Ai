@@ -7,7 +7,8 @@ import { Button } from "@/components/ui/button";
 import { Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 
 export default function CartPage() {
-  const { items, removeItem, updateQuantity, totalPrice } = useCartStore();
+  const { items, removeItem, updateQuantity } = useCartStore();
+  const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0);
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {

@@ -8,6 +8,7 @@ import { AuthModal } from "@/components/auth-modal";
 import { CartSheet } from "@/components/cart-sheet";
 import { CartSyncer } from "@/components/cart-syncer";
 import { Toaster } from "@/components/ui/sonner";
+import { AIChatbot } from "@/components/ui/ai-chatbot";
 import { StoreWrapper } from "@/components/layout/store-wrapper";
 
 const lora = Lora({
@@ -49,6 +50,7 @@ export default function RootLayout({
             <CartSyncer />
           </StoreWrapper>
           <Toaster />
+          <AIChatbot />
         </Providers>
       </body>
     </html>

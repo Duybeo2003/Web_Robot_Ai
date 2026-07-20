@@ -15,7 +15,7 @@ test.describe('E-commerce Checkout Flow', () => {
     await page.goto('/shop');
     
     // Find first product and add to cart
-    const firstProductCard = page.locator('.glass-card').first();
+    const firstProductCard = page.locator('.bg-white.group').first();
     const addToCartBtn = firstProductCard.locator('button').last(); 
     await addToCartBtn.click();
 
@@ -24,14 +24,12 @@ test.describe('E-commerce Checkout Flow', () => {
     const cartSheetTitle = page.locator('h2', { hasText: 'Giỏ hàng của bạn' });
     await expect(cartSheetTitle).toBeVisible();
 
+    // Click checkout button in cart
     const checkoutBtn = page.locator('button', { hasText: 'Tiến hành Thanh toán' });
     await checkoutBtn.click();
 
     // 3. Since user is not logged in, they should see the login prompt on /checkout
     await expect(page).toHaveURL(/\/checkout/);
-    
-    // Debug output if needed
-    console.log("Body text:", await page.locator('body').innerText());
     
     const loginPrompt = page.locator('h1', { hasText: 'Bạn cần đăng nhập' });
     await expect(loginPrompt).toBeVisible({ timeout: 10000 });
@@ -39,16 +37,20 @@ test.describe('E-commerce Checkout Flow', () => {
     // 4. Open Login Modal
     const loginBtn = page.locator('button', { hasText: 'Đăng nhập ngay' });
     await loginBtn.click();
-
     // 5. Fill Phone Number and send OTP
     const testPhone = '+84999999999';
+    // Switch to OTP login method
+    const otpSwitchBtn = page.locator('button', { hasText: 'Đăng nhập bằng OTP (SĐT)' });
+    await expect(otpSwitchBtn).toBeVisible({ timeout: 5000 });
+    await otpSwitchBtn.click();
+
     // Let's clean up any old OTPs or users first just in case
     await prisma.otpCode.deleteMany({ where: { phoneNumber: testPhone } });
 
     // The modal has an input for phone
     await page.locator('input[type="tel"]').fill(testPhone);
     
-    const sendOtpBtn = page.locator('button', { hasText: 'Tiếp tục bằng số điện thoại' });
+    const sendOtpBtn = page.locator('button', { hasText: 'Tiếp tục bằng SĐT' });
     await sendOtpBtn.click();
 
     // Wait a bit for the API to process and save OTP to database
@@ -68,7 +70,7 @@ test.describe('E-commerce Checkout Flow', () => {
     const otpInputs = page.locator('input');
     await otpInputs.last().pressSequentially(otpCode);
 
-    const verifyBtn = page.locator('button', { hasText: 'Xác thực & Đăng nhập' });
+    const verifyBtn = page.locator('button', { hasText: 'Xác nhận' });
     await verifyBtn.click();
 
     // 8. After login, the page reloads or auth state updates
@@ -89,7 +91,7 @@ test.describe('E-commerce Checkout Flow', () => {
     await page.locator('label[for="bank"]').click();
 
     // Submit Order
-    const submitOrderBtn = page.locator('button', { hasText: 'Đặt hàng an toàn' });
+    const submitOrderBtn = page.locator('button', { hasText: 'ĐẶT HÀNG NGAY' });
     await submitOrderBtn.click();
 
     // 10. Assert Success Page

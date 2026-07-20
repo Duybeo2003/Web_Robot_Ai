@@ -9,7 +9,7 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet"
-import { Eye, MapPin, Phone, CreditCard, Calendar, ShoppingBag } from "lucide-react"
+import { Eye, MapPin, Phone, CreditCard, Calendar, ShoppingBag, Truck } from "lucide-react"
 import { OrderStatusUpdater } from "../order-status-updater"
 import { format } from "date-fns"
 
@@ -37,6 +37,38 @@ export function OrderDetailsModal({ order }: { order: any }) {
               currentStatus={order.status} 
               paymentStatus={order.paymentStatus} 
             />
+            {order.status !== 'SHIPPED' && order.status !== 'COMPLETED' && order.status !== 'CANCELLED' && (
+              <div className="pt-2 border-t mt-2 flex justify-end">
+                <Button 
+                  size="sm" 
+                  variant="outline" 
+                  className="bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 hover:text-orange-700"
+                  onClick={async (e) => {
+                    const btn = e.currentTarget;
+                    const originalText = btn.innerText;
+                    btn.innerText = "Đang đẩy...";
+                    btn.disabled = true;
+                    try {
+                      const { pushOrderToLogistics } = await import("@/actions/admin");
+                      const res = await pushOrderToLogistics(order.id, 'GHN');
+                      if (res.success) {
+                        alert(`Đã đẩy đơn sang GHN! Mã vận đơn: ${res.trackingCode}`);
+                      } else {
+                        alert(`Lỗi: ${res.error}`);
+                        btn.innerText = originalText;
+                        btn.disabled = false;
+                      }
+                    } catch (err) {
+                      alert("Lỗi kết nối");
+                      btn.innerText = originalText;
+                      btn.disabled = false;
+                    }
+                  }}
+                >
+                  <Truck className="w-4 h-4 mr-2" /> Đẩy sang GHN
+                </Button>
+              </div>
+            )}
           </div>
 
           {/* Customer Info */}

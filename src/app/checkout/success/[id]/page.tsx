@@ -54,6 +54,58 @@ export default async function CheckoutSuccessPage({ params }: { params: Promise<
           </div>
         </div>
 
+        {order.paymentMethod === 'BANK_TRANSFER' && (
+          <div className="bg-orange-50 border border-orange-100 p-6 rounded-sm mb-8 text-left">
+            <h2 className="text-lg font-bold text-orange-800 mb-4 text-center">Hướng dẫn chuyển khoản qua VietQR</h2>
+            
+            <div className="flex flex-col md:flex-row items-center justify-center gap-8">
+              {/* QR Code */}
+              <div className="bg-white p-4 rounded-xl shadow-sm border border-orange-200">
+                <img 
+                  src={`https://img.vietqr.io/image/vcb-1058744697-compact2.png?amount=${order.totalAmount}&addInfo=ROBOED%20${order.id.toUpperCase()}&accountName=NGUYEN%20QUOC%20DUY`}
+                  alt="VietQR Payment"
+                  className="w-64 h-64 object-contain"
+                />
+                <p className="text-center text-xs text-gray-500 mt-2 font-medium">Mở App Ngân hàng bất kỳ để quét mã</p>
+              </div>
+              
+              {/* Manual Transfer Info */}
+              <div className="flex-1 w-full space-y-4">
+                <div className="space-y-1">
+                  <p className="text-xs text-orange-600 font-bold uppercase">Ngân hàng</p>
+                  <p className="font-semibold text-gray-800">Vietcombank (VCB)</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-orange-600 font-bold uppercase">Chủ tài khoản</p>
+                  <p className="font-semibold text-gray-800">NGUYEN QUOC DUY</p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-orange-600 font-bold uppercase">Số tài khoản</p>
+                  <div className="flex items-center gap-2">
+                    <p className="font-mono font-bold text-lg tracking-wider text-gray-800">1058744697</p>
+                  </div>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-orange-600 font-bold uppercase">Số tiền</p>
+                  <p className="font-bold text-[#E30019] text-xl">
+                    {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(order.totalAmount))}
+                  </p>
+                </div>
+                <div className="space-y-1">
+                  <p className="text-xs text-orange-600 font-bold uppercase">Nội dung chuyển khoản</p>
+                  <div className="bg-white border border-orange-200 p-3 rounded-sm font-mono font-bold text-lg text-center text-gray-800">
+                    ROBOED {order.id.toUpperCase()}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <p className="text-sm text-orange-700 mt-6 text-center font-medium bg-orange-100/50 p-3 rounded-sm border border-orange-100">
+              Đơn hàng sẽ được xử lý sau khi chúng tôi nhận được thanh toán. Bạn có thể chụp lại màn hình này để chuyển khoản sau.
+            </p>
+          </div>
+        )}
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/profile/orders">
             <Button variant="outline" className="w-full sm:w-auto h-12 px-8 border-neutral-200 text-neutral-700">

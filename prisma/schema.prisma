@@ -10,6 +10,8 @@ datasource db {
 enum Role {
   USER
   ADMIN
+  EDITOR
+  STORE_MANAGER
 }
 
 enum OrderStatus {
@@ -71,6 +73,8 @@ model User {
   cart          Cart?
   reviews       Review[]
   wishlists     Wishlist[]
+  inventoryTransactions InventoryTransaction[]
+  articles      Article[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -161,6 +165,7 @@ model Product {
   warranties     Warranty[]
   reviews        Review[]
   wishlists      Wishlist[]
+  inventoryTransactions InventoryTransaction[]
 
   createdAt      DateTime    @default(now())
   updatedAt      DateTime    @updatedAt
@@ -346,3 +351,53 @@ model AuditLog {
   @@index([action])
   @@index([timestamp])
 }
+
+// ------------------------------------------------------
+// 5. Inventory Management Models
+// ------------------------------------------------------
+enum InventoryTransactionType {
+  IN
+  OUT
+}
+
+model InventoryTransaction {
+  id          String                   @id @default(cuid())
+  productId   String
+  product     Product                  @relation(fields: [productId], references: [id])
+  type        InventoryTransactionType
+  quantity    Int
+  costPrice   Decimal?                 @db.Decimal(10, 2)
+  reference   String?                  // E.g., PO number or Order ID
+  note        String?                  @db.Text
+  userId      String?
+  user        User?                    @relation(fields: [userId], references: [id])
+  createdAt   DateTime                 @default(now())
+
+  @@index([productId])
+  @@index([type])
+  @@index([createdAt])
+}
+
+// ------------------------------------------------------
+// 6. CMS Models
+// ------------------------------------------------------
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.LongText
+  thumbnail   String?
+  published   Boolean  @default(false)
+  tags        String?  // Comma-separated tags
+  
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  @@index([authorId])
+  @@index([slug])
+  @@index([published])
+}
+

@@ -23,7 +23,7 @@ import {
 import { useRouter } from "next/navigation";
 
 function CartBadge() {
-  const totalItems = useCartStore((state) => state.totalItems);
+  const totalItems = useCartStore((state) => state.items.reduce((total, item) => total + item.quantity, 0));
   // Removed mounted state; component renders directly
 
   if (totalItems === 0) return null;
@@ -218,6 +218,9 @@ export function Header() {
             </Link>
             <Link href="/huong-dan" className="text-sm font-medium hover:text-white/80 transition-colors">
               Hướng Dẫn Sử Dụng
+            </Link>
+            <Link href="/bao-hanh" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Tra Cứu Bảo Hành
             </Link>
             <Link href="/giao-duc" className="text-sm font-medium hover:text-white/80 transition-colors">
               Các Bài Viết Giáo Dục

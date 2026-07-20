@@ -154,7 +154,7 @@ export function AuthModal() {
           </DialogTitle>
           <DialogDescription className="text-center text-[#2C2C2C]/70 mt-2 font-manrope text-sm">
             {step === 1 
-              ? "Chào mừng bạn đến với hệ sinh thái Antigravity." 
+              ? "Chào mừng bạn đến với robot giáo dục." 
               : `Mã 6 số đã được gửi đến ${phone}`}
           </DialogDescription>
         </DialogHeader>

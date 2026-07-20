@@ -1,6 +1,7 @@
 import { auth } from "@/auth"
 import { prisma } from "@/lib/prisma"
 import { CancelOrderButton } from "./components/cancel-order-button"
+import { RmaButton } from "./components/rma-button"
 
 import { Package, Clock, CheckCircle, Truck, XCircle } from "lucide-react"
 import Image from "next/image"
@@ -161,6 +162,9 @@ export default async function OrdersPage() {
                   </button>
                   {order.status === 'PENDING' && (
                     <CancelOrderButton orderId={order.id} />
+                  )}
+                  {(order.status === 'COMPLETED' || order.status === 'SHIPPED') && (
+                    <RmaButton orderId={order.id} />
                   )}
                 </div>
               </div>
