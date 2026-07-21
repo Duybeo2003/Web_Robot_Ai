@@ -46,9 +46,9 @@ export function Footer() {
           <div>
             <h3 className="font-bold text-sm mb-4 uppercase tracking-wider">Về chúng tôi</h3>
             <ul className="space-y-3 text-sm text-neutral-300">
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Giới thiệu</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Liên hệ</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Tin tức</Link></li>
+              <li><Link href="/gioi-thieu" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Giới thiệu</Link></li>
+              <li><Link href="/lien-he" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Liên hệ</Link></li>
+              <li><Link href="/giao-duc" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Tin tức</Link></li>
             </ul>
           </div>
 
@@ -56,7 +56,7 @@ export function Footer() {
           <div>
             <h3 className="font-bold text-sm mb-4 uppercase tracking-wider">Tài khoản</h3>
             <ul className="space-y-3 text-sm text-neutral-300">
-              <li><Link href="/portal/orders" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Đơn hàng</Link></li>
+              <li><Link href="/profile/orders" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Đơn hàng</Link></li>
               <li><Link href="/cart" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Giỏ hàng</Link></li>
               <li><Link href="/profile" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Thông tin tài khoản</Link></li>
             </ul>
@@ -66,11 +66,11 @@ export function Footer() {
           <div>
             <h3 className="font-bold text-sm mb-4 uppercase tracking-wider">Chính sách</h3>
             <ul className="space-y-3 text-sm text-neutral-300">
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách bảo mật thông tin</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách thanh toán</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách vận chuyển</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách bảo hành</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách đổi trả</Link></li>
+              <li><Link href="/chinh-sach-bao-mat" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách bảo mật thông tin</Link></li>
+              <li><Link href="/chinh-sach-thanh-toan" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách thanh toán</Link></li>
+              <li><Link href="/chinh-sach-van-chuyen" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách vận chuyển</Link></li>
+              <li><Link href="/bao-hanh" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách bảo hành</Link></li>
+              <li><Link href="/chinh-sach-doi-tra" className="hover:text-primary transition-colors flex items-center gap-2"><span className="text-xs">›</span> Chính sách đổi trả</Link></li>
             </ul>
           </div>
         </div>
