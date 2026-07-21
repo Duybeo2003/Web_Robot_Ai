@@ -1,0 +1,43 @@
+{
+  "users": [
+    {
+      "id": "cmrow0oqx00007mzvuz55cf15",
+      "name": "Administrator",
+      "email": "admin@gmail.com",
+      "emailVerified": null,
+      "image": null,
+      "phoneNumber": null,
+      "role": "ADMIN",
+      "createdAt": "2026-07-17T05:01:41.193Z",
+      "updatedAt": "2026-07-19T08:21:33.312Z",
+      "deletedAt": null,
+      "password": "$2b$10$a6s8xpoY0QvAjW/cjWZCi.wWaqsOTAsCtJo3I.uQCWHIPsJtJv7Hi"
+    },
+    {
+      "id": "cmrqcsl29000111xw7fyrynow",
+      "name": null,
+      "email": null,
+      "emailVerified": null,
+      "image": null,
+      "phoneNumber": "+84385963197",
+      "role": "USER",
+      "createdAt": "2026-07-18T05:39:02.817Z",
+      "updatedAt": "2026-07-18T05:39:02.817Z",
+      "deletedAt": null,
+      "password": null
+    },
+    {
+      "id": "cmrsh9ibt0001ac78x5pvdsm5",
+      "name": null,
+      "email": null,
+      "emailVerified": null,
+      "image": null,
+      "phoneNumber": "+840385333111",
+      "role": "USER",
+      "createdAt": "2026-07-19T17:19:43.241Z",
+      "updatedAt": "2026-07-19T17:19:43.241Z",
+      "deletedAt": null,
+      "password": null
+    }
+  ]
+}

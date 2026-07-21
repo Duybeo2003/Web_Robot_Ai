@@ -2,8 +2,9 @@ import { Metadata } from "next"
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import { prisma } from "@/lib/prisma"
-import { Button } from "@/components/ui/button"
 import Link from "next/link"
+import { buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { Badge } from "@/components/ui/badge"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
@@ -36,9 +37,9 @@ export default async function AdminArticlesPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button render={<Link href="/admin/articles/new" />} className="bg-[#FF5722] hover:bg-[#E64A19]">
+          <Link href="/admin/articles/new" className={cn(buttonVariants({ variant: "default" }), "bg-[#FF5722] hover:bg-[#E64A19]")}>
             Viết bài mới
-          </Button>
+          </Link>
         </div>
       </div>
 
@@ -83,9 +84,9 @@ export default async function AdminArticlesPage() {
                     {format(new Date(article.createdAt), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Button variant="outline" size="sm" render={<Link href={`/admin/articles/${article.id}`} />}>
+                    <Link href={`/admin/articles/${article.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
                       Sửa
-                    </Button>
+                    </Link>
                   </TableCell>
                 </TableRow>
               ))
