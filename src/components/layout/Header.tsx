@@ -182,7 +182,11 @@ export function Header() {
               <div className="flex flex-col py-2">
                 <Link href="/shop?type=ROBOT_STEM" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Robot Giáo Dục</Link>
                 <Link href="/shop?type=KIT_ARDUINO" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Kit Tự Học Arduino</Link>
-                <Link href="/shop?type=DO_CHOI_LOGIC" className="px-4 py-3 hover:bg-muted font-medium text-sm">Đồ Chơi Tư Duy Logic</Link>
+                <Link href="/shop?type=DO_CHOI_LOGIC" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Đồ Chơi Tư Duy Logic</Link>
+                <Link href="/huong-dan" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Hướng Dẫn Sử Dụng</Link>
+                <Link href="/bao-hanh" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Tra Cứu Bảo Hành</Link>
+                <Link href="/giao-duc" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Các Bài Viết Giáo Dục</Link>
+                <Link href="/shop?sale=true" className="px-4 py-3 hover:bg-muted font-bold text-sm text-[#FF5722]">🔥 KHUYẾN MÃI HOT</Link>
               </div>
             </SheetContent>
           </Sheet>
