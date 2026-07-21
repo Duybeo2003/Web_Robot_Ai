@@ -32,11 +32,11 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const password = credentials.password as string;
 
         const user = await prisma.user.findUnique({
-          where: { email },
+          where: { email, deletedAt: null },
         });
 
         if (!user || !user.password) {
-          return null; // Không tìm thấy hoặc đăng nhập bằng social
+          return null; // Không tìm thấy, đã bị xóa, hoặc đăng nhập bằng social
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
@@ -82,8 +82,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           },
         });
 
-        // For MVP development, we also allow a magic OTP "123456" if no real OTP is found
-        if (!validOtp && otp !== "123456") {
+        if (!validOtp) {
           return null; // Invalid or expired OTP
         }
 
@@ -94,7 +93,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         // 3. Find or Create User
         let user = await prisma.user.findUnique({
-          where: { phoneNumber: phone },
+          where: { phoneNumber: phone, deletedAt: null },
         });
 
         if (!user) {

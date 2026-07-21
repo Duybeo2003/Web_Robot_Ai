@@ -2,12 +2,13 @@ import Link from "next/link";
 import { XCircle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 
-export default function CheckoutErrorPage({
+export default async function CheckoutErrorPage({
   searchParams,
 }: {
-  searchParams: { msg?: string };
+  searchParams: Promise<{ msg?: string }>;
 }) {
-  const errorMsg = searchParams.msg || "Có lỗi xảy ra trong quá trình thanh toán.";
+  const resolvedParams = await searchParams;
+  const errorMsg = resolvedParams.msg || "Có lỗi xảy ra trong quá trình thanh toán.";
 
   return (
     <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center min-h-[60vh] justify-center">

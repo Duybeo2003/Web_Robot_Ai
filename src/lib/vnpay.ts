@@ -56,8 +56,8 @@ export function createVnPayUrl(orderId: string, amount: number, ipAddr: string =
 export function verifyVnPayReturn(vnp_Params: any) {
   const secretKey = process.env.VNP_HASH_SECRET || 'MOCK_SECRET_KEY';
   
-  // Allow bypassing signature check for the mock flow
-  if (vnp_Params['mock_status']) {
+  // Only allow mock bypass in development — NEVER in production
+  if (vnp_Params['mock_status'] && process.env.NODE_ENV === 'development') {
     return true;
   }
   

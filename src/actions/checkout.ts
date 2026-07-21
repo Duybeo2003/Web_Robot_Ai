@@ -109,6 +109,11 @@ export async function processVNPayMock(orderId: string) {
   const session = await auth()
   if (!session?.user?.id) return { error: "Unauthorized" }
 
+  // SECURITY: Only ADMIN can trigger mock payments
+  if ((session.user as any).role !== "ADMIN") {
+    return { error: "Chỉ Admin mới có quyền thực hiện thao tác này." }
+  }
+
   try {
     const order = await prisma.order.findUnique({
       where: { id: orderId }

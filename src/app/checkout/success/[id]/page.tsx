@@ -3,11 +3,20 @@ import { notFound } from "next/navigation"
 import Link from "next/link"
 import { CheckCircle2, ArrowRight, Package } from "lucide-react"
 import { Button } from "@/components/ui/button"
+import { auth } from "@/auth"
 
 export default async function CheckoutSuccessPage({ params }: { params: Promise<{ id: string }> }) {
   const resolvedParams = await params;
-  const order = await prisma.order.findUnique({
-    where: { id: resolvedParams.id },
+  const session = await auth();
+  
+  // Build query with ownership check if user is logged in
+  const whereClause: any = { id: resolvedParams.id };
+  if (session?.user?.id) {
+    whereClause.userId = session.user.id;
+  }
+
+  const order = await prisma.order.findFirst({
+    where: whereClause,
     include: {
       items: {
         include: { product: true }
