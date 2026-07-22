@@ -3,9 +3,8 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url = env("DATABASE_URL")
-  directUrl = env("DIRECT_URL")
+  provider = "mysql"
+  url      = env("DATABASE_URL")
 }
 
 enum Role {
@@ -386,7 +385,7 @@ model Article {
   id          String   @id @default(cuid())
   title       String
   slug        String   @unique
-  content     String   
+  content     String   @db.LongText
   thumbnail   String?
   published   Boolean  @default(false)
   tags        String?  // Comma-separated tags

@@ -7,6 +7,7 @@ import { buttonVariants } from "@/components/ui/button"
 import { cn } from "@/lib/utils"
 import { format } from "date-fns"
 import { Badge } from "@/components/ui/badge"
+import { ArticleActions } from "./components/article-actions"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
 
 export const metadata: Metadata = {
@@ -84,9 +85,7 @@ export default async function AdminArticlesPage() {
                     {format(new Date(article.createdAt), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
-                    <Link href={`/admin/articles/${article.id}`} className={buttonVariants({ variant: "outline", size: "sm" })}>
-                      Sửa
-                    </Link>
+                    <ArticleActions articleId={article.id} />
                   </TableCell>
                 </TableRow>
               ))

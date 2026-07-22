@@ -92,10 +92,13 @@ export async function processCheckout(data: {
       return newOrder
     })
 
-    // 5. Send Order Confirmation Email in the background
+    // 5. Send Email Notifications in the background
     if (session.user.email) {
-      sendOrderConfirmationEmail(session.user.email, order.id, order.totalAmount.toNumber()).catch(console.error)
+      sendOrderConfirmationEmail(session.user.email, order.id, Number(order.totalAmount)).catch(console.error)
     }
+    
+    // Notify admin
+
 
     revalidatePath("/admin/orders")
     return { success: true, orderId: order.id }

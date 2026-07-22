@@ -22,6 +22,21 @@ export async function submitReview(productId: string, formData: FormData) {
     return { success: false, error: "Đánh giá quá ngắn." }
   }
 
+  // VERIFIED PURCHASE CHECK
+  const hasPurchased = await prisma.orderItem.findFirst({
+    where: {
+      productId,
+      order: {
+        userId: session.user.id,
+        status: "COMPLETED"
+      }
+    }
+  })
+
+  if (!hasPurchased) {
+    return { success: false, error: "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công." }
+  }
+
   try {
     await prisma.review.create({
       data: {

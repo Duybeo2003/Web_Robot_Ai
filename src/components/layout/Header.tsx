@@ -185,7 +185,7 @@ export function Header() {
                 <Link href="/shop?type=DO_CHOI_LOGIC" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Đồ Chơi Tư Duy Logic</Link>
                 <Link href="/huong-dan" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Hướng Dẫn Sử Dụng</Link>
                 <Link href="/bao-hanh" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Tra Cứu Bảo Hành</Link>
-                <Link href="/giao-duc" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Các Bài Viết Giáo Dục</Link>
+                <Link href="/blog" className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border">Blog & Kiến Thức</Link>
                 <Link href="/shop?sale=true" className="px-4 py-3 hover:bg-muted font-bold text-sm text-[#FF5722]">🔥 KHUYẾN MÃI HOT</Link>
               </div>
             </SheetContent>
@@ -226,8 +226,8 @@ export function Header() {
             <Link href="/bao-hanh" className="text-sm font-medium hover:text-white/80 transition-colors">
               Tra Cứu Bảo Hành
             </Link>
-            <Link href="/giao-duc" className="text-sm font-medium hover:text-white/80 transition-colors">
-              Các Bài Viết Giáo Dục
+            <Link href="/blog" className="text-sm font-medium hover:text-white/80 transition-colors">
+              Blog & Kiến Thức
             </Link>
             <Link href="/shop?sale=true" className="text-sm font-bold text-yellow-300 hover:text-yellow-100 transition-colors flex items-center gap-1">
               🔥 KHUYẾN MÃI HOT

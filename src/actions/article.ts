@@ -76,6 +76,40 @@ export async function createArticle(data: {
   }
 }
 
+export async function updateArticle(id: string, data: {
+  title: string
+  content: string
+  thumbnail?: string
+  tags?: string
+  published: boolean
+}) {
+  const session = await auth()
+  
+  if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "EDITOR")) {
+    return { error: "Bạn không có quyền thực hiện chức năng này." }
+  }
+
+  try {
+    const article = await prisma.article.update({
+      where: { id },
+      data: {
+        title: data.title,
+        content: data.content,
+        thumbnail: data.thumbnail,
+        tags: data.tags,
+        published: data.published,
+      }
+    })
+
+    revalidatePath("/admin/articles")
+    revalidatePath("/blog")
+    revalidatePath(`/blog/${article.slug}`)
+    return { success: true, data: article }
+  } catch (error: any) {
+    return { error: "Không thể cập nhật bài viết." }
+  }
+}
+
 export async function deleteArticle(id: string) {
   const session = await auth()
   if (!session?.user?.id || (session.user.role !== "ADMIN" && session.user.role !== "EDITOR")) {

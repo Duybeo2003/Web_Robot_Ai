@@ -105,7 +105,7 @@ const sanitizedProduct = { ...product, price: Number(product.price), originalPri
           <div className="text-sm font-bold text-[#FF5722] mb-3 uppercase tracking-widest bg-[#FF5722]/10 inline-block px-3 py-1 rounded-sm self-start">
             {product.category?.name || "Sản phẩm Mới"}
           </div>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-2">
             <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight text-foreground leading-tight">
               {product.title}
             </h1>
@@ -114,6 +114,29 @@ const sanitizedProduct = { ...product, price: Number(product.price), originalPri
                <WishlistButton productId={product.id} initiallyWished={isWished} />
             </div>
           </div>
+          
+          {/* Average Rating Display */}
+          <div className="flex items-center gap-2 mb-4">
+            <div className="flex text-yellow-400">
+              {[1, 2, 3, 4, 5].map((star) => {
+                const avgRating = product.reviews.length > 0 
+                  ? product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length
+                  : 0;
+                return (
+                  <svg key={star} className={`w-4 h-4 ${star <= Math.round(avgRating) ? "fill-current" : "text-gray-300"}`} xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+                )
+              })}
+            </div>
+            <span className="text-sm font-medium text-foreground">
+              {product.reviews.length > 0 
+                ? (product.reviews.reduce((acc, r) => acc + r.rating, 0) / product.reviews.length).toFixed(1)
+                : 0}
+            </span>
+            <span className="text-sm text-muted-foreground">
+              ({product.reviews.length} đánh giá)
+            </span>
+          </div>
+          
           <PromotionalBanner 
             isActive={product.flashSaleActive}
             endDate={product.flashSaleEndDate}

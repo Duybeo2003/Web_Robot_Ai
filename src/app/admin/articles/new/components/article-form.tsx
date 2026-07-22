@@ -2,24 +2,24 @@
 
 import { useState } from "react"
 import { useRouter } from "next/navigation"
-import { createArticle } from "@/actions/article"
+import { createArticle, updateArticle } from "@/actions/article"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Textarea } from "@/components/ui/textarea"
 import { Loader2 } from "lucide-react"
 
-export function ArticleForm() {
+export function ArticleForm({ initialData, articleId }: { initialData?: any, articleId?: string }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
   
   const [formData, setFormData] = useState({
-    title: "",
-    content: "",
-    thumbnail: "",
-    tags: "",
-    published: true
+    title: initialData?.title || "",
+    content: initialData?.content || "",
+    thumbnail: initialData?.thumbnail || "",
+    tags: initialData?.tags || "",
+    published: initialData?.published !== undefined ? initialData.published : true
   })
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -33,7 +33,12 @@ export function ArticleForm() {
 
     setLoading(true)
     
-    const res = await createArticle(formData)
+    let res;
+    if (articleId) {
+      res = await updateArticle(articleId, formData)
+    } else {
+      res = await createArticle(formData)
+    }
 
     if (res.error) {
       setError(res.error)
