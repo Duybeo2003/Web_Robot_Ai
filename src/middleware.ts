@@ -14,6 +14,7 @@ export default auth((req) => {
       }
       return NextResponse.redirect(new URL("/", req.url))
     }
+    // DO NOT redirect unauthenticated users away from /login, even if there's an error query param!
     return null
   }
 
