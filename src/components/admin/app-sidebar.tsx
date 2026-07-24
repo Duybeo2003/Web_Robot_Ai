@@ -13,7 +13,7 @@ import {
   SidebarMenuItem,
   SidebarSeparator,
 } from "@/components/ui/sidebar"
-import { BarChart3, Package, ShoppingCart, Settings, Users, ArrowLeft, LogOut, Tags, Star, Ticket, ListTree, BookOpen, LayoutDashboard } from "lucide-react"
+import { BarChart3, Package, ShoppingCart, Settings, Users, ArrowLeft, LogOut, Tags, Star, Ticket, ListTree, BookOpen, LayoutDashboard, ShieldCheck } from "lucide-react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
 import { Button } from "@/components/ui/button"
@@ -46,6 +46,7 @@ const reportGroup = [
 
 const systemGroup = [
   { title: "Khách hàng", url: "/admin/users", icon: Users },
+  { title: "Quản trị Admin", url: "/admin/admins", icon: ShieldCheck },
   { title: "Cài đặt", url: "/admin/settings", icon: Settings },
 ]
 
