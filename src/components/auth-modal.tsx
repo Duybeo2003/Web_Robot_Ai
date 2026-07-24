@@ -111,9 +111,20 @@ export function AuthModal() {
     }
   }
 
-  const handleSocialLogin = (provider: "google" | "facebook") => {
+  const handleSocialLogin = async (provider: "google" | "facebook") => {
     setIsLoading(true)
-    signIn(provider) // Bỏ { redirect: false } để NextAuth tự động chuyển hướng sang Google/Facebook
+    try {
+      const res = await signIn(provider, { redirect: false })
+      if (res?.error) {
+        setError(`Lỗi: ${res.error}`)
+        setIsLoading(false)
+      } else if (res?.url) {
+        window.location.href = res.url
+      }
+    } catch (err) {
+      setError("Có lỗi xảy ra khi kết nối máy chủ.")
+      setIsLoading(false)
+    }
   }
 
   const handlePasswordLogin = async (e?: React.FormEvent) => {
