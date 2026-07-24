@@ -30,19 +30,15 @@ export function ReviewActions({ reviewId }: { reviewId: string }) {
   }
 
   return (
-    <DropdownMenu>
-        <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0" disabled={isLoading}>
-          <span className="sr-only">Mở menu</span>
-          <MoreHorizontal className="h-4 w-4" />
-        </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-          <Trash2 className="mr-2 h-4 w-4" />
-          <span>Xóa đánh giá</span>
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
+    <div className="flex items-center justify-end">
+      <button 
+        onClick={handleDelete} 
+        disabled={isLoading}
+        className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50" 
+        title="Xóa đánh giá"
+      >
+        <Trash2 className="w-4 h-4" />
+      </button>
+    </div>
   )
 }

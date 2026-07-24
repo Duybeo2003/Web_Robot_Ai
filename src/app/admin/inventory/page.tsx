@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Package, AlertTriangle, ArrowUpRight, ArrowDownRight } from "lucide-react"
 import { InventoryTable } from "./components/inventory-table"
 import { LowStockTable } from "./components/low-stock-table"
-import { Button } from "@/components/ui/button"
+import { Button, buttonVariants } from "@/components/ui/button"
+import { cn } from "@/lib/utils"
 import Link from "next/link"
 
 export const metadata: Metadata = {
@@ -56,9 +57,9 @@ export default async function AdminInventoryPage() {
           </p>
         </div>
         <div className="flex gap-2">
-          <Button render={<Link href="/admin/inventory/new-po" />} className="bg-blue-600 hover:bg-blue-700">
+          <Link href="/admin/inventory/new-po" className={cn(buttonVariants({ variant: "default" }), "bg-blue-600 hover:bg-blue-700")}>
             Tạo Phiếu Nhập Kho
-          </Button>
+          </Link>
         </div>
       </div>
 

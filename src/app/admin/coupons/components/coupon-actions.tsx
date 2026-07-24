@@ -36,27 +36,19 @@ export function CouponActions({ coupon }: { coupon: { id: string, code: string, 
   return (
     <>
       <Dialog open={open} onOpenChange={setOpen}>
-        <DropdownMenu open={dropdownOpen} onOpenChange={setDropdownOpen}>
-          <DropdownMenuTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors hover:bg-accent hover:text-accent-foreground h-8 w-8 p-0" disabled={isLoading}>
-            <span className="sr-only">Mở menu</span>
-            <MoreHorizontal className="h-4 w-4" />
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end">
-            <DropdownMenuLabel>Hành động</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-              <DialogTrigger className="w-full">
-                <DropdownMenuItem className="focus:text-blue-600" onSelect={(e) => e.preventDefault()}>
-                  <Edit className="mr-2 h-4 w-4" />
-                  <span>Sửa mã</span>
-                </DropdownMenuItem>
-              </DialogTrigger>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleDelete} className="text-red-600 focus:text-red-600">
-              <Trash2 className="mr-2 h-4 w-4" />
-              <span>Xóa mã giảm giá</span>
-            </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <div className="flex items-center justify-end gap-2">
+          <DialogTrigger className="p-1.5 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors" title="Sửa">
+            <Edit className="w-4 h-4" />
+          </DialogTrigger>
+          <button 
+            onClick={handleDelete} 
+            disabled={isLoading}
+            className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50" 
+            title="Xóa"
+          >
+            <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
 
         <DialogContent>
           <DialogHeader>
