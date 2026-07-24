@@ -9,7 +9,7 @@ import {
 } from "@/components/ui/table"
 import { Badge } from "@/components/ui/badge"
 import { format } from "date-fns"
-import { UserActions } from "./components/user-actions"
+import { UserActions } from "../users/components/user-actions"
 
 const prisma = new PrismaClient()
 
