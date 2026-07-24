@@ -14,10 +14,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     Google({
       clientId: process.env.GOOGLE_CLIENT_ID || "mock-id",
       clientSecret: process.env.GOOGLE_CLIENT_SECRET || "mock-secret",
+      allowDangerousEmailAccountLinking: true,
     }),
     Facebook({
       clientId: process.env.FACEBOOK_CLIENT_ID || "mock-id",
       clientSecret: process.env.FACEBOOK_CLIENT_SECRET || "mock-secret",
+      allowDangerousEmailAccountLinking: true,
     }),
     Credentials({
       id: "credentials-password",
