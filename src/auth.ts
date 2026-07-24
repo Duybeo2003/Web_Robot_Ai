@@ -7,6 +7,7 @@ import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
+  debug: true,
   adapter: PrismaAdapter(prisma),
   session: { strategy: "jwt" },
   providers: [
