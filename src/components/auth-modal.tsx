@@ -113,11 +113,7 @@ export function AuthModal() {
 
   const handleSocialLogin = (provider: "google" | "facebook") => {
     setIsLoading(true)
-    signIn(provider, { redirect: false }).then(() => {
-        setIsLoading(false)
-        closeModal()
-        window.location.reload()
-    }).catch(() => setIsLoading(false))
+    signIn(provider) // Bỏ { redirect: false } để NextAuth tự động chuyển hướng sang Google/Facebook
   }
 
   const handlePasswordLogin = async (e?: React.FormEvent) => {
