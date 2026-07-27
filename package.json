@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:export": "ts-node export_script.ts",
+    "db:import": "ts-node import_script.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.18",
