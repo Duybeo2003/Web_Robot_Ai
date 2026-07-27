@@ -34,15 +34,24 @@ export default function CheckoutPage() {
     (total, item) => total + item.price * item.quantity,
     0,
   );
+  
+  const hasPreOrder = items.some(item => item.supplyType === "PRE_ORDER");
+  const depositTotal = items.reduce((total, item) => {
+    if (item.supplyType === "PRE_ORDER") {
+      return total + (item.price * item.quantity * 0.7);
+    }
+    return total + (item.price * item.quantity);
+  }, 0);
 
   const [mounted, setMounted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
+    receiverName: session?.user?.name || "",
     shippingAddress: "",
     receiverPhone: "",
-    paymentMethod: "COD" as "COD" | "BANK_TRANSFER" | "VNPAY",
+    paymentMethod: hasPreOrder ? "BANK_TRANSFER" : "COD" as "COD" | "BANK_TRANSFER" | "VNPAY",
   });
 
   const [couponInput, setCouponInput] = useState("");
@@ -73,6 +82,7 @@ export default function CheckoutPage() {
 
     setLoading(true);
     const res = await processCheckout({
+      receiverName: formData.receiverName,
       shippingAddress: formData.shippingAddress,
       receiverPhone: formData.receiverPhone,
       paymentMethod:
@@ -100,19 +110,7 @@ export default function CheckoutPage() {
     }
   };
 
-  if (status === "unauthenticated") {
-    return (
-      <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center">
-        <h1 className="text-3xl font-bold mb-4">Bạn cần đăng nhập</h1>
-        <p className="text-muted-foreground mb-8">
-          Vui lòng đăng nhập để tiếp tục quá trình thanh toán.
-        </p>
-        <Button size="lg" onClick={openModal}>
-          Đăng nhập ngay
-        </Button>
-      </div>
-    );
-  }
+
 
   if (items.length === 0) {
     return (
@@ -148,6 +146,26 @@ export default function CheckoutPage() {
               <h2 className="text-xl font-heading font-bold border-b border-neutral-100 pb-3 flex items-center gap-2">
                 Thông tin giao hàng
               </h2>
+
+              <div className="space-y-3">
+                <Label
+                  htmlFor="receiverName"
+                  className="text-neutral-600 font-medium"
+                >
+                  Họ và tên người nhận{" "}
+                  <span className="text-red-500">*</span>
+                </Label>
+                <Input
+                  id="receiverName"
+                  required
+                  placeholder="Nguyễn Văn A"
+                  value={formData.receiverName}
+                  onChange={(e) =>
+                    setFormData({ ...formData, receiverName: e.target.value })
+                  }
+                  className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
+                />
+              </div>
 
               <div className="space-y-3">
                 <Label
@@ -205,14 +223,21 @@ export default function CheckoutPage() {
                 }
                 className="space-y-3"
               >
-                <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-neutral-50/50">
-                  <RadioGroupItem value="COD" id="cod" />
-                  <Label
-                    htmlFor="cod"
-                    className="cursor-pointer font-bold text-neutral-700 flex-1"
-                  >
-                    Thanh toán khi nhận hàng (COD)
-                  </Label>
+                <div className={`flex items-center space-x-4 border p-4 rounded-sm transition-colors ${hasPreOrder ? 'opacity-50 bg-gray-50 border-gray-200 cursor-not-allowed' : 'border-neutral-200 cursor-pointer hover:border-[#FF5722] bg-neutral-50/50'}`}>
+                  <RadioGroupItem value="COD" id="cod" disabled={hasPreOrder} />
+                  <div className="flex-1">
+                    <Label
+                      htmlFor="cod"
+                      className={`font-bold ${hasPreOrder ? 'cursor-not-allowed text-neutral-400' : 'cursor-pointer text-neutral-700'}`}
+                    >
+                      Thanh toán khi nhận hàng (COD)
+                    </Label>
+                    {hasPreOrder && (
+                      <p className="text-[11px] text-amber-600 mt-1">
+                        Không hỗ trợ COD do đơn hàng có chứa sản phẩm Pre-order. Vui lòng chọn thanh toán trước.
+                      </p>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-neutral-50/50">
                   <RadioGroupItem value="BANK_TRANSFER" id="bank" />
@@ -369,13 +394,34 @@ export default function CheckoutPage() {
                 <span className="text-green-600">Miễn phí</span>
               </div>
               <div className="flex justify-between font-bold text-xl pt-4 border-t border-neutral-100">
-                <span className="font-heading uppercase">Tổng cộng</span>
-                <span className="text-[#E30019] text-2xl">
+                <span className="font-heading uppercase">Tổng giá trị đơn hàng</span>
+                <span className="text-[#E30019]">
                   {formatPrice(
                     calculatedTotal - calculatedTotal * (appliedDiscount / 100),
                   )}
                 </span>
               </div>
+              
+              {hasPreOrder && (
+                <>
+                  <div className="flex justify-between font-bold text-lg pt-2 text-amber-600">
+                    <span>Thanh toán ngay (Cọc 70% hàng Order)</span>
+                    <span>
+                      {formatPrice(
+                        Math.max(0, depositTotal - calculatedTotal * (appliedDiscount / 100))
+                      )}
+                    </span>
+                  </div>
+                  <div className="flex justify-between text-neutral-600 font-medium pt-2">
+                    <span>Còn lại thanh toán khi nhận hàng</span>
+                    <span>
+                      {formatPrice(
+                        (calculatedTotal - calculatedTotal * (appliedDiscount / 100)) - Math.max(0, depositTotal - calculatedTotal * (appliedDiscount / 100))
+                      )}
+                    </span>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>

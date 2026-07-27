@@ -15,16 +15,23 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
     <div className="group relative bg-white h-full flex flex-col hover:shadow-lg transition-all duration-300 rounded-sm border border-transparent hover:border-border overflow-hidden">
       
       {/* Badges */}
-      {hasDiscount && (
-        <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">
-          <div className="text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm" style={{ backgroundColor: theme.primary }}>
-            Giảm {discountPercent}%
+      <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">
+        {product.supplyType === "PRE_ORDER" && (
+          <div className="text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm bg-amber-500">
+            Hàng Order (7-10 ngày)
           </div>
-          <div className="text-[9px] md:text-[10px] font-semibold px-2 bg-white/90 backdrop-blur-sm rounded-br-md" style={{ color: theme.secondary }}>
-            Có giảm thêm
-          </div>
-        </div>
-      )}
+        )}
+        {hasDiscount && (
+          <>
+            <div className="text-white text-[10px] md:text-xs font-bold px-2 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm" style={{ backgroundColor: theme.primary }}>
+              Giảm {discountPercent}%
+            </div>
+            <div className="text-[9px] md:text-[10px] font-semibold px-2 bg-white/90 backdrop-blur-sm rounded-br-md" style={{ color: theme.secondary }}>
+              Có giảm thêm
+            </div>
+          </>
+        )}
+      </div>
 
       <div className="absolute top-2 right-2 z-10">
         <WishlistButton productId={product.id} initiallyWished={isWished} />

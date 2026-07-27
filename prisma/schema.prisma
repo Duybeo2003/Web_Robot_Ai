@@ -33,6 +33,13 @@ enum PaymentMethod {
   BANK_TRANSFER
 }
 
+enum SupplyType {
+  IN_HOUSE
+  AFFILIATE_SELL
+  PRE_ORDER
+  AFFILIATE_HOST
+}
+
 enum ProductType {
   ROBOT_STEM
   KIT_ARDUINO
@@ -161,6 +168,7 @@ model Product {
   description    String      
   price          Decimal     @db.Decimal(10, 2)
   type           ProductType @default(ROBOT_STEM)
+  supplyType     SupplyType  @default(IN_HOUSE)
   sku            String?     @unique
   inventoryCount Int         @default(0)
   imageUrl       String?

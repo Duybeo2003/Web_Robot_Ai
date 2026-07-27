@@ -99,6 +99,7 @@ export async function upsertProduct(data: any, id?: string) {
     description: data.description,
     price: data.price,
     type: data.type,
+    supplyType: data.supplyType || "IN_HOUSE",
     inventoryCount: data.inventoryCount,
     imageUrl: data.imageUrl,
     originalPrice: data.originalPrice || null,

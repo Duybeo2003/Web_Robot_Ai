@@ -155,6 +155,12 @@ export default async function CheckoutSuccessPage({
           </div>
         )}
 
+        <div className="bg-blue-50 border border-blue-100 p-4 rounded-sm mb-8 text-left">
+          <p className="text-sm text-blue-800">
+            <strong>Mẹo nhỏ:</strong> Bạn có thể dùng <strong>Số điện thoại</strong> vừa đặt hàng để Đăng nhập vào hệ thống bất kỳ lúc nào để theo dõi chi tiết tình trạng đơn hàng này nhé!
+          </p>
+        </div>
+
         <div className="flex flex-col sm:flex-row gap-4 justify-center">
           <Link href="/profile/orders">
             <Button

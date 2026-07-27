@@ -172,19 +172,19 @@ export function Header() {
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
                 {session.user.role === "ADMIN" ? (
-                  <Link href="/admin">
-                    <DropdownMenuItem className="cursor-pointer">
+                  <DropdownMenuItem className="cursor-pointer" asChild>
+                    <Link href="/admin" className="w-full flex items-center">
                       <LayoutDashboard className="mr-2 h-4 w-4" />
                       <span>Bảng điều khiển</span>
-                    </DropdownMenuItem>
-                  </Link>
+                    </Link>
+                  </DropdownMenuItem>
                 ) : (
-                  <Link href="/profile">
-                    <DropdownMenuItem className="cursor-pointer">
+                  <DropdownMenuItem className="cursor-pointer" asChild>
+                    <Link href="/profile" className="w-full flex items-center">
                       <UserIcon className="mr-2 h-4 w-4" />
                       <span>Hồ sơ cá nhân</span>
-                    </DropdownMenuItem>
-                  </Link>
+                    </Link>
+                  </DropdownMenuItem>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem

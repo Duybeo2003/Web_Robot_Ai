@@ -182,6 +182,27 @@ export function OrderDetailsModal({ order }: { order: any }) {
                   }).format(Number(order.totalAmount))}
                 </p>
               </div>
+              {order.items.some((item: any) => item.product.supplyType === "PRE_ORDER") && (() => {
+                const depositTotal = order.items.reduce((total: number, item: any) => {
+                  if (item.product.supplyType === "PRE_ORDER") {
+                    return total + (Number(item.priceAtPurchase) * item.quantity * 0.7);
+                  }
+                  return total + (Number(item.priceAtPurchase) * item.quantity);
+                }, 0);
+                // Assume no discount recorded directly on item, totalAmount handles it or doesn't for MVP.
+                // We'll just show the deposit logic simply.
+                return (
+                  <div className="flex justify-between items-center pt-2 mt-2 border-t border-dashed border-primary/20 text-amber-600">
+                    <p className="font-semibold text-sm">Tiền cọc cần thu (70% hàng Order):</p>
+                    <p className="font-bold text-sm">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(depositTotal)}
+                    </p>
+                  </div>
+                );
+              })()}
             </div>
           </div>
         </div>

@@ -7,6 +7,7 @@ import { revalidatePath } from "next/cache";
 import { sendOrderConfirmationEmail } from "./email";
 
 export async function processCheckout(data: {
+  receiverName?: string;
   shippingAddress: string;
   receiverPhone: string;
   paymentMethod: PaymentMethod;
@@ -14,10 +15,31 @@ export async function processCheckout(data: {
   couponCode?: string;
 }) {
   const session = await auth();
-  if (!session?.user?.id) {
-    return { error: "Bạn cần đăng nhập để thanh toán." };
+  let userId = session?.user?.id;
+
+  // GUEST CHECKOUT LOGIC: If no logged in user, find or create shadow user based on phone number
+  if (!userId) {
+    if (!data.receiverPhone) {
+      return { error: "Vui lòng nhập số điện thoại để đặt hàng." };
+    }
+    
+    // Check if user exists with this phone number
+    let shadowUser = await prisma.user.findUnique({
+      where: { phoneNumber: data.receiverPhone }
+    });
+
+    // Create a new shadow user if doesn't exist
+    if (!shadowUser) {
+      shadowUser = await prisma.user.create({
+        data: {
+          phoneNumber: data.receiverPhone,
+          name: data.receiverName || "Khách hàng",
+        }
+      });
+    }
+    
+    userId = shadowUser.id;
   }
-  const userId = session.user.id;
 
   if (!data.cartItems || data.cartItems.length === 0) {
     return { error: "Giỏ hàng trống." };

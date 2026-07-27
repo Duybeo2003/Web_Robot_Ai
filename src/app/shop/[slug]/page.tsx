@@ -162,14 +162,26 @@ const sanitizedProduct = { ...product, price: Number(product.price), originalPri
           <div className="mb-6 space-y-2 text-sm">
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground w-24">Tình trạng:</span>
-              <span className={`font-medium ${product.inventoryCount > 0 ? "text-green-600" : "text-red-500"}`}>
-                {product.inventoryCount > 0 ? `Còn hàng (${product.inventoryCount})` : "Hết hàng"}
-              </span>
+              {product.supplyType === "PRE_ORDER" ? (
+                <span className="font-medium text-amber-500">
+                  Hàng Order (Chờ 7-10 ngày)
+                </span>
+              ) : (
+                <span className={`font-medium ${product.inventoryCount > 0 ? "text-green-600" : "text-red-500"}`}>
+                  {product.inventoryCount > 0 ? `Còn hàng (${product.inventoryCount})` : "Hết hàng"}
+                </span>
+              )}
             </div>
             <div className="flex items-center gap-2">
               <span className="text-muted-foreground w-24">Vận chuyển:</span>
               <span className="font-medium text-foreground">Miễn phí giao hàng toàn quốc</span>
             </div>
+            
+            {product.supplyType === "PRE_ORDER" && (
+              <div className="p-3 bg-amber-50 text-amber-800 rounded-md border border-amber-200 mt-2 text-xs">
+                <span className="font-bold">Lưu ý:</span> Đây là sản phẩm đặt trước (Pre-order). Yêu cầu thanh toán cọc 70% giá trị. Hàng sẽ về sau 7-10 ngày.
+              </div>
+            )}
           </div>
 
           <div className="prose prose-sm text-muted-foreground mb-8 line-clamp-3">
@@ -184,6 +196,8 @@ const sanitizedProduct = { ...product, price: Number(product.price), originalPri
                 price: Number(product.price),
                 slug: product.slug,
                 imageUrl: product.imageUrl || "",
+                supplyType: product.supplyType,
+                inventoryCount: product.inventoryCount,
               }} 
             />
           </div>
