@@ -80,24 +80,21 @@ export function AppSidebar() {
               (pathname.startsWith(item.url + "/") && item.url !== "/admin");
             return (
               <SidebarMenuItem key={item.title}>
-                <SidebarMenuButton
-                  render={
-                    <Link
-                      href={item.url}
-                      className={`flex items-center gap-2 w-full font-medium transition-all ${
-                        isActive
-                          ? "text-[#FF5722] bg-orange-50 hover:bg-orange-100 hover:text-[#FF5722]"
-                          : "text-neutral-600 hover:text-[#FF5722] hover:bg-orange-50/50"
-                      }`}
+                <Link href={item.url} className="w-full block">
+                  <SidebarMenuButton
+                    isActive={isActive}
+                    className={`flex items-center gap-2 w-full font-medium transition-all ${
+                      isActive
+                        ? "text-[#FF5722] bg-orange-50 hover:bg-orange-100 hover:text-[#FF5722]"
+                        : "text-neutral-600 hover:text-[#FF5722] hover:bg-orange-50/50"
+                    }`}
+                  >
+                    <item.icon
+                      className={`w-[18px] h-[18px] ${isActive ? "text-[#FF5722]" : "text-neutral-500"}`}
                     />
-                  }
-                  isActive={isActive}
-                >
-                  <item.icon
-                    className={`w-[18px] h-[18px] ${isActive ? "text-[#FF5722]" : "text-neutral-500"}`}
-                  />
-                  <span>{item.title}</span>
-                </SidebarMenuButton>
+                    <span>{item.title}</span>
+                  </SidebarMenuButton>
+                </Link>
               </SidebarMenuItem>
             );
           })}

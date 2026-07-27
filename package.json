@@ -8,8 +8,8 @@
     "start": "next start",
     "lint": "eslint",
     "postinstall": "prisma generate",
-    "db:export": "ts-node export_script.ts",
-    "db:import": "ts-node import_script.ts"
+    "db:export": "tsx scripts/export.ts",
+    "db:import": "tsx scripts/import.ts"
   },
   "dependencies": {
     "@ai-sdk/google": "^4.0.18",

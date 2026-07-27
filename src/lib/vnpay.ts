@@ -89,7 +89,7 @@ export function verifyVnPayReturn(vnp_Params: Record<string, string>) {
   return secureHash === signed;
 }
 
-function sortObject(obj: Record<string, any>) {
+function sortObject(obj: Record<string, unknown>) {
   const sorted: Record<string, string> = {};
   const str = [];
   let key;

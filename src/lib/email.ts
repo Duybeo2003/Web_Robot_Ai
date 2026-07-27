@@ -17,7 +17,7 @@ export async function sendOrderConfirmationEmail(
   totalAmount: number,
   items: Array<{
     quantity: number;
-    priceAtPurchase: number | string | any; // Use any as a fallback to avoid strict Decimal errors in this context if it comes from Prisma
+    priceAtPurchase: number | string; // Fallback to avoid strict Decimal errors
     product?: { title?: string };
   }>,
 ) {
