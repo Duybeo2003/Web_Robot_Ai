@@ -60,11 +60,9 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
         </Link>
         <div className="mt-auto pt-3 pb-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-2">
-            {hasDiscount && (
-              <p className="text-[11px] md:text-xs text-neutral-400 line-through">
-                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice)}
-              </p>
-            )}
+            <p className={`text-[11px] md:text-xs text-neutral-400 line-through ${hasDiscount ? '' : 'invisible'}`}>
+              {hasDiscount ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice) : '0đ'}
+            </p>
             <p className="text-base md:text-lg font-bold text-[#E30019] leading-none sm:leading-normal">
               {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentPrice)}
             </p>
