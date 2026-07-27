@@ -43,16 +43,16 @@ export function ProductCarousel({
               {title}
             </h2>
           </div>
-          <div className="flex items-center gap-2">
+          <div className="flex flex-wrap items-center gap-2">
             <Link
               href={categoryLink}
-              className="text-xs md:text-sm border border-neutral-300 bg-white text-neutral-700 px-3 md:px-4 py-1.5 rounded-sm hover:border-primary hover:text-primary transition-colors font-medium"
+              className="text-[10px] md:text-sm border border-neutral-300 bg-white text-neutral-700 px-2 md:px-4 py-1 md:py-1.5 rounded-sm hover:border-primary hover:text-primary transition-colors font-medium whitespace-nowrap"
             >
               {subLinkText}
             </Link>
             <Link
               href={categoryLink}
-              className="text-xs md:text-sm bg-[#1A1A1A] text-white px-3 md:px-4 py-1.5 rounded-sm hover:bg-black transition-colors font-medium"
+              className="text-[10px] md:text-sm bg-[#1A1A1A] text-white px-2 md:px-4 py-1 md:py-1.5 rounded-sm hover:bg-black transition-colors font-medium whitespace-nowrap"
             >
               Xem tất cả
             </Link>
