@@ -1,7 +1,7 @@
-import { Button as ButtonPrimitive } from "@base-ui/react/button"
-import { cva, type VariantProps } from "class-variance-authority"
+import { Button as ButtonPrimitive } from "@base-ui/react/button";
+import { cva, type VariantProps } from "class-variance-authority";
 
-import { cn } from "@/lib/utils"
+import { cn } from "@/lib/utils";
 
 import { theme } from "@/components/ui/theme";
 
@@ -40,7 +40,7 @@ const buttonVariants = cva(
       variant: "default",
       size: "default",
     },
-  }
+  },
 );
 
 function Button({
@@ -50,7 +50,10 @@ function Button({
   ...props
 }: ButtonPrimitive.Props & VariantProps<typeof buttonVariants>) {
   // Apply theme colors for the default variant via inline style
-  const defaultStyle = variant === "default" ? { backgroundColor: theme.primary, color: theme.primaryForeground } : {};
+  const defaultStyle =
+    variant === "default"
+      ? { backgroundColor: theme.primary, color: theme.primaryForeground }
+      : {};
   return (
     <ButtonPrimitive
       data-slot="button"
@@ -61,4 +64,4 @@ function Button({
   );
 }
 
-export { Button, buttonVariants }
+export { Button, buttonVariants };

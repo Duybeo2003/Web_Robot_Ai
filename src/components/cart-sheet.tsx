@@ -1,44 +1,45 @@
 /* eslint-disable react-hooks/set-state-in-effect */
-"use client"
+"use client";
 
-import { useCartStore } from "@/lib/store/cart"
-import { useCartUI } from "@/store/use-cart-ui"
+import { useCartStore } from "@/lib/store/cart";
+import { useCartUI } from "@/store/use-cart-ui";
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetFooter,
-} from "@/components/ui/sheet"
-import { ScrollArea } from "@/components/ui/scroll-area"
-import { Button } from "@/components/ui/button"
-import { Separator } from "@/components/ui/separator"
-import { Minus, Plus, Trash2, ShoppingBag, Truck } from "lucide-react"
-import Link from "next/link"
-import Image from "next/image"
-import { useEffect, useState } from "react"
-import { useRouter } from "next/navigation"
+} from "@/components/ui/sheet";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Minus, Plus, Trash2, ShoppingBag, Truck } from "lucide-react";
+import Link from "next/link";
+import Image from "next/image";
+import { useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 
 export function CartSheet() {
-  const router = useRouter()
-  const { isOpen, closeCart } = useCartUI()
-  const { items, updateQuantity, removeItem } = useCartStore()
-  const totalPrice = items.reduce((total, item) => total + item.price * item.quantity, 0)
-  
-  // Prevent hydration mismatch
-  const [mounted, setMounted] = useState(false)
-  useEffect(() => {
-    setMounted(true)
-  }, [])
+  const router = useRouter();
+  const { isOpen, closeCart } = useCartUI();
+  const { items, updateQuantity, removeItem } = useCartStore();
+  const totalPrice = items.reduce(
+    (total, item) => total + item.price * item.quantity,
+    0,
+  );
 
-  if (!mounted) return null
+  // Prevent hydration mismatch
+  const [mounted, setMounted] = useState(false);
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  if (!mounted) return null;
 
   const formatPrice = (price: number) => {
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",
-    }).format(price)
-  }
+    }).format(price);
+  };
 
   return (
     <Sheet open={isOpen} onOpenChange={(open) => !open && closeCart()}>
@@ -57,13 +58,16 @@ export function CartSheet() {
             </div>
             <div className="space-y-2">
               <p className="text-xl font-bold text-gray-800">Giỏ hàng trống</p>
-              <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">Chưa có sản phẩm nào trong giỏ hàng của bạn. Hãy khám phá các robot giáo dục tuyệt vời của chúng tôi!</p>
+              <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">
+                Chưa có sản phẩm nào trong giỏ hàng của bạn. Hãy khám phá các
+                robot giáo dục tuyệt vời của chúng tôi!
+              </p>
             </div>
-            <Button 
+            <Button
               onClick={() => {
-                closeCart()
-                router.push('/shop')
-              }} 
+                closeCart();
+                router.push("/shop");
+              }}
               className="mt-6 rounded-xl bg-[#FF5722] hover:bg-[#E64A19] text-white px-8 h-12 shadow-md transition-transform hover:-translate-y-0.5"
             >
               Bắt đầu mua sắm
@@ -78,7 +82,13 @@ export function CartSheet() {
                     <div className="h-20 w-20 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                       {item.imageUrl ? (
                         <div className="relative w-full h-full">
-                          <Image src={item.imageUrl} alt={item.title} fill className="object-cover" sizes="80px" />
+                          <Image
+                            src={item.imageUrl}
+                            alt={item.title}
+                            fill
+                            className="object-cover"
+                            sizes="80px"
+                          />
                         </div>
                       ) : (
                         <div className="w-full h-full flex items-center justify-center text-xs text-gray-400">
@@ -86,28 +96,30 @@ export function CartSheet() {
                         </div>
                       )}
                     </div>
-                    
+
                     <div className="flex-1 flex flex-col">
                       <div className="flex justify-between items-start">
-                        <Link 
-                          href={`/shop/${item.slug}`} 
+                        <Link
+                          href={`/shop/${item.slug}`}
                           onClick={closeCart}
                           className="font-semibold text-sm line-clamp-2 hover:text-blue-600 transition-colors"
                         >
                           {item.title}
                         </Link>
-                        <button 
+                        <button
                           onClick={() => removeItem(item.id)}
                           className="text-gray-400 hover:text-red-500 p-1"
                         >
                           <Trash2 className="w-4 h-4" />
                         </button>
                       </div>
-                      
+
                       <div className="mt-auto flex items-center justify-between">
                         <div className="flex items-center border rounded-lg bg-background">
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity - 1)
+                            }
                             className="p-1.5 hover:bg-gray-100 rounded-l-lg transition-colors"
                           >
                             <Minus className="w-3.5 h-3.5" />
@@ -116,7 +128,9 @@ export function CartSheet() {
                             {item.quantity}
                           </span>
                           <button
-                            onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                            onClick={() =>
+                              updateQuantity(item.id, item.quantity + 1)
+                            }
                             className="p-1.5 hover:bg-gray-100 rounded-r-lg transition-colors"
                           >
                             <Plus className="w-3.5 h-3.5" />
@@ -138,16 +152,18 @@ export function CartSheet() {
                 Đơn hàng của bạn được Miễn phí vận chuyển!
               </div>
               <div className="flex items-center justify-between mb-4">
-                <span className="font-semibold text-gray-600">Tổng tạm tính</span>
+                <span className="font-semibold text-gray-600">
+                  Tổng tạm tính
+                </span>
                 <span className="text-xl font-bold text-[#E30019]">
                   {formatPrice(totalPrice)}
                 </span>
               </div>
-              <Button 
+              <Button
                 className="w-full h-14 rounded-xl text-base font-bold bg-[#FF5722] hover:bg-[#E64A19] text-white shadow-md transition-all hover:-translate-y-0.5"
                 onClick={() => {
-                  closeCart()
-                  router.push('/checkout')
+                  closeCart();
+                  router.push("/checkout");
                 }}
               >
                 Tiến hành Thanh toán
@@ -157,5 +173,5 @@ export function CartSheet() {
         )}
       </SheetContent>
     </Sheet>
-  )
+  );
 }

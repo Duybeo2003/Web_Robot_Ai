@@ -37,58 +37,58 @@
 
 :root {
   /* Vibrant E-commerce Colors (Xiaomi-style) */
-  --background: #F5F5F5; /* Light Gray for page background */
-  --foreground: #2C2C2C; /* Deep Charcoal */
-  --card: #FFFFFF;
-  --card-foreground: #2C2C2C;
-  --popover: #FFFFFF;
-  --popover-foreground: #2C2C2C;
-  
-  --primary: #FF6700; /* Vivid Orange */
-  --primary-foreground: #FFFFFF;
-  
-  --secondary: #FF4A00; /* Darker Orange for hover/accents */
-  --secondary-foreground: #FFFFFF;
-  
-  --muted: #F3F4F6; /* Tailwind gray-100 */
-  --muted-foreground: #6B7280; /* Tailwind gray-500 */
-  
-  --accent: #FEF0E6; /* Light Orange accent */
-  --accent-foreground: #FF6700;
-  
-  --destructive: #EF4444; /* Standard Red */
-  --destructive-foreground: #FFFFFF;
-  
-  --border: #E5E7EB; /* Tailwind gray-200 */
-  --input: #E5E7EB;
-  --ring: #FF6700;
-  
+  --background: #f5f5f5; /* Light Gray for page background */
+  --foreground: #2c2c2c; /* Deep Charcoal */
+  --card: #ffffff;
+  --card-foreground: #2c2c2c;
+  --popover: #ffffff;
+  --popover-foreground: #2c2c2c;
+
+  --primary: #ff6700; /* Vivid Orange */
+  --primary-foreground: #ffffff;
+
+  --secondary: #ff4a00; /* Darker Orange for hover/accents */
+  --secondary-foreground: #ffffff;
+
+  --muted: #f3f4f6; /* Tailwind gray-100 */
+  --muted-foreground: #6b7280; /* Tailwind gray-500 */
+
+  --accent: #fef0e6; /* Light Orange accent */
+  --accent-foreground: #ff6700;
+
+  --destructive: #ef4444; /* Standard Red */
+  --destructive-foreground: #ffffff;
+
+  --border: #e5e7eb; /* Tailwind gray-200 */
+  --input: #e5e7eb;
+  --ring: #ff6700;
+
   --radius: 0.25rem; /* Flat, rounded-sm */
 }
 
 .dark {
   --background: #121212;
-  --foreground: #F3F4F6;
-  --card: #1F2937;
-  --card-foreground: #F3F4F6;
-  --popover: #1F2937;
-  --popover-foreground: #F3F4F6;
-  
-  --primary: #FF6700;
-  --primary-foreground: #FFFFFF;
-  
-  --secondary: #FF4A00;
-  --secondary-foreground: #FFFFFF;
-  
+  --foreground: #f3f4f6;
+  --card: #1f2937;
+  --card-foreground: #f3f4f6;
+  --popover: #1f2937;
+  --popover-foreground: #f3f4f6;
+
+  --primary: #ff6700;
+  --primary-foreground: #ffffff;
+
+  --secondary: #ff4a00;
+  --secondary-foreground: #ffffff;
+
   --muted: #374151;
-  --muted-foreground: #9CA3AF;
-  
+  --muted-foreground: #9ca3af;
+
   --accent: #374151;
-  --accent-foreground: #F3F4F6;
-  
+  --accent-foreground: #f3f4f6;
+
   --border: #374151;
   --input: #374151;
-  --ring: #FF6700;
+  --ring: #ff6700;
 }
 
 @layer base {
@@ -101,7 +101,12 @@
   html {
     @apply font-sans;
   }
-  h1, h2, h3, h4, h5, h6 {
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
     @apply font-heading tracking-tight;
   }
 }
@@ -116,7 +121,7 @@
   .text-gradient {
     @apply text-primary;
   }
-  
+
   /* E-commerce specific utilities */
   .badge-flash-sale {
     @apply absolute top-0 left-0 bg-red-600 text-white text-[10px] font-bold px-2 py-0.5 z-10;

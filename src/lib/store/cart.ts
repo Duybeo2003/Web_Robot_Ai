@@ -1,5 +1,5 @@
-import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
+import { create } from "zustand";
+import { persist } from "zustand/middleware";
 
 export interface CartItem {
   id: string;
@@ -25,11 +25,13 @@ export const useCartStore = create<CartStore>()(
       addItem: (item) => {
         const currentItems = get().items;
         const existingItem = currentItems.find((i) => i.id === item.id);
-        
+
         if (existingItem) {
           set({
             items: currentItems.map((i) =>
-              i.id === item.id ? { ...i, quantity: i.quantity + item.quantity } : i
+              i.id === item.id
+                ? { ...i, quantity: i.quantity + item.quantity }
+                : i,
             ),
           });
         } else {
@@ -51,7 +53,7 @@ export const useCartStore = create<CartStore>()(
       clearCart: () => set({ items: [] }),
     }),
     {
-      name: 'roboed-cart',
-    }
-  )
+      name: "roboed-cart",
+    },
+  ),
 );

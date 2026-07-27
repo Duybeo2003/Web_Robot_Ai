@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import {
   Bar,
@@ -7,7 +7,7 @@ import {
   XAxis,
   YAxis,
   Tooltip,
-} from "recharts"
+} from "recharts";
 
 export function ReportsChart({ data }: { data: any[] }) {
   if (data.length === 0) {
@@ -15,7 +15,7 @@ export function ReportsChart({ data }: { data: any[] }) {
       <div className="flex h-[350px] items-center justify-center text-muted-foreground">
         Chưa có dữ liệu doanh thu.
       </div>
-    )
+    );
   }
 
   return (
@@ -35,16 +35,17 @@ export function ReportsChart({ data }: { data: any[] }) {
           axisLine={false}
           tickFormatter={(value) => `${value / 1000000}M`}
         />
-        <Tooltip 
-          formatter={(value: any) => new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(value))}
-          labelStyle={{ color: 'black' }}
+        <Tooltip
+          formatter={(value: any) =>
+            new Intl.NumberFormat("vi-VN", {
+              style: "currency",
+              currency: "VND",
+            }).format(Number(value))
+          }
+          labelStyle={{ color: "black" }}
         />
-        <Bar
-          dataKey="revenue"
-          fill="#3b82f6"
-          radius={[4, 4, 0, 0]}
-        />
+        <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
-  )
+  );
 }

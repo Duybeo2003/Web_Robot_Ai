@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";
 
 export async function POST(req: Request) {
   try {
@@ -35,7 +35,7 @@ export async function POST(req: Request) {
     // Merge logic
     for (const localItem of items) {
       const existingDbItem = cart.items.find(
-        (i) => i.productId === localItem.id
+        (i) => i.productId === localItem.id,
       );
 
       if (existingDbItem) {
@@ -59,8 +59,8 @@ export async function POST(req: Request) {
       where: { userId },
       include: {
         items: {
-          include: { product: true }
-        }
+          include: { product: true },
+        },
       },
     });
 

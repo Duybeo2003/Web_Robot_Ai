@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client";
 import {
   Table,
   TableBody,
@@ -6,40 +6,44 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { format } from "date-fns"
-import { CategoryActions } from "./components/category-actions"
-import { CategoryForm } from "./components/category-form"
+} from "@/components/ui/table";
+import { format } from "date-fns";
+import { CategoryActions } from "./components/category-actions";
+import { CategoryForm } from "./components/category-form";
 import {
   Dialog,
   DialogContent,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
-} from "@/components/ui/dialog"
-import { Button } from "@/components/ui/button"
-import { Plus } from "lucide-react"
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Plus } from "lucide-react";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default async function AdminCategoriesPage() {
   const categories = await prisma.category.findMany({
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
-        select: { products: true }
-      }
-    }
-  })
+        select: { products: true },
+      },
+    },
+  });
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <div>
-          <h2 className="text-2xl font-bold tracking-tight">Danh mục sản phẩm</h2>
-          <p className="text-muted-foreground">Quản lý và phân loại nhóm sản phẩm.</p>
+          <h2 className="text-2xl font-bold tracking-tight">
+            Danh mục sản phẩm
+          </h2>
+          <p className="text-muted-foreground">
+            Quản lý và phân loại nhóm sản phẩm.
+          </p>
         </div>
-        
+
         <Dialog>
           <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-[#FF5722] hover:bg-[#E64A19] text-white shadow">
             <Plus className="mr-2 h-4 w-4" />
@@ -53,7 +57,7 @@ export default async function AdminCategoriesPage() {
           </DialogContent>
         </Dialog>
       </div>
-      
+
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
@@ -75,13 +79,13 @@ export default async function AdminCategoriesPage() {
             ) : (
               categories.map((category) => (
                 <TableRow key={category.id}>
-                  <TableCell className="font-medium">
-                    {category.name}
-                  </TableCell>
+                  <TableCell className="font-medium">{category.name}</TableCell>
                   <TableCell className="max-w-[200px] truncate text-muted-foreground">
                     {category.description || "-"}
                   </TableCell>
-                  <TableCell>{format(new Date(category.createdAt), "dd/MM/yyyy")}</TableCell>
+                  <TableCell>
+                    {format(new Date(category.createdAt), "dd/MM/yyyy")}
+                  </TableCell>
                   <TableCell>{category._count.products}</TableCell>
                   <TableCell className="text-right">
                     <CategoryActions category={category} />
@@ -93,5 +97,5 @@ export default async function AdminCategoriesPage() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

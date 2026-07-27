@@ -45,6 +45,20 @@ enum WarrantyStatus {
   VOID
 }
 
+enum AgeRange {
+  AGE_3_5
+  AGE_6_8
+  AGE_9_12
+  AGE_12_PLUS
+}
+
+enum PrimarySkill {
+  LOGIC
+  LANGUAGE
+  MOTOR_SKILLS
+  EQ
+}
+
 enum RmaStatus {
   PENDING
   APPROVED
@@ -157,6 +171,16 @@ model Product {
   flashSaleEndDate DateTime?
   flashSaleStock   Int?
   
+  // Educational Metadata
+  ageRange         AgeRange?
+  primarySkill     PrimarySkill?
+  educationalGoal  String?      @db.Text
+  
+  // Combo Selling Strategy
+  isCombo          Boolean      @default(false)
+  comboItems       ComboItem[]  @relation("ComboParent")
+  partOfCombos     ComboItem[]  @relation("ComboChild")
+  
   categoryId     String?
   category       Category?   @relation(fields: [categoryId], references: [id])
   
@@ -243,6 +267,18 @@ model OrderItem {
   priceAtPurchase Decimal @db.Decimal(10, 2)
 
   @@index([orderId])
+  @@index([productId])
+}
+
+model ComboItem {
+  id            String  @id @default(cuid())
+  comboId       String
+  combo         Product @relation("ComboParent", fields: [comboId], references: [id], onDelete: Cascade)
+  productId     String
+  product       Product @relation("ComboChild", fields: [productId], references: [id], onDelete: Cascade)
+  quantity      Int     @default(1)
+
+  @@index([comboId])
   @@index([productId])
 }
 

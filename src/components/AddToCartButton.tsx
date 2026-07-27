@@ -14,8 +14,8 @@ export function AddToCartButton({ product }: { product: CartItem }) {
   };
 
   return (
-    <Button 
-      size="lg" 
+    <Button
+      size="lg"
       onClick={handleAddToCart}
       className="h-14 rounded-full text-lg shadow-lg hover:shadow-primary/30 transition-all gap-2 w-full sm:w-auto"
     >

@@ -1,50 +1,49 @@
-"use client"
+"use client";
 
-import { useState, useRef, useEffect } from "react"
-import { Button } from "./button"
-import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react"
+import { useState, useRef, useEffect } from "react";
+import { MessageCircle, X, Send, Bot, User, Loader2 } from "lucide-react";
 
 interface ChatMessage {
-  id: string
-  role: "user" | "assistant"
-  content: string
+  id: string;
+  role: "user" | "assistant";
+  content: string;
 }
 
 export function AIChatbot() {
-  const [isOpen, setIsOpen] = useState(false)
-  const [messages, setMessages] = useState<ChatMessage[]>([])
-  const [inputValue, setInputValue] = useState("")
-  const [isLoading, setIsLoading] = useState(false)
-  const messagesEndRef = useRef<HTMLDivElement>(null)
-  const inputRef = useRef<HTMLInputElement>(null)
+  const [isOpen, setIsOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatMessage[]>([]);
+  const [inputValue, setInputValue] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" })
-  }, [messages])
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
 
   // Auto-focus input when chat opens
   useEffect(() => {
     if (isOpen) {
-      setTimeout(() => inputRef.current?.focus(), 100)
+      setTimeout(() => inputRef.current?.focus(), 100);
     }
-  }, [isOpen])
+  }, [isOpen]);
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    const text = inputValue.trim()
-    if (!text || isLoading) return
+    e.preventDefault();
+    const text = inputValue.trim();
+    if (!text || isLoading) return;
 
     const userMessage: ChatMessage = {
       id: Date.now().toString(),
       role: "user",
       content: text,
-    }
+    };
 
-    const updatedMessages = [...messages, userMessage]
-    setMessages(updatedMessages)
-    setInputValue("")
-    setIsLoading(true)
+    const updatedMessages = [...messages, userMessage];
+    setMessages(updatedMessages);
+    setInputValue("");
+    setIsLoading(true);
 
     try {
       const res = await fetch("/api/chat", {
@@ -56,50 +55,50 @@ export function AIChatbot() {
             content: m.content,
           })),
         }),
-      })
+      });
 
       if (!res.ok) {
-        throw new Error("Lỗi kết nối với AI")
+        throw new Error("Lỗi kết nối với AI");
       }
 
       // Read the stream
-      const reader = res.body?.getReader()
-      const decoder = new TextDecoder()
-      
+      const reader = res.body?.getReader();
+      const decoder = new TextDecoder();
+
       const assistantMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "",
-      }
-      
-      setMessages((prev) => [...prev, assistantMessage])
+      };
+
+      setMessages((prev) => [...prev, assistantMessage]);
 
       if (reader) {
         while (true) {
-          const { done, value } = await reader.read()
-          if (done) break
-          const chunk = decoder.decode(value, { stream: true })
-          assistantMessage.content += chunk
+          const { done, value } = await reader.read();
+          if (done) break;
+          const chunk = decoder.decode(value, { stream: true });
+          assistantMessage.content += chunk;
           setMessages((prev) =>
             prev.map((m) =>
               m.id === assistantMessage.id
                 ? { ...m, content: assistantMessage.content }
-                : m
-            )
-          )
+                : m,
+            ),
+          );
         }
       }
-    } catch (error) {
+    } catch {
       const errorMessage: ChatMessage = {
         id: (Date.now() + 1).toString(),
         role: "assistant",
         content: "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.",
-      }
-      setMessages((prev) => [...prev, errorMessage])
+      };
+      setMessages((prev) => [...prev, errorMessage]);
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   return (
     <>
@@ -134,7 +133,10 @@ export function AIChatbot() {
               <div className="text-center text-sm text-neutral-500 mt-10">
                 <Bot className="h-10 w-10 mx-auto mb-2 text-neutral-300" />
                 <p>Chào bạn! Tôi là trợ lý AI của RoboEd.</p>
-                <p className="mt-1">Tôi có thể giúp bạn tìm kiếm sản phẩm hoặc giải đáp thắc mắc về STEM.</p>
+                <p className="mt-1">
+                  Tôi có thể giúp bạn tìm kiếm sản phẩm hoặc giải đáp thắc mắc
+                  về STEM.
+                </p>
               </div>
             )}
             {messages.map((m) => (
@@ -173,9 +175,18 @@ export function AIChatbot() {
                   <Bot className="h-4 w-4 text-[#FF5722]" />
                 </div>
                 <div className="px-4 py-3 rounded-2xl rounded-tl-none bg-white border border-neutral-200 text-neutral-500 shadow-sm flex items-center gap-1">
-                  <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "0ms" }} />
-                  <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "150ms" }} />
-                  <div className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce" style={{ animationDelay: "300ms" }} />
+                  <div
+                    className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "0ms" }}
+                  />
+                  <div
+                    className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "150ms" }}
+                  />
+                  <div
+                    className="w-1.5 h-1.5 bg-neutral-400 rounded-full animate-bounce"
+                    style={{ animationDelay: "300ms" }}
+                  />
                 </div>
               </div>
             )}
@@ -210,5 +221,5 @@ export function AIChatbot() {
         </div>
       )}
     </>
-  )
+  );
 }

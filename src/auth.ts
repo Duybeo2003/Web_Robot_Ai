@@ -25,12 +25,16 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       id: "credentials-password",
       name: "Tài khoản / Mật khẩu",
       credentials: {
-        email: { label: "Email", type: "email", placeholder: "admin@gmail.com" },
+        email: {
+          label: "Email",
+          type: "email",
+          placeholder: "admin@gmail.com",
+        },
         password: { label: "Mật khẩu", type: "password" },
       },
       async authorize(credentials) {
         if (!credentials?.email || !credentials?.password) return null;
-        
+
         const email = credentials.email as string;
         const password = credentials.password as string;
 
@@ -54,13 +58,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           image: user.image,
           role: user.role,
         };
-      }
+      },
     }),
     Credentials({
       id: "credentials-otp",
       name: "Phone Number (OTP)",
       credentials: {
-        phone: { label: "Phone Number", type: "text", placeholder: "e.g. 0912345678" },
+        phone: {
+          label: "Phone Number",
+          type: "text",
+          placeholder: "e.g. 0912345678",
+        },
         otp: { label: "OTP", type: "text", placeholder: "123456" },
       },
       async authorize(credentials) {
@@ -124,16 +132,13 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       // If user object is passed (only on initial sign in), append it to token
       if (user) {
         token.id = user.id;
-        // @ts-ignore
         token.role = user.role;
       }
       return token;
     },
     async session({ session, token }) {
       if (token && session.user) {
-        // @ts-ignore
         session.user.id = token.id as string;
-        // @ts-ignore
         session.user.role = token.role as "USER" | "ADMIN";
       }
       return session;

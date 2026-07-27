@@ -1,25 +1,25 @@
-"use server"
+"use server";
 
-import { auth } from "@/auth"
-import { prisma } from "@/lib/prisma"
-import { revalidatePath } from "next/cache"
+import { auth } from "@/auth";
+import { prisma } from "@/lib/prisma";
+import { revalidatePath } from "next/cache";
 
 export async function submitReview(productId: string, formData: FormData) {
-  const session = await auth()
-  
+  const session = await auth();
+
   if (!session?.user?.id) {
-    return { success: false, error: "Bạn cần đăng nhập để đánh giá." }
+    return { success: false, error: "Bạn cần đăng nhập để đánh giá." };
   }
 
-  const rating = parseInt(formData.get("rating") as string)
-  const comment = formData.get("comment") as string
+  const rating = parseInt(formData.get("rating") as string);
+  const comment = formData.get("comment") as string;
 
   if (!rating || rating < 1 || rating > 5) {
-    return { success: false, error: "Vui lòng chọn số sao hợp lệ." }
+    return { success: false, error: "Vui lòng chọn số sao hợp lệ." };
   }
 
   if (!comment || comment.trim().length < 5) {
-    return { success: false, error: "Đánh giá quá ngắn." }
+    return { success: false, error: "Đánh giá quá ngắn." };
   }
 
   // VERIFIED PURCHASE CHECK
@@ -28,13 +28,17 @@ export async function submitReview(productId: string, formData: FormData) {
       productId,
       order: {
         userId: session.user.id,
-        status: "COMPLETED"
-      }
-    }
-  })
+        status: "COMPLETED",
+      },
+    },
+  });
 
   if (!hasPurchased) {
-    return { success: false, error: "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công." }
+    return {
+      success: false,
+      error:
+        "Bạn chỉ có thể đánh giá sản phẩm sau khi đã mua và nhận hàng thành công.",
+    };
   }
 
   try {
@@ -43,14 +47,17 @@ export async function submitReview(productId: string, formData: FormData) {
         rating,
         comment: comment.trim(),
         userId: session.user.id,
-        productId
-      }
-    })
+        productId,
+      },
+    });
 
-    revalidatePath(`/shop/[slug]`, 'page')
-    return { success: true }
+    revalidatePath(`/shop/[slug]`, "page");
+    return { success: true };
   } catch (error) {
-    console.error("Failed to submit review:", error)
-    return { success: false, error: "Gửi đánh giá thất bại. Vui lòng thử lại." }
+    console.error("Failed to submit review:", error);
+    return {
+      success: false,
+      error: "Gửi đánh giá thất bại. Vui lòng thử lại.",
+    };
   }
 }

@@ -7,12 +7,8 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <NextThemesProvider attribute="class" forcedTheme="light">
-      <SessionProvider>
-        <TooltipProvider>
-          {children}
-        </TooltipProvider>
-      </SessionProvider>
-    </NextThemesProvider>
+    <SessionProvider>
+      <TooltipProvider>{children}</TooltipProvider>
+    </SessionProvider>
   );
 }

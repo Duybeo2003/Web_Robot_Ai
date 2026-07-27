@@ -8,7 +8,8 @@ export default async function CheckoutErrorPage({
   searchParams: Promise<{ msg?: string }>;
 }) {
   const resolvedParams = await searchParams;
-  const errorMsg = resolvedParams.msg || "Có lỗi xảy ra trong quá trình thanh toán.";
+  const errorMsg =
+    resolvedParams.msg || "Có lỗi xảy ra trong quá trình thanh toán.";
 
   return (
     <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center min-h-[60vh] justify-center">
@@ -16,10 +17,8 @@ export default async function CheckoutErrorPage({
       <h1 className="text-3xl font-bold mb-4 font-heading text-red-600">
         Thanh toán không thành công
       </h1>
-      <p className="text-neutral-600 mb-8 max-w-md">
-        {errorMsg}
-      </p>
-      
+      <p className="text-neutral-600 mb-8 max-w-md">{errorMsg}</p>
+
       <div className="flex gap-4">
         <Link href="/profile/orders">
           <Button variant="outline" className="h-12 px-6">

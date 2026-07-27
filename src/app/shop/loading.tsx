@@ -1,4 +1,3 @@
-import { Loader2 } from "lucide-react";
 
 export default function ShopLoading() {
   return (
@@ -10,7 +9,10 @@ export default function ShopLoading() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-8">
         {[1, 2, 3, 4].map((i) => (
-          <div key={i} className="glass-card rounded-sm overflow-hidden flex flex-col h-[400px] animate-pulse">
+          <div
+            key={i}
+            className="glass-card rounded-sm overflow-hidden flex flex-col h-[400px] animate-pulse"
+          >
             <div className="h-60 bg-muted w-full" />
             <div className="p-6 flex flex-col flex-1">
               <div className="h-4 bg-muted rounded w-20 mb-3" />

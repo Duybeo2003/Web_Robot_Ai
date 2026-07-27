@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { upsertCoupon } from "@/actions/admin"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { upsertCoupon } from "@/actions/admin";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -15,24 +15,33 @@ import {
   FormLabel,
   FormMessage,
   FormDescription,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
 
 const formSchema = z.object({
   code: z.string().min(3, "Mã phải có ít nhất 3 ký tự").toUpperCase(),
-  discountPercent: z.coerce.number().min(1, "Giảm ít nhất 1%").max(100, "Giảm tối đa 100%"),
+  discountPercent: z.coerce
+    .number()
+    .min(1, "Giảm ít nhất 1%")
+    .max(100, "Giảm tối đa 100%"),
   usageLimit: z.coerce.number().optional().nullable(),
   expiresAt: z.string().optional().nullable(),
-})
+});
 
-export function CouponForm({ 
-  initialData, 
-  onSuccess 
-}: { 
-  initialData?: { id: string, code: string, discountPercent: number, usageLimit: number | null, expiresAt: Date | null },
-  onSuccess?: () => void
+export function CouponForm({
+  initialData,
+  onSuccess,
+}: {
+  initialData?: {
+    id: string;
+    code: string;
+    discountPercent: number;
+    usageLimit: number | null;
+    expiresAt: Date | null;
+  };
+  onSuccess?: () => void;
 }) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
@@ -40,26 +49,28 @@ export function CouponForm({
       code: initialData?.code || "",
       discountPercent: initialData?.discountPercent || 10,
       usageLimit: initialData?.usageLimit || undefined,
-      expiresAt: initialData?.expiresAt ? new Date(initialData.expiresAt).toISOString().slice(0, 16) : undefined,
+      expiresAt: initialData?.expiresAt
+        ? new Date(initialData.expiresAt).toISOString().slice(0, 16)
+        : undefined,
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
+    setIsLoading(true);
     const payload = {
       ...values,
       usageLimit: values.usageLimit || null,
       expiresAt: values.expiresAt ? new Date(values.expiresAt) : null,
-    }
-    const result = await upsertCoupon(payload, initialData?.id)
-    setIsLoading(false)
+    };
+    const result = await upsertCoupon(payload, initialData?.id);
+    setIsLoading(false);
 
     if (result.success) {
-      toast.success(initialData ? "Đã cập nhật mã" : "Đã tạo mã giảm giá")
-      if (onSuccess) onSuccess()
-      if (!initialData) form.reset()
+      toast.success(initialData ? "Đã cập nhật mã" : "Đã tạo mã giảm giá");
+      if (onSuccess) onSuccess();
+      if (!initialData) form.reset();
     } else {
-      toast.error(result.error || "Có lỗi xảy ra")
+      toast.error(result.error || "Có lỗi xảy ra");
     }
   }
 
@@ -99,9 +110,16 @@ export function CouponForm({
             <FormItem>
               <FormLabel>Số lượt dùng tối đa</FormLabel>
               <FormControl>
-                <Input type="number" placeholder="Để trống nếu không giới hạn" value={value || ""} {...fieldProps} />
+                <Input
+                  type="number"
+                  placeholder="Để trống nếu không giới hạn"
+                  value={value || ""}
+                  {...fieldProps}
+                />
               </FormControl>
-              <FormDescription>Để trống nếu không giới hạn số lượt sử dụng.</FormDescription>
+              <FormDescription>
+                Để trống nếu không giới hạn số lượt sử dụng.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -113,9 +131,15 @@ export function CouponForm({
             <FormItem>
               <FormLabel>Ngày hết hạn</FormLabel>
               <FormControl>
-                <Input type="datetime-local" value={value || ""} {...fieldProps} />
+                <Input
+                  type="datetime-local"
+                  value={value || ""}
+                  {...fieldProps}
+                />
               </FormControl>
-              <FormDescription>Để trống nếu không bao giờ hết hạn.</FormDescription>
+              <FormDescription>
+                Để trống nếu không bao giờ hết hạn.
+              </FormDescription>
               <FormMessage />
             </FormItem>
           )}
@@ -127,5 +151,5 @@ export function CouponForm({
         </div>
       </form>
     </Form>
-  )
+  );
 }

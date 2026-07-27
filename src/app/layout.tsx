@@ -23,10 +23,12 @@ const manrope = Manrope({
 
 export const metadata: Metadata = {
   title: "RoboEd - Đồ chơi Công nghệ & Giáo dục STEM",
-  description: "Cửa hàng RoboEd chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM giúp phát triển tư duy logic và kỹ năng lập trình cho trẻ.",
+  description:
+    "Cửa hàng RoboEd chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM giúp phát triển tư duy logic và kỹ năng lập trình cho trẻ.",
   openGraph: {
     title: "RoboEd - Đồ chơi Công nghệ & Giáo dục STEM",
-    description: "Cửa hàng RoboEd chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM.",
+    description:
+      "Cửa hàng RoboEd chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM.",
     url: "https://roboed.vn",
     siteName: "RoboEd",
     images: [
@@ -55,7 +57,10 @@ export default function RootLayout({
       className={`${manrope.variable} ${lora.variable} h-full antialiased`}
       suppressHydrationWarning
     >
-      <body className="min-h-full flex flex-col bg-background/95" suppressHydrationWarning>
+      <body
+        className="min-h-full flex flex-col bg-background/95"
+        suppressHydrationWarning
+      >
         <Providers>
           <StoreWrapper>
             <Header />

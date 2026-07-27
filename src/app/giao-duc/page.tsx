@@ -1,8 +1,8 @@
-import { Metadata } from "next"
-import { prisma } from "@/lib/prisma"
-import Link from "next/link"
-import Image from "next/image"
-import { format } from "date-fns"
+import { Metadata } from "next";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import Image from "next/image";
+import { format } from "date-fns";
 
 export const metadata: Metadata = {
   title: "Góc Giáo Dục STEM - RoboEd",
@@ -10,24 +10,27 @@ export const metadata: Metadata = {
   openGraph: {
     title: "Góc Giáo Dục STEM - RoboEd",
     description: "Các bài viết hướng dẫn, kiến thức về Arduino, Robot và STEM",
-  }
-}
+  },
+};
 
 export default async function EducationBlogPage() {
   const articles = await prisma.article.findMany({
     where: { published: true },
     orderBy: { createdAt: "desc" },
     include: {
-      author: { select: { name: true } }
-    }
-  })
+      author: { select: { name: true } },
+    },
+  });
 
   return (
     <div className="container mx-auto px-4 py-12 min-h-screen">
       <div className="text-center mb-12">
-        <h1 className="text-4xl font-heading font-bold text-neutral-900 mb-4 tracking-tight">Góc Giáo Dục STEM</h1>
+        <h1 className="text-4xl font-heading font-bold text-neutral-900 mb-4 tracking-tight">
+          Góc Giáo Dục STEM
+        </h1>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
-          Tổng hợp các bài viết hướng dẫn, thủ thuật và kiến thức bổ ích về lập trình Arduino, chế tạo Robot và giáo dục STEM.
+          Tổng hợp các bài viết hướng dẫn, thủ thuật và kiến thức bổ ích về lập
+          trình Arduino, chế tạo Robot và giáo dục STEM.
         </p>
       </div>
 
@@ -37,11 +40,20 @@ export default async function EducationBlogPage() {
             Chưa có bài viết nào được xuất bản.
           </div>
         ) : (
-          articles.map(article => (
-            <Link key={article.id} href={`/giao-duc/${article.slug}`} className="group flex flex-col bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-all duration-300">
+          articles.map((article) => (
+            <Link
+              key={article.id}
+              href={`/giao-duc/${article.slug}`}
+              className="group flex flex-col bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-all duration-300"
+            >
               <div className="relative h-48 w-full bg-neutral-100 overflow-hidden">
                 {article.thumbnail ? (
-                  <Image src={article.thumbnail} alt={article.title} fill className="object-cover group-hover:scale-105 transition-transform duration-500" />
+                  <Image
+                    src={article.thumbnail}
+                    alt={article.title}
+                    fill
+                    className="object-cover group-hover:scale-105 transition-transform duration-500"
+                  />
                 ) : (
                   <div className="w-full h-full flex items-center justify-center text-neutral-300 font-heading text-2xl font-bold bg-neutral-100">
                     RoboEd
@@ -61,11 +73,16 @@ export default async function EducationBlogPage() {
                   {article.title}
                 </h3>
                 <p className="text-neutral-600 text-sm line-clamp-3 mb-4 flex-1">
-                  {article.content.replace(/<[^>]*>?/gm, '').substring(0, 150)}...
+                  {article.content.replace(/<[^>]*>?/gm, "").substring(0, 150)}
+                  ...
                 </p>
                 <div className="flex items-center justify-between mt-auto pt-4 border-t border-neutral-100">
-                  <span className="text-sm font-medium text-neutral-700">{article.author.name}</span>
-                  <span className="text-sm font-bold text-[#FF5722] group-hover:underline">Đọc tiếp &rarr;</span>
+                  <span className="text-sm font-medium text-neutral-700">
+                    {article.author.name}
+                  </span>
+                  <span className="text-sm font-bold text-[#FF5722] group-hover:underline">
+                    Đọc tiếp &rarr;
+                  </span>
                 </div>
               </div>
             </Link>
@@ -73,5 +90,5 @@ export default async function EducationBlogPage() {
         )}
       </div>
     </div>
-  )
+  );
 }

@@ -1,66 +1,80 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { toast } from "sonner"
-import { updateOrderStatus } from "@/actions/admin"
+import { useState } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { toast } from "sonner";
+import { updateOrderStatus } from "@/actions/admin";
 
-export function OrderStatusUpdater({ 
-  orderId, 
-  currentStatus, 
-  paymentStatus 
-}: { 
-  orderId: string, 
-  currentStatus: string,
-  paymentStatus: string 
+export function OrderStatusUpdater({
+  orderId,
+  currentStatus,
+  paymentStatus,
+}: {
+  orderId: string;
+  currentStatus: string;
+  paymentStatus: string;
 }) {
-  const [status, setStatus] = useState(currentStatus)
-  const [payStatus, setPayStatus] = useState(paymentStatus)
-  const [loading, setLoading] = useState(false)
+  const [status, setStatus] = useState(currentStatus);
+  const [payStatus, setPayStatus] = useState(paymentStatus);
+  const [loading, setLoading] = useState(false);
 
   const handleStatusChange = async (newStatus: string) => {
-    setLoading(true)
-    setStatus(newStatus)
+    setLoading(true);
+    setStatus(newStatus);
     try {
-      const res = await updateOrderStatus(orderId, { status: newStatus })
+      const res = await updateOrderStatus(orderId, { status: newStatus });
       if (res.success) {
-        toast.success("Cập nhật trạng thái thành công")
+        toast.success("Cập nhật trạng thái thành công");
       } else {
-        toast.error("Lỗi cập nhật trạng thái")
-        setStatus(currentStatus) // revert
+        toast.error("Lỗi cập nhật trạng thái");
+        setStatus(currentStatus); // revert
       }
     } catch (e) {
-      toast.error("Đã xảy ra lỗi")
-      setStatus(currentStatus)
+      toast.error("Đã xảy ra lỗi");
+      setStatus(currentStatus);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   const handlePaymentChange = async (newPayStatus: string) => {
-    setLoading(true)
-    setPayStatus(newPayStatus)
+    setLoading(true);
+    setPayStatus(newPayStatus);
     try {
-      const res = await updateOrderStatus(orderId, { paymentStatus: newPayStatus })
+      const res = await updateOrderStatus(orderId, {
+        paymentStatus: newPayStatus,
+      });
       if (res.success) {
-        toast.success("Cập nhật thanh toán thành công")
+        toast.success("Cập nhật thanh toán thành công");
       } else {
-        toast.error("Lỗi cập nhật thanh toán")
-        setPayStatus(paymentStatus) // revert
+        toast.error("Lỗi cập nhật thanh toán");
+        setPayStatus(paymentStatus); // revert
       }
     } catch (e) {
-      toast.error("Đã xảy ra lỗi")
-      setPayStatus(paymentStatus)
+      toast.error("Đã xảy ra lỗi");
+      setPayStatus(paymentStatus);
     } finally {
-      setLoading(false)
+      setLoading(false);
     }
-  }
+  };
 
   return (
     <div className="flex flex-col gap-3">
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground">Tiến trình giao hàng</label>
-        <Select value={status} onValueChange={(val) => handleStatusChange(val as string)} disabled={loading}>
+        <label className="text-xs font-medium text-muted-foreground">
+          Tiến trình giao hàng
+        </label>
+        <Select
+          value={status}
+          onValueChange={(val) => handleStatusChange(val as string)}
+          disabled={loading}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Trạng thái đơn" />
           </SelectTrigger>
@@ -73,20 +87,26 @@ export function OrderStatusUpdater({
           </SelectContent>
         </Select>
       </div>
-      
+
       <div className="space-y-1.5">
-        <label className="text-xs font-medium text-muted-foreground">Tình trạng thanh toán</label>
-        <Select value={payStatus} onValueChange={(val) => handlePaymentChange(val as string)} disabled={loading}>
+        <label className="text-xs font-medium text-muted-foreground">
+          Tình trạng thanh toán
+        </label>
+        <Select
+          value={payStatus}
+          onValueChange={(val) => handlePaymentChange(val as string)}
+          disabled={loading}
+        >
           <SelectTrigger className="w-full">
             <SelectValue placeholder="Thanh toán" />
           </SelectTrigger>
-        <SelectContent>
-          <SelectItem value="UNPAID">Chưa thanh toán</SelectItem>
-          <SelectItem value="PAID">Đã thanh toán</SelectItem>
-          <SelectItem value="REFUNDED">Đã hoàn tiền</SelectItem>
-        </SelectContent>
-      </Select>
+          <SelectContent>
+            <SelectItem value="UNPAID">Chưa thanh toán</SelectItem>
+            <SelectItem value="PAID">Đã thanh toán</SelectItem>
+            <SelectItem value="REFUNDED">Đã hoàn tiền</SelectItem>
+          </SelectContent>
+        </Select>
       </div>
     </div>
-  )
+  );
 }

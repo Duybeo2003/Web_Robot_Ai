@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -22,7 +22,10 @@ export default function Breadcrumbs() {
   const allCrumbs = [home, ...crumbs];
 
   return (
-    <nav className="flex items-center gap-2 px-6 py-2 bg-white border-b border-neutral-200 text-sm" aria-label="breadcrumb">
+    <nav
+      className="flex items-center gap-2 px-6 py-2 bg-white border-b border-neutral-200 text-sm"
+      aria-label="breadcrumb"
+    >
       <Home className="w-4 h-4 text-neutral-500" />
       {allCrumbs.map((crumb, idx) => (
         <span key={idx} className="flex items-center">

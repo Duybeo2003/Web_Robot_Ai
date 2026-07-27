@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client"
+import { PrismaClient } from "@prisma/client";
 import {
   Table,
   TableBody,
@@ -6,33 +6,35 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"
-import { Badge } from "@/components/ui/badge"
-import { format } from "date-fns"
-import { UserActions } from "../users/components/user-actions"
+} from "@/components/ui/table";
+import { Badge } from "@/components/ui/badge";
+import { format } from "date-fns";
+import { UserActions } from "../users/components/user-actions";
 
-const prisma = new PrismaClient()
+const prisma = new PrismaClient();
 
 export default async function AdminManagementPage() {
   const users = await prisma.user.findMany({
     where: {
-      role: "ADMIN"
+      role: "ADMIN",
     },
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
-        select: { orders: true }
-      }
-    }
-  })
+        select: { orders: true },
+      },
+    },
+  });
 
   return (
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight">Quản trị viên</h2>
-        <p className="text-muted-foreground">Quản lý các tài khoản có quyền quản trị hệ thống.</p>
+        <p className="text-muted-foreground">
+          Quản lý các tài khoản có quyền quản trị hệ thống.
+        </p>
       </div>
-      
+
       <div className="rounded-md border bg-white">
         <Table>
           <TableHeader>
@@ -59,10 +61,14 @@ export default async function AdminManagementPage() {
                     {user.name || "Khách hàng"}
                   </TableCell>
                   <TableCell>{user.phoneNumber}</TableCell>
-                  <TableCell>{format(new Date(user.createdAt), "dd/MM/yyyy")}</TableCell>
+                  <TableCell>
+                    {format(new Date(user.createdAt), "dd/MM/yyyy")}
+                  </TableCell>
                   <TableCell>{user._count.orders}</TableCell>
                   <TableCell>
-                    <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
+                    <Badge
+                      variant={user.role === "ADMIN" ? "default" : "secondary"}
+                    >
                       {user.role}
                     </Badge>
                   </TableCell>
@@ -76,5 +82,5 @@ export default async function AdminManagementPage() {
         </Table>
       </div>
     </div>
-  )
+  );
 }

@@ -1,13 +1,13 @@
-"use client"
+"use client";
 
-import { usePathname } from "next/navigation"
+import { usePathname } from "next/navigation";
 
 export function StoreWrapper({ children }: { children: React.ReactNode }) {
-  const pathname = usePathname()
-  
+  const pathname = usePathname();
+
   if (pathname?.startsWith("/admin")) {
-    return null
+    return null;
   }
-  
-  return <>{children}</>
+
+  return <>{children}</>;
 }

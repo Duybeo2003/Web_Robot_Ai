@@ -1,23 +1,30 @@
-"use server"
+"use server";
 
-import nodemailer from 'nodemailer';
+import nodemailer from "nodemailer";
 
 // You need to configure SMTP settings in .env
 // SMTP_HOST, SMTP_PORT, SMTP_USER, SMTP_PASS, SMTP_FROM_EMAIL
 const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || 'smtp.gmail.com',
-  port: parseInt(process.env.SMTP_PORT || '587'),
-  secure: process.env.SMTP_SECURE === 'true', // true for 465, false for other ports
+  host: process.env.SMTP_HOST || "smtp.gmail.com",
+  port: parseInt(process.env.SMTP_PORT || "587"),
+  secure: process.env.SMTP_SECURE === "true", // true for 465, false for other ports
   auth: {
-    user: process.env.SMTP_USER, 
-    pass: process.env.SMTP_PASS, 
+    user: process.env.SMTP_USER,
+    pass: process.env.SMTP_PASS,
   },
 });
 
-export async function sendOrderConfirmationEmail(userEmail: string, orderId: string, totalAmount: number) {
+export async function sendOrderConfirmationEmail(
+  userEmail: string,
+  orderId: string,
+  totalAmount: number,
+) {
   if (!userEmail) return;
 
-  const formattedTotal = new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(totalAmount);
+  const formattedTotal = new Intl.NumberFormat("vi-VN", {
+    style: "currency",
+    currency: "VND",
+  }).format(totalAmount);
 
   const emailHtml = `
   <div style="font-family: Arial, sans-serif; line-height: 1.6; color: #333;">

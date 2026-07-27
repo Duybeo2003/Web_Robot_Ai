@@ -1,12 +1,12 @@
-"use client"
+"use client";
 
-import { useState } from "react"
-import { useForm } from "react-hook-form"
-import { zodResolver } from "@hookform/resolvers/zod"
-import * as z from "zod"
-import { upsertCategory } from "@/actions/admin"
-import { toast } from "sonner"
-import { Button } from "@/components/ui/button"
+import { useState } from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import { upsertCategory } from "@/actions/admin";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
 import {
   Form,
   FormControl,
@@ -14,23 +14,23 @@ import {
   FormItem,
   FormLabel,
   FormMessage,
-} from "@/components/ui/form"
-import { Input } from "@/components/ui/input"
-import { Textarea } from "@/components/ui/textarea"
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 
 const formSchema = z.object({
   name: z.string().min(2, "Tên danh mục phải có ít nhất 2 ký tự"),
   description: z.string().optional(),
-})
+});
 
-export function CategoryForm({ 
-  initialData, 
-  onSuccess 
-}: { 
-  initialData?: { id: string, name: string, description: string | null },
-  onSuccess?: () => void
+export function CategoryForm({
+  initialData,
+  onSuccess,
+}: {
+  initialData?: { id: string; name: string; description: string | null };
+  onSuccess?: () => void;
 }) {
-  const [isLoading, setIsLoading] = useState(false)
+  const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -38,19 +38,19 @@ export function CategoryForm({
       name: initialData?.name || "",
       description: initialData?.description || "",
     },
-  })
+  });
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
-    setIsLoading(true)
-    const result = await upsertCategory(values, initialData?.id)
-    setIsLoading(false)
+    setIsLoading(true);
+    const result = await upsertCategory(values, initialData?.id);
+    setIsLoading(false);
 
     if (result.success) {
-      toast.success(initialData ? "Đã cập nhật danh mục" : "Đã tạo danh mục")
-      if (onSuccess) onSuccess()
-      if (!initialData) form.reset()
+      toast.success(initialData ? "Đã cập nhật danh mục" : "Đã tạo danh mục");
+      if (onSuccess) onSuccess();
+      if (!initialData) form.reset();
     } else {
-      toast.error(result.error || "Có lỗi xảy ra")
+      toast.error(result.error || "Có lỗi xảy ra");
     }
   }
 
@@ -90,5 +90,5 @@ export function CategoryForm({
         </div>
       </form>
     </Form>
-  )
+  );
 }
