@@ -6,7 +6,7 @@ import { AddToCartButton } from "./components/add-to-cart-button";
 import { ProductCard } from "@/components/ui/product-card";
 import { Search } from "lucide-react";
 import { SortForm } from "./components/sort-form";
-
+import { ShopSidebarFilters } from "./components/shop-sidebar-filters";
 import { auth } from "@/auth";
 
 export const revalidate = 0; // Dynamic page due to searchParams
@@ -26,6 +26,9 @@ export default async function ShopPage({
     page?: string;
     minPrice?: string;
     maxPrice?: string;
+    minAge?: string;
+    maxAge?: string;
+    skill?: string;
     sort?: string;
   }>;
 }) {
@@ -40,8 +43,9 @@ export default async function ShopPage({
     ? Number(resolvedParams.maxPrice)
     : undefined;
   const sortOption = resolvedParams.sort || "newest";
-  const ageFilter = (resolvedParams as { age?: string }).age || "";
-  const skillFilter = (resolvedParams as { skill?: string }).skill || "";
+  const skillFilter = resolvedParams.skill || "";
+  const minAge = resolvedParams.minAge ? Number(resolvedParams.minAge) : undefined;
+  const maxAge = resolvedParams.maxAge ? Number(resolvedParams.maxAge) : undefined;
   const itemsPerPage = 12;
 
   const session = await auth();
@@ -79,8 +83,19 @@ export default async function ShopPage({
         whereClause.type = typeFilter as Prisma.EnumProductTypeFilter<"Product">;
       }
     }
-    if (ageFilter) {
-      whereClause.ageRange = ageFilter as Prisma.EnumAgeRangeFilter<"Product">;
+    if (minAge !== undefined || maxAge !== undefined) {
+      const minA = minAge ?? 3;
+      const maxA = maxAge ?? 18;
+      const ageEnumMatches: Prisma.EnumAgeRangeFilter<"Product">["in"] = [];
+      
+      if (minA <= 5 && maxA >= 3) ageEnumMatches.push("AGE_3_5");
+      if (minA <= 8 && maxA >= 6) ageEnumMatches.push("AGE_6_8");
+      if (minA <= 12 && maxA >= 9) ageEnumMatches.push("AGE_9_12");
+      if (maxA >= 12) ageEnumMatches.push("AGE_12_PLUS");
+
+      if (ageEnumMatches.length > 0) {
+        whereClause.ageRange = { in: ageEnumMatches };
+      }
     }
     if (skillFilter) {
       whereClause.primarySkill = skillFilter as Prisma.EnumSkillFilter<"Product">;
@@ -156,144 +171,7 @@ export default async function ShopPage({
       <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
         {/* Left Sidebar Filters */}
         <div className="lg:col-span-1 space-y-6">
-          <div className="bg-white p-6 rounded-sm shadow-sm border border-neutral-100">
-            <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">
-              Tìm kiếm
-            </h2>
-            <form action="/shop" method="GET" className="relative mb-6">
-              <input
-                type="text"
-                name="q"
-                defaultValue={query}
-                placeholder="Nhập tên sản phẩm..."
-                className="w-full h-10 pl-10 pr-4 text-sm border border-neutral-200 rounded-sm focus:outline-none focus:border-[#FF5722]"
-              />
-              <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-3" />
-              {typeFilter && (
-                <input type="hidden" name="type" value={typeFilter} />
-              )}
-            </form>
-
-            <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">
-              Danh mục
-            </h2>
-            <div className="flex flex-col space-y-2 mb-8">
-              <Link
-                href="/shop"
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${!typeFilter ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Tất cả sản phẩm
-              </Link>
-              <Link
-                href="/shop?type=ROBOT_STEM"
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${typeFilter === "ROBOT_STEM" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Robot Giáo Dục
-              </Link>
-              <Link
-                href="/shop?type=DO_CHOI_LOGIC"
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${typeFilter === "DO_CHOI_LOGIC" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Đồ Chơi Logic
-              </Link>
-              <Link
-                href="/shop?type=COMBO"
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${typeFilter === "COMBO" ? "bg-red-100 text-red-600" : "text-red-500 hover:bg-red-50"}`}
-              >
-                Combo Tiết Kiệm
-              </Link>
-            </div>
-
-            <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">
-              Độ tuổi
-            </h2>
-            <div className="flex flex-col space-y-2 mb-8">
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(skillFilter && { skill: skillFilter }) }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${!ageFilter ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Tất cả độ tuổi
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(skillFilter && { skill: skillFilter }), age: "AGE_3_5" }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${ageFilter === "AGE_3_5" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                3 - 5 Tuổi
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(skillFilter && { skill: skillFilter }), age: "AGE_6_8" }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${ageFilter === "AGE_6_8" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                6 - 8 Tuổi
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(skillFilter && { skill: skillFilter }), age: "AGE_9_12" }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${ageFilter === "AGE_9_12" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                9 - 12 Tuổi
-              </Link>
-            </div>
-
-            <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">
-              Kỹ năng
-            </h2>
-            <div className="flex flex-col space-y-2 mb-8">
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(ageFilter && { age: ageFilter }) }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${!skillFilter ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Tất cả kỹ năng
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(ageFilter && { age: ageFilter }), skill: "LOGIC" }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${skillFilter === "LOGIC" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Tư duy Logic
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(ageFilter && { age: ageFilter }), skill: "EQ" }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${skillFilter === "EQ" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Phát triển EQ
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(ageFilter && { age: ageFilter }), skill: "LANGUAGE" }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${skillFilter === "LANGUAGE" ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Ngoại ngữ
-              </Link>
-            </div>
-
-            <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">
-              Mức giá
-            </h2>
-            <div className="flex flex-col space-y-2">
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), ...(sortOption !== "newest" && { sort: sortOption }) }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${!minPrice && !maxPrice ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Tất cả mức giá
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), maxPrice: "500000", ...(sortOption !== "newest" && { sort: sortOption }) }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${maxPrice === 500000 && !minPrice ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Dưới 500.000₫
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), minPrice: "500000", maxPrice: "1000000", ...(sortOption !== "newest" && { sort: sortOption }) }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${minPrice === 500000 && maxPrice === 1000000 ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                500.000₫ - 1.000.000₫
-              </Link>
-              <Link
-                href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), minPrice: "1000000", ...(sortOption !== "newest" && { sort: sortOption }) }).toString()}`}
-                className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors ${minPrice === 1000000 && !maxPrice ? "bg-[#FF5722]/10 text-[#FF5722]" : "text-neutral-600 hover:bg-neutral-50"}`}
-              >
-                Trên 1.000.000₫
-              </Link>
-            </div>
-          </div>
+          <ShopSidebarFilters />
 
           <div className="bg-white p-6 rounded-sm shadow-sm border border-neutral-100">
             <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">

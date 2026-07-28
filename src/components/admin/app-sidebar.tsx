@@ -12,6 +12,7 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
   SidebarSeparator,
+  useSidebar,
 } from "@/components/ui/sidebar";
 import {
   BarChart3,
@@ -68,6 +69,7 @@ const systemGroup = [
 
 export function AppSidebar() {
   const pathname = usePathname();
+  const { setOpenMobile } = useSidebar();
 
   const renderGroup = (label: string, items: typeof overviewGroup) => (
     <SidebarGroup>
@@ -80,7 +82,7 @@ export function AppSidebar() {
               (pathname.startsWith(item.url + "/") && item.url !== "/admin");
             return (
               <SidebarMenuItem key={item.title}>
-                <Link href={item.url} className="w-full block">
+                <Link href={item.url} className="w-full block" onClick={() => setOpenMobile(false)}>
                   <SidebarMenuButton
                     isActive={isActive}
                     className={`flex items-center gap-2 w-full font-medium transition-all ${
