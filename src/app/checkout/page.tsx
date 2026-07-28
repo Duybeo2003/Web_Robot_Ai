@@ -2,7 +2,6 @@
 
 import { useSession } from "next-auth/react";
 import { useCartStore } from "@/lib/store/cart";
-import { useAuthModal } from "@/store/use-auth-modal";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { processCheckout } from "@/actions/checkout";
@@ -13,17 +12,14 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import {
   ShoppingBag,
   Loader2,
-  ArrowRight,
   ShieldCheck,
-  Truck,
   CreditCard,
 } from "lucide-react";
 import { validateCoupon } from "@/actions/coupon";
 import Image from "next/image";
 
 export default function CheckoutPage() {
-  const { data: session, status } = useSession();
-  const { openModal } = useAuthModal();
+  const { data: session } = useSession();
   const router = useRouter();
 
   const items = useCartStore((state) => state.items);
@@ -58,8 +54,8 @@ export default function CheckoutPage() {
   const [appliedDiscount, setAppliedDiscount] = useState(0);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   if (!mounted) return null;
@@ -89,8 +85,13 @@ export default function CheckoutPage() {
         formData.paymentMethod === "VNPAY"
           ? "BANK_TRANSFER"
           : formData.paymentMethod,
-      cartItems: items.map((i) => ({ productId: i.id, quantity: i.quantity })),
+      cartItems: items.map((i) => ({ 
+        productId: i.id, 
+        quantity: i.quantity,
+        variantId: i.variantId || undefined
+      })),
       couponCode: appliedDiscount > 0 ? couponInput : undefined,
+      affiliateRef: localStorage.getItem("affiliate_ref") || undefined,
     });
 
     if (res.error) {
@@ -317,6 +318,11 @@ export default function CheckoutPage() {
                     <p className="font-medium line-clamp-2 text-foreground mb-1">
                       {item.title}
                     </p>
+                    {item.variantAttributes && (
+                      <p className="text-neutral-500 text-xs mb-1">
+                        {Object.values(item.variantAttributes).join(" - ")}
+                      </p>
+                    )}
                     <p className="text-neutral-500 text-xs font-medium">
                       Số lượng:{" "}
                       <span className="text-foreground">{item.quantity}</span>

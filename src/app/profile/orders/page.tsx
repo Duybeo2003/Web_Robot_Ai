@@ -17,7 +17,7 @@ export default async function OrdersPage() {
     where: { userId: session.user.id },
     include: {
       items: {
-        include: { product: true },
+        include: { product: true, variant: true },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -183,6 +183,11 @@ export default async function OrdersPage() {
                       <h4 className="font-medium text-sm line-clamp-2 hover:text-[#FF5722] cursor-pointer transition-colors">
                         {item.product.title}
                       </h4>
+                      {item.variant && item.variant.attributes && (
+                        <p className="text-xs text-blue-600 mt-1 font-medium">
+                          {Object.values(item.variant.attributes).join(" - ")}
+                        </p>
+                      )}
                       <p className="text-xs text-neutral-500 mt-1">
                         x{item.quantity}
                       </p>

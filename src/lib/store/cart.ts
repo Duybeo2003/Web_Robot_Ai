@@ -2,12 +2,15 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
 export interface CartItem {
-  id: string;
+  id: string; // productId
+  variantId?: string; // new variant id
+  variantAttributes?: Record<string, string>; // to show "Màu sắc: Đỏ" in cart
   title: string;
   price: number;
   quantity: number;
   imageUrl?: string;
   slug: string;
+  supplyType?: string; // used for preorder logic
 }
 
 interface CartStore {

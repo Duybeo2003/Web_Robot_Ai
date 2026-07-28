@@ -106,6 +106,11 @@ export function CartSheet() {
                         >
                           {item.title}
                         </Link>
+                        {item.variantAttributes && (
+                          <div className="text-xs text-neutral-500 mt-1">
+                            {Object.values(item.variantAttributes).join(" - ")}
+                          </div>
+                        )}
                         <button
                           onClick={() => removeItem(item.id)}
                           className="text-gray-400 hover:text-red-500 p-1"

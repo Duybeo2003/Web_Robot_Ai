@@ -11,8 +11,9 @@ export async function processCheckout(data: {
   shippingAddress: string;
   receiverPhone: string;
   paymentMethod: PaymentMethod;
-  cartItems: { productId: string; quantity: number }[];
+  cartItems: { productId: string; quantity: number, variantId?: string | null }[];
   couponCode?: string;
+  affiliateRef?: string;
 }) {
   const session = await auth();
   let userId = session?.user?.id;
@@ -57,7 +58,11 @@ export async function processCheckout(data: {
           price: true, 
           inventoryCount: true, 
           flashSaleActive: true, 
-          flashSaleStock: true 
+          flashSaleStock: true,
+          variants: true,
+          supplyType: true,
+          depositPercent: true,
+          commissionRate: true
         },
       });
 
@@ -66,14 +71,28 @@ export async function processCheckout(data: {
       }
 
       let totalAmount = 0;
+      let depositAmount = 0;
       const orderItemsData = [];
+      let totalCommissionAmount = 0;
       
       for (const cartItem of data.cartItems) {
         const dbProduct = dbProducts.find((p) => p.id === cartItem.productId)!;
         
+        const variant = cartItem.variantId 
+          ? dbProduct.variants.find((v: any) => v.id === cartItem.variantId) 
+          : null;
+        
+        const currentInventory = variant ? variant.inventoryCount : dbProduct.inventoryCount;
+        const currentPrice = variant ? Number(variant.price) : Number(dbProduct.price);
+        
+        let itemName = dbProduct.title;
+        if (variant && variant.attributes && typeof variant.attributes === 'object') {
+          itemName = `${dbProduct.title} - ${Object.values(variant.attributes as Record<string, string>).join(' - ')}`;
+        }
+
         // 1. Check Inventory
-        if (dbProduct.inventoryCount < cartItem.quantity) {
-          throw new Error(`Sản phẩm "${dbProduct.title}" không đủ số lượng trong kho (còn ${dbProduct.inventoryCount}).`);
+        if (currentInventory < cartItem.quantity) {
+          throw new Error(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
         }
         
         // 2. Check Flash Sale
@@ -83,24 +102,46 @@ export async function processCheckout(data: {
           }
         }
         
-        // 3. Deduct Inventory (using await tx.product.update)
-        await tx.product.update({
-          where: { id: dbProduct.id },
-          data: {
-            inventoryCount: { decrement: cartItem.quantity },
-            ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
-              ? { flashSaleStock: { decrement: cartItem.quantity } }
-              : {})
+        // 3. Deduct Inventory
+        if (variant) {
+          await tx.productVariant.update({
+            where: { id: variant.id },
+            data: { inventoryCount: { decrement: cartItem.quantity } }
+          });
+        } else {
+          await tx.product.update({
+            where: { id: dbProduct.id },
+            data: {
+              inventoryCount: { decrement: cartItem.quantity }
+            }
+          });
+          if (dbProduct.flashSaleStock !== null) {
+            await tx.product.update({
+              where: { id: dbProduct.id },
+              data: { flashSaleStock: dbProduct.flashSaleStock - cartItem.quantity },
+            });
           }
-        });
+        }
         
-        const price = Number(dbProduct.price);
-        totalAmount += price * cartItem.quantity;
-
+        // 4. Calculate amounts
+        totalAmount += currentPrice * cartItem.quantity;
+        if (dbProduct.supplyType === "PRE_ORDER" && dbProduct.depositPercent) {
+          depositAmount += (currentPrice * cartItem.quantity * dbProduct.depositPercent) / 100;
+        } else {
+          depositAmount += currentPrice * cartItem.quantity; // Pay 100%
+        }
+        
+        // 5. Calculate commission if valid affiliate ref
+        if (data.affiliateRef && dbProduct.supplyType === "AFFILIATE_HOST" && dbProduct.commissionRate) {
+          totalCommissionAmount += (currentPrice * cartItem.quantity * dbProduct.commissionRate) / 100;
+        }
+        
+        // 6. Build OrderItem
         orderItemsData.push({
           productId: cartItem.productId,
+          variantId: cartItem.variantId || null,
           quantity: cartItem.quantity,
-          priceAtPurchase: price, // mapping database price (CRITICAL)
+          priceAtPurchase: currentPrice, // mapping database price (CRITICAL)
         });
       }
 
@@ -132,6 +173,7 @@ export async function processCheckout(data: {
         data: {
           userId,
           totalAmount,
+          depositAmount,
           shippingAddress: data.shippingAddress,
           receiverPhone: data.receiverPhone,
           paymentMethod: data.paymentMethod,
@@ -140,6 +182,22 @@ export async function processCheckout(data: {
           },
         },
       });
+
+      // 4. Create Commission if applicable
+      if (data.affiliateRef && totalCommissionAmount > 0) {
+        // verify affiliateRef exists as user
+        const affiliateUser = await tx.user.findUnique({ where: { id: data.affiliateRef } });
+        if (affiliateUser) {
+          await tx.commission.create({
+            data: {
+              orderId: newOrder.id,
+              affiliateUserId: data.affiliateRef,
+              amount: totalCommissionAmount,
+              status: "PENDING"
+            }
+          });
+        }
+      }
 
       // 4. Clear the specific user's CartItem records
       const userCart = await tx.cart.findUnique({ where: { userId } });
@@ -151,7 +209,7 @@ export async function processCheckout(data: {
     });
 
     // 5. Send Email Notifications in the background
-    if (session.user.email) {
+    if (session?.user?.email) {
       sendOrderConfirmationEmail(
         session.user.email,
         order.id,

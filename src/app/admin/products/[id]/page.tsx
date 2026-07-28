@@ -20,6 +20,7 @@ export default async function EditProductPage({
             product: { select: { title: true, price: true, imageUrl: true } },
           },
         },
+        variants: true,
       },
     }),
     prisma.category.findMany({
@@ -48,6 +49,10 @@ export default async function EditProductPage({
         ...ci.product,
         price: Number(ci.product.price),
       },
+    })),
+    variants: product.variants?.map((v) => ({
+      ...v,
+      price: Number(v.price),
     })),
   };
 

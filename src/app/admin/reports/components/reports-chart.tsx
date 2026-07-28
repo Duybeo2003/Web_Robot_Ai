@@ -9,7 +9,7 @@ import {
   Tooltip,
 } from "recharts";
 
-export function ReportsChart({ data }: { data: any[] }) {
+export function ReportsChart({ data }: { data: { name: string; revenue: number }[] }) {
   if (data.length === 0) {
     return (
       <div className="flex h-[350px] items-center justify-center text-muted-foreground">
@@ -36,7 +36,7 @@ export function ReportsChart({ data }: { data: any[] }) {
           tickFormatter={(value) => `${value / 1000000}M`}
         />
         <Tooltip
-          formatter={(value: any) =>
+          formatter={(value: number) =>
             new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",

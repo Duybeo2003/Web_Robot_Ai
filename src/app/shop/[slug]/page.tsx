@@ -7,7 +7,7 @@ import { PromotionalBanner } from "./components/promotional-banner"
 import { ProductCard } from "@/components/ui/product-card"
 import { AddToCartButton } from "../components/add-to-cart-button"
 import Link from "next/link"
-import { Cpu, ShieldCheck, Wrench, RefreshCcw } from "lucide-react"
+import { ShieldCheck, Wrench, RefreshCcw } from "lucide-react"
 import { auth } from "@/auth"
 import { WishlistButton } from "@/components/ui/wishlist-button"
 
@@ -42,6 +42,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
     where: { slug: resolvedParams.slug },
     include: { 
       category: true,
+      variants: true,
       reviews: {
         include: { user: true },
         orderBy: { createdAt: "desc" }
@@ -74,7 +75,15 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   
   let isWished = false
   let userWishlistIds: string[] = [];
-const sanitizedProduct = { ...product, price: Number(product.price), originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined };
+const sanitizedProduct = { 
+  ...product, 
+  price: Number(product.price), 
+  originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined,
+  variants: product.variants.map((v) => ({
+    ...v,
+    price: Number(v.price)
+  }))
+};
   
   if (userId) {
     const wishlistItems = await prisma.wishlist.findMany({
@@ -198,6 +207,9 @@ const sanitizedProduct = { ...product, price: Number(product.price), originalPri
                 imageUrl: product.imageUrl || "",
                 supplyType: product.supplyType,
                 inventoryCount: product.inventoryCount,
+                externalAffiliateLink: product.externalAffiliateLink,
+                estimatedArrivalDate: product.estimatedArrivalDate ? new Date(product.estimatedArrivalDate).toISOString() : undefined,
+                variants: sanitizedProduct.variants,
               }} 
             />
           </div>
@@ -238,7 +250,7 @@ const sanitizedProduct = { ...product, price: Number(product.price), originalPri
                 product={{
                   ...rp,
                   price: Number(rp.price)
-                } as any}
+                } as unknown as { id: string; title: string; price: number; slug: string; imageUrl: string; supplyType?: string; inventoryCount: number; type: string; category: any; isCombo: boolean; flashSaleActive: boolean; flashSalePrice: number | null; flashSaleStock: number | null; variants?: any[] }}
                 isWished={userWishlistIds.includes(rp.id)}
                 action={
                   <AddToCartButton 

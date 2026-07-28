@@ -161,6 +161,11 @@ export function OrderDetailsModal({ order }: { order: any }) {
                     <p className="font-medium leading-snug">
                       {item.product.title}
                     </p>
+                    {item.variant && item.variant.attributes && (
+                      <p className="text-xs text-muted-foreground mt-1 font-medium text-blue-600">
+                        {Object.values(item.variant.attributes).join(" - ")}
+                      </p>
+                    )}
                     <p className="text-xs text-muted-foreground mt-1">
                       SL: {item.quantity}
                     </p>

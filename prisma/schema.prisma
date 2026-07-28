@@ -73,6 +73,12 @@ enum RmaStatus {
   COMPLETED
 }
 
+enum CommissionStatus {
+  PENDING
+  PAID
+  CANCELLED
+}
+
 // ------------------------------------------------------
 // 1. NextAuth v5 Models (Passwordless + OAuth)
 // ------------------------------------------------------
@@ -96,6 +102,7 @@ model User {
   wishlists     Wishlist[]
   inventoryTransactions InventoryTransaction[]
   articles      Article[]
+  commissions   Commission[]
 
   createdAt     DateTime  @default(now())
   updatedAt     DateTime  @updatedAt
@@ -184,6 +191,12 @@ model Product {
   primarySkill     PrimarySkill?
   educationalGoal  String?      @db.Text
   
+  // Affiliate & Pre-order
+  externalAffiliateLink String? // For AFFILIATE_SELL
+  commissionRate   Float?       @default(10) // For AFFILIATE_HOST
+  depositPercent   Int?         @default(70) // For PRE_ORDER
+  estimatedArrivalDate DateTime? // For PRE_ORDER
+  
   // Combo Selling Strategy
   isCombo          Boolean      @default(false)
   comboItems       ComboItem[]  @relation("ComboParent")
@@ -192,6 +205,7 @@ model Product {
   categoryId     String?
   category       Category?   @relation(fields: [categoryId], references: [id])
   
+  variants       ProductVariant[]
   orderItems     OrderItem[]
   cartItems      CartItem[]
   warranties     Warranty[]
@@ -208,6 +222,28 @@ model Product {
   @@index([createdAt])
   @@index([type, price])
   @@index([price])
+}
+
+model ProductVariant {
+  id             String      @id @default(cuid())
+  productId      String
+  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
+  
+  // JSON field for dynamic attributes like {"Màu sắc": "Đỏ", "Size": "L"}
+  attributes     Json
+  
+  price          Decimal     @db.Decimal(10, 2)
+  inventoryCount Int         @default(0)
+  sku            String?
+  imageUrl       String?
+  
+  cartItems      CartItem[]
+  orderItems     OrderItem[]
+  
+  createdAt      DateTime    @default(now())
+  updatedAt      DateTime    @updatedAt
+  
+  @@index([productId])
 }
 
 model Cart {
@@ -229,6 +265,8 @@ model CartItem {
   cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
   productId String
   product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId String?
+  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
   quantity  Int     @default(1)
 
   createdAt DateTime @default(now())
@@ -236,6 +274,7 @@ model CartItem {
 
   @@index([cartId])
   @@index([productId])
+  @@index([variantId])
 }
 
 model Order {
@@ -243,6 +282,7 @@ model Order {
   userId          String
   user            User          @relation(fields: [userId], references: [id])
   totalAmount     Decimal       @db.Decimal(10, 2)
+  depositAmount   Decimal?      @db.Decimal(10, 2)
   
   // Logistics & Payment
   shippingAddress String?       
@@ -255,6 +295,7 @@ model Order {
   
   items           OrderItem[]
   returnRequests  ReturnRequest[]
+  commissions     Commission[]
   
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
@@ -271,11 +312,14 @@ model OrderItem {
   order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId       String
   product         Product @relation(fields: [productId], references: [id])
+  variantId       String?
+  variant         ProductVariant? @relation(fields: [variantId], references: [id])
   quantity        Int     @default(1)
   priceAtPurchase Decimal @db.Decimal(10, 2)
 
   @@index([orderId])
   @@index([productId])
+  @@index([variantId])
 }
 
 model ComboItem {
@@ -331,6 +375,22 @@ model ReturnRequest {
   @@index([orderId])
   @@index([status])
   @@index([createdAt])
+}
+
+model Commission {
+  id              String   @id @default(cuid())
+  orderId         String
+  order           Order    @relation(fields: [orderId], references: [id])
+  affiliateUserId String
+  affiliateUser   User     @relation(fields: [affiliateUserId], references: [id])
+  amount          Decimal  @db.Decimal(10, 2)
+  status          CommissionStatus @default(PENDING)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  @@index([orderId])
+  @@index([affiliateUserId])
+  @@index([status])
 }
 
 // ------------------------------------------------------

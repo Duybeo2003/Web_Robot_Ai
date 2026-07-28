@@ -113,6 +113,10 @@ export async function upsertProduct(data: any, id?: string) {
     primarySkill: data.primarySkill || null,
     educationalGoal: data.educationalGoal || null,
     isCombo: data.isCombo || false,
+    externalAffiliateLink: data.externalAffiliateLink || null,
+    commissionRate: data.commissionRate ? Number(data.commissionRate) : null,
+    depositPercent: data.depositPercent ? Number(data.depositPercent) : null,
+    estimatedArrivalDate: data.estimatedArrivalDate ? new Date(data.estimatedArrivalDate) : null,
     ...(data.categoryId ? { categoryId: data.categoryId } : {}),
   };
 
@@ -140,8 +144,55 @@ export async function upsertProduct(data: any, id?: string) {
           });
         }
       } else if (!data.isCombo) {
-        // If changed from combo to normal product, remove combo items just in case
         await prisma.comboItem.deleteMany({ where: { comboId: id } });
+      }
+
+      // 3. Handle Variants
+      if (data.variants && data.variants.length > 0) {
+        // Delete old variants that are not in the new list (if they don't have an ID, or if we just want to recreate them)
+        // Simplest approach: Delete all and recreate, or update existing and create new.
+        // Let's delete all existing variants for this product and recreate them to avoid orphans.
+        // Note: This might break CartItem/OrderItem links if they rely on variantId!
+        // A safer approach: Update existing, create new, delete missing.
+        const existingVariants = await prisma.productVariant.findMany({ where: { productId: id } });
+        const incomingIds = data.variants.map((v: any) => v.id).filter(Boolean);
+        
+        // Delete variants not in the incoming list
+        const variantsToDelete = existingVariants.filter(ev => !incomingIds.includes(ev.id));
+        if (variantsToDelete.length > 0) {
+          await prisma.productVariant.deleteMany({
+            where: { id: { in: variantsToDelete.map(v => v.id) } }
+          });
+        }
+
+        // Upsert incoming variants
+        for (const variant of data.variants) {
+          if (variant.id) {
+            await prisma.productVariant.update({
+              where: { id: variant.id },
+              data: {
+                attributes: variant.attributes,
+                price: variant.price,
+                inventoryCount: variant.inventoryCount,
+                sku: variant.sku || null,
+                imageUrl: variant.imageUrl || null,
+              }
+            });
+          } else {
+            await prisma.productVariant.create({
+              data: {
+                productId: id,
+                attributes: variant.attributes,
+                price: variant.price,
+                inventoryCount: variant.inventoryCount,
+                sku: variant.sku || null,
+                imageUrl: variant.imageUrl || null,
+              }
+            });
+          }
+        }
+      } else {
+        // If no variants provided, maybe create a default one? Or leave it empty.
       }
     } else {
       const slug =
@@ -163,6 +214,20 @@ export async function upsertProduct(data: any, id?: string) {
             productId: c.productId,
             quantity: c.quantity || 1,
           })),
+        });
+      }
+      
+      // Handle Variants for new product
+      if (data.variants && data.variants.length > 0) {
+        await prisma.productVariant.createMany({
+          data: data.variants.map((v: any) => ({
+            productId: newProduct.id,
+            attributes: v.attributes,
+            price: v.price,
+            inventoryCount: v.inventoryCount,
+            sku: v.sku || null,
+            imageUrl: v.imageUrl || null,
+          }))
         });
       }
     }

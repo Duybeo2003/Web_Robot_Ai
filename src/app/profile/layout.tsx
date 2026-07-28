@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { User, Package, LogOut, Heart } from "lucide-react"
+import { User, Package, Heart } from "lucide-react"
 import Image from "next/image"
 
 export default async function ProfileLayout({ children }: { children: React.ReactNode }) {
@@ -29,7 +29,7 @@ export default async function ProfileLayout({ children }: { children: React.Reac
               </div>
               <div className="overflow-hidden">
                 <p className="font-semibold text-foreground truncate">{session.user.name || "Khách hàng"}</p>
-                <p className="text-xs text-neutral-500 truncate">{session.user.email || (session.user as any).phoneNumber}</p>
+                <p className="text-xs text-neutral-500 truncate">{session.user.email || (session.user as Record<string, unknown>).phoneNumber as string}</p>
               </div>
             </div>
 
@@ -45,6 +45,10 @@ export default async function ProfileLayout({ children }: { children: React.Reac
               <Link href="/profile/wishlist" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
                 <Heart className="w-5 h-5 text-neutral-400" />
                 Sản phẩm yêu thích
+              </Link>
+              <Link href="/profile/affiliate" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
+                <User className="w-5 h-5 text-neutral-400" />
+                Tiếp thị liên kết
               </Link>
               {/* Optional Logout Link - Note: Should ideally be a client component button for signOut() */}
             </nav>

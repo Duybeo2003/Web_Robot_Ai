@@ -67,7 +67,7 @@ export default async function AdminOrdersPage() {
     include: {
       user: true,
       items: {
-        include: { product: true },
+        include: { product: true, variant: true },
       },
     },
   });

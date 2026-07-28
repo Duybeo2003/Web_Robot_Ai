@@ -11,6 +11,8 @@ import { toast } from "sonner";
 import { Loader2, Plus, Trash2 } from "lucide-react";
 import Image from "next/image";
 
+import { VariantManager, Variant } from "./variant-manager";
+
 export function ProductForm({
   initialData,
   categories = [],
@@ -32,6 +34,7 @@ export function ProductForm({
     supplyType: initialData?.supplyType || "IN_HOUSE",
     categoryId: initialData?.categoryId || categories[0]?.id || "", // new category link
     inventoryCount: initialData?.inventoryCount || 0,
+    sku: initialData?.sku || "",
     imageUrl: initialData?.imageUrl || "",
     originalPrice: initialData?.originalPrice
       ? Number(initialData.originalPrice)
@@ -53,6 +56,20 @@ export function ProductForm({
         price: ci.product?.price || 0,
         imageUrl: ci.product?.imageUrl || "",
       })) || [],
+    variants: initialData?.variants?.map((v: any) => ({
+      id: v.id,
+      attributes: v.attributes,
+      price: Number(v.price),
+      inventoryCount: v.inventoryCount,
+      sku: v.sku || "",
+      imageUrl: v.imageUrl || ""
+    })) || [],
+    externalAffiliateLink: initialData?.externalAffiliateLink || "",
+    commissionRate: initialData?.commissionRate ? Number(initialData.commissionRate) : 10,
+    depositPercent: initialData?.depositPercent ? Number(initialData.depositPercent) : 70,
+    estimatedArrivalDate: initialData?.estimatedArrivalDate
+      ? new Date(initialData.estimatedArrivalDate).toISOString().slice(0, 16)
+      : "",
   });
 
   const [selectedProductId, setSelectedProductId] = useState("");
@@ -162,7 +179,7 @@ export function ProductForm({
             >
               <option value="IN_HOUSE">Hàng tự sản xuất</option>
               <option value="AFFILIATE_SELL">Bán hộ (Affiliate Out)</option>
-              <option value="PRE_ORDER">Hàng Order (Chờ 7-10 ngày, Cọc 70%)</option>
+              <option value="PRE_ORDER">Hàng Order (Pre-order)</option>
               <option value="AFFILIATE_HOST">Cho phép CTV khác bán (Affiliate In)</option>
             </select>
           </div>
@@ -214,6 +231,67 @@ export function ProductForm({
             />
           </div>
         </div>
+
+        {/* Dynamic Fields Based on Supply Type */}
+        {formData.supplyType === "AFFILIATE_SELL" && (
+          <div className="space-y-2 border-l-4 border-orange-500 pl-4 py-2">
+            <Label htmlFor="externalAffiliateLink">Link Sàn Phụ (Shopee/Lazada)</Label>
+            <Input
+              id="externalAffiliateLink"
+              type="url"
+              placeholder="https://shopee.vn/..."
+              value={formData.externalAffiliateLink}
+              onChange={(e) =>
+                setFormData({ ...formData, externalAffiliateLink: e.target.value })
+              }
+            />
+          </div>
+        )}
+
+        {formData.supplyType === "AFFILIATE_HOST" && (
+          <div className="space-y-2 border-l-4 border-green-500 pl-4 py-2">
+            <Label htmlFor="commissionRate">Tỷ lệ Hoa hồng CTV (%)</Label>
+            <Input
+              id="commissionRate"
+              type="number"
+              min="0"
+              max="100"
+              value={formData.commissionRate}
+              onChange={(e) =>
+                setFormData({ ...formData, commissionRate: Number(e.target.value) })
+              }
+            />
+          </div>
+        )}
+
+        {formData.supplyType === "PRE_ORDER" && (
+          <div className="grid grid-cols-2 gap-4 border-l-4 border-blue-500 pl-4 py-2">
+            <div className="space-y-2">
+              <Label htmlFor="depositPercent">Tỷ lệ Cọc (%)</Label>
+              <Input
+                id="depositPercent"
+                type="number"
+                min="0"
+                max="100"
+                value={formData.depositPercent}
+                onChange={(e) =>
+                  setFormData({ ...formData, depositPercent: Number(e.target.value) })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="estimatedArrivalDate">Ngày Hàng Về (Dự kiến)</Label>
+              <Input
+                id="estimatedArrivalDate"
+                type="datetime-local"
+                value={formData.estimatedArrivalDate}
+                onChange={(e) =>
+                  setFormData({ ...formData, estimatedArrivalDate: e.target.value })
+                }
+              />
+            </div>
+          </div>
+        )}
 
         {/* Educational Metadata Section */}
         <div className="border rounded-md p-4 bg-indigo-50/30 space-y-4">
@@ -501,22 +579,42 @@ export function ProductForm({
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="inventoryCount">Tồn kho chung</Label>
-          <Input
-            id="inventoryCount"
-            type="number"
-            min="0"
-            value={formData.inventoryCount}
-            onChange={(e) =>
-              setFormData({
-                ...formData,
-                inventoryCount: Number(e.target.value),
-              })
-            }
-            required
-          />
+        <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="inventoryCount">Tồn kho chung (Nếu không có biến thể)</Label>
+            <Input
+              id="inventoryCount"
+              type="number"
+              min="0"
+              value={formData.inventoryCount}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  inventoryCount: Number(e.target.value),
+                })
+              }
+              required
+            />
+          </div>
+          <div className="space-y-2">
+            <Label htmlFor="sku">SKU Chung</Label>
+            <Input
+              id="sku"
+              value={formData.sku || ""}
+              onChange={(e) =>
+                setFormData({ ...formData, sku: e.target.value })
+              }
+              placeholder="Ví dụ: SKU-001"
+            />
+          </div>
         </div>
+
+        {/* VARIANT MANAGER */}
+        <VariantManager 
+          variants={formData.variants}
+          basePrice={formData.price}
+          onChange={(newVariants) => setFormData({ ...formData, variants: newVariants })}
+        />
 
         {/* Flash Sale Section */}
         <div className="border rounded-md p-4 bg-orange-50/30 space-y-4">

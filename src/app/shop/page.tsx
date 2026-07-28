@@ -80,10 +80,10 @@ export default async function ShopPage({
       }
     }
     if (ageFilter) {
-      whereClause.ageRange = ageFilter as any;
+      whereClause.ageRange = ageFilter as Prisma.EnumAgeRangeFilter<"Product">;
     }
     if (skillFilter) {
-      whereClause.primarySkill = skillFilter as any;
+      whereClause.primarySkill = skillFilter as Prisma.EnumSkillFilter<"Product">;
     }
     if (minPrice !== undefined || maxPrice !== undefined) {
       whereClause.price = {};

@@ -10,6 +10,7 @@ import { CartSyncer } from "@/components/cart-syncer";
 import { Toaster } from "@/components/ui/sonner";
 import { AIChatbot } from "@/components/ui/ai-chatbot";
 import { StoreWrapper } from "@/components/layout/store-wrapper";
+import { AffiliateTracker } from "@/components/affiliate-tracker";
 
 const lora = Lora({
   variable: "--font-heading",
@@ -74,6 +75,7 @@ export default function RootLayout({
           </StoreWrapper>
           <Toaster />
           <AIChatbot />
+          <AffiliateTracker />
         </Providers>
       </body>
     </html>

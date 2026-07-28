@@ -55,10 +55,11 @@ Nếu khách hỏi về kiến thức lập trình (Arduino, Python) hoặc lắ
     });
 
     return result.toTextStreamResponse();
-  } catch (error: any) {
-    console.error("[Chat API Error]", error?.message || error);
+  } catch (error: unknown) {
+    const err = error as Error;
+    console.error("[Chat API Error]", err?.message || err);
 
-    const errorMsg = error?.message || "";
+    const errorMsg = err?.message || "";
 
     if (
       errorMsg.includes("API_KEY_INVALID") ||
