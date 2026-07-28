@@ -202,7 +202,7 @@ export function ProductForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
+          <div className="flex flex-col justify-end gap-2">
             <Label htmlFor="price">Giá bán hiện tại (VNĐ)</Label>
             <Input
               id="price"
@@ -215,7 +215,7 @@ export function ProductForm({
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col justify-end gap-2">
             <Label htmlFor="originalPrice">Giá gốc (VNĐ) - Tuỳ chọn</Label>
             <Input
               id="originalPrice"
@@ -580,7 +580,7 @@ export function ProductForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="space-y-2">
+          <div className="flex flex-col justify-end gap-2">
             <Label htmlFor="inventoryCount">Tồn kho chung (Nếu không có biến thể)</Label>
             <Input
               id="inventoryCount"
@@ -596,7 +596,7 @@ export function ProductForm({
               required
             />
           </div>
-          <div className="space-y-2">
+          <div className="flex flex-col justify-end gap-2">
             <Label htmlFor="sku">SKU Chung</Label>
             <Input
               id="sku"
@@ -618,7 +618,7 @@ export function ProductForm({
 
         {/* Flash Sale Section */}
         <div className="border rounded-md p-4 bg-orange-50/30 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <Label className="text-base font-bold text-orange-600">
                 Flash Sale & Khuyến Mãi

@@ -128,8 +128,8 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
       {optionGroups.length > 0 && (
         <div className="space-y-4 bg-white p-4 border rounded-md shadow-sm">
           {optionGroups.map((group, idx) => (
-            <div key={idx} className="flex items-start gap-4">
-              <div className="flex-1 space-y-2">
+            <div key={idx} className="flex flex-col sm:flex-row items-start gap-4">
+              <div className="flex-1 flex flex-col justify-end gap-2">
                 <Label>Tên Phân Loại</Label>
                 <Input 
                   placeholder="VD: Màu sắc" 
@@ -137,7 +137,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
                   onChange={(e) => updateOptionName(idx, e.target.value)}
                 />
               </div>
-              <div className="flex-[2] space-y-2">
+              <div className="flex-[2] flex flex-col justify-end gap-2">
                 <Label>Giá trị (Cách nhau bằng dấu phẩy)</Label>
                 <div className="flex items-center gap-2">
                   <Input 
