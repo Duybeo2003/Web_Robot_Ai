@@ -121,8 +121,10 @@ export default async function ShopPage({
           title: true,
           slug: true,
           price: true,
+          originalPrice: true,
           imageUrl: true,
           type: true,
+          supplyType: true,
           inventoryCount: true,
           category: {
             select: { name: true },

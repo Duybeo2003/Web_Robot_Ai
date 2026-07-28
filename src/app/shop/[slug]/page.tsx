@@ -176,8 +176,10 @@ const sanitizedProduct = {
                   Hàng Order (Chờ 7-10 ngày)
                 </span>
               ) : (
-                <span className={`font-medium ${product.inventoryCount > 0 ? "text-green-600" : "text-red-500"}`}>
-                  {product.inventoryCount > 0 ? `Còn hàng (${product.inventoryCount})` : "Hết hàng"}
+                <span className={`font-medium ${(product.variants.length > 0 ? product.variants.reduce((sum, v) => sum + v.inventoryCount, 0) : product.inventoryCount) > 0 ? "text-green-600" : "text-red-500"}`}>
+                  {(product.variants.length > 0 ? product.variants.reduce((sum, v) => sum + v.inventoryCount, 0) : product.inventoryCount) > 0 
+                    ? `Còn hàng (${product.variants.length > 0 ? product.variants.reduce((sum, v) => sum + v.inventoryCount, 0) : product.inventoryCount})` 
+                    : "Hết hàng"}
                 </span>
               )}
             </div>
