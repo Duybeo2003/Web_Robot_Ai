@@ -3,7 +3,7 @@
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -77,6 +77,19 @@ export function ProductForm({
   });
 
   const [selectedProductId, setSelectedProductId] = useState("");
+
+  // Sync total retail price as original price for combos
+  useEffect(() => {
+    if (formData.isCombo) {
+      const totalRetail = formData.comboItems.reduce(
+        (acc: number, cur: any) => acc + cur.price * cur.quantity,
+        0
+      );
+      if (formData.originalPrice !== totalRetail) {
+        setFormData((prev) => ({ ...prev, originalPrice: totalRetail }));
+      }
+    }
+  }, [formData.comboItems, formData.isCombo, formData.originalPrice]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -232,7 +245,14 @@ export function ProductForm({
                   originalPrice: Number(e.target.value),
                 })
               }
+              readOnly={formData.isCombo}
+              className={formData.isCombo ? "bg-neutral-100 cursor-not-allowed" : ""}
             />
+            {formData.isCombo && (
+              <span className="text-xs text-muted-foreground mt-1">
+                *Giá gốc tự động tính bằng tổng giá bán rời của Combo.
+              </span>
+            )}
           </div>
         </div>
 
