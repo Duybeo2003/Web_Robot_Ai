@@ -1,8 +1,7 @@
-/* eslint-disable react-hooks/exhaustive-deps */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -26,22 +25,22 @@ interface VariantManagerProps {
 
 export function VariantManager({ variants, onChange, basePrice }: VariantManagerProps) {
   // Option Types (e.g. "Color", "Size") and their possible values
-  const [optionGroups, setOptionGroups] = useState<{ name: string; values: string[] }[]>([]);
-  
-  // Extract existing option groups from variants on mount
-  useEffect(() => {
-    if (variants.length > 0 && optionGroups.length === 0) {
+  const [optionGroups, setOptionGroups] = useState<{ name: string; values: string[] }[]>(() => {
+    if (variants.length > 0) {
       const groups: Record<string, Set<string>> = {};
-      variants.forEach(v => {
+      variants.forEach((v) => {
         Object.entries(v.attributes).forEach(([k, val]) => {
           if (!groups[k]) groups[k] = new Set();
           groups[k].add(val as string);
         });
       });
-      setOptionGroups(Object.entries(groups).map(([name, set]) => ({ name, values: Array.from(set) })));
+      return Object.entries(groups).map(([name, set]) => ({
+        name,
+        values: Array.from(set),
+      }));
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [variants]);
+    return [];
+  });
 
   const generateVariants = () => {
     if (optionGroups.length === 0) {

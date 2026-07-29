@@ -52,7 +52,7 @@ export async function createReturnRequest(data: {
 
     revalidatePath("/profile/orders");
     return { success: true };
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[CREATE_RMA]", e);
     return { error: "Lỗi tạo yêu cầu đổi trả." };
   }
@@ -80,7 +80,7 @@ export async function updateReturnRequestStatus(
     revalidatePath("/admin/returns");
     revalidatePath("/profile/orders");
     return { success: true };
-  } catch (error) {
+  } catch {
     return { error: "Lỗi cập nhật trạng thái." };
   }
 }

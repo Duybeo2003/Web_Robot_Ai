@@ -13,7 +13,7 @@ export function ArticleForm({
   initialData,
   articleId,
 }: {
-  initialData?: any;
+  initialData?: { title: string; content: string; thumbnail?: string | null; tags?: string | null; published: boolean };
   articleId?: string;
 }) {
   const router = useRouter();

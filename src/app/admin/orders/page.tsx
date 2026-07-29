@@ -14,10 +14,6 @@ import { Card } from "@/components/ui/card";
 
 const prisma = new PrismaClient();
 
-const paymentStatusMap: Record<string, string> = {
-  UNPAID: "Chưa thanh toán",
-  PAID: "Đã thanh toán",
-};
 
 const getOrderStatusBadge = (status: string) => {
   switch (status) {

@@ -194,7 +194,7 @@ export default async function AdminDashboardPage() {
                   Chưa có dữ liệu bán hàng.
                 </p>
               ) : (
-                topProducts.map((product, index) => (
+                topProducts.map((product) => (
                   <div key={product.id} className="flex items-center gap-4">
                     <div className="w-12 h-12 bg-neutral-100 rounded-sm p-1 shrink-0">
                       {product.imageUrl && (

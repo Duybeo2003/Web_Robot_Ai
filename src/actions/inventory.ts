@@ -70,9 +70,10 @@ export async function createInventoryTransaction(data: {
     revalidatePath(`/admin/products/${data.productId}`);
 
     return { success: true, data: result };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[INVENTORY_ERROR]", error);
-    return { error: error.message || "Có lỗi xảy ra khi cập nhật kho." };
+    const msg = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật kho.";
+    return { error: msg };
   }
 }
 
@@ -103,7 +104,7 @@ export async function getLowStockProducts(threshold = 10) {
     });
 
     return { success: true, data: products };
-  } catch (error: any) {
+  } catch {
     return { error: "Failed to fetch low stock products." };
   }
 }

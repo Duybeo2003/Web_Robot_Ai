@@ -23,7 +23,7 @@ export async function lookupWarranty(serialNumber: string) {
     }
 
     return { success: true, warranty };
-  } catch (e: any) {
+  } catch (e: unknown) {
     console.error("[WARRANTY_LOOKUP]", e);
     return { error: "Lỗi hệ thống khi tra cứu bảo hành." };
   }

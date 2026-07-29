@@ -2,12 +2,14 @@
 
 import { prisma } from "@/lib/prisma";
 
+import { AgeRange, PrimarySkill } from "@prisma/client";
+
 export async function getGiftRecommendations(age: string, skill: string) {
   try {
     const products = await prisma.product.findMany({
       where: {
-        ageRange: age as any,
-        primarySkill: skill as any,
+        ageRange: age as AgeRange,
+        primarySkill: skill as PrimarySkill,
       },
       select: {
         id: true,

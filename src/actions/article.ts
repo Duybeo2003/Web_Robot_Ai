@@ -15,7 +15,7 @@ export async function getArticles(publishedOnly = false) {
       },
     });
     return { success: true, data: articles };
-  } catch (error: any) {
+  } catch {
     return { error: "Không thể lấy danh sách bài viết." };
   }
 }
@@ -30,7 +30,7 @@ export async function getArticleBySlug(slug: string) {
     });
     if (!article) return { error: "Không tìm thấy bài viết." };
     return { success: true, data: article };
-  } catch (error: any) {
+  } catch {
     return { error: "Đã xảy ra lỗi." };
   }
 }
@@ -74,7 +74,7 @@ export async function createArticle(data: {
     revalidatePath("/admin/articles");
     revalidatePath("/giao-duc");
     return { success: true, data: article };
-  } catch (error: any) {
+  } catch {
     return { error: "Không thể tạo bài viết." };
   }
 }
@@ -114,7 +114,7 @@ export async function updateArticle(
     revalidatePath("/blog");
     revalidatePath(`/blog/${article.slug}`);
     return { success: true, data: article };
-  } catch (error: any) {
+  } catch {
     return { error: "Không thể cập nhật bài viết." };
   }
 }
@@ -133,7 +133,7 @@ export async function deleteArticle(id: string) {
     revalidatePath("/admin/articles");
     revalidatePath("/giao-duc");
     return { success: true };
-  } catch (error: any) {
+  } catch {
     return { error: "Không thể xóa bài viết." };
   }
 }

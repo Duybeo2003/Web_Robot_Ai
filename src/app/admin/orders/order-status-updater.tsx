@@ -35,7 +35,7 @@ export function OrderStatusUpdater({
         toast.error("Lỗi cập nhật trạng thái");
         setStatus(currentStatus); // revert
       }
-    } catch (e) {
+    } catch {
       toast.error("Đã xảy ra lỗi");
       setStatus(currentStatus);
     } finally {
@@ -56,7 +56,7 @@ export function OrderStatusUpdater({
         toast.error("Lỗi cập nhật thanh toán");
         setPayStatus(paymentStatus); // revert
       }
-    } catch (e) {
+    } catch {
       toast.error("Đã xảy ra lỗi");
       setPayStatus(paymentStatus);
     } finally {

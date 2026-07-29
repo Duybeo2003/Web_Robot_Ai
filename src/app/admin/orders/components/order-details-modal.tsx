@@ -20,7 +20,24 @@ import {
 import { OrderStatusUpdater } from "../order-status-updater";
 import { format } from "date-fns";
 
-export function OrderDetailsModal({ order }: { order: Record<string, unknown> }) {
+export function OrderDetailsModal({ order }: { order: {
+  id: string;
+  status: string;
+  paymentStatus: string;
+  shippingAddress: string;
+  receiverPhone: string;
+  paymentMethod: string;
+  createdAt: string | Date;
+  totalAmount: number | string;
+  user: { name: string | null; phoneNumber: string | null };
+  items: {
+    id: string;
+    product: { title: string; supplyType?: string };
+    variant?: { attributes: Record<string, string> };
+    quantity: number;
+    priceAtPurchase: string | number;
+  }[];
+} }) {
   return (
     <Sheet>
       <SheetTrigger
@@ -151,7 +168,13 @@ export function OrderDetailsModal({ order }: { order: Record<string, unknown> })
               Sản phẩm ({order.items.length})
             </h4>
             <div className="space-y-3 pl-9">
-              {order.items.map((item: any) => (
+              {order.items.map((item: {
+                id: string;
+                product: { title: string; supplyType?: string };
+                variant?: { attributes: Record<string, string> };
+                quantity: number;
+                priceAtPurchase: string | number;
+              }) => (
                 <div
                   key={item.id}
                   className="flex justify-between items-start border-b pb-3 last:border-0 last:pb-0"
@@ -186,15 +209,13 @@ export function OrderDetailsModal({ order }: { order: Record<string, unknown> })
                   }).format(Number(order.totalAmount))}
                 </p>
               </div>
-              {order.items.some((item: any) => item.product.supplyType === "PRE_ORDER") && (() => {
-                const depositTotal = order.items.reduce((total: number, item: any) => {
+              {order.items.some((item: { product: { supplyType?: string } }) => item.product.supplyType === "PRE_ORDER") && (() => {
+                const depositTotal = order.items.reduce((total: number, item: { product: { supplyType?: string }; priceAtPurchase: string | number; quantity: number }) => {
                   if (item.product.supplyType === "PRE_ORDER") {
                     return total + (Number(item.priceAtPurchase) * item.quantity * 0.7);
                   }
                   return total + (Number(item.priceAtPurchase) * item.quantity);
                 }, 0);
-                // Assume no discount recorded directly on item, totalAmount handles it or doesn't for MVP.
-                // We'll just show the deposit logic simply.
                 return (
                   <div className="flex justify-between items-center pt-2 mt-2 border-t border-dashed border-primary/20 text-amber-600">
                     <p className="font-semibold text-sm">Tiền cọc cần thu (70% hàng Order):</p>

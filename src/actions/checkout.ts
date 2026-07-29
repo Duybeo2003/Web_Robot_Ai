@@ -79,7 +79,7 @@ export async function processCheckout(data: {
         const dbProduct = dbProducts.find((p) => p.id === cartItem.productId)!;
         
         const variant = cartItem.variantId 
-          ? dbProduct.variants.find((v: any) => v.id === cartItem.variantId) 
+          ? dbProduct.variants.find((v) => v.id === cartItem.variantId) 
           : null;
         
         const currentInventory = variant ? variant.inventoryCount : dbProduct.inventoryCount;
@@ -221,9 +221,10 @@ export async function processCheckout(data: {
 
     revalidatePath("/admin/orders");
     return { success: true, orderId: order.id };
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error("[CHECKOUT_ERROR]", error);
-    return { error: error.message || "Có lỗi xảy ra khi xử lý đơn hàng." };
+    const msg = error instanceof Error ? error.message : "Có lỗi xảy ra khi xử lý đơn hàng.";
+    return { error: msg };
   }
 }
 
@@ -231,8 +232,13 @@ export async function processVNPayMock(orderId: string) {
   const session = await auth();
   if (!session?.user?.id) return { error: "Unauthorized" };
 
+  const user = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
   // SECURITY: Only ADMIN can trigger mock payments
-  if ((session.user as any).role !== "ADMIN") {
+  if (user?.role !== "ADMIN") {
     return { error: "Chỉ Admin mới có quyền thực hiện thao tác này." };
   }
 
@@ -254,7 +260,7 @@ export async function processVNPayMock(orderId: string) {
     revalidatePath("/profile/orders");
     revalidatePath("/admin/orders");
     return { success: true };
-  } catch (e: any) {
+  } catch {
     return { error: "Failed to process mock payment" };
   }
 }

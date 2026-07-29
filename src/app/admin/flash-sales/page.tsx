@@ -24,7 +24,8 @@ export default async function AdminFlashSalesPage() {
     },
   });
 
-  const formatPrice = (price: any) => {
+  const formatPrice = (price: number | string | null | undefined) => {
+    if (price == null) return "0 ₫";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",
       currency: "VND",

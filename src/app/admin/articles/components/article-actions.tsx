@@ -1,15 +1,6 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, Trash2, Edit } from "lucide-react";
+import { Trash2, Edit } from "lucide-react";
 import { deleteArticle } from "@/actions/article";
 import { toast } from "sonner";
 import { useState } from "react";

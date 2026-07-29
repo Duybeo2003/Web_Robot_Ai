@@ -27,7 +27,7 @@ export async function updateOrderStatus(
   }
 
   try {
-    const updateData: any = {};
+    const updateData: { status?: string; paymentStatus?: string } = {};
     if (data.status) updateData.status = data.status;
     if (data.paymentStatus) updateData.paymentStatus = data.paymentStatus;
 
@@ -84,7 +84,47 @@ export async function pushOrderToLogistics(
   }
 }
 
-export async function upsertProduct(data: any, id?: string) {
+interface ComboItemData {
+  productId: string;
+  quantity?: number;
+}
+
+interface VariantData {
+  id?: string;
+  attributes: Record<string, string>;
+  price: number;
+  originalPrice?: number | null;
+  inventoryCount: number;
+  sku?: string | null;
+  imageUrl?: string | null;
+}
+
+export interface ProductData {
+  title: string;
+  description: string;
+  price: number;
+  type: string;
+  supplyType?: string;
+  inventoryCount: number;
+  imageUrl: string;
+  originalPrice?: number | null;
+  flashSaleActive?: boolean;
+  flashSaleEndDate?: string | Date | null;
+  flashSaleStock?: number;
+  ageRange?: string | null;
+  primarySkill?: string | null;
+  educationalGoal?: string | null;
+  isCombo?: boolean;
+  externalAffiliateLink?: string | null;
+  commissionRate?: number | null;
+  depositPercent?: number | null;
+  estimatedArrivalDate?: string | Date | null;
+  categoryId?: string;
+  comboItems?: ComboItemData[];
+  variants?: VariantData[];
+}
+
+export async function upsertProduct(data: ProductData, id?: string) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
@@ -109,7 +149,7 @@ export async function upsertProduct(data: any, id?: string) {
       data.flashSaleActive && data.flashSaleEndDate
         ? new Date(data.flashSaleEndDate)
         : null,
-    flashSaleStock: data.flashSaleActive ? data.flashSaleStock : 0,
+    flashSaleStock: data.flashSaleActive ? data.flashSaleStock || 0 : 0,
     ageRange: data.ageRange || null,
     primarySkill: data.primarySkill || null,
     educationalGoal: data.educationalGoal || null,
@@ -137,7 +177,7 @@ export async function upsertProduct(data: any, id?: string) {
         // Insert new items
         if (data.comboItems.length > 0) {
           await prisma.comboItem.createMany({
-            data: data.comboItems.map((c: any) => ({
+            data: data.comboItems.map((c: ComboItemData) => ({
               comboId: id,
               productId: c.productId,
               quantity: c.quantity || 1,
@@ -150,13 +190,8 @@ export async function upsertProduct(data: any, id?: string) {
 
       // 3. Handle Variants
       if (data.variants && data.variants.length > 0) {
-        // Delete old variants that are not in the new list (if they don't have an ID, or if we just want to recreate them)
-        // Simplest approach: Delete all and recreate, or update existing and create new.
-        // Let's delete all existing variants for this product and recreate them to avoid orphans.
-        // Note: This might break CartItem/OrderItem links if they rely on variantId!
-        // A safer approach: Update existing, create new, delete missing.
         const existingVariants = await prisma.productVariant.findMany({ where: { productId: id } });
-        const incomingIds = data.variants.map((v: any) => v.id).filter(Boolean);
+        const incomingIds = data.variants.map((v: VariantData) => v.id).filter(Boolean);
         
         // Delete variants not in the incoming list
         const variantsToDelete = existingVariants.filter(ev => !incomingIds.includes(ev.id));
@@ -194,8 +229,6 @@ export async function upsertProduct(data: any, id?: string) {
             });
           }
         }
-      } else {
-        // If no variants provided, maybe create a default one? Or leave it empty.
       }
     } else {
       const slug =
@@ -212,7 +245,7 @@ export async function upsertProduct(data: any, id?: string) {
       // Handle Combo Items for new product
       if (data.isCombo && data.comboItems && data.comboItems.length > 0) {
         await prisma.comboItem.createMany({
-          data: data.comboItems.map((c: any) => ({
+          data: data.comboItems.map((c: ComboItemData) => ({
             comboId: newProduct.id,
             productId: c.productId,
             quantity: c.quantity || 1,
@@ -223,7 +256,7 @@ export async function upsertProduct(data: any, id?: string) {
       // Handle Variants for new product
       if (data.variants && data.variants.length > 0) {
         await prisma.productVariant.createMany({
-          data: data.variants.map((v: any) => ({
+          data: data.variants.map((v: VariantData) => ({
             productId: newProduct.id,
             attributes: v.attributes,
             price: v.price,
@@ -523,7 +556,7 @@ export async function createAdminAccount(data: {
 
     if (existingUser) {
       // If user exists, just update their role, name and password if provided
-      const updateData: any = { role: data.role, name: data.name };
+      const updateData: { role?: string; name?: string; password?: string } = { role: data.role, name: data.name };
       if (data.password) {
         updateData.password = await bcrypt.hash(data.password, 10);
       }

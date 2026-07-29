@@ -2,7 +2,6 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Plus, Edit, Trash2, Search, Layers } from "lucide-react";
 import { deleteProduct } from "@/actions/product";
-import Image from "next/image";
 
 export const metadata = {
   title: "Quản lý Combo - Admin",
@@ -18,7 +17,7 @@ export default async function AdminCombosPage({
   const currentPage = Math.max(1, Number(resolvedParams.page) || 1);
   const itemsPerPage = 10;
 
-  const whereClause: any = { isCombo: true };
+  const whereClause: { isCombo: boolean; title?: { contains: string } } = { isCombo: true };
   if (query) {
     whereClause.title = { contains: query };
   }
