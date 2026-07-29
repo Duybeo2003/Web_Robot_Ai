@@ -12,7 +12,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
   const discountPercent = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
   
   return (
-    <div className="group relative bg-white h-full flex flex-col hover:shadow-lg transition-all duration-300 rounded-sm border border-transparent hover:border-border overflow-hidden">
+    <div className="group relative bg-white h-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
       
       {/* Badges */}
       <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">

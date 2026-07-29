@@ -109,20 +109,20 @@ export default async function Home() {
       />
 
       <ProductCarousel
-        title="ĐỒ CHƠI TƯ DUY LOGIC"
-        categoryLink="/shop?type=DO_CHOI_LOGIC"
-        subLinkText="Rubik & Xếp Hình"
-        products={logicProducts}
-        badgeColor="bg-[#F44336]"
-        userWishlistIds={userWishlistIds}
-      />
-
-      <ProductCarousel
         title="ROBOT AI GIÁO DỤC"
         categoryLink="/shop?type=ROBOT_STEM"
         subLinkText="Robot mBot"
         products={robotProducts}
         badgeColor="bg-[#FF3300]"
+        userWishlistIds={userWishlistIds}
+      />
+
+      <ProductCarousel
+        title="ĐỒ CHƠI TƯ DUY LOGIC"
+        categoryLink="/shop?type=DO_CHOI_LOGIC"
+        subLinkText="Rubik & Xếp Hình"
+        products={logicProducts}
+        badgeColor="bg-[#F44336]"
         userWishlistIds={userWishlistIds}
       />
     </div>

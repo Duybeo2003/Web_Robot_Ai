@@ -219,7 +219,7 @@ export function ProductForm({
         </div>
 
         <div className="grid grid-cols-2 gap-4">
-          <div className="flex flex-col justify-end gap-2">
+          <div className="flex flex-col justify-start gap-2">
             <Label htmlFor="price">Giá bán hiện tại (VNĐ)</Label>
             <Input
               id="price"
@@ -232,7 +232,7 @@ export function ProductForm({
               required
             />
           </div>
-          <div className="flex flex-col justify-end gap-2">
+          <div className="flex flex-col justify-start gap-2">
             <Label htmlFor="originalPrice">Giá gốc (VNĐ) - Tuỳ chọn</Label>
             <Input
               id="originalPrice"
