@@ -39,25 +39,8 @@ export default async function EditComboPage({
     notFound();
   }
 
-  const serializedProduct = {
-    ...product,
-    price: Number(product.price),
-    originalPrice: product.originalPrice
-      ? Number(product.originalPrice)
-      : undefined,
-    comboItems: product.comboItems?.map((ci) => ({
-      ...ci,
-      product: {
-        ...ci.product,
-        price: Number(ci.product.price),
-      },
-    })),
-  };
-
-  const serializedAvailableProducts = availableProducts.map((p) => ({
-    ...p,
-    price: Number(p.price),
-  }));
+  const serializedProduct = JSON.parse(JSON.stringify(product));
+  const serializedAvailableProducts = JSON.parse(JSON.stringify(availableProducts));
 
   return (
     <div className="space-y-6">

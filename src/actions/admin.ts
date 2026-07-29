@@ -3,6 +3,7 @@
 import { auth } from "@/auth";
 import { PrismaClient } from "@prisma/client";
 import { revalidatePath } from "next/cache";
+import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
@@ -495,7 +496,13 @@ export async function updateSettings(data: Record<string, string>) {
   }
 }
 
-export async function addAdminByPhone(phoneNumber: string, role: "ADMIN" | "STORE_MANAGER") {
+export async function createAdminAccount(data: {
+  name: string;
+  email: string;
+  phoneNumber: string;
+  password?: string;
+  role: "ADMIN" | "STORE_MANAGER";
+}) {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
@@ -508,22 +515,41 @@ export async function addAdminByPhone(phoneNumber: string, role: "ADMIN" | "STOR
     return { success: false, error: "Unauthorized" };
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { phoneNumber },
+    const existingUser = await prisma.user.findFirst({
+      where: {
+        OR: [{ email: data.email }, { phoneNumber: data.phoneNumber }],
+      },
     });
 
-    if (!user) {
-      return { success: false, error: "Không tìm thấy người dùng với số điện thoại này. Người dùng cần đăng nhập ít nhất một lần để hệ thống ghi nhận." };
-    }
+    if (existingUser) {
+      // If user exists, just update their role, name and password if provided
+      const updateData: any = { role: data.role, name: data.name };
+      if (data.password) {
+        updateData.password = await bcrypt.hash(data.password, 10);
+      }
 
-    if (user.role === role) {
-      return { success: false, error: "Người dùng này đã có quyền này rồi." };
-    }
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: updateData,
+      });
+    } else {
+      // Create new user
+      if (!data.password) {
+        return { success: false, error: "Mật khẩu là bắt buộc khi tạo mới người dùng" };
+      }
+      
+      const hashedPassword = await bcrypt.hash(data.password, 10);
 
-    await prisma.user.update({
-      where: { id: user.id },
-      data: { role },
-    });
+      await prisma.user.create({
+        data: {
+          name: data.name,
+          email: data.email,
+          phoneNumber: data.phoneNumber,
+          password: hashedPassword,
+          role: data.role,
+        },
+      });
+    }
     
     revalidatePath("/admin/admins");
     return { success: true };
