@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
-export function NewPoForm({ products }: { products: any[] }) {
+export function NewPoForm({ products }: { products: Record<string, unknown>[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -70,7 +70,7 @@ export function NewPoForm({ products }: { products: any[] }) {
         <Label>Loại giao dịch</Label>
         <Select
           value={formData.type}
-          onValueChange={(val: any) => setFormData({ ...formData, type: val })}
+          onValueChange={(val: "IN" | "OUT") => setFormData({ ...formData, type: val })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Chọn loại giao dịch" />
@@ -86,7 +86,7 @@ export function NewPoForm({ products }: { products: any[] }) {
         <Label>Sản phẩm</Label>
         <Select
           value={formData.productId}
-          onValueChange={(val: any) =>
+          onValueChange={(val: string) =>
             setFormData({ ...formData, productId: val || "" })
           }
         >

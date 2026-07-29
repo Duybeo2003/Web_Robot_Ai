@@ -12,12 +12,10 @@ import {
 import {
   Package,
   AlertTriangle,
-  ArrowUpRight,
-  ArrowDownRight,
 } from "lucide-react";
 import { InventoryTable } from "./components/inventory-table";
 import { LowStockTable } from "./components/low-stock-table";
-import { Button, buttonVariants } from "@/components/ui/button";
+import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 

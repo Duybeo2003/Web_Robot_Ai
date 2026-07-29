@@ -1,6 +1,5 @@
 "use client";
 
-import { Button } from "@/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -23,7 +22,7 @@ export function UserActions({
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRoleChange = async (newRole: "USER" | "ADMIN") => {
+  const handleRoleChange = async (newRole: "USER" | "ADMIN" | "STORE_MANAGER") => {
     setIsLoading(true);
     const result = await updateUserRole(userId, newRole);
     setIsLoading(false);
@@ -59,10 +58,16 @@ export function UserActions({
         <DropdownMenuLabel>Hành động</DropdownMenuLabel>
         <DropdownMenuSeparator />
         {currentRole === "USER" ? (
-          <DropdownMenuItem onClick={() => handleRoleChange("ADMIN")}>
-            <ShieldCheck className="mr-2 h-4 w-4 text-green-600" />
-            <span>Thăng cấp Admin</span>
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem onClick={() => handleRoleChange("STORE_MANAGER")}>
+              <ShieldCheck className="mr-2 h-4 w-4 text-blue-600" />
+              <span>Thăng cấp Quản lý (Cấp 2)</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleRoleChange("ADMIN")}>
+              <ShieldCheck className="mr-2 h-4 w-4 text-green-600" />
+              <span>Thăng cấp Admin (Cấp 1)</span>
+            </DropdownMenuItem>
+          </>
         ) : (
           <DropdownMenuItem onClick={() => handleRoleChange("USER")}>
             <ShieldAlert className="mr-2 h-4 w-4 text-orange-600" />

@@ -1,3 +1,5 @@
+/* eslint-disable react-hooks/exhaustive-deps */
+/* eslint-disable @typescript-eslint/no-explicit-any */
 "use client";
 
 import { useState, useEffect } from "react";
@@ -10,6 +12,7 @@ export interface Variant {
   id?: string;
   attributes: Record<string, string>;
   price: number;
+  originalPrice?: number | null;
   inventoryCount: number;
   sku?: string;
   imageUrl?: string;
@@ -37,7 +40,8 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
       });
       setOptionGroups(Object.entries(groups).map(([name, set]) => ({ name, values: Array.from(set) })));
     }
-  }, [variants]); // intentionally only run on initial load or variants change when groups are empty
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [variants]);
 
   const generateVariants = () => {
     if (optionGroups.length === 0) {
@@ -50,7 +54,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
     if (validGroups.length === 0) return;
 
     // Cartesian product
-    const cartesian = (arrays: any[][]) => {
+    const cartesian = (arrays: Record<string, string>[][]) => {
       return arrays.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
     };
 
@@ -58,7 +62,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
     const combinations = groupValues.length > 1 ? cartesian(groupValues) : groupValues[0].map(x => [x]);
     
     const newVariants: Variant[] = combinations.map(comb => {
-      const attrs = (comb as any[]).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      const attrs = (comb as Record<string, string>[]).reduce((acc, curr) => ({ ...acc, ...curr }), {});
       
       // Try to find existing variant to keep its data
       const existing = variants.find(v => {
@@ -71,6 +75,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
       return {
         attributes: attrs,
         price: basePrice,
+        originalPrice: null,
         inventoryCount: 0,
         sku: "",
         imageUrl: ""
@@ -165,6 +170,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
             <thead className="bg-neutral-100 text-neutral-600">
               <tr>
                 <th className="px-4 py-3 font-semibold whitespace-nowrap">Tên Phân Loại</th>
+                <th className="px-4 py-3 font-semibold min-w-[120px]">Giá Gốc (VNĐ)</th>
                 <th className="px-4 py-3 font-semibold min-w-[120px]">Giá Bán (VNĐ)</th>
                 <th className="px-4 py-3 font-semibold min-w-[100px]">Tồn kho</th>
                 <th className="px-4 py-3 font-semibold min-w-[120px]">Mã SKU</th>
@@ -177,6 +183,15 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
                 <tr key={idx} className="border-t hover:bg-neutral-50">
                   <td className="px-4 py-3 font-medium text-indigo-700 whitespace-nowrap">
                     {Object.values(v.attributes).join(" - ")}
+                  </td>
+                  <td className="px-4 py-3">
+                    <Input 
+                      type="number" 
+                      value={v.originalPrice || ""} 
+                      onChange={(e) => updateVariant(idx, "originalPrice", e.target.value ? Number(e.target.value) : null)} 
+                      className="h-8"
+                      placeholder="Không"
+                    />
                   </td>
                   <td className="px-4 py-3">
                     <Input 

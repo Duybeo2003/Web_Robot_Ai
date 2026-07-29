@@ -4,6 +4,8 @@ import { Plus, Edit, Trash2, Search, Package } from "lucide-react";
 import { deleteProduct } from "@/actions/product";
 import Image from "next/image";
 
+import { Prisma } from "@prisma/client";
+
 export const metadata = {
   title: "Quản lý sản phẩm - Admin",
 };
@@ -18,7 +20,7 @@ export default async function AdminProductsPage({
   const currentPage = Math.max(1, Number(resolvedParams.page) || 1);
   const itemsPerPage = 10;
 
-  const whereClause: any = { isCombo: false };
+  const whereClause: Prisma.ProductWhereInput = { isCombo: false };
   if (query) {
     whereClause.title = { contains: query };
   }

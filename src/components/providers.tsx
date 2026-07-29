@@ -1,6 +1,5 @@
 "use client";
 
-import { ThemeProvider as NextThemesProvider } from "next-themes";
 import { SessionProvider } from "next-auth/react";
 
 import { TooltipProvider } from "@/components/ui/tooltip";

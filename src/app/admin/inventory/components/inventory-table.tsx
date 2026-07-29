@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
-export function InventoryTable({ transactions }: { transactions: any[] }) {
+export function InventoryTable({ transactions }: { transactions: Record<string, unknown>[] }) {
   if (transactions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">
@@ -21,7 +21,7 @@ export function InventoryTable({ transactions }: { transactions: any[] }) {
     );
   }
 
-  const formatPrice = (price: any) => {
+  const formatPrice = (price: unknown) => {
     if (!price) return "-";
     return new Intl.NumberFormat("vi-VN", {
       style: "currency",

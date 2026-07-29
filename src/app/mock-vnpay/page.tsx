@@ -1,6 +1,6 @@
 "use client";
 
-import { useSearchParams, useRouter } from "next/navigation";
+import { useSearchParams } from "next/navigation";
 import { Suspense } from "react";
 import { CheckCircle2, XCircle, CreditCard, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";

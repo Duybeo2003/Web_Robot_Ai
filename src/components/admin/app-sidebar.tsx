@@ -67,9 +67,13 @@ const systemGroup = [
   { title: "Cài đặt", url: "/admin/settings", icon: Settings },
 ];
 
-export function AppSidebar() {
+export function AppSidebar({ role = "ADMIN" }: { role?: string }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
+  
+  const filteredSystemGroup = role === "STORE_MANAGER" 
+    ? systemGroup.filter(item => item.url !== "/admin/admins")
+    : systemGroup;
 
   const renderGroup = (label: string, items: typeof overviewGroup) => (
     <SidebarGroup>
@@ -142,7 +146,7 @@ export function AppSidebar() {
         <div className="px-4 py-2 opacity-50">
           <SidebarSeparator />
         </div>
-        {renderGroup("Hệ thống", systemGroup)}
+        {renderGroup("Hệ thống", filteredSystemGroup)}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-orange-100 bg-orange-50/30">

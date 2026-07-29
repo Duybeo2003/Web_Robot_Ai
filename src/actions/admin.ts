@@ -173,6 +173,7 @@ export async function upsertProduct(data: any, id?: string) {
               data: {
                 attributes: variant.attributes,
                 price: variant.price,
+                originalPrice: variant.originalPrice || null,
                 inventoryCount: variant.inventoryCount,
                 sku: variant.sku || null,
                 imageUrl: variant.imageUrl || null,
@@ -184,6 +185,7 @@ export async function upsertProduct(data: any, id?: string) {
                 productId: id,
                 attributes: variant.attributes,
                 price: variant.price,
+                originalPrice: variant.originalPrice || null,
                 inventoryCount: variant.inventoryCount,
                 sku: variant.sku || null,
                 imageUrl: variant.imageUrl || null,
@@ -224,6 +226,7 @@ export async function upsertProduct(data: any, id?: string) {
             productId: newProduct.id,
             attributes: v.attributes,
             price: v.price,
+            originalPrice: v.originalPrice || null,
             inventoryCount: v.inventoryCount,
             sku: v.sku || null,
             imageUrl: v.imageUrl || null,
@@ -240,7 +243,7 @@ export async function upsertProduct(data: any, id?: string) {
   }
 }
 
-export async function updateUserRole(userId: string, role: "USER" | "ADMIN") {
+export async function updateUserRole(userId: string, role: "USER" | "ADMIN" | "STORE_MANAGER") {
   const session = await auth();
   if (!session?.user?.id) return { success: false, error: "Unauthorized" };
 
@@ -444,5 +447,50 @@ export async function deleteReview(id: string) {
   } catch (error) {
     console.error("Failed to delete review:", error);
     return { success: false, error: "Failed to delete review." };
+  }
+}
+
+export async function getSettings() {
+  try {
+    const settings = await prisma.setting.findMany();
+    const settingsMap = settings.reduce((acc, setting) => {
+      acc[setting.key] = setting.value;
+      return acc;
+    }, {} as Record<string, string>);
+    return { success: true, data: settingsMap };
+  } catch (error) {
+    console.error("Failed to get settings:", error);
+    return { success: false, error: "Failed to fetch settings" };
+  }
+}
+
+export async function updateSettings(data: Record<string, string>) {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (currentUser?.role !== "ADMIN")
+    return { success: false, error: "Unauthorized" };
+
+  try {
+    const promises = Object.entries(data).map(([key, value]) => {
+      return prisma.setting.upsert({
+        where: { key },
+        update: { value },
+        create: { key, value },
+      });
+    });
+
+    await prisma.$transaction(promises);
+    revalidatePath("/admin/settings");
+    revalidatePath("/"); // Revalidate storefront to reflect new settings
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to update settings:", error);
+    return { success: false, error: "Failed to update settings" };
   }
 }

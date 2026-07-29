@@ -24,13 +24,13 @@ export default async function AdminLayout({
     select: { role: true },
   });
 
-  if (user?.role !== "ADMIN") {
+  if (user?.role !== "ADMIN" && user?.role !== "STORE_MANAGER") {
     redirect("/");
   }
 
   return (
     <SidebarProvider>
-      <AppSidebar />
+      <AppSidebar role={user.role} />
       <div className="flex flex-1 flex-col overflow-hidden min-h-screen bg-[#F8F9FA]">
         <header className="flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm z-10 sticky top-0">
           <SidebarTrigger className="text-[#FF5722]" />

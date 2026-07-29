@@ -11,12 +11,29 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { UserActions } from "../users/components/user-actions";
 
+import { redirect } from "next/navigation";
+import { auth } from "@/auth";
+
 const prisma = new PrismaClient();
 
 export default async function AdminManagementPage() {
+  const session = await auth();
+  if (!session?.user?.id) redirect("/");
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (currentUser?.role !== "ADMIN") {
+    redirect("/admin");
+  }
+
   const users = await prisma.user.findMany({
     where: {
-      role: "ADMIN",
+      role: {
+        in: ["ADMIN", "STORE_MANAGER"],
+      },
     },
     orderBy: { createdAt: "desc" },
     include: {
@@ -69,7 +86,7 @@ export default async function AdminManagementPage() {
                     <Badge
                       variant={user.role === "ADMIN" ? "default" : "secondary"}
                     >
-                      {user.role}
+                      {user.role === "STORE_MANAGER" ? "Quản lý (Cấp 2)" : user.role}
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">

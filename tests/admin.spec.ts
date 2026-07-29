@@ -7,7 +7,6 @@ test.describe("Admin Dashboard", () => {
   test.describe.configure({ mode: "serial" });
 
   const adminPhone = "+84999999888";
-  let adminId: string;
 
   test.beforeAll(async () => {
     // Ensure admin user exists
@@ -28,7 +27,6 @@ test.describe("Admin Dashboard", () => {
         data: { role: "ADMIN" },
       });
     }
-    adminId = adminUser.id;
   });
 
   test.afterAll(async () => {

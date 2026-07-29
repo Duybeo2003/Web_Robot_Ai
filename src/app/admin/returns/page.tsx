@@ -12,7 +12,7 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { RmaActionDropdown } from "./components/rma-action-dropdown";
-import Image from "next/image";
+// import Image from "next/image";
 
 export default async function AdminReturnsPage() {
   const session = await auth();

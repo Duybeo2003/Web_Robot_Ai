@@ -233,6 +233,7 @@ model ProductVariant {
   attributes     Json
   
   price          Decimal     @db.Decimal(10, 2)
+  originalPrice  Decimal?    @db.Decimal(10, 2)
   inventoryCount Int         @default(0)
   sku            String?
   imageUrl       String?
@@ -375,6 +376,13 @@ model ReturnRequest {
   @@index([orderId])
   @@index([status])
   @@index([createdAt])
+}
+
+model Setting {
+  id        String   @id @default(cuid())
+  key       String   @unique
+  value     String   @db.Text
+  updatedAt DateTime @updatedAt
 }
 
 model Commission {

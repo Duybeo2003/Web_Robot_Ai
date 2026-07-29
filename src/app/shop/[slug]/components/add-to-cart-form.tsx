@@ -13,6 +13,7 @@ interface AddToCartProps {
     id: string;
     title: string;
     price: number;
+    originalPrice?: number | null;
     slug: string;
     imageUrl: string;
     supplyType?: string;
@@ -33,7 +34,14 @@ export function AddToCartForm({ product }: AddToCartProps) {
 
   const hasVariants = product.variants && product.variants.length > 0;
   const currentPrice = hasVariants && selectedVariant ? Number(selectedVariant.price) : product.price;
+  const currentOriginalPrice = hasVariants && selectedVariant && selectedVariant.originalPrice 
+    ? Number(selectedVariant.originalPrice) 
+    : product.originalPrice;
   const currentInventory = hasVariants && selectedVariant ? Number(selectedVariant.inventoryCount) : product.inventoryCount;
+  
+  const discountPercent = currentOriginalPrice && currentOriginalPrice > currentPrice
+    ? Math.round(((currentOriginalPrice - currentPrice) / currentOriginalPrice) * 100)
+    : 0;
   
   const isPreOrder = product.supplyType === "PRE_ORDER";
   const isAffiliateSell = product.supplyType === "AFFILIATE_SELL";
@@ -119,8 +127,20 @@ export function AddToCartForm({ product }: AddToCartProps) {
     <div>
       {/* Price Display Override if Variant Selected */}
       {hasVariants && selectedVariant && (
-        <div className="mb-6 text-2xl font-bold text-[#FF5722]">
-          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentPrice)}
+        <div className="mb-6 flex items-end gap-3">
+          <div className="text-2xl font-bold text-[#FF5722]">
+            {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentPrice)}
+          </div>
+          {discountPercent > 0 && (
+            <>
+              <span className="text-sm text-neutral-400 line-through mb-1">
+                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentOriginalPrice!)}
+              </span>
+              <span className="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-sm mb-1">
+                -{discountPercent}%
+              </span>
+            </>
+          )}
         </div>
       )}
 

@@ -22,9 +22,8 @@ type Step = "AGE" | "SKILL" | "RESULT";
 export function GiftRecommender() {
   const [step, setStep] = useState<Step>("AGE");
   const [age, setAge] = useState<string>("");
-  const [skill, setSkill] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<any[]>([]);
+  const [results, setResults] = useState<Record<string, unknown>[]>([]);
 
   const handleAgeSelect = (selectedAge: string) => {
     setAge(selectedAge);
@@ -32,7 +31,6 @@ export function GiftRecommender() {
   };
 
   const handleSkillSelect = async (selectedSkill: string) => {
-    setSkill(selectedSkill);
     setStep("RESULT");
     setLoading(true);
     const data = await getGiftRecommendations(age, selectedSkill);

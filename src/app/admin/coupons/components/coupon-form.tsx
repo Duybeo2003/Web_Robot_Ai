@@ -44,7 +44,7 @@ export function CouponForm({
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema) as any,
+    resolver: zodResolver(formSchema),
     defaultValues: {
       code: initialData?.code || "",
       discountPercent: initialData?.discountPercent || 10,

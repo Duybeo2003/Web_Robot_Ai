@@ -252,7 +252,7 @@ const sanitizedProduct = {
                 product={{
                   ...rp,
                   price: Number(rp.price)
-                } as unknown as { id: string; title: string; price: number; slug: string; imageUrl: string; supplyType?: string; inventoryCount: number; type: string; category: any; isCombo: boolean; flashSaleActive: boolean; flashSalePrice: number | null; flashSaleStock: number | null; variants?: any[] }}
+                } as unknown as { id: string; title: string; price: number; slug: string; imageUrl: string; supplyType?: string; inventoryCount: number; type: string; category: Record<string, unknown>; isCombo: boolean; flashSaleActive: boolean; flashSalePrice: number | null; flashSaleStock: number | null; variants?: Record<string, unknown>[] }}
                 isWished={userWishlistIds.includes(rp.id)}
                 action={
                   <AddToCartButton 

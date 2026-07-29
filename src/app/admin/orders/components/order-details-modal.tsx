@@ -14,14 +14,13 @@ import {
   MapPin,
   Phone,
   CreditCard,
-  Calendar,
   ShoppingBag,
   Truck,
 } from "lucide-react";
 import { OrderStatusUpdater } from "../order-status-updater";
 import { format } from "date-fns";
 
-export function OrderDetailsModal({ order }: { order: any }) {
+export function OrderDetailsModal({ order }: { order: Record<string, unknown> }) {
   return (
     <Sheet>
       <SheetTrigger
@@ -77,8 +76,8 @@ export function OrderDetailsModal({ order }: { order: any }) {
                           btn.innerText = originalText;
                           btn.disabled = false;
                         }
-                      } catch (err) {
-                        alert("Lỗi kết nối");
+                      } catch {
+                        alert("Lỗi kết nối khi gọi vận chuyển");
                         btn.innerText = originalText;
                         btn.disabled = false;
                       }
