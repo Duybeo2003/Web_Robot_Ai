@@ -40,6 +40,8 @@ export default async function EditProductPage({
   const serializedProduct = JSON.parse(JSON.stringify(product));
   const serializedAvailableProducts = JSON.parse(JSON.stringify(availableProducts));
 
+  const serializedCategories = JSON.parse(JSON.stringify(categories));
+
   return (
     <div className="space-y-6">
       <div>
@@ -53,7 +55,7 @@ export default async function EditProductPage({
 
       <ProductForm
         initialData={serializedProduct}
-        categories={categories}
+        categories={serializedCategories}
         availableProducts={serializedAvailableProducts}
       />
     </div>

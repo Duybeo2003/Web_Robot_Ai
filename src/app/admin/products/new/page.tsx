@@ -24,6 +24,8 @@ export default async function NewProductPage() {
     price: Number(p.price),
   }));
 
+  const serializedCategories = JSON.parse(JSON.stringify(categories));
+
   return (
     <div className="space-y-6">
       <div>
@@ -34,7 +36,7 @@ export default async function NewProductPage() {
       </div>
 
       <ProductForm
-        categories={categories}
+        categories={serializedCategories}
         availableProducts={serializedAvailableProducts}
       />
     </div>

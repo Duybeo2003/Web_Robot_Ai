@@ -41,21 +41,22 @@ export default async function EditComboPage({
 
   const serializedProduct = JSON.parse(JSON.stringify(product));
   const serializedAvailableProducts = JSON.parse(JSON.stringify(availableProducts));
+  const serializedCategories = JSON.parse(JSON.stringify(categories));
 
   return (
     <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold tracking-tight text-indigo-700">
+        <h2 className="text-2xl font-bold tracking-tight">
           Chỉnh sửa Gói Combo
         </h2>
         <p className="text-muted-foreground">
-          Cập nhật thông tin chi tiết cho gói combo: {product.title}
+          Cập nhật thông tin chi tiết cho Gói Combo: {product.title}
         </p>
       </div>
 
       <ProductForm
         initialData={serializedProduct}
-        categories={categories}
+        categories={serializedCategories}
         availableProducts={serializedAvailableProducts}
         forceComboMode={true}
       />
