@@ -14,6 +14,8 @@ import { UserActions } from "../users/components/user-actions";
 import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 
+import { AddAdminModal } from "./components/add-admin-modal";
+
 const prisma = new PrismaClient();
 
 export default async function AdminManagementPage() {
@@ -45,11 +47,14 @@ export default async function AdminManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h2 className="text-2xl font-bold tracking-tight">Quản trị viên</h2>
-        <p className="text-muted-foreground">
-          Quản lý các tài khoản có quyền quản trị hệ thống.
-        </p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-2xl font-bold tracking-tight">Quản trị viên</h2>
+          <p className="text-muted-foreground">
+            Quản lý các tài khoản có quyền quản trị hệ thống.
+          </p>
+        </div>
+        <AddAdminModal />
       </div>
 
       <div className="rounded-md border bg-white">

@@ -53,6 +53,7 @@ export default async function EditProductPage({
     variants: product.variants?.map((v) => ({
       ...v,
       price: Number(v.price),
+      originalPrice: v.originalPrice ? Number(v.originalPrice) : null,
     })),
   };
 

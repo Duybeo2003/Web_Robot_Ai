@@ -494,3 +494,42 @@ export async function updateSettings(data: Record<string, string>) {
     return { success: false, error: "Failed to update settings" };
   }
 }
+
+export async function addAdminByPhone(phoneNumber: string, role: "ADMIN" | "STORE_MANAGER") {
+  const session = await auth();
+  if (!session?.user?.id) return { success: false, error: "Unauthorized" };
+
+  const currentUser = await prisma.user.findUnique({
+    where: { id: session.user.id },
+    select: { role: true },
+  });
+
+  if (currentUser?.role !== "ADMIN")
+    return { success: false, error: "Unauthorized" };
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: { phoneNumber },
+    });
+
+    if (!user) {
+      return { success: false, error: "Không tìm thấy người dùng với số điện thoại này. Người dùng cần đăng nhập ít nhất một lần để hệ thống ghi nhận." };
+    }
+
+    if (user.role === role) {
+      return { success: false, error: "Người dùng này đã có quyền này rồi." };
+    }
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { role },
+    });
+    
+    revalidatePath("/admin/admins");
+    return { success: true };
+  } catch (error) {
+    console.error("Failed to add admin:", error);
+    return { success: false, error: "Có lỗi xảy ra khi thêm quản trị viên" };
+  }
+}
+
