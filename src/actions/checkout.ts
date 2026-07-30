@@ -18,6 +18,15 @@ export async function processCheckout(data: {
   const session = await auth();
   let userId = session?.user?.id;
 
+  if (userId) {
+    const existingUser = await prisma.user.findUnique({
+      where: { id: userId },
+    });
+    if (!existingUser) {
+      return { error: "Tài khoản của bạn không tồn tại (có thể do hệ thống vừa được phục hồi dữ liệu). Vui lòng Đăng xuất và Đăng nhập lại để tiếp tục." };
+    }
+  }
+
   // GUEST CHECKOUT LOGIC: If no logged in user, find or create shadow user based on phone number
   if (!userId) {
     if (!data.receiverPhone) {
