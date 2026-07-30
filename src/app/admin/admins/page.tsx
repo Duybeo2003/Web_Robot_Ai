@@ -64,7 +64,6 @@ export default async function AdminManagementPage() {
               <TableHead>Khách hàng</TableHead>
               <TableHead>Số điện thoại</TableHead>
               <TableHead>Ngày tham gia</TableHead>
-              <TableHead>Số đơn hàng</TableHead>
               <TableHead>Vai trò</TableHead>
               <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
@@ -86,7 +85,6 @@ export default async function AdminManagementPage() {
                   <TableCell>
                     {format(new Date(user.createdAt), "dd/MM/yyyy")}
                   </TableCell>
-                  <TableCell>{user._count.orders}</TableCell>
                   <TableCell>
                     <Badge
                       variant={user.role === "ADMIN" ? "default" : "secondary"}

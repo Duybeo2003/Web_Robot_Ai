@@ -139,7 +139,7 @@ export function AuthModal() {
 
     setIsLoading(true);
     const result = await signIn("credentials-password", {
-      email,
+      identifier: email,
       password,
       redirect: false,
     });
@@ -215,12 +215,12 @@ export function AuthModal() {
                       htmlFor="email"
                       className="text-sm font-medium text-[#2C2C2C]"
                     >
-                      Email
+                      Email hoặc Số điện thoại
                     </Label>
                     <Input
                       id="email"
-                      type="email"
-                      placeholder="admin@gmail.com"
+                      type="text"
+                      placeholder="admin@gmail.com hoặc 0912345678"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"

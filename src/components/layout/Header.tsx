@@ -156,22 +156,22 @@ export function Header() {
                   <DropdownMenuLabel className="font-normal">
                     <div className="flex flex-col space-y-1">
                       <p className="text-sm font-medium leading-none">
-                        {session.user.name ||
-                          (session.user.role === "ADMIN"
+                        {session?.user?.name ||
+                          (["ADMIN", "STORE_MANAGER", "EDITOR"].includes(session?.user?.role as string)
                             ? "Quản trị viên"
                             : "Tài khoản của tôi")}
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
-                        {session.user.email ||
+                        {session?.user?.email ||
                           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                          (session.user as any).phoneNumber ||
+                          (session?.user as any)?.phoneNumber ||
                           ""}
                       </p>
                     </div>
                   </DropdownMenuLabel>
                 </DropdownMenuGroup>
                 <DropdownMenuSeparator />
-                {session.user.role === "ADMIN" ? (
+                {["ADMIN", "STORE_MANAGER", "EDITOR"].includes(session?.user?.role as string) ? (
                   <DropdownMenuItem className="cursor-pointer">
                     <Link href="/admin" className="w-full flex items-center">
                       <LayoutDashboard className="mr-2 h-4 w-4" />

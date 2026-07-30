@@ -25,21 +25,27 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       id: "credentials-password",
       name: "Tài khoản / Mật khẩu",
       credentials: {
-        email: {
-          label: "Email",
-          type: "email",
-          placeholder: "admin@gmail.com",
+        identifier: {
+          label: "Email hoặc Số điện thoại",
+          type: "text",
+          placeholder: "admin@gmail.com hoặc 0912345678",
         },
         password: { label: "Mật khẩu", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.email || !credentials?.password) return null;
+        if (!credentials?.identifier || !credentials?.password) return null;
 
-        const email = credentials.email as string;
+        const identifier = credentials.identifier as string;
         const password = credentials.password as string;
 
-        const user = await prisma.user.findUnique({
-          where: { email, deletedAt: null },
+        const user = await prisma.user.findFirst({
+          where: {
+            OR: [
+              { email: identifier },
+              { phoneNumber: identifier }
+            ],
+            deletedAt: null
+          },
         });
 
         if (!user || !user.password) {
