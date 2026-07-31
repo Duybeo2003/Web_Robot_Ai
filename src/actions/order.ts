@@ -49,6 +49,32 @@ export async function updateOrderStatus(
             }
           }
         }
+
+        // Refund used points if cancelled
+        if (order.pointsUsed > 0) {
+          await tx.user.update({
+            where: { id: order.userId },
+            data: { points: { increment: order.pointsUsed } }
+          });
+        }
+        
+        // Revoke earned points if it was already completed and now cancelled
+        if (order.status === "COMPLETED" && order.pointsEarned > 0) {
+           await tx.user.update({
+            where: { id: order.userId },
+            data: { points: { decrement: order.pointsEarned } }
+          });
+        }
+      }
+
+      // Reward points if order is successfully completed
+      if (order && order.status !== "COMPLETED" && status === "COMPLETED") {
+        if (order.pointsEarned > 0) {
+          await tx.user.update({
+            where: { id: order.userId },
+            data: { points: { increment: order.pointsEarned } }
+          });
+        }
       }
 
       await tx.order.update({
@@ -118,6 +144,14 @@ export async function cancelOrder(orderId: string) {
               });
             }
           }
+        }
+        
+        // Refund used points
+        if (orderToCancel.pointsUsed > 0) {
+          await tx.user.update({
+            where: { id: orderToCancel.userId },
+            data: { points: { increment: orderToCancel.pointsUsed } }
+          });
         }
       }
       await tx.order.update({

@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { MOCK_PRODUCTS } from "@/lib/mock-data";
 import Link from "next/link";
-import { Prisma } from "@prisma/client";
+import { Prisma, AgeRange, Skill } from "@prisma/client";
 import { AddToCartButton } from "./components/add-to-cart-button";
 import { ProductCard } from "@/components/ui/product-card";
 import { Search } from "lucide-react";
@@ -86,7 +86,7 @@ export default async function ShopPage({
     if (minAge !== undefined || maxAge !== undefined) {
       const minA = minAge ?? 3;
       const maxA = maxAge ?? 18;
-      const ageEnumMatches: Prisma.EnumAgeRangeFilter<"Product">["in"] = [];
+      const ageEnumMatches: AgeRange[] = [];
       
       if (minA <= 5 && maxA >= 3) ageEnumMatches.push("AGE_3_5");
       if (minA <= 8 && maxA >= 6) ageEnumMatches.push("AGE_6_8");
@@ -98,7 +98,7 @@ export default async function ShopPage({
       }
     }
     if (skillFilter) {
-      whereClause.primarySkill = skillFilter as Prisma.EnumSkillFilter<"Product">;
+      whereClause.primarySkill = skillFilter as Skill;
     }
     if (minPrice !== undefined || maxPrice !== undefined) {
       whereClause.price = {};

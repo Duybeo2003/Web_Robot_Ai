@@ -230,6 +230,20 @@ export function Header() {
                 <Menu className="h-5 w-5" />
                 <span className="font-bold">Danh mục sản phẩm</span>
               </div>
+              <div className="p-4 border-b border-border bg-neutral-50">
+                <form onSubmit={(e) => { handleSearch(e); setOpenMobileMenu(false); }} className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-10 pl-4 pr-10 border border-primary/30 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm bg-white"
+                  />
+                  <button type="submit" className="absolute right-0 top-0 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-primary">
+                    <Search className="h-4 w-4" />
+                  </button>
+                </form>
+              </div>
               <div className="flex flex-col py-2">
                 <Link
                   href="/shop?type=ROBOT_STEM"

@@ -13,6 +13,7 @@ export async function processCheckout(data: {
   paymentMethod: PaymentMethod;
   cartItems: { productId: string; quantity: number, variantId?: string | null }[];
   couponCode?: string;
+  pointsToUse?: number;
   affiliateRef?: string;
 }) {
   const session = await auth();
@@ -155,6 +156,9 @@ export async function processCheckout(data: {
       }
 
       // 1.5 Handle Coupon
+      let discountAmount = 0;
+      let isFreeship = false;
+      
       if (data.couponCode) {
         const coupon = await tx.coupon.findUnique({
           where: { code: data.couponCode },
@@ -166,16 +170,56 @@ export async function processCheckout(data: {
             (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit);
 
           if (isValid) {
-            totalAmount =
-              totalAmount - totalAmount * (coupon.discountPercent / 100);
+            // Check minOrderValue
+            if (coupon.minOrderValue && totalAmount < Number(coupon.minOrderValue)) {
+              throw new Error(`Mã giảm giá yêu cầu đơn hàng tối thiểu ${Number(coupon.minOrderValue).toLocaleString("vi-VN")}đ`);
+            }
+            
+            if (coupon.discountPercent) {
+              discountAmount += totalAmount * (coupon.discountPercent / 100);
+            } else if (coupon.discountValue) {
+              discountAmount += Number(coupon.discountValue);
+            }
+            
+            if (coupon.isFreeship) {
+              isFreeship = true;
+            }
+
             // increment usage count
             await tx.coupon.update({
               where: { id: coupon.id },
               data: { usageCount: { increment: 1 } },
             });
+          } else {
+             throw new Error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
           }
+        } else {
+           throw new Error("Mã giảm giá không tồn tại.");
         }
       }
+
+      // 1.6 Handle Loyalty Points (1 point = 1000 VND)
+      let pointsUsed = 0;
+      if (data.pointsToUse && data.pointsToUse > 0) {
+        const user = await tx.user.findUnique({ where: { id: userId } });
+        if (!user || user.points < data.pointsToUse) {
+           throw new Error("Bạn không đủ điểm thưởng.");
+        }
+        pointsUsed = data.pointsToUse;
+        discountAmount += pointsUsed * 1000;
+        
+        // Deduct points
+        await tx.user.update({
+          where: { id: userId },
+          data: { points: { decrement: pointsUsed } }
+        });
+      }
+      
+      // Calculate final total (ensure it doesn't go below 0)
+      totalAmount = Math.max(0, totalAmount - discountAmount);
+      
+      // Calculate points earned (10,000 VND = 1 point based on FINAL amount)
+      const pointsEarned = Math.floor(totalAmount / 10000);
 
       // 2 & 3. Create the Order with the verified total amount
       const newOrder = await tx.order.create({
@@ -186,6 +230,9 @@ export async function processCheckout(data: {
           shippingAddress: data.shippingAddress,
           receiverPhone: data.receiverPhone,
           paymentMethod: data.paymentMethod,
+          discountAmount,
+          pointsUsed,
+          pointsEarned,
           items: {
             create: orderItemsData,
           },

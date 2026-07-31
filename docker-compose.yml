@@ -24,6 +24,7 @@ services:
       - "3000:3000"
     environment:
       - DATABASE_URL=mysql://root:${DB_ROOT_PASSWORD:-root_password_123}@mysql:3306/${DB_NAME:-web_robot_ai}
+      - REDIS_URL=redis://redis:6379
       - AUTH_SECRET=${NEXTAUTH_SECRET:-your_nextauth_secret_key_here}
       - AUTH_URL=${NEXTAUTH_URL:-http://localhost:3000}
       - AUTH_TRUST_HOST=true
@@ -39,4 +40,22 @@ services:
     depends_on:
       mysql:
         condition: service_healthy
+      redis:
+        condition: service_healthy
 
+  redis:
+    image: redis:7-alpine
+    container_name: roboed-redis
+    restart: always
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  redis_data:

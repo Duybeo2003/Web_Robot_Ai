@@ -91,6 +91,7 @@ model User {
   image         String?
   phoneNumber   String?   @unique
   role          Role      @default(USER)
+  points        Int       @default(0)
   
   accounts      Account[]
   sessions      Session[]
@@ -292,6 +293,9 @@ model Order {
   paymentStatus   PaymentStatus @default(UNPAID)
   
   // State Machine for Kanban / Order processing
+  pointsEarned   Int     @default(0) // Số điểm kiếm được từ đơn này
+  pointsUsed     Int     @default(0) // Số điểm đã sử dụng để giảm giá
+  discountAmount Decimal @default(0) // Tiền giảm do coupon + points
   status          OrderStatus   @default(PENDING)
   
   items           OrderItem[]
@@ -393,8 +397,9 @@ model Commission {
   affiliateUser   User     @relation(fields: [affiliateUserId], references: [id])
   amount          Decimal  @db.Decimal(10, 2)
   status          CommissionStatus @default(PENDING)
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
 
   @@index([orderId])
   @@index([affiliateUserId])
@@ -407,7 +412,10 @@ model Commission {
 model Coupon {
   id              String   @id @default(cuid())
   code            String   @unique
-  discountPercent Int
+  discountPercent Int?     // Either percent
+  discountValue   Decimal? // Or exact value
+  minOrderValue   Decimal? // Giá trị đơn hàng tối thiểu để áp dụng
+  isFreeship      Boolean  @default(false)
   usageLimit      Int?
   usageCount      Int      @default(0)
   isActive        Boolean  @default(true)

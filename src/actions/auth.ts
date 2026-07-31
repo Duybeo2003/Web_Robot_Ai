@@ -2,12 +2,35 @@
 
 import { prisma } from "@/lib/prisma";
 import crypto from "crypto";
+import { redis } from "@/lib/redis";
 
 export async function generateOtp(phoneNumber: string) {
   try {
     // Basic validation
     if (!phoneNumber || phoneNumber.length < 9) {
       return { success: false, error: "Số điện thoại không hợp lệ." };
+    }
+
+    // RATE LIMITING: Max 3 OTPs per 5 minutes per phone number
+    const rateLimitKey = `rate_limit:otp:${phoneNumber}`;
+    
+    // We use a small fallback in case Redis fails or isn't running yet (optional, but good for robustness)
+    let requestsCount = 0;
+    try {
+      requestsCount = await redis.incr(rateLimitKey);
+      if (requestsCount === 1) {
+        await redis.expire(rateLimitKey, 300); // 5 minutes
+      }
+    } catch (redisError) {
+      console.warn("Redis error during rate limiting:", redisError);
+      // If Redis fails, we can optionally use DB or just let it pass
+    }
+
+    if (requestsCount > 3) {
+      return { 
+        success: false, 
+        error: "Bạn đã yêu cầu mã OTP quá nhiều lần. Vui lòng thử lại sau 5 phút." 
+      };
     }
 
     // Fix #6: Delete old OTPs for this phone number first to prevent accumulation

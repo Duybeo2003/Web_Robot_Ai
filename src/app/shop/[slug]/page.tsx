@@ -94,9 +94,34 @@ const sanitizedProduct = {
     isWished = userWishlistIds.includes(product.id)
   }
 
+  const schemaMarkup = {
+    "@context": "https://schema.org/",
+    "@type": "Product",
+    name: product.title,
+    image: product.imageUrl || "",
+    description: product.description.substring(0, 160),
+    sku: product.sku || product.id,
+    offers: {
+      "@type": "Offer",
+      url: `https://roboed.vn/shop/${product.slug}`,
+      priceCurrency: "VND",
+      price: Number(product.price),
+      availability:
+        Number(product.inventoryCount) > 0
+          ? "https://schema.org/InStock"
+          : "https://schema.org/OutOfStock",
+      itemCondition: "https://schema.org/NewCondition",
+    },
+  };
+
   return (
-    <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
-      {/* Breadcrumbs */}
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+      />
+      <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
+        {/* Breadcrumbs */}
       <div className="mb-8 text-sm text-muted-foreground flex items-center gap-2">
         <Link href="/" className="hover:text-[#FF5722] transition-colors">Trang chủ</Link>
         <span>/</span>
@@ -271,5 +296,6 @@ const sanitizedProduct = {
         </div>
       )}
     </div>
+    </>
   )
 }

@@ -24,6 +24,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
+  manifest: "/manifest.json",
   title: "RoboEd - Đồ chơi Công nghệ & Giáo dục STEM",
   description:
     "Cửa hàng RoboEd chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM giúp phát triển tư duy logic và kỹ năng lập trình cho trẻ.",

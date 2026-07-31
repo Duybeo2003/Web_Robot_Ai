@@ -41,7 +41,6 @@ export function GiftRecommender() {
   const reset = () => {
     setStep("AGE");
     setAge("");
-    setSkill("");
     setResults([]);
   };
 
