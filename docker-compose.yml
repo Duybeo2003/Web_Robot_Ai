@@ -8,8 +8,6 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password_123}
       MYSQL_DATABASE: ${DB_NAME:-web_robot_ai}
-    ports:
-      - "3306:3306"
     volumes:
       - /var/lib/mysql_data:/var/lib/mysql
     healthcheck:
