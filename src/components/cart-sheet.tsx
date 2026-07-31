@@ -14,17 +14,17 @@ import { Button } from "@/components/ui/button";
 import { Minus, Plus, Trash2, ShoppingBag, Truck } from "lucide-react";
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import { useRouter } from "next/navigation";
 
 export function CartSheet() {
   const router = useRouter();
   const { isOpen, closeCart } = useCartUI();
   const { items, updateQuantity, removeItem } = useCartStore();
-  const totalPrice = items.reduce(
+  const totalPrice = useMemo(() => items.reduce(
     (total, item) => total + item.price * item.quantity,
     0,
-  );
+  ), [items]);
 
   // Prevent hydration mismatch
   const [mounted, setMounted] = useState(false);

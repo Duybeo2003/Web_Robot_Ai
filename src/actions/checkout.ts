@@ -4,7 +4,7 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { PaymentMethod } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { sendOrderConfirmationEmail } from "./email";
+import { sendOrderConfirmationEmail } from "@/lib/email";
 
 export async function processCheckout(data: {
   receiverName?: string;
@@ -99,36 +99,36 @@ export async function processCheckout(data: {
           itemName = `${dbProduct.title} - ${Object.values(variant.attributes as Record<string, string>).join(' - ')}`;
         }
 
-        // 1. Check Inventory
-        if (currentInventory < cartItem.quantity) {
-          throw new Error(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
-        }
-        
-        // 2. Check Flash Sale
-        if (dbProduct.flashSaleActive) {
-          if (dbProduct.flashSaleStock !== null && dbProduct.flashSaleStock < cartItem.quantity) {
-            throw new Error(`Sản phẩm "${dbProduct.title}" chỉ còn ${dbProduct.flashSaleStock} suất Flash Sale.`);
-          }
-        }
-        
-        // 3. Deduct Inventory
+        // 1. Deduct Inventory FIRST (atomic), then check result
+        // This prevents race conditions where two concurrent requests both
+        // read "1 in stock" and both proceed to decrement.
         if (variant) {
-          await tx.productVariant.update({
+          const updatedVariant = await tx.productVariant.update({
             where: { id: variant.id },
             data: { inventoryCount: { decrement: cartItem.quantity } }
           });
+          if (updatedVariant.inventoryCount < 0) {
+            throw new Error(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
+          }
         } else {
-          await tx.product.update({
+          const updatedProduct = await tx.product.update({
             where: { id: dbProduct.id },
             data: {
               inventoryCount: { decrement: cartItem.quantity }
             }
           });
-          if (dbProduct.flashSaleStock !== null) {
-            await tx.product.update({
+          if (updatedProduct.inventoryCount < 0) {
+            throw new Error(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
+          }
+          // Deduct Flash Sale stock if applicable
+          if (dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null) {
+            const updatedFS = await tx.product.update({
               where: { id: dbProduct.id },
-              data: { flashSaleStock: dbProduct.flashSaleStock - cartItem.quantity },
+              data: { flashSaleStock: { decrement: cartItem.quantity } },
             });
+            if (updatedFS.flashSaleStock !== null && updatedFS.flashSaleStock < 0) {
+              throw new Error(`Sản phẩm "${dbProduct.title}" chỉ còn ${dbProduct.flashSaleStock} suất Flash Sale.`);
+            }
           }
         }
         
@@ -211,7 +211,12 @@ export async function processCheckout(data: {
       // 4. Clear the specific user's CartItem records
       const userCart = await tx.cart.findUnique({ where: { userId } });
       if (userCart) {
-        await tx.cartItem.deleteMany({ where: { cartId: userCart.id } });
+        await tx.cartItem.deleteMany({
+          where: {
+            cartId: userCart.id,
+            productId: { in: data.cartItems.map(i => i.productId) }
+          }
+        });
       }
 
       return newOrder;

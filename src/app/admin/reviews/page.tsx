@@ -12,11 +12,21 @@ import { ReviewActions } from "./components/review-actions";
 import { Star } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
+import { Button } from "@/components/ui/button";
 
 const prisma = new PrismaClient();
 
-export default async function AdminReviewsPage() {
+export default async function AdminReviewsPage(props: { searchParams: Promise<{ page?: string }> }) {
+  const searchParams = await props.searchParams;
+  const itemsPerPage = 20;
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const totalCount = await prisma.review.count();
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   const reviews = await prisma.review.findMany({
+    skip: (currentPage - 1) * itemsPerPage,
+    take: itemsPerPage,
     orderBy: { createdAt: "desc" },
     include: {
       user: true,
@@ -113,6 +123,25 @@ export default async function AdminReviewsPage() {
             )}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t">
+            <p className="text-sm text-muted-foreground">
+              Trang {currentPage} / {totalPages} (Tổng: {totalCount})
+            </p>
+            <div className="flex gap-2">
+              {currentPage > 1 && (
+                <Link href={`?page=${currentPage - 1}`}>
+                  <Button variant="outline" size="sm">← Trước</Button>
+                </Link>
+              )}
+              {currentPage < totalPages && (
+                <Link href={`?page=${currentPage + 1}`}>
+                  <Button variant="outline" size="sm">Sau →</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

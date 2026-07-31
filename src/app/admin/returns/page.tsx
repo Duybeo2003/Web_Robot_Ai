@@ -12,9 +12,12 @@ import {
 import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { RmaActionDropdown } from "./components/rma-action-dropdown";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 // import Image from "next/image";
 
-export default async function AdminReturnsPage() {
+export default async function AdminReturnsPage(props: { searchParams: Promise<{ page?: string }> }) {
+  const searchParams = await props.searchParams;
   const session = await auth();
 
   if (!session?.user?.id) {
@@ -29,7 +32,15 @@ export default async function AdminReturnsPage() {
     redirect("/");
   }
 
+  const itemsPerPage = 20;
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const totalCount = await prisma.returnRequest.count();
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   const returns = await prisma.returnRequest.findMany({
+    skip: (currentPage - 1) * itemsPerPage,
+    take: itemsPerPage,
     include: {
       user: { select: { name: true, phoneNumber: true, email: true } },
       order: true,
@@ -149,6 +160,25 @@ export default async function AdminReturnsPage() {
             )}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t">
+            <p className="text-sm text-muted-foreground">
+              Trang {currentPage} / {totalPages} (Tổng: {totalCount})
+            </p>
+            <div className="flex gap-2">
+              {currentPage > 1 && (
+                <Link href={`?page=${currentPage - 1}`}>
+                  <Button variant="outline" size="sm">← Trước</Button>
+                </Link>
+              )}
+              {currentPage < totalPages && (
+                <Link href={`?page=${currentPage + 1}`}>
+                  <Button variant="outline" size="sm">Sau →</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

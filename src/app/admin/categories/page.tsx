@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -21,8 +23,17 @@ import { Plus } from "lucide-react";
 
 const prisma = new PrismaClient();
 
-export default async function AdminCategoriesPage() {
+export default async function AdminCategoriesPage(props: { searchParams: Promise<{ page?: string }> }) {
+  const searchParams = props.searchParams;
+  const itemsPerPage = 20;
+  const currentPage = Number((await searchParams)?.page) || 1;
+
+  const totalCount = await prisma.category.count();
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   const categories = await prisma.category.findMany({
+    skip: (currentPage - 1) * itemsPerPage,
+    take: itemsPerPage,
     orderBy: { createdAt: "desc" },
     include: {
       _count: {
@@ -94,6 +105,25 @@ export default async function AdminCategoriesPage() {
             )}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t">
+            <p className="text-sm text-muted-foreground">
+              Trang {currentPage} / {totalPages} (Tổng: {totalCount})
+            </p>
+            <div className="flex gap-2">
+              {currentPage > 1 && (
+                <Link href={`?page=${currentPage - 1}`}>
+                  <Button variant="outline" size="sm">← Trước</Button>
+                </Link>
+              )}
+              {currentPage < totalPages && (
+                <Link href={`?page=${currentPage + 1}`}>
+                  <Button variant="outline" size="sm">Sau →</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

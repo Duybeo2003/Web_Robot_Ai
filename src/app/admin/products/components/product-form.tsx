@@ -86,6 +86,7 @@ export function ProductForm({
         0
       );
       if (formData.originalPrice !== totalRetail) {
+        // eslint-disable-next-line react-hooks/exhaustive-deps
         setFormData((prev) => ({ ...prev, originalPrice: totalRetail }));
       }
     }

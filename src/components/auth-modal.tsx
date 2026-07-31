@@ -47,8 +47,9 @@ export function AuthModal() {
 
   // Reset state when modal closes
   useEffect(() => {
+    let timer: NodeJS.Timeout;
     if (!isOpen) {
-      setTimeout(() => {
+      timer = setTimeout(() => {
         setStep(1);
         setLoginMethod("password");
         setPhone("+84");
@@ -59,6 +60,7 @@ export function AuthModal() {
         setCountdown(0);
       }, 300);
     }
+    return () => clearTimeout(timer);
   }, [isOpen]);
 
   const handleSendOtp = async (e?: React.FormEvent) => {

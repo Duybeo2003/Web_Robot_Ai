@@ -17,9 +17,9 @@ export async function sendOrderConfirmationEmail(
   totalAmount: number,
   items: Array<{
     quantity: number;
-    priceAtPurchase: number | string; // Fallback to avoid strict Decimal errors
+    priceAtPurchase: number | string;
     product?: { title?: string };
-  }>,
+  }> = [],
 ) {
   if (!process.env.SMTP_USER || process.env.SMTP_PASS === "your-app-password") {
     console.log(`[MOCK EMAIL] To: ${userEmail} - Order ${orderId} confirmed.`);

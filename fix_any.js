@@ -1,3 +1,4 @@
+/* eslint-disable */
 const fs = require('fs');
 const path = require('path');
 
@@ -47,3 +48,4 @@ for (const filepath of filesToFix) {
     fs.writeFileSync(fullPath, newLines.join("\n"), "utf-8");
 }
 console.log("Fixed any types");
+

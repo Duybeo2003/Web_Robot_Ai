@@ -1,5 +1,6 @@
 "use client";
 
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { ShoppingCart } from "lucide-react";
 import { useCartStore, CartItem } from "@/lib/store/cart";
@@ -10,7 +11,7 @@ export function AddToCartButton({ product }: { product: CartItem }) {
   const handleAddToCart = () => {
     addItem({ ...product, quantity: 1 });
     // Trong thực tế có thể thêm toast notification ở đây
-    alert("Đã thêm vào giỏ hàng!");
+    toast.success("Đã thêm vào giỏ hàng!");
   };
 
   return (

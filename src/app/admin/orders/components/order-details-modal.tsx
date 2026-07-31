@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import {
   Sheet,
@@ -38,6 +39,8 @@ export function OrderDetailsModal({ order }: { order: {
     priceAtPurchase: string | number;
   }[];
 } }) {
+  const [isPushing, setIsPushing] = useState(false);
+
   return (
     <Sheet>
       <SheetTrigger
@@ -71,37 +74,33 @@ export function OrderDetailsModal({ order }: { order: {
               order.status !== "COMPLETED" &&
               order.status !== "CANCELLED" && (
                 <div className="pt-2 border-t mt-2 flex justify-end">
-                  <Button
-                    size="sm"
-                    variant="outline"
-                    className="bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 hover:text-orange-700"
-                    onClick={async (e) => {
-                      const btn = e.currentTarget;
-                      const originalText = btn.innerText;
-                      btn.innerText = "Đang đẩy...";
-                      btn.disabled = true;
-                      try {
-                        const { pushOrderToLogistics } =
-                          await import("@/actions/admin");
-                        const res = await pushOrderToLogistics(order.id, "GHN");
-                        if (res.success) {
-                          alert(
-                            `Đã đẩy đơn sang GHN! Mã vận đơn: ${res.trackingCode}`,
-                          );
-                        } else {
-                          alert(`Lỗi: ${res.error}`);
-                          btn.innerText = originalText;
-                          btn.disabled = false;
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      className="bg-orange-50 text-orange-600 border-orange-200 hover:bg-orange-100 hover:text-orange-700"
+                      disabled={isPushing}
+                      onClick={async () => {
+                        setIsPushing(true);
+                        try {
+                          const { pushOrderToLogistics } =
+                            await import("@/actions/admin");
+                          const res = await pushOrderToLogistics(order.id, "GHN");
+                          if (res.success) {
+                            alert(
+                              `Đã đẩy đơn sang GHN! Mã vận đơn: ${res.trackingCode}`,
+                            );
+                          } else {
+                            alert(`Lỗi: ${res.error}`);
+                          }
+                        } catch {
+                          alert("Lỗi kết nối khi gọi vận chuyển");
+                        } finally {
+                          setIsPushing(false);
                         }
-                      } catch {
-                        alert("Lỗi kết nối khi gọi vận chuyển");
-                        btn.innerText = originalText;
-                        btn.disabled = false;
-                      }
-                    }}
-                  >
-                    <Truck className="w-4 h-4 mr-2" /> Đẩy sang GHN
-                  </Button>
+                      }}
+                    >
+                      <Truck className="w-4 h-4 mr-2" /> {isPushing ? "Đang đẩy..." : "Đẩy sang GHN"}
+                    </Button>
                 </div>
               )}
           </div>

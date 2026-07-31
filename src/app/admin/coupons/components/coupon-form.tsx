@@ -57,20 +57,26 @@ export function CouponForm({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const payload = {
-      ...values,
-      usageLimit: values.usageLimit || null,
-      expiresAt: values.expiresAt ? new Date(values.expiresAt) : null,
-    };
-    const result = await upsertCoupon(payload, initialData?.id);
-    setIsLoading(false);
+    try {
+      const payload = {
+        ...values,
+        usageLimit: values.usageLimit || null,
+        expiresAt: values.expiresAt ? new Date(values.expiresAt) : null,
+      };
+      const result = await upsertCoupon(payload, initialData?.id);
 
-    if (result.success) {
-      toast.success(initialData ? "Đã cập nhật mã" : "Đã tạo mã giảm giá");
-      if (onSuccess) onSuccess();
-      if (!initialData) form.reset();
-    } else {
-      toast.error(result.error || "Có lỗi xảy ra");
+      if (result.success) {
+        toast.success(initialData ? "Đã cập nhật mã" : "Đã tạo mã giảm giá");
+        if (onSuccess) onSuccess();
+        if (!initialData) form.reset();
+      } else {
+        toast.error(result.error || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setIsLoading(false);
     }
   }
 

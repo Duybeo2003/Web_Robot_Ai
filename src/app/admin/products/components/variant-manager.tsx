@@ -60,6 +60,11 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
     const groupValues = validGroups.map(g => g.values.map(v => ({ [g.name]: v })));
     const combinations = groupValues.length > 1 ? cartesian(groupValues) : groupValues[0].map(x => [x]);
     
+    if (combinations.length > 100) {
+      window.alert("Số lượng biến thể quá lớn (vượt quá 100). Vui lòng giảm bớt số lượng tùy chọn.");
+      return;
+    }
+
     const newVariants: Variant[] = combinations.map(comb => {
       const attrs = (comb as Record<string, string>[]).reduce((acc, curr) => ({ ...acc, ...curr }), {});
       

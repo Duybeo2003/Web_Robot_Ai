@@ -1,6 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
+import crypto from "crypto";
 
 export async function generateOtp(phoneNumber: string) {
   try {
@@ -9,8 +10,13 @@ export async function generateOtp(phoneNumber: string) {
       return { success: false, error: "Số điện thoại không hợp lệ." };
     }
 
-    // Generate a random 6 digit OTP
-    const code = Math.floor(100000 + Math.random() * 900000).toString();
+    // Fix #6: Delete old OTPs for this phone number first to prevent accumulation
+    await prisma.otpCode.deleteMany({
+      where: { phoneNumber },
+    });
+
+    // Fix #6: Use crypto.randomInt instead of Math.random for secure OTP generation
+    const code = crypto.randomInt(100000, 999999).toString();
 
     // Expires in 5 minutes
     const expiresAt = new Date(Date.now() + 5 * 60 * 1000);

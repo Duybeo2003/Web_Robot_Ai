@@ -90,22 +90,18 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           phone = `+${phone}`;
         }
 
-        // 1. Validate against the OtpCode table
-        const validOtp = await prisma.otpCode.findFirst({
+        // Fix #7: Use atomic deleteMany to prevent race condition
+        // (Two concurrent requests with the same OTP can't both succeed)
+        const deletedOtps = await prisma.otpCode.deleteMany({
           where: {
             phoneNumber: phone,
             code: otp,
-            expiresAt: { gt: new Date() }, // Ensure OTP has not expired
+            expiresAt: { gt: new Date() },
           },
         });
 
-        if (!validOtp) {
-          return null; // Invalid or expired OTP
-        }
-
-        // 2. Consume the OTP
-        if (validOtp) {
-          await prisma.otpCode.delete({ where: { id: validOtp.id } });
+        if (deletedOtps.count === 0) {
+          return null; // Invalid or expired OTP, or already consumed
         }
 
         // 3. Find or Create User

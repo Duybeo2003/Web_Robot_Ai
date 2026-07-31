@@ -27,11 +27,26 @@ export default async function AdminReportsPage() {
     redirect("/");
   }
 
-  // Lấy đơn hàng hoàn thành trong 6 tháng gần nhất (mock dữ liệu biểu đồ đơn giản)
-  const orders = await prisma.order.findMany({
+  // Fix #4: Use aggregate for total revenue instead of loading ALL orders
+  const revenueResult = await prisma.order.aggregate({
     where: {
       status: "COMPLETED",
       deletedAt: null,
+    },
+    _sum: { totalAmount: true },
+  });
+
+  const totalRevenue = Number(revenueResult._sum.totalAmount || 0);
+
+  // Only fetch orders from the last 6 months for chart grouping
+  const sixMonthsAgo = new Date();
+  sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+
+  const recentOrders = await prisma.order.findMany({
+    where: {
+      status: "COMPLETED",
+      deletedAt: null,
+      createdAt: { gte: sixMonthsAgo },
     },
     select: {
       totalAmount: true,
@@ -42,16 +57,13 @@ export default async function AdminReportsPage() {
 
   // Group by month
   const groupedData: Record<string, number> = {};
-  let totalRevenue = 0;
 
-  orders.forEach((order) => {
+  recentOrders.forEach((order) => {
     const month = format(new Date(order.createdAt), "MM/yyyy");
     if (!groupedData[month]) {
       groupedData[month] = 0;
     }
-    const amount = Number(order.totalAmount);
-    groupedData[month] += amount;
-    totalRevenue += amount;
+    groupedData[month] += Number(order.totalAmount);
   });
 
   const chartData = Object.keys(groupedData).map((key) => ({

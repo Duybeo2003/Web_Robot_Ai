@@ -3,7 +3,7 @@ import { auth } from "@/auth";
 import { redirect } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { buttonVariants } from "@/components/ui/button";
+import { buttonVariants, Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { format } from "date-fns";
 import { Badge } from "@/components/ui/badge";
@@ -21,7 +21,8 @@ export const metadata: Metadata = {
   title: "Quản lý Bài viết - Admin",
 };
 
-export default async function AdminArticlesPage() {
+export default async function AdminArticlesPage(props: { searchParams: Promise<{ page?: string }> }) {
+  const searchParams = await props.searchParams;
   const session = await auth();
 
   if (
@@ -31,7 +32,15 @@ export default async function AdminArticlesPage() {
     redirect("/");
   }
 
+  const itemsPerPage = 20;
+  const currentPage = Number(searchParams?.page) || 1;
+
+  const totalCount = await prisma.article.count();
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   const articles = await prisma.article.findMany({
+    skip: (currentPage - 1) * itemsPerPage,
+    take: itemsPerPage,
     orderBy: { createdAt: "desc" },
     include: {
       author: { select: { name: true } },
@@ -121,6 +130,25 @@ export default async function AdminArticlesPage() {
             )}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t">
+            <p className="text-sm text-muted-foreground">
+              Trang {currentPage} / {totalPages} (Tổng: {totalCount})
+            </p>
+            <div className="flex gap-2">
+              {currentPage > 1 && (
+                <Link href={`?page=${currentPage - 1}`}>
+                  <Button variant="outline" size="sm">← Trước</Button>
+                </Link>
+              )}
+              {currentPage < totalPages && (
+                <Link href={`?page=${currentPage + 1}`}>
+                  <Button variant="outline" size="sm">Sau →</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

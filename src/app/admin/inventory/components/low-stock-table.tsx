@@ -18,17 +18,34 @@ import Link from "next/link";
 export function LowStockTable() {
   const [products, setProducts] = useState<Record<string, unknown>[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchLowStock = async () => {
-      const res = await getLowStockProducts(10);
-      if (res.success) {
-        setProducts(res.data);
+      try {
+        const res = await getLowStockProducts(10);
+        if (res.success) {
+          setProducts(res.data);
+        } else {
+          setError("Failed to load low stock products");
+        }
+      } catch (err) {
+        console.error(err);
+        setError("Không thể tải dữ liệu tồn kho");
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
     };
     fetchLowStock();
   }, []);
+
+  if (error) {
+    return (
+      <div className="text-center p-6 text-sm text-red-600 font-medium">
+        {error}
+      </div>
+    );
+  }
 
   if (loading) {
     return (

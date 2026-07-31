@@ -1,7 +1,8 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Plus, Edit, Trash2, Search, Layers } from "lucide-react";
+import { Plus, Edit, Search, Layers } from "lucide-react";
 import { deleteProduct } from "@/actions/product";
+import { DeleteButton } from "@/components/delete-button";
 
 export const metadata = {
   title: "Quản lý Combo - Admin",
@@ -195,13 +196,7 @@ export default async function AdminCombosPage({
                               await deleteProduct(combo.id);
                             }}
                           >
-                            <button
-                              type="submit"
-                              className="p-1.5 text-neutral-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors"
-                              title="Xóa"
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </button>
+                            <DeleteButton />
                           </form>
                         </div>
                       </td>

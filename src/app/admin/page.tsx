@@ -1,29 +1,35 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { PrismaClient } from "@prisma/client";
 import { DollarSign, ShoppingCart, Users, Package } from "lucide-react";
 import { RevenueChart } from "@/components/admin/revenue-chart";
 import Image from "next/image";
 import { subDays, format } from "date-fns";
 
-const prisma = new PrismaClient();
+import { prisma } from "@/lib/prisma";
 
 export default async function AdminDashboardPage() {
-  const [totalOrders, totalUsers, totalProducts, orders] = await Promise.all([
+  const sevenDaysAgo = subDays(new Date(), 6);
+
+  // Fix #3: Use aggregate + efficient queries instead of loading ALL orders into RAM
+  const [totalOrders, totalUsers, totalProducts, revenueResult, recentOrders] = await Promise.all([
     prisma.order.count(),
     prisma.user.count(),
     prisma.product.count(),
+    // Calculate total revenue directly in the database
+    prisma.order.aggregate({
+      where: { status: { not: "CANCELLED" } },
+      _sum: { totalAmount: true },
+    }),
+    // Only fetch orders from the last 7 days for the chart
     prisma.order.findMany({
       where: {
-        status: { not: "CANCELLED" }, // Only count non-cancelled
+        status: { not: "CANCELLED" },
+        createdAt: { gte: sevenDaysAgo },
       },
       select: { totalAmount: true, createdAt: true },
     }),
   ]);
 
-  const totalRevenue = orders.reduce(
-    (sum, order) => sum + Number(order.totalAmount),
-    0,
-  );
+  const totalRevenue = Number(revenueResult._sum.totalAmount || 0);
 
   // Calculate revenue for the last 7 days
   const last7Days = Array.from({ length: 7 }).map((_, i) => {
@@ -36,7 +42,7 @@ export default async function AdminDashboardPage() {
     };
   });
 
-  orders.forEach((order) => {
+  recentOrders.forEach((order) => {
     const orderDateStr = format(new Date(order.createdAt), "yyyy-MM-dd");
     const dayMatch = last7Days.find((d) => d.dateStr === orderDateStr);
     if (dayMatch) {
@@ -49,7 +55,7 @@ export default async function AdminDashboardPage() {
     revenue: d.revenue,
   }));
 
-  // Top 5 Products by Sales
+  // Fix N+1: Get top product IDs first, then fetch all products in ONE query
   const topProductsRaw = await prisma.orderItem.groupBy({
     by: ["productId"],
     _sum: { quantity: true },
@@ -57,20 +63,22 @@ export default async function AdminDashboardPage() {
     take: 5,
   });
 
-  const topProducts = await Promise.all(
-    topProductsRaw.map(async (p) => {
-      const product = await prisma.product.findUnique({
-        where: { id: p.productId },
-      });
-      return {
-        id: product?.id,
-        title: product?.title,
-        price: product?.price,
-        imageUrl: product?.imageUrl,
-        sold: p._sum.quantity || 0,
-      };
-    }),
-  );
+  const topProductIds = topProductsRaw.map(p => p.productId);
+  const topProductsFromDb = await prisma.product.findMany({
+    where: { id: { in: topProductIds } },
+    select: { id: true, title: true, price: true, imageUrl: true },
+  });
+
+  const topProducts = topProductsRaw.map((p) => {
+    const product = topProductsFromDb.find(prod => prod.id === p.productId);
+    return {
+      id: product?.id,
+      title: product?.title,
+      price: product?.price,
+      imageUrl: product?.imageUrl,
+      sold: p._sum.quantity || 0,
+    };
+  });
 
   return (
     <div className="space-y-6">

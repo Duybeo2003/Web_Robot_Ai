@@ -24,8 +24,17 @@ export async function updateUserProfile(data: {
 
     revalidatePath("/profile");
     return { success: true };
-  } catch (error) {
+  } catch (error: unknown) {
     console.error("Error updating profile:", error);
+    // Fix #14: Check for unique constraint violation (duplicate phone number)
+    if (
+      typeof error === "object" &&
+      error !== null &&
+      "code" in error &&
+      (error as { code: string }).code === "P2002"
+    ) {
+      return { error: "Số điện thoại này đã được đăng ký bởi tài khoản khác." };
+    }
     return { error: "Có lỗi xảy ra khi cập nhật hồ sơ" };
   }
 }

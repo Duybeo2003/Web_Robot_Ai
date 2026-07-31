@@ -1,3 +1,4 @@
+/* eslint-disable */
 const { PrismaClient } = require("@prisma/client");
 const fs = require("fs");
 
@@ -75,3 +76,4 @@ main()
     await prisma.$disconnect();
     process.exit(1);
   });
+

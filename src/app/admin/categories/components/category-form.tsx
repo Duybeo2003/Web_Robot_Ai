@@ -42,15 +42,20 @@ export function CategoryForm({
 
   async function onSubmit(values: z.infer<typeof formSchema>) {
     setIsLoading(true);
-    const result = await upsertCategory(values, initialData?.id);
-    setIsLoading(false);
-
-    if (result.success) {
-      toast.success(initialData ? "Đã cập nhật danh mục" : "Đã tạo danh mục");
-      if (onSuccess) onSuccess();
-      if (!initialData) form.reset();
-    } else {
-      toast.error(result.error || "Có lỗi xảy ra");
+    try {
+      const result = await upsertCategory(values, initialData?.id);
+      if (result.success) {
+        toast.success(initialData ? "Đã cập nhật danh mục" : "Đã tạo danh mục");
+        if (onSuccess) onSuccess();
+        if (!initialData) form.reset();
+      } else {
+        toast.error(result.error || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setIsLoading(false);
     }
   }
 

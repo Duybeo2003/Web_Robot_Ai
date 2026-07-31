@@ -1,8 +1,9 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Zap, Clock, Package, Edit, Trash2 } from "lucide-react";
+import { Zap, Clock, Package, Edit, Eye, Plus } from "lucide-react";
 import Image from "next/image";
 import { removeFlashSale } from "@/actions/product";
+import { DeleteButton } from "@/components/delete-button";
 
 export const metadata = {
   title: "Quản lý Flash Sale - Admin",
@@ -152,13 +153,10 @@ export default async function AdminFlashSalesPage() {
                           <Edit className="w-4 h-4" />
                         </Link>
                         <form action={removeFlashSale.bind(null, item.id)}>
-                          <button
-                            type="submit"
-                            className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors"
-                            title="Tắt Flash Sale ngay lập tức"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </button>
+                          <DeleteButton 
+                            className="p-2 text-red-600 hover:bg-red-50 rounded-md transition-colors" 
+                            title="Tắt Flash Sale ngay lập tức" 
+                          />
                         </form>
                       </div>
                     </td>

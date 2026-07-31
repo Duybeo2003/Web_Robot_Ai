@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { Lora, Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
@@ -75,7 +76,9 @@ export default function RootLayout({
           </StoreWrapper>
           <Toaster />
           <AIChatbot />
-          <AffiliateTracker />
+          <Suspense fallback={null}>
+            <AffiliateTracker />
+          </Suspense>
         </Providers>
       </body>
     </html>

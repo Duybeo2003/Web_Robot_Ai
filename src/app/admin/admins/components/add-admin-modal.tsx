@@ -43,21 +43,27 @@ export function AddAdminModal() {
     }
 
     setIsLoading(true);
-    const res = await createAdminAccount(formData);
-    setIsLoading(false);
+    try {
+      const res = await createAdminAccount(formData);
 
-    if (res.success) {
-      toast.success("Đã thêm quản trị viên thành công!");
-      setIsOpen(false);
-      setFormData({
-        name: "",
-        email: "",
-        phoneNumber: "",
-        password: "",
-        role: "STORE_MANAGER",
-      });
-    } else {
-      toast.error(res.error || "Có lỗi xảy ra");
+      if (res.success) {
+        toast.success("Đã thêm quản trị viên thành công!");
+        setIsOpen(false);
+        setFormData({
+          name: "",
+          email: "",
+          phoneNumber: "",
+          password: "",
+          role: "STORE_MANAGER",
+        });
+      } else {
+        toast.error(res.error || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setIsLoading(false);
     }
   };
 

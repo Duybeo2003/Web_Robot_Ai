@@ -12,7 +12,10 @@ export async function updateOrderStatus(
 ) {
   try {
     const session = await auth();
-    if (session?.user?.role !== "ADMIN") {
+    if (
+      !session?.user?.role ||
+      !["ADMIN", "STORE_MANAGER"].includes(session.user.role)
+    ) {
       return { success: false, error: "Unauthorized" };
     }
 
@@ -25,18 +28,26 @@ export async function updateOrderStatus(
       // If changing to CANCELLED from a non-CANCELLED state, return inventory
       if (order && order.status !== "CANCELLED" && status === "CANCELLED") {
         for (const item of order.items) {
-           const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
-           if (dbProduct) {
+          // Fix #2: Restore inventory to the correct target (variant or product)
+          if (item.variantId) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: { inventoryCount: { increment: item.quantity } },
+            });
+          } else {
+            const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
+            if (dbProduct) {
               await tx.product.update({
-                 where: { id: item.productId },
-                 data: {
-                   inventoryCount: { increment: item.quantity },
-                   ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
-                      ? { flashSaleStock: { increment: item.quantity } }
-                      : {})
-                 }
+                where: { id: item.productId },
+                data: {
+                  inventoryCount: { increment: item.quantity },
+                  ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
+                    ? { flashSaleStock: { increment: item.quantity } }
+                    : {})
+                }
               });
-           }
+            }
+          }
         }
       }
 
@@ -87,18 +98,26 @@ export async function cancelOrder(orderId: string) {
       });
       if (orderToCancel) {
         for (const item of orderToCancel.items) {
-           const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
-           if (dbProduct) {
+          // Fix #2: Restore inventory to the correct target (variant or product)
+          if (item.variantId) {
+            await tx.productVariant.update({
+              where: { id: item.variantId },
+              data: { inventoryCount: { increment: item.quantity } },
+            });
+          } else {
+            const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
+            if (dbProduct) {
               await tx.product.update({
-                 where: { id: item.productId },
-                 data: {
-                   inventoryCount: { increment: item.quantity },
-                   ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
-                      ? { flashSaleStock: { increment: item.quantity } }
-                      : {})
-                 }
+                where: { id: item.productId },
+                data: {
+                  inventoryCount: { increment: item.quantity },
+                  ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
+                    ? { flashSaleStock: { increment: item.quantity } }
+                    : {})
+                }
               });
-           }
+            }
+          }
         }
       }
       await tx.order.update({

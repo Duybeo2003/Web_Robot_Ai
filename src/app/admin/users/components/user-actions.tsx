@@ -8,10 +8,11 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { MoreHorizontal, ShieldAlert, ShieldCheck, Trash2 } from "lucide-react";
+import { MoreHorizontal, ShieldAlert, ShieldCheck, Trash2, Eye } from "lucide-react";
 import { updateUserRole, deleteUser } from "@/actions/admin";
 import { toast } from "sonner";
 import { useState } from "react";
+import Link from "next/link";
 
 export function UserActions({
   userId,
@@ -24,24 +25,36 @@ export function UserActions({
 
   const handleRoleChange = async (newRole: "USER" | "ADMIN" | "STORE_MANAGER") => {
     setIsLoading(true);
-    const result = await updateUserRole(userId, newRole);
-    setIsLoading(false);
-    if (result.success) {
-      toast.success("Đã cập nhật quyền người dùng");
-    } else {
-      toast.error(result.error || "Có lỗi xảy ra");
+    try {
+      const result = await updateUserRole(userId, newRole);
+      if (result.success) {
+        toast.success("Đã cập nhật quyền người dùng");
+      } else {
+        toast.error(result.error || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setIsLoading(false);
     }
   };
 
   const handleDelete = async () => {
     if (!confirm("Bạn có chắc chắn muốn xóa/chặn người dùng này?")) return;
     setIsLoading(true);
-    const result = await deleteUser(userId);
-    setIsLoading(false);
-    if (result.success) {
-      toast.success("Đã xóa người dùng");
-    } else {
-      toast.error(result.error || "Có lỗi xảy ra");
+    try {
+      const result = await deleteUser(userId);
+      if (result.success) {
+        toast.success("Đã xóa người dùng");
+      } else {
+        toast.error(result.error || "Có lỗi xảy ra");
+      }
+    } catch (error) {
+      console.error(error);
+      toast.error("Có lỗi xảy ra");
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -56,6 +69,13 @@ export function UserActions({
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Hành động</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link href={`/admin/users/${userId}`}>
+            <Eye className="mr-2 h-4 w-4" />
+            <span>Xem chi tiết</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuSeparator />
         {currentRole === "USER" ? (
           <>

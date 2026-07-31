@@ -1,4 +1,6 @@
 import { PrismaClient } from "@prisma/client";
+import Link from "next/link";
+import { Button } from "@/components/ui/button";
 import {
   Table,
   TableBody,
@@ -57,8 +59,17 @@ const getOrderStatusBadge = (status: string) => {
   }
 };
 
-export default async function AdminOrdersPage() {
+export default async function AdminOrdersPage(props: { searchParams: Promise<{ page?: string }> }) {
+  const searchParams = props.searchParams;
+  const itemsPerPage = 20;
+  const currentPage = Number((await searchParams)?.page) || 1;
+
+  const totalCount = await prisma.order.count();
+  const totalPages = Math.ceil(totalCount / itemsPerPage);
+
   const orders = await prisma.order.findMany({
+    skip: (currentPage - 1) * itemsPerPage,
+    take: itemsPerPage,
     orderBy: { createdAt: "desc" },
     include: {
       user: true,
@@ -171,6 +182,25 @@ export default async function AdminOrdersPage() {
             )}
           </TableBody>
         </Table>
+        {totalPages > 1 && (
+          <div className="flex items-center justify-between p-4 border-t">
+            <p className="text-sm text-muted-foreground">
+              Trang {currentPage} / {totalPages} (Tổng: {totalCount})
+            </p>
+            <div className="flex gap-2">
+              {currentPage > 1 && (
+                <Link href={`?page=${currentPage - 1}`}>
+                  <Button variant="outline" size="sm">← Trước</Button>
+                </Link>
+              )}
+              {currentPage < totalPages && (
+                <Link href={`?page=${currentPage + 1}`}>
+                  <Button variant="outline" size="sm">Sau →</Button>
+                </Link>
+              )}
+            </div>
+          </div>
+        )}
       </Card>
     </div>
   );

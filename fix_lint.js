@@ -1,3 +1,4 @@
+/* eslint-disable */
 const fs = require('fs');
 const path = require('path');
 
@@ -41,3 +42,4 @@ for (const [filepath, varsToRemove] of Object.entries(filesToFix)) {
     fs.writeFileSync(fullPath, content, "utf-8");
 }
 console.log("Fixed unused vars");
+
