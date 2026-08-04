@@ -9,7 +9,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { updateOrderStatus } from "@/actions/admin";
+import { updateOrderStatus } from "@/actions/order";
+import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 export function OrderStatusUpdater({
   orderId,
@@ -28,7 +29,7 @@ export function OrderStatusUpdater({
     setLoading(true);
     setStatus(newStatus);
     try {
-      const res = await updateOrderStatus(orderId, { status: newStatus });
+      const res = await updateOrderStatus(orderId, newStatus as OrderStatus, payStatus as PaymentStatus);
       if (res.success) {
         toast.success("Cập nhật trạng thái thành công");
       } else {
@@ -47,9 +48,7 @@ export function OrderStatusUpdater({
     setLoading(true);
     setPayStatus(newPayStatus);
     try {
-      const res = await updateOrderStatus(orderId, {
-        paymentStatus: newPayStatus,
-      });
+      const res = await updateOrderStatus(orderId, status as OrderStatus, newPayStatus as PaymentStatus);
       if (res.success) {
         toast.success("Cập nhật thanh toán thành công");
       } else {

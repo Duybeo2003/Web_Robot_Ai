@@ -10,6 +10,7 @@ export async function getGiftRecommendations(age: string, skill: string) {
       where: {
         ageRange: age as AgeRange,
         primarySkill: skill as PrimarySkill,
+        deletedAt: null,
       },
       select: {
         id: true,
@@ -28,6 +29,7 @@ export async function getGiftRecommendations(age: string, skill: string) {
       const fallbackProducts = await prisma.product.findMany({
         where: {
           isCombo: true,
+          deletedAt: null,
           id: { notIn: products.map((p) => p.id) },
         },
         select: {

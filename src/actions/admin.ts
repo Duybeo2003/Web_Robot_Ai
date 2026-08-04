@@ -7,43 +7,7 @@ import bcrypt from "bcryptjs";
 
 const prisma = new PrismaClient();
 
-export async function updateOrderStatus(
-  orderId: string,
-  data: { status?: string; paymentStatus?: string },
-) {
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-
-  if (user?.role !== "ADMIN") {
-    return { success: false, error: "Unauthorized" };
-  }
-
-  try {
-    const updateData: { status?: string; paymentStatus?: string } = {};
-    if (data.status) updateData.status = data.status;
-    if (data.paymentStatus) updateData.paymentStatus = data.paymentStatus;
-
-    await prisma.order.update({
-      where: { id: orderId },
-      data: updateData,
-    });
-
-    revalidatePath("/admin/orders");
-    revalidatePath("/profile/orders");
-    return { success: true };
-  } catch (error) {
-    console.error("Failed to update order:", error);
-    return { success: false, error: "Failed to update order" };
-  }
-}
+// C5 Fix: Removed duplicate updateOrderStatus.
 
 export async function pushOrderToLogistics(
   orderId: string,
@@ -163,73 +127,71 @@ export async function upsertProduct(data: ProductData, id?: string) {
 
   try {
     if (id) {
-      // 1. Update product base info
-      await prisma.product.update({
-        where: { id },
-        data: productData,
-      });
+      // C8 Fix: Wrap in transaction to prevent partial updates
+      await prisma.$transaction(async (tx) => {
+        // 1. Update product base info
+        await tx.product.update({
+          where: { id },
+          data: productData,
+        });
 
-      // 2. Handle Combo Items
-      if (data.isCombo && data.comboItems) {
-        // Delete old items
-        await prisma.comboItem.deleteMany({ where: { comboId: id } });
-
-        // Insert new items
-        if (data.comboItems.length > 0) {
-          await prisma.comboItem.createMany({
-            data: data.comboItems.map((c: ComboItemData) => ({
-              comboId: id,
-              productId: c.productId,
-              quantity: c.quantity || 1,
-            })),
-          });
-        }
-      } else if (!data.isCombo) {
-        await prisma.comboItem.deleteMany({ where: { comboId: id } });
-      }
-
-      // 3. Handle Variants
-      if (data.variants && data.variants.length > 0) {
-        const existingVariants = await prisma.productVariant.findMany({ where: { productId: id } });
-        const incomingIds = data.variants.map((v: VariantData) => v.id).filter(Boolean);
-        
-        // Delete variants not in the incoming list
-        const variantsToDelete = existingVariants.filter(ev => !incomingIds.includes(ev.id));
-        if (variantsToDelete.length > 0) {
-          await prisma.productVariant.deleteMany({
-            where: { id: { in: variantsToDelete.map(v => v.id) } }
-          });
-        }
-
-        // Upsert incoming variants
-        for (const variant of data.variants) {
-          if (variant.id) {
-            await prisma.productVariant.update({
-              where: { id: variant.id },
-              data: {
-                attributes: variant.attributes,
-                price: variant.price,
-                originalPrice: variant.originalPrice || null,
-                inventoryCount: variant.inventoryCount,
-                sku: variant.sku || null,
-                imageUrl: variant.imageUrl || null,
-              }
-            });
-          } else {
-            await prisma.productVariant.create({
-              data: {
-                productId: id,
-                attributes: variant.attributes,
-                price: variant.price,
-                originalPrice: variant.originalPrice || null,
-                inventoryCount: variant.inventoryCount,
-                sku: variant.sku || null,
-                imageUrl: variant.imageUrl || null,
-              }
+        // 2. Handle Combo Items
+        if (data.isCombo && data.comboItems) {
+          await tx.comboItem.deleteMany({ where: { comboId: id } });
+          if (data.comboItems.length > 0) {
+            await tx.comboItem.createMany({
+              data: data.comboItems.map((c: ComboItemData) => ({
+                comboId: id,
+                productId: c.productId,
+                quantity: c.quantity || 1,
+              })),
             });
           }
+        } else if (!data.isCombo) {
+          await tx.comboItem.deleteMany({ where: { comboId: id } });
         }
-      }
+
+        // 3. Handle Variants
+        if (data.variants && data.variants.length > 0) {
+          const existingVariants = await tx.productVariant.findMany({ where: { productId: id } });
+          const incomingIds = data.variants.map((v: VariantData) => v.id).filter(Boolean);
+          
+          const variantsToDelete = existingVariants.filter(ev => !incomingIds.includes(ev.id));
+          if (variantsToDelete.length > 0) {
+            await tx.productVariant.deleteMany({
+              where: { id: { in: variantsToDelete.map(v => v.id) } }
+            });
+          }
+
+          for (const variant of data.variants) {
+            if (variant.id) {
+              await tx.productVariant.update({
+                where: { id: variant.id },
+                data: {
+                  attributes: variant.attributes,
+                  price: variant.price,
+                  originalPrice: variant.originalPrice || null,
+                  inventoryCount: variant.inventoryCount,
+                  sku: variant.sku || null,
+                  imageUrl: variant.imageUrl || null,
+                }
+              });
+            } else {
+              await tx.productVariant.create({
+                data: {
+                  productId: id,
+                  attributes: variant.attributes,
+                  price: variant.price,
+                  originalPrice: variant.originalPrice || null,
+                  inventoryCount: variant.inventoryCount,
+                  sku: variant.sku || null,
+                  imageUrl: variant.imageUrl || null,
+                }
+              });
+            }
+          }
+        }
+      });
     } else {
       const slug =
         data.title.toLowerCase().replace(/[^a-z0-9]+/g, "-") +

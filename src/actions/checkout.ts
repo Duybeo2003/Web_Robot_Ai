@@ -28,26 +28,19 @@ export async function processCheckout(data: {
     }
   }
 
-  // GUEST CHECKOUT LOGIC: If no logged in user, find or create shadow user based on phone number
+  // GUEST CHECKOUT LOGIC: Create shadow user for guest orders only
   if (!userId) {
     if (!data.receiverPhone) {
       return { error: "Vui lòng nhập số điện thoại để đặt hàng." };
     }
     
-    // Check if user exists with this phone number
-    let shadowUser = await prisma.user.findUnique({
-      where: { phoneNumber: data.receiverPhone }
+    // Always create a new shadow user for guest orders to prevent account hijacking
+    const shadowUser = await prisma.user.create({
+      data: {
+        phoneNumber: `guest_${Date.now()}_${Math.random().toString(36).slice(2, 8)}`,
+        name: data.receiverName || "Khách hàng",
+      }
     });
-
-    // Create a new shadow user if doesn't exist
-    if (!shadowUser) {
-      shadowUser = await prisma.user.create({
-        data: {
-          phoneNumber: data.receiverPhone,
-          name: data.receiverName || "Khách hàng",
-        }
-      });
-    }
     
     userId = shadowUser.id;
   }
@@ -161,58 +154,62 @@ export async function processCheckout(data: {
       
       if (data.couponCode) {
         const coupon = await tx.coupon.findUnique({
-          where: { code: data.couponCode },
+          where: { code: data.couponCode.toUpperCase() },
         });
         if (coupon && coupon.isActive) {
           const now = new Date();
-          const isValid =
-            (!coupon.expiresAt || coupon.expiresAt > now) &&
-            (!coupon.usageLimit || coupon.usageCount < coupon.usageLimit);
+          if (coupon.expiresAt && coupon.expiresAt <= now) {
+            throw new Error("Mã giảm giá đã hết hạn.");
+          }
 
-          if (isValid) {
-            // Check minOrderValue
-            if (coupon.minOrderValue && totalAmount < Number(coupon.minOrderValue)) {
-              throw new Error(`Mã giảm giá yêu cầu đơn hàng tối thiểu ${Number(coupon.minOrderValue).toLocaleString("vi-VN")}đ`);
-            }
-            
-            if (coupon.discountPercent) {
-              discountAmount += totalAmount * (coupon.discountPercent / 100);
-            } else if (coupon.discountValue) {
-              discountAmount += Number(coupon.discountValue);
-            }
-            
-            if (coupon.isFreeship) {
-              isFreeship = true;
-            }
+          // Check minOrderValue
+          if (coupon.minOrderValue && totalAmount < Number(coupon.minOrderValue)) {
+            throw new Error(`Mã giảm giá yêu cầu đơn hàng tối thiểu ${Number(coupon.minOrderValue).toLocaleString("vi-VN")}đ`);
+          }
+          
+          if (coupon.discountPercent) {
+            discountAmount += totalAmount * (coupon.discountPercent / 100);
+          } else if (coupon.discountValue) {
+            discountAmount += Number(coupon.discountValue);
+          }
+          
+          if (coupon.isFreeship) {
+            isFreeship = true;
+          }
 
-            // increment usage count
-            await tx.coupon.update({
-              where: { id: coupon.id },
-              data: { usageCount: { increment: 1 } },
-            });
-          } else {
-             throw new Error("Mã giảm giá không hợp lệ hoặc đã hết hạn.");
+          // C2 Fix: Atomic increment - prevents race condition on usage
+          const updatedCoupon = await tx.coupon.update({
+            where: { id: coupon.id },
+            data: { usageCount: { increment: 1 } },
+          });
+          if (coupon.usageLimit && updatedCoupon.usageCount > coupon.usageLimit) {
+            throw new Error("Mã giảm giá đã hết lượt sử dụng.");
           }
         } else {
-           throw new Error("Mã giảm giá không tồn tại.");
+           throw new Error("Mã giảm giá không tồn tại hoặc đã ngừng hoạt động.");
         }
       }
 
       // 1.6 Handle Loyalty Points (1 point = 1000 VND)
       let pointsUsed = 0;
       if (data.pointsToUse && data.pointsToUse > 0) {
-        const user = await tx.user.findUnique({ where: { id: userId } });
-        if (!user || user.points < data.pointsToUse) {
-           throw new Error("Bạn không đủ điểm thưởng.");
-        }
-        pointsUsed = data.pointsToUse;
-        discountAmount += pointsUsed * 1000;
+        // C7 Fix: Clamp points so user doesn't burn more than totalAmount
+        const maxPointsValue = totalAmount - discountAmount; // remaining amount after coupon
+        const maxPointsAllowed = Math.floor(Math.max(0, maxPointsValue) / 1000);
+        pointsUsed = Math.min(data.pointsToUse, maxPointsAllowed);
         
-        // Deduct points
-        await tx.user.update({
-          where: { id: userId },
-          data: { points: { decrement: pointsUsed } }
-        });
+        if (pointsUsed > 0) {
+          discountAmount += pointsUsed * 1000;
+          
+          // C1 Fix: Atomic decrement - prevents race condition
+          const updatedUser = await tx.user.update({
+            where: { id: userId },
+            data: { points: { decrement: pointsUsed } }
+          });
+          if (updatedUser.points < 0) {
+            throw new Error("Bạn không đủ điểm thưởng.");
+          }
+        }
       }
       
       // Calculate final total (ensure it doesn't go below 0)
@@ -308,7 +305,7 @@ export async function processVNPayMock(orderId: string) {
       where: { id: orderId },
     });
 
-    if (order?.userId !== session.user.id) return { error: "Unauthorized" };
+    if (!order) return { error: "Order not found" };
 
     await prisma.order.update({
       where: { id: orderId },

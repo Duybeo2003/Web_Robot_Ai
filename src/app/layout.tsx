@@ -5,13 +5,15 @@ import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/Header";
 import { Footer } from "@/components/layout/Footer";
-import { AuthModal } from "@/components/auth-modal";
 import { CartSheet } from "@/components/cart-sheet";
 import { CartSyncer } from "@/components/cart-syncer";
 import { Toaster } from "@/components/ui/sonner";
-import { AIChatbot } from "@/components/ui/ai-chatbot";
 import { StoreWrapper } from "@/components/layout/store-wrapper";
 import { AffiliateTracker } from "@/components/affiliate-tracker";
+import dynamicImport from "next/dynamic";
+
+const AuthModal = dynamicImport(() => import("@/components/auth-modal").then((mod) => mod.AuthModal));
+const AIChatbot = dynamicImport(() => import("@/components/ui/ai-chatbot").then((mod) => mod.AIChatbot));
 
 const lora = Lora({
   variable: "--font-heading",

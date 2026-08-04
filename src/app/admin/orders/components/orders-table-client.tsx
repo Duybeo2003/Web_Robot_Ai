@@ -3,8 +3,6 @@
 import { useState } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import * as xlsx from "xlsx";
-import { saveAs } from "file-saver";
 import { Button } from "@/components/ui/button";
 import {
   Table,
@@ -70,10 +68,13 @@ export function OrdersTableClient({
     }
   };
 
-  const exportToExcel = () => {
+  const exportToExcel = async () => {
     if (orders.length === 0) return toast.error("Không có dữ liệu để xuất");
     
-    // Prepare data for Excel
+    // I6 Fix: Dynamic import to reduce initial bundle size
+    const xlsx = await import("xlsx");
+    const { saveAs } = await import("file-saver");
+
     const data = orders.map((order) => ({
       "Mã đơn hàng": order.id,
       "Tên khách hàng": order.user.name || "Khách",

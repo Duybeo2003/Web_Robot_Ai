@@ -41,6 +41,20 @@ export async function submitReview(productId: string, formData: FormData) {
     };
   }
 
+  // I8 Fix: Prevent duplicate reviews - one review per product per user
+  const existingReview = await prisma.review.findFirst({
+    where: {
+      userId: session.user.id,
+      productId,
+    },
+  });
+  if (existingReview) {
+    return {
+      success: false,
+      error: "Bạn đã đánh giá sản phẩm này rồi.",
+    };
+  }
+
   try {
     await prisma.review.create({
       data: {

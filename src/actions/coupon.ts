@@ -27,6 +27,8 @@ export async function validateCoupon(code: string) {
     return {
       success: true,
       discountPercent: coupon.discountPercent,
+      discountValue: coupon.discountValue ? Number(coupon.discountValue) : null,
+      isFreeship: coupon.isFreeship || false,
     };
   } catch (error) {
     console.error("Coupon validation error:", error);

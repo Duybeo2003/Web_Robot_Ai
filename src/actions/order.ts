@@ -16,7 +16,24 @@ export async function updateOrderStatus(
       !session?.user?.role ||
       !["ADMIN", "STORE_MANAGER"].includes(session.user.role)
     ) {
-      return { success: false, error: "Unauthorized" };
+    }
+
+    // C4 Fix: Valid state transitions map
+    const VALID_TRANSITIONS: Record<string, string[]> = {
+      PENDING: ["PROCESSING", "CANCELLED"],
+      PROCESSING: ["SHIPPED", "CANCELLED"],
+      SHIPPED: ["COMPLETED", "CANCELLED"],
+      COMPLETED: [],
+      CANCELLED: [],
+    };
+
+    // Pre-check: verify the transition is valid
+    const currentOrder = await prisma.order.findUnique({ where: { id: orderId }, select: { status: true } });
+    if (!currentOrder) return { success: false, error: "Order not found" };
+    
+    const allowedNextStates = VALID_TRANSITIONS[currentOrder.status] || [];
+    if (!allowedNextStates.includes(status)) {
+      return { success: false, error: `Không thể chuyển trạng thái từ ${currentOrder.status} sang ${status}` };
     }
 
     await prisma.$transaction(async (tx) => {
@@ -99,61 +116,50 @@ export async function cancelOrder(orderId: string) {
       return { success: false, error: "Unauthorized" };
     }
 
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-    });
-
-    if (!order) return { success: false, error: "Order not found" };
-
-    // Only allow cancelling if it belongs to the user and is PENDING
-    if (order.userId !== session.user.id) {
-      return { success: false, error: "Unauthorized" };
-    }
-
-    if (order.status !== "PENDING") {
-      return {
-        success: false,
-        error: "Cannot cancel order that is already being processed",
-      };
-    }
-
     await prisma.$transaction(async (tx) => {
-      const orderToCancel = await tx.order.findUnique({
+      // C3 Fix: Read order INSIDE transaction to prevent double-cancel race condition
+      const order = await tx.order.findUnique({
         where: { id: orderId },
         include: { items: true },
       });
-      if (orderToCancel) {
-        for (const item of orderToCancel.items) {
-          // Fix #2: Restore inventory to the correct target (variant or product)
-          if (item.variantId) {
-            await tx.productVariant.update({
-              where: { id: item.variantId },
-              data: { inventoryCount: { increment: item.quantity } },
+
+      if (!order) throw new Error("Order not found");
+      if (order.userId !== session.user.id) throw new Error("Unauthorized");
+      if (order.status !== "PENDING") {
+        throw new Error("Cannot cancel order that is already being processed");
+      }
+
+      // Restore inventory
+      for (const item of order.items) {
+        if (item.variantId) {
+          await tx.productVariant.update({
+            where: { id: item.variantId },
+            data: { inventoryCount: { increment: item.quantity } },
+          });
+        } else {
+          const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
+          if (dbProduct) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: {
+                inventoryCount: { increment: item.quantity },
+                ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
+                  ? { flashSaleStock: { increment: item.quantity } }
+                  : {})
+              }
             });
-          } else {
-            const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
-            if (dbProduct) {
-              await tx.product.update({
-                where: { id: item.productId },
-                data: {
-                  inventoryCount: { increment: item.quantity },
-                  ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
-                    ? { flashSaleStock: { increment: item.quantity } }
-                    : {})
-                }
-              });
-            }
           }
         }
-        
-        // Refund used points
-        if (orderToCancel.pointsUsed > 0) {
-          await tx.user.update({
-            where: { id: orderToCancel.userId },
-            data: { points: { increment: orderToCancel.pointsUsed } }
-          });
-        }
       }
+      
+      // Refund used points
+      if (order.pointsUsed > 0) {
+        await tx.user.update({
+          where: { id: order.userId },
+          data: { points: { increment: order.pointsUsed } }
+        });
+      }
+
       await tx.order.update({
         where: { id: orderId },
         data: { status: "CANCELLED" },
@@ -165,6 +171,7 @@ export async function cancelOrder(orderId: string) {
     return { success: true };
   } catch (error) {
     console.error("Cancel order error:", error);
-    return { success: false, error: "Failed to cancel order" };
+    const msg = error instanceof Error ? error.message : "Failed to cancel order";
+    return { success: false, error: msg };
   }
 }
