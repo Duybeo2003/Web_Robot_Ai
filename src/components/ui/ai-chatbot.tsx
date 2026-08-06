@@ -105,9 +105,10 @@ export function AIChatbot() {
       {!isOpen && (
         <button
           onClick={() => setIsOpen(true)}
-          className="fixed bottom-6 right-6 h-14 w-14 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 bg-[#FF5722] hover:bg-[#E64A19] flex items-center justify-center cursor-pointer border-none"
+          className="fixed bottom-6 right-6 h-12 px-4 rounded-full shadow-lg hover:shadow-xl transition-all duration-300 z-50 bg-gradient-to-r from-[#FF5722] to-[#FF9800] hover:scale-105 flex items-center justify-center gap-2 cursor-pointer border-none text-white font-bold"
         >
-          <MessageCircle className="h-6 w-6 text-white" />
+          <Bot className="h-5 w-5 animate-pulse" />
+          <span>Chat AI</span>
         </button>
       )}
 
