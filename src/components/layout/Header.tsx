@@ -16,6 +16,7 @@ import {
   Cpu,
   Search,
   Phone,
+  Trophy,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthModal } from "@/store/use-auth-modal";
@@ -288,6 +289,14 @@ export function Header() {
                   Blog & Kiến Thức
                 </Link>
                 <Link
+                  href="/events"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-bold text-sm text-orange-600 border-b border-border flex items-center gap-2"
+                >
+                  <Trophy className="w-4 h-4" />
+                  Sự Kiện & Vòng Quay
+                </Link>
+                <Link
                   href="/shop?flashsale=true"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-bold text-sm text-[#FF5722]"
@@ -369,6 +378,13 @@ export function Header() {
               className="text-sm font-medium hover:text-white/80 transition-colors"
             >
               Tra Cứu Bảo Hành
+            </Link>
+            <Link
+              href="/events"
+              className="text-sm font-bold text-orange-200 hover:text-white transition-colors flex items-center gap-1"
+            >
+              <Trophy className="w-4 h-4" />
+              Sự Kiện
             </Link>
             <Link
               href="/shop?flashsale=true"

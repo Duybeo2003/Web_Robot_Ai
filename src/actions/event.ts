@@ -1,0 +1,164 @@
+"use server";
+
+import { prisma } from "@/lib/prisma";
+import { auth } from "@/auth";
+
+export async function getActiveEvents() {
+  return prisma.event.findMany({
+    where: {
+      isActive: true,
+      endDate: {
+        gte: new Date(),
+      },
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+    include: {
+      _count: {
+        select: { prizes: true }
+      }
+    }
+  });
+}
+
+export async function getEventBySlug(slug: string) {
+  return prisma.event.findUnique({
+    where: { slug },
+    include: {
+      prizes: {
+        orderBy: { probability: 'asc' }
+      },
+      _count: {
+        select: { histories: true }
+      }
+    }
+  });
+}
+
+export async function getRecentWinners(eventId: string) {
+  return prisma.userEventHistory.findMany({
+    where: { eventId },
+    orderBy: { createdAt: 'desc' },
+    take: 10,
+    include: {
+      user: {
+        select: {
+          name: true,
+          email: true,
+          phoneNumber: true,
+          image: true
+        }
+      }
+    }
+  });
+}
+
+export async function spinWheel(eventId: string) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+  const userId = session.user.id;
+
+  return prisma.$transaction(async (tx) => {
+    // 1. Get Event and Wallet
+    const event = await tx.event.findUnique({
+      where: { id: eventId },
+      include: { prizes: true }
+    });
+    if (!event || !event.isActive) throw new Error("Sự kiện không tồn tại hoặc đã kết thúc");
+
+    const wallet = await tx.userWallet.findUnique({ where: { userId } });
+    if (!wallet || wallet.balance < event.pricePerPlay) {
+      throw new Error("Không đủ số dư Xu. Vui lòng nạp thêm!");
+    }
+
+    // 2. Deduct Xu
+    await tx.userWallet.update({
+      where: { id: wallet.id },
+      data: { balance: { decrement: event.pricePerPlay } }
+    });
+
+    await tx.walletTransaction.create({
+      data: {
+        walletId: wallet.id,
+        amount: event.pricePerPlay,
+        type: "SPEND",
+        status: "COMPLETED",
+        description: `Chơi vòng quay: ${event.name}`
+      }
+    });
+
+    // 3. Roll the dice based on probability
+    const prizes = event.prizes;
+    const totalWeight = prizes.reduce((sum, prize) => sum + prize.probability, 0);
+    let randomNum = Math.random() * totalWeight;
+    
+    let wonPrize = prizes[prizes.length - 1]; // Default to last
+    for (const prize of prizes) {
+      if (randomNum <= prize.probability) {
+        // Check stock if it has limit
+        if (prize.stock !== null) {
+          if (prize.stock > 0) {
+            wonPrize = prize;
+            break;
+          }
+          // If out of stock, continue to next prize
+        } else {
+          wonPrize = prize;
+          break;
+        }
+      }
+      randomNum -= prize.probability;
+    }
+
+    // 4. Update Prize Stock
+    if (wonPrize.stock !== null) {
+      await tx.eventPrize.update({
+        where: { id: wonPrize.id },
+        data: { stock: { decrement: 1 } }
+      });
+    }
+
+    // 5. Add to User History
+    await tx.userEventHistory.create({
+      data: {
+        userId,
+        eventId,
+        prizeName: wonPrize.name,
+        cost: event.pricePerPlay
+      }
+    });
+
+    // 6. Give Reward
+    if (wonPrize.productId) {
+      // Physical item -> Add to Inventory
+      await tx.userInventory.create({
+        data: {
+          userId,
+          productId: wonPrize.productId,
+          quantity: 1,
+          isClaimed: false
+        }
+      });
+    } else if (wonPrize.rewardPoints > 0) {
+      // Points reward -> Add directly to wallet or points
+      await tx.userWallet.update({
+        where: { id: wallet.id },
+        data: { balance: { increment: wonPrize.rewardPoints } }
+      });
+      await tx.walletTransaction.create({
+        data: {
+          walletId: wallet.id,
+          amount: wonPrize.rewardPoints,
+          type: "REWARD",
+          status: "COMPLETED",
+          description: `Trúng thưởng: ${wonPrize.name}`
+        }
+      });
+    }
+
+    return wonPrize;
+  });
+}
