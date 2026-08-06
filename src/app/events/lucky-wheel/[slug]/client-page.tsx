@@ -238,6 +238,37 @@ export default function LuckyWheelClientPage({
                 Chi phí mỗi lượt quay là <strong className="text-orange-400">{event.pricePerPlay} Xu</strong>. Phần thưởng vật phẩm sẽ được chuyển vào <strong>Túi đồ sự kiện</strong> của bạn.
               </p>
             </div>
+
+            {/* Prize Pool */}
+            <div className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6 shadow-xl mt-6">
+              <h3 className="text-lg font-bold text-orange-400 mb-4 flex items-center gap-2 border-b border-neutral-700 pb-3">
+                <Sparkles className="w-5 h-5" />
+                CƠ CẤU GIẢI THƯỞNG
+              </h3>
+              <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
+                {prizes.length === 0 ? (
+                  <p className="text-neutral-500 text-sm text-center py-2">Sự kiện chưa có phần thưởng.</p>
+                ) : (
+                  [...prizes].sort((a, b) => Number(a.probability) - Number(b.probability)).map((prize) => (
+                    <div key={prize.id} className="flex items-center justify-between bg-neutral-900/50 p-3 rounded-lg border border-neutral-800">
+                      <div className="flex-1 min-w-0 pr-4">
+                        <p className="font-bold text-sm text-neutral-200 truncate flex items-center gap-2">
+                          {prize.name}
+                          {prize.isJackpot && <span className="text-[10px] bg-yellow-500 text-black px-1.5 py-0.5 rounded font-black uppercase">JACKPOT</span>}
+                        </p>
+                        <p className="text-xs text-neutral-500 mt-1">
+                          {prize.productId ? "Vật phẩm thực" : `Cộng ${prize.rewardPoints} Xu`}
+                          {prize.stock !== null && ` • Còn: ${prize.stock}`}
+                        </p>
+                      </div>
+                      <div className="shrink-0 text-right">
+                        <span className="text-sm font-black text-orange-400">{prize.probability}%</span>
+                      </div>
+                    </div>
+                  ))
+                )}
+              </div>
+            </div>
           </div>
 
         </div>

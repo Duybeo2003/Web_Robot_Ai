@@ -17,5 +17,11 @@ export default async function AdminEventConfigPage({ params }: { params: Promise
     orderBy: { createdAt: 'desc' }
   });
 
-  return <EventConfigClientPage event={event} products={products} />;
+  const serializedProducts = products.map(p => ({
+    id: p.id,
+    name: p.name,
+    price: Number(p.price)
+  }));
+
+  return <EventConfigClientPage event={event} products={serializedProducts} />;
 }

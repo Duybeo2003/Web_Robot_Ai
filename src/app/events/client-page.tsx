@@ -14,7 +14,7 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
   return (
     <div className="min-h-screen bg-[#F5F5F5]">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-orange-600 via-[#FF5722] to-orange-500 py-16 px-4 relative overflow-hidden">
+      <div className="bg-gradient-to-br from-orange-600 via-[#FF5722] to-orange-500 py-10 px-4 relative overflow-hidden">
         {/* Dynamic Background Elements */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-orange-900 opacity-20 rounded-full blur-3xl"></div>
@@ -42,11 +42,11 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
             <p className="text-neutral-500">Các sự kiện hấp dẫn đang được chuẩn bị. Bạn vui lòng quay lại sau nhé!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
             {events.map((event) => (
               <div 
                 key={event.id} 
-                className="bg-white rounded-xl overflow-hidden shadow-lg border border-orange-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group"
+                className="bg-white rounded-xl overflow-hidden shadow-lg border border-orange-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group mx-auto w-full max-w-sm"
               >
                 {/* Banner */}
                 <div className="relative aspect-video bg-neutral-100 overflow-hidden">
