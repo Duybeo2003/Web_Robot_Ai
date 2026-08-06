@@ -114,7 +114,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
       await deleteEvent(id);
       setEvents(events.filter(e => e.id !== id));
       toast.success("Đã xóa sự kiện");
-    } catch (error: unknown) {
+    } catch {
       toast.error("Không thể xóa sự kiện");
     }
   };

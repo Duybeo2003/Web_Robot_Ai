@@ -75,10 +75,14 @@ export async function spinWheel(eventId: string) {
     }
 
     // 2. Deduct Xu
-    await tx.userWallet.update({
-      where: { id: wallet.id },
+    const walletUpdate = await tx.userWallet.updateMany({
+      where: { id: wallet.id, balance: { gte: event.pricePerPlay } },
       data: { balance: { decrement: event.pricePerPlay } }
     });
+    
+    if (walletUpdate.count === 0) {
+      throw new Error("Số dư không đủ trong quá trình giao dịch!");
+    }
 
     await tx.walletTransaction.create({
       data: {
@@ -115,10 +119,13 @@ export async function spinWheel(eventId: string) {
 
     // 4. Update Prize Stock
     if (wonPrize.stock !== null) {
-      await tx.eventPrize.update({
-        where: { id: wonPrize.id },
+      const updateStockResult = await tx.eventPrize.updateMany({
+        where: { id: wonPrize.id, stock: { gt: 0 } },
         data: { stock: { decrement: 1 } }
       });
+      if (updateStockResult.count === 0) {
+        throw new Error("Phần thưởng này vừa hết cách đây 1 giây. Vui lòng quay lại!");
+      }
     }
 
     // 5. Add to User History

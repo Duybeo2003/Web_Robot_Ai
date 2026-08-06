@@ -103,7 +103,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
       await deletePrize(id);
       setPrizes(prizes.filter(p => p.id !== id));
       toast.success("Đã xóa");
-    } catch (error: unknown) {
+    } catch {
       toast.error("Không thể xóa");
     }
   };

@@ -5,6 +5,68 @@ import { FlashSaleCarousel } from "@/components/ui/flash-sale-carousel";
 import { auth } from "@/auth";
 import { Prisma } from "@prisma/client";
 
+import { unstable_cache } from "next/cache";
+
+const getCachedProducts = unstable_cache(
+  async () => {
+    type ProductWithCombo = {
+      id: string;
+      price: Prisma.Decimal | number;
+      originalPrice?: Prisma.Decimal | number | null;
+      comboItems?: { product: { price: Prisma.Decimal | number } }[];
+      [key: string]: unknown;
+    };
+
+    const serializeProduct = (p: ProductWithCombo) => ({
+      ...p,
+      price: Number(p.price),
+      originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
+      comboItems: p.comboItems
+        ? p.comboItems.map((ci) => ({
+            ...ci,
+            product: {
+              ...ci.product,
+              price: Number(ci.product.price),
+            },
+          }))
+        : undefined,
+    });
+
+    const robotProducts = (
+      await prisma.product.findMany({
+        where: { type: "ROBOT_STEM", isCombo: false },
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      })
+    ).map(serializeProduct);
+
+    const comboProducts = (
+      await prisma.product.findMany({
+        where: { isCombo: true },
+        include: {
+          comboItems: {
+            include: { product: { select: { imageUrl: true, price: true } } },
+          },
+        },
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      })
+    ).map(serializeProduct);
+
+    const logicProducts = (
+      await prisma.product.findMany({
+        where: { type: "DO_CHOI_LOGIC", isCombo: false },
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      })
+    ).map(serializeProduct);
+
+    return { robotProducts, comboProducts, logicProducts };
+  },
+  ["homepage-products"],
+  { revalidate: 3600 } // Cache for 1 hour
+);
+
 export const dynamic = "force-dynamic";
 
 export default async function Home() {
@@ -20,57 +82,7 @@ export default async function Home() {
     userWishlistIds = wishlistItems.map((w) => w.productId);
   }
 
-  type ProductWithCombo = {
-    id: string;
-    price: Prisma.Decimal | number;
-    originalPrice?: Prisma.Decimal | number | null;
-    comboItems?: { product: { price: Prisma.Decimal | number } }[];
-    [key: string]: unknown;
-  };
-
-  const serializeProduct = (p: ProductWithCombo) => ({
-    ...p,
-    price: Number(p.price),
-    originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-    comboItems: p.comboItems
-      ? p.comboItems.map((ci) => ({
-          ...ci,
-          product: {
-            ...ci.product,
-            price: Number(ci.product.price),
-          },
-        }))
-      : undefined,
-  });
-
-  const robotProducts = (
-    await prisma.product.findMany({
-      where: { type: "ROBOT_STEM", isCombo: false },
-      take: 8,
-      orderBy: { createdAt: "desc" },
-    })
-  ).map(serializeProduct);
-
-  const comboProducts = (
-    await prisma.product.findMany({
-      where: { isCombo: true },
-      include: {
-        comboItems: {
-          include: { product: { select: { imageUrl: true, price: true } } },
-        },
-      },
-      take: 8,
-      orderBy: { createdAt: "desc" },
-    })
-  ).map(serializeProduct);
-
-  const logicProducts = (
-    await prisma.product.findMany({
-      where: { type: "DO_CHOI_LOGIC", isCombo: false },
-      take: 8,
-      orderBy: { createdAt: "desc" },
-    })
-  ).map(serializeProduct);
+  const { robotProducts, comboProducts, logicProducts } = await getCachedProducts();
 
   // Combine some products for the Flash Sale and deduplicate by id
   const rawFlashSale = [
