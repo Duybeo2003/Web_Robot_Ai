@@ -213,7 +213,7 @@ export default function WalletClientPage({ wallet, transactions }: WalletClientP
 
       {/* QR Payment Dialog */}
       <Dialog open={!!activeTransaction} onOpenChange={(open) => !open && setActiveTransaction(null)}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[550px] overflow-hidden">
           <DialogHeader>
             <DialogTitle className="text-center text-xl text-[#FF5722]">Thanh toán đơn nạp Xu</DialogTitle>
             <DialogDescription className="text-center">
@@ -222,40 +222,42 @@ export default function WalletClientPage({ wallet, transactions }: WalletClientP
           </DialogHeader>
           
           {activeTransaction && (
-            <div className="flex flex-col items-center justify-center space-y-6 py-4">
-              <div className="bg-white p-4 rounded-xl shadow-sm border border-orange-200">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={`https://img.vietqr.io/image/vcb-1058744697-compact2.png?amount=${activeTransaction.amount}&addInfo=NAPXU%20${activeTransaction.id.slice(-6).toUpperCase()}&accountName=NGUYEN%20QUOC%20DUY`}
-                  alt="VietQR Payment"
-                  className="w-64 h-64 object-contain"
-                />
+            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start py-2">
+              <div className="flex flex-col items-center shrink-0">
+                <div className="bg-white p-3 rounded-xl shadow-sm border border-orange-200">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={`https://img.vietqr.io/image/vcb-1058744697-compact2.png?amount=${activeTransaction.amount}&addInfo=NAPXU%20${activeTransaction.id.slice(-6).toUpperCase()}&accountName=NGUYEN%20QUOC%20DUY`}
+                    alt="VietQR Payment"
+                    className="w-48 h-48 object-contain"
+                  />
+                </div>
                 <p className="text-center text-xs text-gray-500 mt-2 font-medium">Mở App Ngân hàng quét mã</p>
               </div>
 
-              <div className="w-full bg-orange-50 border border-orange-100 p-4 rounded-sm space-y-3">
-                <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
-                  <span className="text-orange-800/70">Số tiền:</span>
-                  <span className="font-bold text-[#E30019] text-lg">{activeTransaction.amount.toLocaleString('vi-VN')} VNĐ</span>
-                </div>
-                <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
-                  <span className="text-orange-800/70">Ngân hàng:</span>
-                  <span className="font-bold text-gray-800">Vietcombank (VCB)</span>
-                </div>
-                <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
-                  <span className="text-orange-800/70">Số tài khoản:</span>
-                  <span className="font-bold text-gray-800">1058744697</span>
-                </div>
-                <div className="flex justify-between items-center text-sm">
-                  <span className="text-orange-800/70">Nội dung chuyển:</span>
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono font-bold text-gray-800">NAPXU {activeTransaction.id.slice(-6).toUpperCase()}</span>
+              <div className="w-full flex flex-col space-y-3">
+                <div className="bg-orange-50 border border-orange-100 p-4 rounded-lg space-y-3 shadow-sm">
+                  <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
+                    <span className="text-orange-800/70">Số tiền:</span>
+                    <span className="font-bold text-[#E30019] text-lg">{activeTransaction.amount.toLocaleString('vi-VN')} VNĐ</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
+                    <span className="text-orange-800/70">Ngân hàng:</span>
+                    <span className="font-bold text-gray-800">Vietcombank</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
+                    <span className="text-orange-800/70">Số tài khoản:</span>
+                    <span className="font-bold text-gray-800">1058744697</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-orange-800/70">Nội dung:</span>
+                    <span className="font-mono font-bold text-[#FF5722]">NAPXU {activeTransaction.id.slice(-6).toUpperCase()}</span>
                   </div>
                 </div>
-              </div>
 
-              <div className="bg-blue-50 text-blue-800 p-3 rounded-sm text-xs text-center border border-blue-100">
-                Hệ thống sẽ cộng Xu vào tài khoản của bạn ngay sau khi chúng tôi nhận được thanh toán. (Có thể mất 1-5 phút)
+                <div className="bg-blue-50 text-blue-800 p-2.5 rounded-lg text-xs text-center border border-blue-100 shadow-sm leading-relaxed">
+                  Xu sẽ được cộng tự động trong <strong>1-5 phút</strong>.
+                </div>
               </div>
             </div>
           )}

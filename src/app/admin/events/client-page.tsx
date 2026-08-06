@@ -238,11 +238,11 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
       </div>
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[500px]">
+        <DialogContent className="sm:max-w-[550px] overflow-hidden">
           <DialogHeader>
             <DialogTitle>{editingEvent ? "Cập nhật Sự Kiện" : "Tạo Sự Kiện Mới"}</DialogTitle>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+          <div className="grid gap-4 py-2 max-h-[65vh] overflow-y-auto pr-1">
             <div className="grid gap-2">
               <Label>Tên Sự kiện</Label>
               <Input 
@@ -265,6 +265,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
               <Textarea 
                 value={formData.description} 
                 onChange={(e) => setFormData({...formData, description: e.target.value})} 
+                rows={2}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
@@ -296,6 +297,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
                 placeholder="Nhập thể lệ, cách chơi, quy tắc đổi điểm..."
                 value={formData.rules} 
                 onChange={(e) => setFormData({...formData, rules: e.target.value})} 
+                rows={2}
               />
             </div>
             
@@ -306,6 +308,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
                 value={formData.uiConfig} 
                 onChange={(e) => setFormData({...formData, uiConfig: e.target.value})} 
                 className="font-mono text-sm"
+                rows={2}
               />
             </div>
             <div className="grid grid-cols-2 gap-4">
