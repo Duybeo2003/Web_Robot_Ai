@@ -13,7 +13,6 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
-  DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
 
@@ -93,10 +92,10 @@ export default function LuckyWheelClientPage({
         router.refresh(); // Refresh recent winners
       }, 5000);
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       setIsSpinning(false);
       setUserBalance(prev => prev + event.pricePerPlay); // Revert balance
-      toast.error(error.message || "Có lỗi xảy ra khi quay");
+      toast.error((error as Error).message || "Có lỗi xảy ra khi quay");
     }
   };
 
