@@ -14,7 +14,6 @@ import { FloatingSocialBar } from "@/components/layout/floating-social-bar";
 import dynamicImport from "next/dynamic";
 
 const AuthModal = dynamicImport(() => import("@/components/auth-modal").then((mod) => mod.AuthModal));
-const AIChatbot = dynamicImport(() => import("@/components/ui/ai-chatbot").then((mod) => mod.AIChatbot));
 
 const lora = Lora({
   variable: "--font-heading",
@@ -79,7 +78,6 @@ export default function RootLayout({
             <CartSyncer />
           </StoreWrapper>
           <Toaster />
-          <AIChatbot />
           <FloatingSocialBar />
           <Suspense fallback={null}>
             <AffiliateTracker />

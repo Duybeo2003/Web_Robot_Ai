@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { Phone } from "lucide-react";
 
 export function FloatingSocialBar() {
   return (
@@ -32,6 +31,19 @@ export function FloatingSocialBar() {
         </svg>
       </Link>
 
+      {/* Tiktok */}
+      <Link
+        href="#" // TODO: Thay link Tiktok
+        target="_blank"
+        className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-[#000000] text-white shadow-lg shadow-neutral-500/30 hover:scale-110 transition-transform duration-300"
+        title="Tiktok"
+      >
+        <span className="absolute inset-0 rounded-full animate-ping opacity-25 bg-[#000000]"></span>
+        <svg viewBox="0 0 24 24" width="22" height="22" className="fill-current z-10">
+          <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64 2.93 2.93 0 0 1 .88.13V9.4a6.84 6.84 0 0 0-1-.05A6.33 6.33 0 0 0 5 20.1a6.34 6.34 0 0 0 10.86-4.43v-7a8.16 8.16 0 0 0 4.77 1.52v-3.4a4.85 4.85 0 0 1-1-.1z" />
+        </svg>
+      </Link>
+
       {/* Zalo */}
       <Link
         href="https://zalo.me/0385333111"
@@ -43,16 +55,6 @@ export function FloatingSocialBar() {
         <svg viewBox="0 0 24 24" width="24" height="24" className="fill-current z-10">
           <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
         </svg>
-      </Link>
-
-      {/* Hotline */}
-      <Link
-        href="tel:0385333111"
-        className="group relative flex items-center justify-center w-12 h-12 rounded-full bg-red-600 text-white shadow-lg shadow-red-500/30 hover:scale-110 transition-transform duration-300"
-        title="Hotline: 0385.333.111"
-      >
-        <span className="absolute inset-0 rounded-full animate-ping opacity-25 bg-red-600"></span>
-        <Phone className="w-6 h-6 z-10 animate-bounce" />
       </Link>
     </div>
   );
