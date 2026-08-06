@@ -99,15 +99,7 @@ export default function CheckoutPage() {
       setLoading(false);
     } else if (res.success) {
       clearCart(); // Clear local Zustand cart
-      const finalTotal =
-        calculatedTotal - calculatedTotal * (appliedDiscount / 100);
-      if (formData.paymentMethod === "VNPAY") {
-        router.push(
-          `/api/vnpay/create_url?orderId=${res.orderId}&amount=${finalTotal}`,
-        );
-      } else {
-        router.push(`/checkout/success/${res.orderId}`);
-      }
+      router.push(`/checkout/success/${res.orderId}`);
     }
   };
 
@@ -244,18 +236,9 @@ export default function CheckoutPage() {
                   <RadioGroupItem value="BANK_TRANSFER" id="bank" />
                   <Label
                     htmlFor="bank"
-                    className="cursor-pointer font-bold text-neutral-700 flex-1"
-                  >
-                    Chuyển khoản ngân hàng (Thủ công)
-                  </Label>
-                </div>
-                <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-blue-50/50 border-blue-100">
-                  <RadioGroupItem value="VNPAY" id="vnpay" />
-                  <Label
-                    htmlFor="vnpay"
                     className="cursor-pointer font-bold text-[#005BAA] flex-1"
                   >
-                    Thanh toán qua VNPay (Trực tuyến)
+                    Chuyển khoản Ngân hàng (Quét mã QR)
                   </Label>
                 </div>
               </RadioGroup>

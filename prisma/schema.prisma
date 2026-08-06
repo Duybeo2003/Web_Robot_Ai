@@ -93,22 +93,27 @@ model User {
   phoneNumber   String?   @unique
   role          Role      @default(USER)
   points        Int       @default(0)
-  
-  accounts      Account[]
-  sessions      Session[]
-  orders        Order[]
-  warranties    Warranty[]
-  returnRequests ReturnRequest[]
-  cart          Cart?
-  reviews       Review[]
-  wishlists     Wishlist[]
-  inventoryTransactions InventoryTransaction[]
-  articles      Article[]
-  commissions   Commission[]
 
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  deletedAt     DateTime? // Soft Delete
+  accounts              Account[]
+  sessions              Session[]
+  orders                Order[]
+  warranties            Warranty[]
+  returnRequests        ReturnRequest[]
+  cart                  Cart?
+  reviews               Review[]
+  wishlists             Wishlist[]
+  inventoryTransactions InventoryTransaction[]
+  articles              Article[]
+  commissions           Commission[]
+
+  // Gamification
+  wallet         UserWallet?
+  eventHistories UserEventHistory[]
+  inventory      UserInventory[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Soft Delete
 
   @@index([createdAt])
 }
@@ -119,25 +124,25 @@ model OtpCode {
   code        String
   expiresAt   DateTime
 
-  createdAt   DateTime @default(now())
+  createdAt DateTime @default(now())
 
   @@index([phoneNumber])
   @@index([createdAt])
 }
 
 model Account {
-  id                 String  @id @default(cuid())
-  userId             String
-  type               String
-  provider           String
-  providerAccountId  String
-  refresh_token      String?   @db.Text
-  access_token       String?   @db.Text
-  expires_at         Int?
-  token_type         String?
-  scope              String?
-  id_token           String?   @db.Text
-  session_state      String?
+  id                String  @id @default(cuid())
+  userId            String
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.Text
+  access_token      String? @db.Text
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.Text
+  session_state     String?
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 
@@ -163,9 +168,9 @@ model Category {
   name        String
   description String?
   products    Product[]
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([createdAt])
 }
@@ -174,50 +179,51 @@ model Product {
   id             String      @id @default(cuid())
   title          String
   slug           String      @unique
-  description    String      
+  description    String
   price          Decimal     @db.Decimal(10, 2)
   type           ProductType @default(ROBOT_STEM)
   supplyType     SupplyType  @default(IN_HOUSE)
   sku            String?     @unique
   inventoryCount Int         @default(0)
   imageUrl       String?
-  
+
   // Promotional Fields
   originalPrice    Decimal?  @db.Decimal(10, 2)
   flashSaleActive  Boolean   @default(false)
   flashSaleEndDate DateTime?
   flashSaleStock   Int?
-  
+
   // Educational Metadata
-  ageRange         AgeRange?
-  primarySkill     PrimarySkill?
-  educationalGoal  String?      @db.Text
-  
+  ageRange        AgeRange?
+  primarySkill    PrimarySkill?
+  educationalGoal String?       @db.Text
+
   // Affiliate & Pre-order
   externalAffiliateLink String? // For AFFILIATE_SELL
-  commissionRate   Float?       @default(10) // For AFFILIATE_HOST
-  depositPercent   Int?         @default(70) // For PRE_ORDER
-  estimatedArrivalDate DateTime? // For PRE_ORDER
-  
+  commissionRate        Float?    @default(10) // For AFFILIATE_HOST
+  depositPercent        Int?      @default(70) // For PRE_ORDER
+  estimatedArrivalDate  DateTime? // For PRE_ORDER
+
   // Combo Selling Strategy
-  isCombo          Boolean      @default(false)
-  comboItems       ComboItem[]  @relation("ComboParent")
-  partOfCombos     ComboItem[]  @relation("ComboChild")
-  
-  categoryId     String?
-  category       Category?   @relation(fields: [categoryId], references: [id])
-  
-  variants       ProductVariant[]
-  orderItems     OrderItem[]
-  cartItems      CartItem[]
-  warranties     Warranty[]
-  reviews        Review[]
-  wishlists      Wishlist[]
+  isCombo      Boolean     @default(false)
+  comboItems   ComboItem[] @relation("ComboParent")
+  partOfCombos ComboItem[] @relation("ComboChild")
+
+  categoryId String?
+  category   Category? @relation(fields: [categoryId], references: [id])
+
+  variants              ProductVariant[]
+  orderItems            OrderItem[]
+  cartItems             CartItem[]
+  warranties            Warranty[]
+  reviews               Review[]
+  wishlists             Wishlist[]
   inventoryTransactions InventoryTransaction[]
 
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  deletedAt      DateTime?   // Soft Delete
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+  deletedAt     DateTime? // Soft Delete
+  UserInventory UserInventory[]
 
   @@index([categoryId])
   @@index([slug])
@@ -227,50 +233,50 @@ model Product {
 }
 
 model ProductVariant {
-  id             String      @id @default(cuid())
-  productId      String
-  product        Product     @relation(fields: [productId], references: [id], onDelete: Cascade)
-  
+  id        String  @id @default(cuid())
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
   // JSON field for dynamic attributes like {"Màu sắc": "Đỏ", "Size": "L"}
-  attributes     Json
-  
-  price          Decimal     @db.Decimal(10, 2)
-  originalPrice  Decimal?    @db.Decimal(10, 2)
-  inventoryCount Int         @default(0)
+  attributes Json
+
+  price          Decimal  @db.Decimal(10, 2)
+  originalPrice  Decimal? @db.Decimal(10, 2)
+  inventoryCount Int      @default(0)
   sku            String?
   imageUrl       String?
-  
-  cartItems      CartItem[]
-  orderItems     OrderItem[]
-  
-  createdAt      DateTime    @default(now())
-  updatedAt      DateTime    @updatedAt
-  
+
+  cartItems  CartItem[]
+  orderItems OrderItem[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([productId])
 }
 
 model Cart {
-  id        String     @id @default(cuid())
-  userId    String     @unique
-  user      User       @relation(fields: [userId], references: [id], onDelete: Cascade)
-  items     CartItem[]
+  id     String     @id @default(cuid())
+  userId String     @unique
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  items  CartItem[]
 
-  createdAt DateTime   @default(now())
-  updatedAt DateTime   @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([createdAt])
 }
 
 model CartItem {
-  id        String  @id @default(cuid())
+  id        String          @id @default(cuid())
   cartId    String
-  cart      Cart    @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  cart      Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
   productId String
-  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   variantId String?
   variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  quantity  Int     @default(1)
+  quantity  Int             @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -281,31 +287,31 @@ model CartItem {
 }
 
 model Order {
-  id              String        @id @default(cuid())
-  userId          String
-  user            User          @relation(fields: [userId], references: [id])
-  totalAmount     Decimal       @db.Decimal(10, 2)
-  depositAmount   Decimal?      @db.Decimal(10, 2)
-  
+  id            String   @id @default(cuid())
+  userId        String
+  user          User     @relation(fields: [userId], references: [id])
+  totalAmount   Decimal  @db.Decimal(10, 2)
+  depositAmount Decimal? @db.Decimal(10, 2)
+
   // Logistics & Payment
-  shippingAddress String?       
+  shippingAddress String?
   receiverPhone   String?
   paymentMethod   PaymentMethod @default(COD)
   paymentStatus   PaymentStatus @default(UNPAID)
-  
+
   // State Machine for Kanban / Order processing
-  pointsEarned   Int     @default(0) // Số điểm kiếm được từ đơn này
-  pointsUsed     Int     @default(0) // Số điểm đã sử dụng để giảm giá
-  discountAmount Decimal @default(0) // Tiền giảm do coupon + points
-  status          OrderStatus   @default(PENDING)
-  
-  items           OrderItem[]
-  returnRequests  ReturnRequest[]
-  commissions     Commission[]
-  
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  deletedAt       DateTime?     // Soft Delete
+  pointsEarned   Int         @default(0) // Số điểm kiếm được từ đơn này
+  pointsUsed     Int         @default(0) // Số điểm đã sử dụng để giảm giá
+  discountAmount Decimal     @default(0) // Tiền giảm do coupon + points
+  status         OrderStatus @default(PENDING)
+
+  items          OrderItem[]
+  returnRequests ReturnRequest[]
+  commissions    Commission[]
+
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+  deletedAt DateTime? // Soft Delete
 
   @@index([userId])
   @@index([status])
@@ -313,15 +319,15 @@ model Order {
 }
 
 model OrderItem {
-  id              String  @id @default(cuid())
+  id              String          @id @default(cuid())
   orderId         String
-  order           Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  order           Order           @relation(fields: [orderId], references: [id], onDelete: Cascade)
   productId       String
-  product         Product @relation(fields: [productId], references: [id])
+  product         Product         @relation(fields: [productId], references: [id])
   variantId       String?
   variant         ProductVariant? @relation(fields: [variantId], references: [id])
-  quantity        Int     @default(1)
-  priceAtPurchase Decimal @db.Decimal(10, 2)
+  quantity        Int             @default(1)
+  priceAtPurchase Decimal         @db.Decimal(10, 2)
 
   @@index([orderId])
   @@index([productId])
@@ -329,12 +335,12 @@ model OrderItem {
 }
 
 model ComboItem {
-  id            String  @id @default(cuid())
-  comboId       String
-  combo         Product @relation("ComboParent", fields: [comboId], references: [id], onDelete: Cascade)
-  productId     String
-  product       Product @relation("ComboChild", fields: [productId], references: [id], onDelete: Cascade)
-  quantity      Int     @default(1)
+  id        String  @id @default(cuid())
+  comboId   String
+  combo     Product @relation("ComboParent", fields: [comboId], references: [id], onDelete: Cascade)
+  productId String
+  product   Product @relation("ComboChild", fields: [productId], references: [id], onDelete: Cascade)
+  quantity  Int     @default(1)
 
   @@index([comboId])
   @@index([productId])
@@ -349,14 +355,14 @@ model Warranty {
   status       WarrantyStatus @default(ACTIVE)
   startDate    DateTime       @default(now())
   endDate      DateTime
-  
-  userId       String
-  user         User           @relation(fields: [userId], references: [id])
-  productId    String
-  product      Product        @relation(fields: [productId], references: [id])
 
-  createdAt    DateTime       @default(now())
-  updatedAt    DateTime       @updatedAt
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([productId])
@@ -364,18 +370,18 @@ model Warranty {
 }
 
 model ReturnRequest {
-  id          String    @id @default(cuid())
-  userId      String
-  user        User      @relation(fields: [userId], references: [id])
-  orderId     String
-  order       Order     @relation(fields: [orderId], references: [id])
-  
-  reason      String    
-  imageUrl    String?   // Proof of defect
-  status      RmaStatus @default(PENDING)
-  
-  createdAt   DateTime  @default(now())
-  updatedAt   DateTime  @updatedAt
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id])
+  orderId String
+  order   Order  @relation(fields: [orderId], references: [id])
+
+  reason   String
+  imageUrl String? // Proof of defect
+  status   RmaStatus @default(PENDING)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([orderId])
@@ -391,16 +397,16 @@ model Setting {
 }
 
 model Commission {
-  id              String   @id @default(cuid())
+  id              String           @id @default(cuid())
   orderId         String
-  order           Order    @relation(fields: [orderId], references: [id])
+  order           Order            @relation(fields: [orderId], references: [id])
   affiliateUserId String
-  affiliateUser   User     @relation(fields: [affiliateUserId], references: [id])
-  amount          Decimal  @db.Decimal(10, 2)
+  affiliateUser   User             @relation(fields: [affiliateUserId], references: [id])
+  amount          Decimal          @db.Decimal(10, 2)
   status          CommissionStatus @default(PENDING)
 
-  createdAt       DateTime  @default(now())
-  updatedAt       DateTime  @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([orderId])
   @@index([affiliateUserId])
@@ -411,44 +417,44 @@ model Commission {
 // 4. Marketing & Social Models
 // ------------------------------------------------------
 model Coupon {
-  id              String   @id @default(cuid())
-  code            String   @unique
-  discountPercent Int?     // Either percent
+  id              String    @id @default(cuid())
+  code            String    @unique
+  discountPercent Int? // Either percent
   discountValue   Decimal? // Or exact value
   minOrderValue   Decimal? // Giá trị đơn hàng tối thiểu để áp dụng
-  isFreeship      Boolean  @default(false)
+  isFreeship      Boolean   @default(false)
   usageLimit      Int?
-  usageCount      Int      @default(0)
-  isActive        Boolean  @default(true)
+  usageCount      Int       @default(0)
+  isActive        Boolean   @default(true)
   expiresAt       DateTime?
 
-  createdAt       DateTime @default(now())
-  updatedAt       DateTime @updatedAt
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }
 
 model Review {
-  id          String   @id @default(cuid())
-  rating      Int      // 1-5
-  comment     String   
-  
-  userId      String
-  user        User     @relation(fields: [userId], references: [id])
-  productId   String
-  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  id      String @id @default(cuid())
+  rating  Int // 1-5
+  comment String
 
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  userId    String
+  user      User    @relation(fields: [userId], references: [id])
+  productId String
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([userId])
   @@index([productId])
 }
 
 model Wishlist {
-  id        String   @id @default(cuid())
+  id        String  @id @default(cuid())
   userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  user      User    @relation(fields: [userId], references: [id], onDelete: Cascade)
   productId String
-  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   createdAt DateTime @default(now())
 
@@ -458,14 +464,14 @@ model Wishlist {
 }
 
 model AuditLog {
-  id          String   @id @default(cuid())
-  userId      String?
-  action      String
-  model       String
-  recordId    String?
-  before      Json?
-  after       Json?
-  timestamp   DateTime @default(now())
+  id        String   @id @default(cuid())
+  userId    String?
+  action    String
+  model     String
+  recordId  String?
+  before    Json?
+  after     Json?
+  timestamp DateTime @default(now())
 
   @@index([userId])
   @@index([model])
@@ -482,17 +488,17 @@ enum InventoryTransactionType {
 }
 
 model InventoryTransaction {
-  id          String                   @id @default(cuid())
-  productId   String
-  product     Product                  @relation(fields: [productId], references: [id])
-  type        InventoryTransactionType
-  quantity    Int
-  costPrice   Decimal?                 @db.Decimal(10, 2)
-  reference   String?                  // E.g., PO number or Order ID
-  note        String?                  
-  userId      String?
-  user        User?                    @relation(fields: [userId], references: [id])
-  createdAt   DateTime                 @default(now())
+  id        String                   @id @default(cuid())
+  productId String
+  product   Product                  @relation(fields: [productId], references: [id])
+  type      InventoryTransactionType
+  quantity  Int
+  costPrice Decimal?                 @db.Decimal(10, 2)
+  reference String? // E.g., PO number or Order ID
+  note      String?
+  userId    String?
+  user      User?                    @relation(fields: [userId], references: [id])
+  createdAt DateTime                 @default(now())
 
   @@index([productId])
   @@index([type])
@@ -503,22 +509,134 @@ model InventoryTransaction {
 // 6. CMS Models
 // ------------------------------------------------------
 model Article {
-  id          String   @id @default(cuid())
-  title       String
-  slug        String   @unique
-  content     String   @db.LongText
-  thumbnail   String?
-  published   Boolean  @default(false)
-  tags        String?  // Comma-separated tags
-  
-  authorId    String
-  author      User     @relation(fields: [authorId], references: [id])
-  
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  id        String  @id @default(cuid())
+  title     String
+  slug      String  @unique
+  content   String  @db.LongText
+  thumbnail String?
+  published Boolean @default(false)
+  tags      String? // Comma-separated tags
+
+  authorId String
+  author   User   @relation(fields: [authorId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
   @@index([authorId])
   @@index([slug])
   @@index([published])
 }
 
+// ------------------------------------------------------
+// Gamification & Events (Virtual Currency & Mini-games)
+// ------------------------------------------------------
+
+enum EventType {
+  LUCKY_WHEEL
+  MYSTERY_BOX
+}
+
+enum TransactionType {
+  TOPUP
+  SPEND
+  REFUND
+  REWARD
+}
+
+enum TransactionStatus {
+  PENDING
+  COMPLETED
+  REJECTED
+}
+
+model UserWallet {
+  id      String @id @default(cuid())
+  userId  String @unique
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  balance Int    @default(0) // Robo Xu
+
+  transactions WalletTransaction[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WalletTransaction {
+  id       String     @id @default(cuid())
+  walletId String
+  wallet   UserWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
+
+  amount      Int // Positive for TOPUP/REWARD, Negative for SPEND
+  type        TransactionType
+  status      TransactionStatus @default(COMPLETED)
+  description String?
+
+  createdAt DateTime @default(now())
+}
+
+model Event {
+  id          String  @id @default(cuid())
+  name        String
+  slug        String  @unique
+  description String? @db.Text
+  bannerUrl   String?
+
+  type         EventType @default(LUCKY_WHEEL)
+  pricePerPlay Int       @default(0) // Cost in Xu
+
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(true)
+
+  prizes    EventPrize[]
+  histories UserEventHistory[]
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model EventPrize {
+  id      String @id @default(cuid())
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  name        String
+  imageUrl    String?
+  probability Float // e.g. 0.1 for 0.1%, 80 for 80%
+  stock       Int? // null = unlimited
+
+  isJackpot    Boolean @default(false)
+  rewardPoints Int     @default(0) // If it's a point reward
+  productId    String? // If it's a physical product reward
+
+  createdAt DateTime @default(now())
+}
+
+model UserEventHistory {
+  id      String @id @default(cuid())
+  userId  String
+  user    User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  eventId String
+  event   Event  @relation(fields: [eventId], references: [id], onDelete: Cascade)
+
+  prizeName String
+  cost      Int // Xu spent
+
+  createdAt DateTime @default(now())
+}
+
+model UserInventory {
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  productId String
+  product   Product @relation(fields: [productId], references: [id])
+
+  quantity  Int     @default(1)
+  isClaimed Boolean @default(false) // true if they requested delivery or sold it back
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

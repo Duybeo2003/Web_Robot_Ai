@@ -1,7 +1,7 @@
 import { auth } from "@/auth"
 import { redirect } from "next/navigation"
 import Link from "next/link"
-import { User, Package, Heart } from "lucide-react"
+import { User, Package, Heart, Wallet, Gift } from "lucide-react"
 import Image from "next/image"
 
 export default async function ProfileLayout({ children }: { children: React.ReactNode }) {
@@ -45,6 +45,14 @@ export default async function ProfileLayout({ children }: { children: React.Reac
               <Link href="/profile/wishlist" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
                 <Heart className="w-5 h-5 text-neutral-400" />
                 Sản phẩm yêu thích
+              </Link>
+              <Link href="/profile/wallet" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-orange-50 text-[#FF5722] font-bold transition-colors border border-transparent hover:border-orange-100">
+                <Wallet className="w-5 h-5" />
+                Ví RoboCoin
+              </Link>
+              <Link href="/profile/inventory" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-orange-50 text-[#FF5722] font-bold transition-colors border border-transparent hover:border-orange-100">
+                <Gift className="w-5 h-5" />
+                Túi đồ sự kiện
               </Link>
               <Link href="/profile/affiliate" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
                 <User className="w-5 h-5 text-neutral-400" />
