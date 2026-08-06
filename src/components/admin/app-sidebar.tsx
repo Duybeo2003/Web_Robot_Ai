@@ -30,6 +30,7 @@ import {
   ShieldCheck,
   Layers,
   Zap,
+  Wallet,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -40,6 +41,7 @@ const overviewGroup = [{ title: "Tổng quan", url: "/admin", icon: BarChart3 }]
 
 const salesGroup = [
   { title: "Đơn hàng", url: "/admin/orders", icon: ShoppingCart },
+  { title: "Duyệt Nạp Xu", url: "/admin/wallet", icon: Wallet },
   { title: "Đổi/Trả (RMA)", url: "/admin/returns", icon: Package },
   { title: "Đánh giá", url: "/admin/reviews", icon: Star },
 ];
