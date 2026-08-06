@@ -5,7 +5,7 @@ import { UserWallet, WalletTransaction } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wallet, Plus, Clock, ArrowDownRight, ArrowUpRight, Copy, CheckCircle2, QrCode } from "lucide-react";
+import { Wallet, Plus, Clock, ArrowDownRight, ArrowUpRight, QrCode } from "lucide-react";
 import { createTopupRequest } from "@/actions/wallet";
 import { toast } from "sonner";
 import {
@@ -42,7 +42,7 @@ export default function WalletClientPage({ wallet, transactions }: WalletClientP
       setIsTopupOpen(false);
       setAmount("");
       toast.success("Đã tạo yêu cầu nạp Xu. Vui lòng chuyển khoản!");
-    } catch (error) {
+    } catch (err) {
       toast.error("Có lỗi xảy ra khi tạo yêu cầu nạp Xu");
     } finally {
       setLoading(false);

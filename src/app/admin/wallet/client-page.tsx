@@ -5,7 +5,7 @@ import { User, UserWallet, WalletTransaction } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { approveTopup, rejectTopup } from "@/actions/admin-wallet";
 import { toast } from "sonner";
-import { Check, X, Clock, Wallet } from "lucide-react";
+import { Check, X, Clock } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PendingTopup extends WalletTransaction {
@@ -28,7 +28,7 @@ export default function AdminWalletClientPage({ pendingTopups: initialTopups }: 
       await approveTopup(id);
       setTopups(topups.filter(t => t.id !== id));
       toast.success("Đã duyệt nạp Xu thành công");
-    } catch (error) {
+    } catch (err) {
       toast.error("Có lỗi xảy ra khi duyệt");
     } finally {
       setLoadingId(null);
@@ -42,7 +42,7 @@ export default function AdminWalletClientPage({ pendingTopups: initialTopups }: 
       await rejectTopup(id);
       setTopups(topups.filter(t => t.id !== id));
       toast.success("Đã từ chối nạp Xu");
-    } catch (error) {
+    } catch (err) {
       toast.error("Có lỗi xảy ra khi từ chối");
     } finally {
       setLoadingId(null);
