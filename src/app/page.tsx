@@ -83,7 +83,7 @@ export default async function Home() {
   );
 
   return (
-    <div className="flex flex-col flex-1 bg-[#F5F5F5] pb-20 overflow-hidden">
+    <div className="flex flex-col flex-1 bg-[#F5F5F5] overflow-hidden">
       {/* Hero Banner Area - Carousel */}
       <HeroCarousel />
 

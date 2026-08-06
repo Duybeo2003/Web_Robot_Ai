@@ -2,7 +2,7 @@ import Link from "next/link";
 
 export function Footer() {
   return (
-    <footer className="w-full bg-[#1A1A1A] text-white pt-12 pb-6 mt-16">
+    <footer className="w-full bg-[#1A1A1A] text-white pt-12 pb-6 mt-4">
       <div className="container mx-auto px-4">
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
           {/* Column 1: Company Info */}
