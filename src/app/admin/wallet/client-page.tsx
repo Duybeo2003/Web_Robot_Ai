@@ -5,7 +5,7 @@ import { User, UserWallet, WalletTransaction } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { approveTopup, rejectTopup } from "@/actions/admin-wallet";
 import { toast } from "sonner";
-import { Check, X, Clock } from "lucide-react";
+import { Check, X, Clock, User as UserIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
 interface PendingTopup extends WalletTransaction {
@@ -18,32 +18,33 @@ interface AdminWalletClientPageProps {
   pendingTopups: PendingTopup[];
 }
 
-export default function AdminWalletClientPage({ pendingTopups: initialTopups }: AdminWalletClientPageProps) {
-  const [topups, setTopups] = useState(initialTopups);
+export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClientPageProps) {
+  const [topups, setTopups] = useState(pendingTopups);
   const [loadingId, setLoadingId] = useState<string | null>(null);
 
   const handleApprove = async (id: string) => {
     try {
       setLoadingId(id);
       await approveTopup(id);
-      setTopups(topups.filter(t => t.id !== id));
+      setTopups(prev => prev.filter(t => t.id !== id));
       toast.success("Đã duyệt nạp Xu thành công");
-    } catch (err: unknown) {
-      toast.error((err as Error).message || "Có lỗi xảy ra");
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message || "Có lỗi xảy ra");
     } finally {
       setLoadingId(null);
     }
   };
 
   const handleReject = async (id: string) => {
-    if (!confirm("Bạn có chắc chắn muốn từ chối yêu cầu này?")) return;
     try {
       setLoadingId(id);
       await rejectTopup(id);
-      setTopups(topups.filter(t => t.id !== id));
+      setTopups(prev => prev.filter(t => t.id !== id));
       toast.success("Đã từ chối nạp Xu");
-    } catch (err: unknown) {
-      toast.error((err as Error).message || "Có lỗi xảy ra");
+    } catch (error: unknown) {
+      const err = error as Error;
+      toast.error(err.message || "Có lỗi xảy ra");
     } finally {
       setLoadingId(null);
     }
@@ -52,7 +53,7 @@ export default function AdminWalletClientPage({ pendingTopups: initialTopups }: 
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-heading font-bold text-foreground">Duyệt Nạp Xu (VietQR)</h1>
+        <h1 className="text-3xl font-heading font-bold text-foreground">Duyệt Nạp Xu</h1>
       </div>
 
       <div className="bg-white rounded-sm border border-neutral-200 shadow-sm overflow-hidden">
@@ -61,8 +62,8 @@ export default function AdminWalletClientPage({ pendingTopups: initialTopups }: 
             <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 border-b border-neutral-200">
               <tr>
                 <th className="px-6 py-4 font-bold">Người dùng</th>
-                <th className="px-6 py-4 font-bold">Số tiền nạp</th>
-                <th className="px-6 py-4 font-bold">Mã GD / Nội dung</th>
+                <th className="px-6 py-4 font-bold">Số lượng Xu</th>
+                <th className="px-6 py-4 font-bold">Mã giao dịch</th>
                 <th className="px-6 py-4 font-bold">Thời gian</th>
                 <th className="px-6 py-4 font-bold text-right">Hành động</th>
               </tr>
@@ -82,7 +83,7 @@ export default function AdminWalletClientPage({ pendingTopups: initialTopups }: 
                       <div className="flex items-center gap-3">
                         <Avatar className="h-8 w-8">
                           <AvatarImage src={tx.wallet.user.image || undefined} />
-                          <AvatarFallback><User className="h-4 w-4" /></AvatarFallback>
+                          <AvatarFallback><UserIcon className="h-4 w-4" /></AvatarFallback>
                         </Avatar>
                         <div>
                           <p className="font-bold text-neutral-800">{tx.wallet.user.name || "Khách hàng"}</p>

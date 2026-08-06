@@ -81,7 +81,9 @@ const sanitizedProduct = {
   originalPrice: product.originalPrice ? Number(product.originalPrice) : undefined,
   variants: product.variants.map((v) => ({
     ...v,
-    price: Number(v.price)
+    price: Number(v.price),
+    originalPrice: v.originalPrice ? Number(v.originalPrice) : null,
+    attributes: v.attributes as Record<string, string>
   }))
 };
   
@@ -236,7 +238,7 @@ const sanitizedProduct = {
                 inventoryCount: product.inventoryCount,
                 externalAffiliateLink: product.externalAffiliateLink,
                 estimatedArrivalDate: product.estimatedArrivalDate ? new Date(product.estimatedArrivalDate).toISOString() : undefined,
-                variants: sanitizedProduct.variants,
+                variants: sanitizedProduct.variants as any,
               }} 
             />
           </div>

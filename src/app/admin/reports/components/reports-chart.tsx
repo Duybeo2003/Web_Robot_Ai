@@ -36,7 +36,7 @@ export function ReportsChart({ data }: { data: { name: string; revenue: number }
           tickFormatter={(value) => `${value / 1000000}M`}
         />
         <Tooltip
-          formatter={(value: number) =>
+          formatter={(value: any) =>
             new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",

@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { CancelOrderButton } from "./components/cancel-order-button";
 import { RmaButton } from "./components/rma-button";
+import { ReorderButton } from "./components/reorder-button";
+import { ReviewButton } from "./components/review-button";
 
 import { Package, Clock, CheckCircle, Truck, XCircle } from "lucide-react";
 import Image from "next/image";
@@ -215,16 +217,17 @@ export default async function OrdersPage() {
                   </span>
                 </div>
                 <div className="flex gap-2">
-                  <button className="px-4 py-2 text-sm font-medium bg-white border border-neutral-200 text-neutral-600 rounded-sm hover:bg-neutral-50 transition-colors hidden sm:block">
-                    Liên hệ Hỗ trợ
-                  </button>
                   {order.status === "PENDING" && (
                     <CancelOrderButton orderId={order.id} />
                   )}
                   {(order.status === "COMPLETED" ||
                     order.status === "SHIPPED") && (
-                    <RmaButton orderId={order.id} />
+                    <>
+                      <RmaButton orderId={order.id} />
+                      <ReviewButton orderId={order.id} items={order.items} />
+                    </>
                   )}
+                  <ReorderButton orderItems={order.items} />
                 </div>
               </div>
             </div>

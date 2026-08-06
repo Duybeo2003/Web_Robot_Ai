@@ -35,7 +35,7 @@ export function CouponForm({
   initialData?: {
     id: string;
     code: string;
-    discountPercent: number;
+    discountPercent: number | null;
     usageLimit: number | null;
     expiresAt: Date | null;
   };
@@ -44,7 +44,7 @@ export function CouponForm({
   const [isLoading, setIsLoading] = useState(false);
 
   const form = useForm<z.infer<typeof formSchema>>({
-    resolver: zodResolver(formSchema),
+    resolver: zodResolver(formSchema) as any,
     defaultValues: {
       code: initialData?.code || "",
       discountPercent: initialData?.discountPercent || 10,

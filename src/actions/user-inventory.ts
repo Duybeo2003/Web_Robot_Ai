@@ -13,7 +13,7 @@ export async function getUserInventory() {
   return prisma.userInventory.findMany({
     where: {
       userId: session.user.id,
-      isClaimed: false,
+      status: "AVAILABLE",
     },
     include: {
       product: true,
@@ -36,18 +36,18 @@ export async function sellItemForXu(inventoryId: string) {
       include: { product: true }
     });
 
-    if (!item || item.userId !== session.user.id || item.isClaimed) {
+    if (!item || item.userId !== session.user.id || item.status !== "AVAILABLE") {
       throw new Error("Vật phẩm không hợp lệ hoặc đã được sử dụng");
     }
 
-    // Sell for 50% of original price in Xu (1 Xu = 1 VNĐ)
+    // Sell for admin configured price, or fallback to 100% of product price
     const priceInVnd = Number(item.product.price);
-    const xuEarned = Math.floor(priceInVnd * 0.5);
+    const xuEarned = item.sellPriceXu !== null ? item.sellPriceXu : Math.floor(priceInVnd);
 
     // Update inventory item to claimed
     await tx.userInventory.update({
       where: { id: inventoryId },
-      data: { isClaimed: true }
+      data: { status: "SOLD", isClaimed: true }
     });
 
     // Add Xu to wallet
@@ -68,11 +68,49 @@ export async function sellItemForXu(inventoryId: string) {
         amount: xuEarned,
         type: "REWARD", 
         status: "COMPLETED",
-        description: `Bán vật phẩm: ${item.product.name} (Tỉ lệ 50%)`
+        description: `Bán vật phẩm: ${item.product.title}`
       }
     });
 
     revalidatePath("/profile/inventory");
     return xuEarned;
+  });
+}
+
+export async function requestDelivery(inventoryId: string, address: { name: string, phone: string, address: string, notes?: string }) {
+  const session = await auth();
+  if (!session?.user?.id) {
+    throw new Error("Unauthorized");
+  }
+
+  return prisma.$transaction(async (tx) => {
+    const item = await tx.userInventory.findUnique({
+      where: { id: inventoryId }
+    });
+
+    if (!item || item.userId !== session.user.id || item.status !== "AVAILABLE") {
+      throw new Error("Vật phẩm không hợp lệ hoặc không khả dụng");
+    }
+
+    // Create delivery request
+    await tx.deliveryRequest.create({
+      data: {
+        userId: session.user.id,
+        inventoryItemId: inventoryId,
+        recipientName: address.name,
+        phoneNumber: address.phone,
+        address: address.address,
+        notes: address.notes,
+        shippingFee: 0, // Events items are freeship for now
+      }
+    });
+
+    // Update item status
+    await tx.userInventory.update({
+      where: { id: inventoryId },
+      data: { status: "PENDING_DELIVERY", isClaimed: true }
+    });
+
+    revalidatePath("/profile/inventory");
   });
 }

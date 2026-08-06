@@ -42,6 +42,8 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
     name: "",
     slug: "",
     description: "",
+    rules: "",
+    uiConfig: "{}",
     type: "LUCKY_WHEEL",
     pricePerPlay: 10000,
     startDate: defaultStartDate,
@@ -57,6 +59,8 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
         name: event.name,
         slug: event.slug,
         description: event.description || "",
+        rules: event.rules || "",
+        uiConfig: event.uiConfig ? JSON.stringify(event.uiConfig) : "{}",
         type: event.type,
         pricePerPlay: event.pricePerPlay,
         startDate: new Date(event.startDate).toISOString().split('T')[0],
@@ -70,6 +74,8 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
         name: "",
         slug: "",
         description: "",
+        rules: "",
+        uiConfig: "{}",
         type: "LUCKY_WHEEL",
         pricePerPlay: 10000,
         startDate: defaultStartDate,
@@ -85,8 +91,20 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
     try {
       setLoading(true);
       
+      let parsedUiConfig = null;
+      try {
+        if (formData.uiConfig.trim()) {
+          parsedUiConfig = JSON.parse(formData.uiConfig);
+        }
+      } catch {
+        toast.error("Cấu hình giao diện (JSON) không hợp lệ!");
+        setLoading(false);
+        return;
+      }
+
       const payload = {
         ...formData,
+        uiConfig: parsedUiConfig,
         startDate: new Date(formData.startDate),
         endDate: new Date(formData.endDate)
       };
@@ -266,9 +284,29 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
                   onChange={(e) => setFormData({...formData, type: e.target.value})}
                 >
                   <option value="LUCKY_WHEEL">Vòng Quay May Mắn</option>
+                  <option value="POINT_EXCHANGE">Tích Điểm Đổi Quà</option>
                   <option value="MYSTERY_BOX">Hộp Mù (Sắp ra mắt)</option>
                 </select>
               </div>
+            </div>
+            
+            <div className="grid gap-2">
+              <Label>Thể lệ (Quy tắc sự kiện - Tùy chọn)</Label>
+              <Textarea 
+                placeholder="Nhập thể lệ, cách chơi, quy tắc đổi điểm..."
+                value={formData.rules} 
+                onChange={(e) => setFormData({...formData, rules: e.target.value})} 
+              />
+            </div>
+            
+            <div className="grid gap-2">
+              <Label>Cấu hình Giao diện (JSON - Tùy chọn)</Label>
+              <Textarea 
+                placeholder='{"bgColor": "#ffffff"}'
+                value={formData.uiConfig} 
+                onChange={(e) => setFormData({...formData, uiConfig: e.target.value})} 
+                className="font-mono text-sm"
+              />
             </div>
             <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">

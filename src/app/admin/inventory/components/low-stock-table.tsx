@@ -16,7 +16,7 @@ import Image from "next/image";
 import Link from "next/link";
 
 export function LowStockTable() {
-  const [products, setProducts] = useState<Record<string, unknown>[]>([]);
+  const [products, setProducts] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 

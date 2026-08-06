@@ -8,6 +8,16 @@ import { Minus, Plus, ShoppingCart, ShoppingBag } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { cn } from "@/lib/utils";
 
+interface ProductVariant {
+  id: string;
+  attributes: Record<string, string>;
+  price: number;
+  originalPrice?: number | null;
+  inventoryCount: number;
+  sku?: string;
+  imageUrl?: string;
+}
+
 interface AddToCartProps {
   product: {
     id: string;
@@ -20,13 +30,13 @@ interface AddToCartProps {
     inventoryCount?: number;
     externalAffiliateLink?: string | null;
     estimatedArrivalDate?: string | null;
-    variants?: Record<string, unknown>[];
+    variants?: ProductVariant[];
   };
 }
 
 export function AddToCartForm({ product }: AddToCartProps) {
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState<Record<string, unknown> | null>(null);
+  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartUI((state) => state.openCart);
@@ -61,9 +71,9 @@ export function AddToCartForm({ product }: AddToCartProps) {
       <div className="space-y-4 mb-6">
         <h3 className="font-semibold text-sm uppercase text-neutral-500 tracking-wider">Chọn Phân loại</h3>
         <div className="flex flex-wrap gap-2">
-          {product.variants!.map((variant: Record<string, unknown>) => {
+          {product.variants!.map((variant) => {
             const isSelected = selectedVariant?.id === variant.id;
-            const label = Object.values(variant.attributes as object).join(" - ");
+            const label = Object.values(variant.attributes).join(" - ");
             const isVariantOutOfStock = !isPreOrder && variant.inventoryCount <= 0;
             
             return (
@@ -95,7 +105,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
       title: product.title,
       price: currentPrice,
       slug: product.slug,
-      imageUrl: selectedVariant?.imageUrl || product.imageUrl,
+      imageUrl: (selectedVariant?.imageUrl || product.imageUrl) as string,
       supplyType: product.supplyType,
       quantity,
       variantId: selectedVariant?.id as string | undefined,
@@ -113,7 +123,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
       title: product.title,
       price: currentPrice,
       slug: product.slug,
-      imageUrl: selectedVariant?.imageUrl || product.imageUrl,
+      imageUrl: (selectedVariant?.imageUrl || product.imageUrl) as string,
       supplyType: product.supplyType,
       quantity,
       variantId: selectedVariant?.id as string | undefined,

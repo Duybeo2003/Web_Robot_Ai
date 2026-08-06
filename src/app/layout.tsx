@@ -11,6 +11,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { StoreWrapper } from "@/components/layout/store-wrapper";
 import { AffiliateTracker } from "@/components/affiliate-tracker";
 import { FloatingSocialBar } from "@/components/layout/floating-social-bar";
+// @ts-expect-error next/dynamic may lack declarations in some setups
 import dynamicImport from "next/dynamic";
 
 const AuthModal = dynamicImport(() => import("@/components/auth-modal").then((mod) => mod.AuthModal));

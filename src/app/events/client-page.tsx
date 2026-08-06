@@ -96,7 +96,14 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
                       </span>
                     </div>
 
-                    <Link href={`/events/${event.type === 'LUCKY_WHEEL' ? 'lucky-wheel' : 'mystery-box'}/${event.slug}`} className="block">
+                    <Link 
+                      href={`/events/${
+                        event.type === 'LUCKY_WHEEL' ? 'lucky-wheel' : 
+                        event.type === 'POINT_EXCHANGE' ? 'point-exchange' : 
+                        'mystery-box'
+                      }/${event.slug}`} 
+                      className="block"
+                    >
                       <Button className="w-full h-12 bg-gradient-to-r from-orange-500 to-[#FF5722] hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg rounded-sm shadow-md transition-all group-hover:shadow-orange-500/25">
                         CHƠI NGAY
                       </Button>

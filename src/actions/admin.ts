@@ -103,8 +103,8 @@ export async function upsertProduct(data: ProductData, id?: string) {
     title: data.title,
     description: data.description,
     price: data.price,
-    type: data.type,
-    supplyType: data.supplyType || "IN_HOUSE",
+    type: data.type as any,
+    supplyType: (data.supplyType || "IN_HOUSE") as any,
     inventoryCount: data.inventoryCount,
     imageUrl: data.imageUrl,
     originalPrice: data.originalPrice || null,
@@ -114,15 +114,15 @@ export async function upsertProduct(data: ProductData, id?: string) {
         ? new Date(data.flashSaleEndDate)
         : null,
     flashSaleStock: data.flashSaleActive ? data.flashSaleStock || 0 : 0,
-    ageRange: data.ageRange || null,
-    primarySkill: data.primarySkill || null,
+    ageRange: (data.ageRange || null) as any,
+    primarySkill: (data.primarySkill || null) as any,
     educationalGoal: data.educationalGoal || null,
     isCombo: data.isCombo || false,
     externalAffiliateLink: data.externalAffiliateLink || null,
     commissionRate: data.commissionRate ? Number(data.commissionRate) : null,
     depositPercent: data.depositPercent ? Number(data.depositPercent) : null,
     estimatedArrivalDate: data.estimatedArrivalDate ? new Date(data.estimatedArrivalDate) : null,
-    ...(data.categoryId ? { categoryId: data.categoryId } : {}),
+    categoryId: data.categoryId || null,
   };
 
   try {
@@ -518,7 +518,7 @@ export async function createAdminAccount(data: {
 
     if (existingUser) {
       // If user exists, just update their role, name and password if provided
-      const updateData: { role?: string; name?: string; password?: string } = { role: data.role, name: data.name };
+      const updateData: { role?: any; name?: string; password?: string } = { role: data.role, name: data.name };
       if (data.password) {
         updateData.password = await bcrypt.hash(data.password, 10);
       }

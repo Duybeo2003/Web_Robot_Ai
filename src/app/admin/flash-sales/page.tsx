@@ -126,10 +126,10 @@ export default async function AdminFlashSalesPage() {
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       <div className="flex flex-col">
-                        <span className="font-bold text-red-600">{formatPrice(item.price)}</span>
+                        <span className="font-bold text-red-600">{formatPrice(Number(item.price))}</span>
                         {item.originalPrice && (
                           <span className="text-xs text-neutral-400 line-through">
-                            {formatPrice(item.originalPrice)}
+                            {formatPrice(Number(item.originalPrice))}
                           </span>
                         )}
                       </div>

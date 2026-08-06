@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
-export function NewPoForm({ products }: { products: Record<string, unknown>[] }) {
+export function NewPoForm({ products }: { products: any[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -32,29 +32,30 @@ export function NewPoForm({ products }: { products: Record<string, unknown>[] })
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setError("");
-
     if (!formData.productId) {
-      setError("Vui lòng chọn sản phẩm.");
+      setError("Vui lòng chọn sản phẩm");
       return;
     }
-
     setLoading(true);
+    setError("");
 
-    const costPriceNum = formData.costPrice
-      ? parseFloat(formData.costPrice)
-      : undefined;
+    try {
+      const res = await createInventoryTransaction({
+        ...formData,
+        costPrice: Number(formData.costPrice),
+        quantity: Number(formData.quantity),
+      });
 
-    const res = await createInventoryTransaction({
-      ...formData,
-      costPrice: costPriceNum,
-    });
-
-    if (res.error) {
-      setError(res.error);
+      if (res.success) {
+        router.push("/admin/inventory");
+        router.refresh();
+      } else {
+        setError(res.error || "Có lỗi xảy ra");
+        setLoading(false);
+      }
+    } catch (err: any) {
+      setError(err.message || "Lỗi hệ thống");
       setLoading(false);
-    } else {
-      router.push("/admin/inventory");
     }
   };
 
@@ -70,7 +71,7 @@ export function NewPoForm({ products }: { products: Record<string, unknown>[] })
         <Label>Loại giao dịch</Label>
         <Select
           value={formData.type}
-          onValueChange={(val: "IN" | "OUT") => setFormData({ ...formData, type: val })}
+          onValueChange={(val) => setFormData({ ...formData, type: (val as "IN" | "OUT") || "IN" })}
         >
           <SelectTrigger>
             <SelectValue placeholder="Chọn loại giao dịch" />
@@ -86,7 +87,7 @@ export function NewPoForm({ products }: { products: Record<string, unknown>[] })
         <Label>Sản phẩm</Label>
         <Select
           value={formData.productId}
-          onValueChange={(val: string) =>
+          onValueChange={(val) =>
             setFormData({ ...formData, productId: val || "" })
           }
         >

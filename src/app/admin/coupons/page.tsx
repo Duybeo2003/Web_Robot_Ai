@@ -118,7 +118,7 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
                     </TableCell>
                     <TableCell className="text-right">
                       <CouponActions
-                        coupon={{ ...coupon, usageLimit: coupon.usageLimit }}
+                        coupon={{ ...coupon, usageLimit: coupon.usageLimit, discountPercent: coupon.discountPercent ?? 0 }}
                       />
                     </TableCell>
                   </TableRow>

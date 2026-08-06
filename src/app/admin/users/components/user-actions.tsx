@@ -70,12 +70,12 @@ export function UserActions({
       <DropdownMenuContent align="end">
         <DropdownMenuLabel>Hành động</DropdownMenuLabel>
         <DropdownMenuSeparator />
-        <DropdownMenuItem asChild>
-          <Link href={`/admin/users/${userId}`}>
+        <Link href={`/admin/users/${userId}`}>
+          <DropdownMenuItem>
             <Eye className="mr-2 h-4 w-4" />
             <span>Xem chi tiết</span>
-          </Link>
-        </DropdownMenuItem>
+          </DropdownMenuItem>
+        </Link>
         <DropdownMenuSeparator />
         {currentRole === "USER" ? (
           <>

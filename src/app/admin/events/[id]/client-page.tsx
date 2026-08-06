@@ -17,7 +17,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
-type ProductBasic = { id: string; name: string; price: unknown };
+type ProductBasic = { id: string; title: string; price: unknown };
 
 interface EventConfigClientPageProps {
   event: Event & { prizes: EventPrize[] };
@@ -34,6 +34,8 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
   const [formData, setFormData] = useState({
     name: "",
     probability: 0,
+    pointCost: 0,
+    sellPriceXu: "",
     productId: "",
     rewardPoints: 0,
     stock: "",
@@ -48,6 +50,8 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
       setFormData({
         name: prize.name,
         probability: Number(prize.probability),
+        pointCost: Number(prize.pointCost || 0),
+        sellPriceXu: prize.sellPriceXu === null ? "" : prize.sellPriceXu.toString(),
         productId: prize.productId || "",
         rewardPoints: prize.rewardPoints || 0,
         stock: prize.stock === null ? "" : prize.stock.toString(),
@@ -58,6 +62,8 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
       setFormData({
         name: "",
         probability: 0,
+        pointCost: 0,
+        sellPriceXu: "",
         productId: "",
         rewardPoints: 0,
         stock: "",
@@ -74,6 +80,8 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
       const payload = {
         name: formData.name,
         probability: Number(formData.probability),
+        pointCost: Number(formData.pointCost),
+        sellPriceXu: formData.sellPriceXu === "" ? null : parseInt(formData.sellPriceXu),
         productId: formData.productId || null,
         rewardPoints: Number(formData.rewardPoints),
         stock: formData.stock === "" ? null : parseInt(formData.stock),
@@ -148,7 +156,11 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
                 <th className="px-6 py-4 font-bold">Vật Phẩm Gắn Kèm (Nếu trúng quà thực tế)</th>
                 <th className="px-6 py-4 font-bold text-center">Xu thưởng (Nếu trúng Xu)</th>
                 <th className="px-6 py-4 font-bold text-center">Kho (Còn lại)</th>
-                <th className="px-6 py-4 font-bold text-center">Tỉ Lệ Rớt (%)</th>
+                {event.type === "POINT_EXCHANGE" ? (
+                  <th className="px-6 py-4 font-bold text-center">Giá đổi (Xu)</th>
+                ) : (
+                  <th className="px-6 py-4 font-bold text-center">Tỉ Lệ Rớt (%)</th>
+                )}
                 <th className="px-6 py-4 font-bold text-right">Hành động</th>
               </tr>
             </thead>
@@ -172,7 +184,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
                       </td>
                       <td className="px-6 py-4">
                         {product ? (
-                          <div className="text-sm font-medium text-blue-600 truncate max-w-[200px]">{product.name}</div>
+                          <div className="text-sm font-medium text-blue-600 truncate max-w-[200px]">{product.title}</div>
                         ) : (
                           <span className="text-neutral-400 italic">Không có</span>
                         )}
@@ -184,9 +196,15 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
                         {prize.stock === null ? "Vô hạn" : prize.stock}
                       </td>
                       <td className="px-6 py-4 text-center">
-                        <span className={`font-black text-lg ${Number(prize.probability) < 5 ? 'text-red-500' : 'text-green-600'}`}>
-                          {Number(prize.probability)}%
-                        </span>
+                        {event.type === "POINT_EXCHANGE" ? (
+                          <span className="font-black text-lg text-orange-500">
+                            {Number(prize.pointCost || 0).toLocaleString('vi-VN')} Xu
+                          </span>
+                        ) : (
+                          <span className={`font-black text-lg ${Number(prize.probability) < 5 ? 'text-red-500' : 'text-green-600'}`}>
+                            {Number(prize.probability)}%
+                          </span>
+                        )}
                       </td>
                       <td className="px-6 py-4 text-right">
                         <div className="flex justify-end gap-2">
@@ -232,15 +250,26 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
             </div>
             
             <div className="grid grid-cols-2 gap-4">
-              <div className="grid gap-2">
-                <Label>Tỉ lệ % (Xác suất)</Label>
-                <Input 
-                  type="number"
-                  step="0.01"
-                  value={formData.probability} 
-                  onChange={(e) => setFormData({...formData, probability: Number(e.target.value)})} 
-                />
-              </div>
+              {event.type === "POINT_EXCHANGE" ? (
+                <div className="grid gap-2">
+                  <Label>Giá đổi (Xu)</Label>
+                  <Input 
+                    type="number"
+                    value={formData.pointCost} 
+                    onChange={(e) => setFormData({...formData, pointCost: Number(e.target.value)})} 
+                  />
+                </div>
+              ) : (
+                <div className="grid gap-2">
+                  <Label>Tỉ lệ % (Xác suất)</Label>
+                  <Input 
+                    type="number"
+                    step="0.01"
+                    value={formData.probability} 
+                    onChange={(e) => setFormData({...formData, probability: Number(e.target.value)})} 
+                  />
+                </div>
+              )}
               <div className="grid gap-2">
                 <Label>Kho / Giới hạn số lần trúng</Label>
                 <Input 
@@ -255,21 +284,34 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
             <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg space-y-4">
               <p className="text-sm font-bold text-orange-800">Phần thưởng (Chọn 1 trong 2)</p>
               
+              <div className="grid grid-cols-2 gap-4">
               <div className="grid gap-2">
-                <Label>1. Gắn Vật phẩm thực tế (Sẽ vào Túi đồ)</Label>
+                <Label>Quà Thực tế (Sản phẩm trong Shop)</Label>
                 <select 
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={formData.productId}
-                  onChange={(e) => setFormData({...formData, productId: e.target.value, rewardPoints: 0})}
+                  onChange={(e) => setFormData({...formData, productId: e.target.value})}
                 >
-                  <option value="">-- Không chọn vật phẩm --</option>
+                  <option value="">Không có</option>
                   {products.map(p => (
-                    <option key={p.id} value={p.id}>{p.name} (Giá: {Number(p.price).toLocaleString()}đ)</option>
+                    <option key={p.id} value={p.id}>
+                      {p.title}
+                    </option>
                   ))}
                 </select>
               </div>
+              <div className="grid gap-2">
+                <Label>Giá bán lại (Xu - Tuỳ chọn)</Label>
+                <Input 
+                  type="number"
+                  placeholder="Để trống nếu không cho bán lại"
+                  value={formData.sellPriceXu} 
+                  onChange={(e) => setFormData({...formData, sellPriceXu: e.target.value})} 
+                />
+              </div>
+            </div>
 
-              <div className="relative flex py-2 items-center">
+            <div className="relative flex py-2 items-center">
                 <div className="flex-grow border-t border-orange-200"></div>
                 <span className="flex-shrink-0 mx-4 text-orange-400 text-xs font-bold uppercase">Hoặc</span>
                 <div className="flex-grow border-t border-orange-200"></div>

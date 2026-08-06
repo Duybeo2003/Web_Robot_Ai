@@ -1,7 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import { MOCK_PRODUCTS } from "@/lib/mock-data";
 import Link from "next/link";
-import { Prisma, AgeRange, Skill } from "@prisma/client";
+import { Prisma, AgeRange, PrimarySkill } from "@prisma/client";
 import { AddToCartButton } from "./components/add-to-cart-button";
 import { ProductCard } from "@/components/ui/product-card";
 import { Search } from "lucide-react";
@@ -98,7 +98,7 @@ export default async function ShopPage({
       }
     }
     if (skillFilter) {
-      whereClause.primarySkill = skillFilter as Skill;
+      whereClause.primarySkill = skillFilter as PrimarySkill;
     }
     if (minPrice !== undefined || maxPrice !== undefined) {
       whereClause.price = {};
@@ -175,25 +175,7 @@ export default async function ShopPage({
         <div className="lg:col-span-1 space-y-6">
           <ShopSidebarFilters />
 
-          <div className="bg-white p-6 rounded-sm shadow-sm border border-neutral-100">
-            <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">
-              Cam kết RoboEd
-            </h2>
-            <ul className="space-y-3 text-sm text-neutral-600">
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#FF5722]"></div>
-                <span>Chính hãng 100%</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#FF5722]"></div>
-                <span>Bảo hành 12 tháng</span>
-              </li>
-              <li className="flex items-center gap-2">
-                <div className="w-1.5 h-1.5 rounded-full bg-[#FF5722]"></div>
-                <span>Đổi trả miễn phí 7 ngày</span>
-              </li>
-            </ul>
-          </div>
+
         </div>
 
         {/* Main Product Area */}

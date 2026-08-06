@@ -22,9 +22,9 @@ export function ProductForm({
   availableProducts = [],
   forceComboMode = false,
 }: {
-  initialData?: Record<string, unknown>;
-  categories?: Record<string, unknown>[];
-  availableProducts?: Record<string, unknown>[];
+  initialData?: any;
+  categories?: any[];
+  availableProducts?: any[];
   forceComboMode?: boolean;
 }) {
   const router = useRouter();
@@ -52,14 +52,14 @@ export function ProductForm({
     educationalGoal: initialData?.educationalGoal || "",
     isCombo: forceComboMode ? true : initialData?.isCombo || false,
     comboItems:
-      (initialData?.comboItems as Record<string, unknown>[])?.map((ci) => ({
+      (initialData?.comboItems || [])?.map((ci: any) => ({
         productId: ci.productId,
         quantity: ci.quantity,
-        title: (ci.product as Record<string, unknown>)?.title || "Sản phẩm",
-        price: (ci.product as Record<string, unknown>)?.price || 0,
-        imageUrl: (ci.product as Record<string, unknown>)?.imageUrl || "",
+        title: ci.product?.title || "Sản phẩm",
+        price: ci.product?.price || 0,
+        imageUrl: ci.product?.imageUrl || "",
       })) || [],
-    variants: (initialData?.variants as Record<string, unknown>[])?.map((v) => ({
+    variants: (initialData?.variants || [])?.map((v: any) => ({
       id: v.id,
       attributes: v.attributes,
       price: Number(v.price),
@@ -72,7 +72,7 @@ export function ProductForm({
     commissionRate: initialData?.commissionRate ? Number(initialData.commissionRate) : 10,
     depositPercent: initialData?.depositPercent ? Number(initialData.depositPercent) : 70,
     estimatedArrivalDate: initialData?.estimatedArrivalDate
-      ? new Date(initialData.estimatedArrivalDate).toISOString().slice(0, 16)
+      ? new Date(initialData.estimatedArrivalDate as string).toISOString().slice(0, 16)
       : "",
   });
 
@@ -433,7 +433,7 @@ export function ProductForm({
                           (ci: any) => ci.productId === p.id,
                         ),
                     )
-                    .map((p) => (
+                    .map((p: any) => (
                       <option key={p.id} value={p.id}>
                         {p.title} - {p.price.toLocaleString("vi-VN")}đ
                       </option>
@@ -444,8 +444,8 @@ export function ProductForm({
                   onClick={() => {
                     if (!selectedProductId) return;
                     const p = availableProducts.find(
-                      (x) => x.id === selectedProductId,
-                    );
+                      (x: any) => x.id === selectedProductId,
+                    ) as any;
                     if (p) {
                       setFormData({
                         ...formData,

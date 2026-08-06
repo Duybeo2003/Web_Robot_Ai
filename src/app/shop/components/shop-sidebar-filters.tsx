@@ -115,7 +115,7 @@ export function ShopSidebarFilters() {
         {currentType && <input type="hidden" name="type" value={currentType} />}
       </form>
 
-      <Accordion type="multiple" defaultValue={["categories", "price", "age", "skills"]} className="w-full">
+      <Accordion className="w-full">
         <AccordionItem value="categories" className="border-b-0">
           <AccordionTrigger className="font-heading font-bold text-lg text-foreground uppercase hover:no-underline py-3">
             Danh mục
@@ -150,7 +150,7 @@ export function ShopSidebarFilters() {
                 min={0}
                 max={10000000}
                 step={50000}
-                onValueChange={setPriceRange}
+                onValueChange={(val) => setPriceRange(val as number[])}
                 className="mt-2"
               />
               <div className="flex items-center justify-between mt-4">
@@ -177,7 +177,7 @@ export function ShopSidebarFilters() {
                 min={3}
                 max={18}
                 step={1}
-                onValueChange={setAgeRange}
+                onValueChange={(val) => setAgeRange(val as number[])}
                 className="mt-2"
               />
               <div className="flex items-center justify-between mt-4">

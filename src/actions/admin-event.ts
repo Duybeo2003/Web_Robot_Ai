@@ -45,7 +45,7 @@ export async function createEvent(data: Record<string, unknown>) {
   }
 
   const event = await prisma.event.create({
-    data,
+    data: data as any,
   });
 
   revalidatePath("/admin/events");
@@ -60,7 +60,7 @@ export async function updateEvent(id: string, data: Record<string, unknown>) {
 
   const event = await prisma.event.update({
     where: { id },
-    data,
+    data: data as any,
   });
 
   revalidatePath("/admin/events");
@@ -94,7 +94,7 @@ export async function createPrize(eventId: string, data: Record<string, unknown>
     data: {
       ...data,
       eventId,
-    },
+    } as any,
   });
 
   revalidatePath(`/admin/events/${eventId}`);
@@ -109,7 +109,7 @@ export async function updatePrize(id: string, data: Record<string, unknown>) {
 
   const prize = await prisma.eventPrize.update({
     where: { id },
-    data,
+    data: data as any,
   });
 
   revalidatePath(`/admin/events/${prize.eventId}`);

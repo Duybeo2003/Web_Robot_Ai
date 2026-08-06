@@ -53,20 +53,24 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
     if (validGroups.length === 0) return;
 
     // Cartesian product
-    const cartesian = (arrays: Record<string, string>[][]) => {
-      return arrays.reduce((a, b) => a.flatMap(d => b.map(e => [d, e].flat())));
+    const cartesian = (arrays: Record<string, string>[][]): Record<string, string>[] => {
+      return arrays.reduce<Record<string, string>[]>((a, b) => 
+        a.flatMap(d => b.map(e => ({ ...d, ...e })))
+      , [{}]);
     };
 
     const groupValues = validGroups.map(g => g.values.map(v => ({ [g.name]: v })));
-    const combinations = groupValues.length > 1 ? cartesian(groupValues) : groupValues[0].map(x => [x]);
-    
+    let combinations = groupValues[0];
+    if (groupValues.length > 1) {
+      combinations = cartesian(groupValues);
+    }
     if (combinations.length > 100) {
       window.alert("Số lượng biến thể quá lớn (vượt quá 100). Vui lòng giảm bớt số lượng tùy chọn.");
       return;
     }
 
     const newVariants: Variant[] = combinations.map(comb => {
-      const attrs = (comb as Record<string, string>[]).reduce((acc, curr) => ({ ...acc, ...curr }), {});
+      const attrs = comb as Record<string, string>;
       
       // Try to find existing variant to keep its data
       const existing = variants.find(v => {

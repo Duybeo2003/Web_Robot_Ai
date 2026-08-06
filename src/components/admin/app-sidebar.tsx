@@ -28,6 +28,7 @@ import {
   BookOpen,
   LayoutDashboard,
   ShieldCheck,
+  ShieldAlert,
   Layers,
   Zap,
   Wallet,
@@ -43,6 +44,8 @@ const overviewGroup = [{ title: "Tổng quan", url: "/admin", icon: BarChart3 }]
 const salesGroup = [
   { title: "Đơn hàng", url: "/admin/orders", icon: ShoppingCart },
   { title: "Duyệt Nạp Xu", url: "/admin/wallet", icon: Wallet },
+  { title: "Trả thưởng & Giao hàng", url: "/admin/deliveries", icon: Package },
+  { title: "Bảo hành", url: "/admin/warranties", icon: ShieldAlert },
   { title: "Đổi/Trả (RMA)", url: "/admin/returns", icon: Package },
   { title: "Đánh giá", url: "/admin/reviews", icon: Star },
 ];

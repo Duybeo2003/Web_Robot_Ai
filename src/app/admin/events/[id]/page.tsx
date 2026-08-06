@@ -13,13 +13,13 @@ export default async function AdminEventConfigPage({ params }: { params: Promise
 
   // Also fetch simple product list so admin can assign product to prize
   const products = await prisma.product.findMany({
-    select: { id: true, name: true, price: true },
+    select: { id: true, title: true, price: true },
     orderBy: { createdAt: 'desc' }
   });
 
   const serializedProducts = products.map(p => ({
     id: p.id,
-    name: p.name,
+    title: p.title,
     price: Number(p.price)
   }));
 

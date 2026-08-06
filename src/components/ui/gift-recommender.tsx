@@ -23,7 +23,7 @@ export function GiftRecommender() {
   const [step, setStep] = useState<Step>("AGE");
   const [age, setAge] = useState<string>("");
   const [loading, setLoading] = useState(false);
-  const [results, setResults] = useState<Record<string, unknown>[]>([]);
+  const [results, setResults] = useState<any[]>([]);
 
   const handleAgeSelect = (selectedAge: string) => {
     setAge(selectedAge);

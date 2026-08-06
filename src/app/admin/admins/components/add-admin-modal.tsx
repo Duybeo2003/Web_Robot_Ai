@@ -69,7 +69,7 @@ export function AddAdminModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger asChild>
+      <DialogTrigger>
         <Button>
           <UserPlus className="mr-2 h-4 w-4" />
           Thêm Quản trị viên
@@ -126,7 +126,7 @@ export function AddAdminModal() {
               <Label htmlFor="role">Quyền hạn</Label>
               <Select 
                 value={formData.role} 
-                onValueChange={(val: "ADMIN" | "STORE_MANAGER") => setFormData({ ...formData, role: val })}
+                onValueChange={(val) => setFormData({ ...formData, role: (val as "ADMIN" | "STORE_MANAGER") || "STORE_MANAGER" })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn quyền" />

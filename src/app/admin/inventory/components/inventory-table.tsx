@@ -12,7 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { ArrowDownRight, ArrowUpRight } from "lucide-react";
 
-export function InventoryTable({ transactions }: { transactions: Record<string, unknown>[] }) {
+export function InventoryTable({ transactions }: { transactions: any[] }) {
   if (transactions.length === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-10 text-center text-muted-foreground">

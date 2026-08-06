@@ -110,6 +110,7 @@ model User {
   wallet         UserWallet?
   eventHistories UserEventHistory[]
   inventory      UserInventory[]
+  deliveryRequests DeliveryRequest[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -535,6 +536,7 @@ model Article {
 enum EventType {
   LUCKY_WHEEL
   MYSTERY_BOX
+  POINT_EXCHANGE
 }
 
 enum TransactionType {
@@ -581,6 +583,8 @@ model Event {
   slug        String  @unique
   description String? @db.Text
   bannerUrl   String?
+  rules       String? @db.Text
+  uiConfig    Json?
 
   type         EventType @default(LUCKY_WHEEL)
   pricePerPlay Int       @default(0) // Cost in Xu
@@ -609,6 +613,8 @@ model EventPrize {
   isJackpot    Boolean @default(false)
   rewardPoints Int     @default(0) // If it's a point reward
   productId    String? // If it's a physical product reward
+  pointCost    Int     @default(0) // Cost in Xu for POINT_EXCHANGE
+  sellPriceXu  Int?    // Admin configured sell-back price
 
   createdAt DateTime @default(now())
 }
@@ -626,6 +632,13 @@ model UserEventHistory {
   createdAt DateTime @default(now())
 }
 
+enum UserInventoryStatus {
+  AVAILABLE
+  PENDING_DELIVERY
+  DELIVERED
+  SOLD
+}
+
 model UserInventory {
   id     String @id @default(cuid())
   userId String
@@ -635,7 +648,33 @@ model UserInventory {
   product   Product @relation(fields: [productId], references: [id])
 
   quantity  Int     @default(1)
-  isClaimed Boolean @default(false) // true if they requested delivery or sold it back
+  isClaimed Boolean @default(false) // Deprecated, use status
+  status    UserInventoryStatus @default(AVAILABLE)
+  
+  source       String? // e.g. EVENT_PRIZE
+  sellPriceXu  Int?    // Snapshot of sell price from EventPrize
+
+  deliveryRequest DeliveryRequest?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model DeliveryRequest {
+  id              String @id @default(cuid())
+  userId          String
+  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  
+  inventoryItemId String @unique
+  inventoryItem   UserInventory @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
+  
+  status          String @default("PENDING") // PENDING, SHIPPED, DELIVERED, CANCELLED
+  recipientName   String
+  phoneNumber     String
+  address         String
+  notes           String?
+  trackingCode    String?
+  shippingFee     Int    @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
