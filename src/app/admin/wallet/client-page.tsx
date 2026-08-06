@@ -28,8 +28,8 @@ export default function AdminWalletClientPage({ pendingTopups: initialTopups }: 
       await approveTopup(id);
       setTopups(topups.filter(t => t.id !== id));
       toast.success("Đã duyệt nạp Xu thành công");
-    } catch (err) {
-      toast.error("Có lỗi xảy ra khi duyệt");
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Có lỗi xảy ra");
     } finally {
       setLoadingId(null);
     }
@@ -42,8 +42,8 @@ export default function AdminWalletClientPage({ pendingTopups: initialTopups }: 
       await rejectTopup(id);
       setTopups(topups.filter(t => t.id !== id));
       toast.success("Đã từ chối nạp Xu");
-    } catch (err) {
-      toast.error("Có lỗi xảy ra khi từ chối");
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Có lỗi xảy ra");
     } finally {
       setLoadingId(null);
     }

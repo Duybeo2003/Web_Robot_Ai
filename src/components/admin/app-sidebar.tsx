@@ -31,6 +31,7 @@ import {
   Layers,
   Zap,
   Wallet,
+  Trophy,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -54,6 +55,7 @@ const productGroup = [
 ];
 
 const marketingGroup = [
+  { title: "Sự kiện & Minigame", url: "/admin/events", icon: Trophy },
   { title: "Mã giảm giá", url: "/admin/coupons", icon: Ticket },
   { title: "Flash Sale", url: "/admin/flash-sales", icon: Zap },
   { title: "Bài viết (Blog)", url: "/admin/articles", icon: BookOpen },

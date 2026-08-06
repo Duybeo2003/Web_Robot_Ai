@@ -42,8 +42,8 @@ export default function WalletClientPage({ wallet, transactions }: WalletClientP
       setIsTopupOpen(false);
       setAmount("");
       toast.success("Đã tạo yêu cầu nạp Xu. Vui lòng chuyển khoản!");
-    } catch (err) {
-      toast.error("Có lỗi xảy ra khi tạo yêu cầu nạp Xu");
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Có lỗi xảy ra");
     } finally {
       setLoading(false);
     }
