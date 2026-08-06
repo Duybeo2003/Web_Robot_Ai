@@ -86,8 +86,9 @@ export function ProductForm({
         0
       );
       if (formData.originalPrice !== totalRetail) {
-        // eslint-disable-next-line react-hooks/exhaustive-deps
-        setFormData((prev) => ({ ...prev, originalPrice: totalRetail }));
+        setTimeout(() => {
+          setFormData((prev) => ({ ...prev, originalPrice: totalRetail }));
+        }, 0);
       }
     }
   }, [formData.comboItems, formData.isCombo, formData.originalPrice]);

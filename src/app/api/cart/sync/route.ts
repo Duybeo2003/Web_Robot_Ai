@@ -32,26 +32,36 @@ export async function POST(req: Request) {
       });
     }
 
-    // Merge logic
+    // Merge logic using transaction for performance
+    const updates = [];
+    const creates = [];
     for (const localItem of items) {
       const existingDbItem = cart.items.find(
         (i) => i.productId === localItem.id,
       );
 
       if (existingDbItem) {
-        await prisma.cartItem.update({
-          where: { id: existingDbItem.id },
-          data: { quantity: localItem.quantity }, // Update DB with local quantity
-        });
+        updates.push(
+          prisma.cartItem.update({
+            where: { id: existingDbItem.id },
+            data: { quantity: localItem.quantity }, // Update DB with local quantity
+          })
+        );
       } else {
-        await prisma.cartItem.create({
-          data: {
-            cartId: cart.id,
-            productId: localItem.id,
-            quantity: localItem.quantity,
-          },
-        });
+        creates.push(
+          prisma.cartItem.create({
+            data: {
+              cartId: cart.id,
+              productId: localItem.id,
+              quantity: localItem.quantity,
+            },
+          })
+        );
       }
+    }
+
+    if (updates.length > 0 || creates.length > 0) {
+      await prisma.$transaction([...updates, ...creates]);
     }
 
     // Return the updated DB cart items so the local store can align

@@ -150,7 +150,6 @@ export async function processCheckout(data: {
 
       // 1.5 Handle Coupon
       let discountAmount = 0;
-      let isFreeship = false;
       
       if (data.couponCode) {
         const coupon = await tx.coupon.findUnique({
@@ -173,10 +172,6 @@ export async function processCheckout(data: {
             discountAmount += Number(coupon.discountValue);
           }
           
-          if (coupon.isFreeship) {
-            isFreeship = true;
-          }
-
           // C2 Fix: Atomic increment - prevents race condition on usage
           const updatedCoupon = await tx.coupon.update({
             where: { id: coupon.id },

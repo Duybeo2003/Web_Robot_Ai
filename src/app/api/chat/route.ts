@@ -1,6 +1,23 @@
 import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { prisma } from "@/lib/prisma";
+import { unstable_cache } from "next/cache";
+
+const getCachedProducts = unstable_cache(
+  async () => {
+    return prisma.product.findMany({
+      where: { deletedAt: null },
+      select: {
+        title: true,
+        price: true,
+        category: { select: { name: true } },
+        sku: true,
+      },
+    });
+  },
+  ["chat-product-catalog"],
+  { revalidate: 3600, tags: ["products"] }
+);
 
 export const maxDuration = 30;
 
@@ -21,16 +38,8 @@ export async function POST(req: Request) {
       apiKey,
     });
 
-    // Fetch product catalog for context
-    const products = await prisma.product.findMany({
-      where: { deletedAt: null },
-      select: {
-        title: true,
-        price: true,
-        category: { select: { name: true } },
-        sku: true,
-      },
-    });
+    // Fetch product catalog for context (Cached)
+    const products = await getCachedProducts();
 
     const productContext = products
       .map(

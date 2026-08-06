@@ -10,6 +10,7 @@ import { CartSyncer } from "@/components/cart-syncer";
 import { Toaster } from "@/components/ui/sonner";
 import { StoreWrapper } from "@/components/layout/store-wrapper";
 import { AffiliateTracker } from "@/components/affiliate-tracker";
+import { FloatingSocialBar } from "@/components/layout/floating-social-bar";
 import dynamicImport from "next/dynamic";
 
 const AuthModal = dynamicImport(() => import("@/components/auth-modal").then((mod) => mod.AuthModal));
@@ -79,6 +80,7 @@ export default function RootLayout({
           </StoreWrapper>
           <Toaster />
           <AIChatbot />
+          <FloatingSocialBar />
           <Suspense fallback={null}>
             <AffiliateTracker />
           </Suspense>

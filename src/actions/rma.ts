@@ -72,15 +72,71 @@ export async function updateReturnRequestStatus(
   if (user?.role !== "ADMIN") return { error: "Unauthorized" };
 
   try {
-    await prisma.returnRequest.update({
-      where: { id },
-      data: { status },
+    await prisma.$transaction(async (tx) => {
+      const returnReq = await tx.returnRequest.update({
+        where: { id },
+        data: { status },
+        include: { order: { include: { items: true } } },
+      });
+
+      // If return is COMPLETED, refund inventory and points (similar to cancel)
+      if (status === "COMPLETED" && returnReq.order) {
+        const order = returnReq.order;
+        
+        // Prevent double return if order was already cancelled/returned
+        if (order.status !== "CANCELLED" && order.status !== "RETURNED") {
+          for (const item of order.items) {
+            if (item.variantId) {
+              await tx.productVariant.update({
+                where: { id: item.variantId },
+                data: { inventoryCount: { increment: item.quantity } },
+              });
+            } else {
+              const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
+              if (dbProduct) {
+                await tx.product.update({
+                  where: { id: item.productId },
+                  data: {
+                    inventoryCount: { increment: item.quantity },
+                    ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
+                      ? { flashSaleStock: { increment: item.quantity } }
+                      : {})
+                  }
+                });
+              }
+            }
+          }
+          
+          // Refund used points
+          if (order.pointsUsed > 0) {
+            await tx.user.update({
+              where: { id: order.userId },
+              data: { points: { increment: order.pointsUsed } }
+            });
+          }
+
+          // Revoke earned points
+          if (order.pointsEarned > 0) {
+             await tx.user.update({
+              where: { id: order.userId },
+              data: { points: { decrement: order.pointsEarned } }
+            });
+          }
+
+          // Update order status
+          await tx.order.update({
+            where: { id: order.id },
+            data: { status: "RETURNED" },
+          });
+        }
+      }
     });
 
     revalidatePath("/admin/returns");
     revalidatePath("/profile/orders");
     return { success: true };
-  } catch {
+  } catch (e: unknown) {
+    console.error("[RMA_UPDATE]", e);
     return { error: "Lỗi cập nhật trạng thái." };
   }
 }

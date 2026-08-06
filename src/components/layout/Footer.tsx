@@ -22,8 +22,10 @@ export function Footer() {
             </ul>
             <div className="flex gap-4 pt-2">
               <Link
-                href="#"
+                href="https://www.facebook.com/share/1PSifhd4HB/?mibextid=wwXIfr"
+                target="_blank"
                 className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-[#1877F2] transition-colors text-white"
+                title="Facebook"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -35,8 +37,10 @@ export function Footer() {
                 </svg>
               </Link>
               <Link
-                href="#"
-                className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-[#0A66C2] transition-colors text-white"
+                href="https://vn.shp.ee/jYvqVEMj"
+                target="_blank"
+                className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-[#EE4D2D] transition-colors text-white"
+                title="Shopee"
               >
                 <svg
                   viewBox="0 0 24 24"
@@ -44,23 +48,7 @@ export function Footer() {
                   height="16"
                   className="fill-current"
                 >
-                  <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
-                  <rect x="2" y="9" width="4" height="12" />
-                  <circle cx="4" cy="4" r="2" />
-                </svg>
-              </Link>
-              <Link
-                href="#"
-                className="w-8 h-8 rounded-full bg-neutral-800 flex items-center justify-center hover:bg-[#FF0000] transition-colors text-white"
-              >
-                <svg
-                  viewBox="0 0 24 24"
-                  width="16"
-                  height="16"
-                  className="fill-current"
-                >
-                  <path d="M22.54 6.42a2.78 2.78 0 0 0-1.94-2C18.88 4 12 4 12 4s-6.88 0-8.6.46a2.78 2.78 0 0 0-1.94 2A29 29 0 0 0 1 11.75a29 29 0 0 0 .46 5.33A2.78 2.78 0 0 0 3.4 19c1.72.46 8.6.46 8.6.46s6.88 0 8.6-.46a2.78 2.78 0 0 0 1.94-2 29 29 0 0 0 .46-5.25 29 29 0 0 0-.46-5.33z" />
-                  <polygon points="9.75 15.02 15.5 11.75 9.75 8.48 9.75 15.02" />
+                  <path d="M19 6h-2c0-2.8-2.2-5-5-5S7 3.2 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.7 0 3 1.3 3 3H9c0-1.7 1.3-3 3-3zm7 17H5V8h14v12zm-7-8c-1.7 0-3-1.3-3-3H7c0 2.8 2.2 5 5 5s5-2.2 5-5h-2c0 1.7-1.3 3-3 3z" />
                 </svg>
               </Link>
               <Link

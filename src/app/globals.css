@@ -130,3 +130,28 @@
     @apply flex items-center justify-center bg-red-600 text-white rounded-full text-xs font-bold px-2 py-1 mt-2;
   }
 }
+
+/* Mobile Accessibility Fixes (I1 & I3) */
+@media (max-width: 768px) {
+  /* I1: Fix text quá nhỏ trên mobile */
+  html {
+    font-size: 16px !important;
+  }
+  
+  input[type="text"], 
+  input[type="email"], 
+  input[type="number"], 
+  input[type="tel"], 
+  select, 
+  textarea {
+    font-size: 16px !important; /* Prevents iOS Safari zoom */
+  }
+
+  /* I3: Fix Touch Targets < 44px */
+  button,
+  [role="button"],
+  a.touch-target {
+    min-height: 44px;
+    min-width: 44px;
+  }
+}

@@ -1,6 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Zap, Clock, Package, Edit, Eye, Plus } from "lucide-react";
+import { Zap, Clock, Package, Edit } from "lucide-react";
 import Image from "next/image";
 import { removeFlashSale } from "@/actions/product";
 import { DeleteButton } from "@/components/delete-button";

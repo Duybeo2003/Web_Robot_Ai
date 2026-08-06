@@ -16,7 +16,7 @@ import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
 import { OrderDetailsModal } from "./order-details-modal";
 import { Card } from "@/components/ui/card";
-import { Download, Truck, CheckCircle, Trash } from "lucide-react";
+import { Download, Truck, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
 import { updateOrderStatus } from "@/actions/order";
 
@@ -130,7 +130,7 @@ export function OrdersTableClient({
             disabled={selectedIds.length === 0 || isActionLoading}
             onClick={() => handleBulkAction("PROCESSING")}
           >
-            Chuyển "Đang chuẩn bị"
+            Chuyển &quot;Đang chuẩn bị&quot;
           </Button>
           <Button 
             variant="outline" 
@@ -139,7 +139,7 @@ export function OrdersTableClient({
             onClick={() => handleBulkAction("SHIPPED")}
           >
             <Truck className="h-4 w-4 mr-2 text-purple-600" />
-            Chuyển "Đang giao"
+            Chuyển &quot;Đang giao&quot;
           </Button>
           <Button 
             variant="outline" 
