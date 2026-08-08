@@ -30,8 +30,9 @@ export function ProductCarousel({
   badgeColor = "bg-[#FF3300]",
   userWishlistIds = [],
 }: ProductCarouselProps) {
-  const autoplayPlugin = React.useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true })
+  const autoplayPlugin = React.useMemo(
+    () => Autoplay({ delay: 3000, stopOnInteraction: true }),
+    []
   );
 
   if (!products || products.length === 0) return null;
@@ -67,7 +68,7 @@ export function ProductCarousel({
         {/* Carousel Block */}
         <div className="relative px-2 md:px-10">
           <Carousel
-            plugins={[autoplayPlugin.current]}
+            plugins={[autoplayPlugin]}
             opts={{
               align: "start",
               loop: true,

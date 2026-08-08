@@ -21,8 +21,9 @@ export function FlashSaleCarousel({
   products,
   userWishlistIds = [],
 }: FlashSaleCarouselProps) {
-  const autoplayPlugin = React.useRef(
-    Autoplay({ delay: 3000, stopOnInteraction: true })
+  const autoplayPlugin = React.useMemo(
+    () => Autoplay({ delay: 3000, stopOnInteraction: true }),
+    []
   );
 
   if (!products || products.length === 0) return null;
@@ -47,7 +48,7 @@ export function FlashSaleCarousel({
 
         <div className="bg-[#FF3300] pb-6 px-4 md:px-8 rounded-b-lg relative shadow-lg">
           <Carousel
-            plugins={[autoplayPlugin.current]}
+            plugins={[autoplayPlugin]}
             opts={{
               align: "start",
               loop: true,
