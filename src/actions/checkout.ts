@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { PaymentMethod } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { sendOrderConfirmationEmail } from "@/lib/email";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function processCheckout(data: {
   receiverName?: string;
@@ -47,6 +48,16 @@ export async function processCheckout(data: {
 
   if (!data.cartItems || data.cartItems.length === 0) {
     return { error: "Giỏ hàng trống." };
+  }
+
+  // Rate Limiting: 3 orders per minute per user or phone number
+  const rateLimitKey = userId 
+    ? `rl:checkout:uid:${userId}` 
+    : `rl:checkout:phone:${data.receiverPhone}`;
+  
+  const rl = await checkRateLimit(rateLimitKey, 3, 60);
+  if (!rl.success) {
+    return { error: "Bạn đã đặt quá nhiều đơn hàng trong thời gian ngắn. Vui lòng thử lại sau 1 phút." };
   }
 
   try {

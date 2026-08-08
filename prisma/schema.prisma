@@ -167,6 +167,7 @@ model Session {
 model Category {
   id          String    @id @default(cuid())
   name        String
+  slug        String    @unique
   description String?
   products    Product[]
 
@@ -225,6 +226,7 @@ model Product {
   updatedAt     DateTime        @updatedAt
   deletedAt     DateTime? // Soft Delete
   UserInventory UserInventory[]
+  eventPrizes   EventPrize[]
 
   @@index([categoryId])
   @@index([slug])
@@ -303,7 +305,7 @@ model Order {
   // State Machine for Kanban / Order processing
   pointsEarned   Int         @default(0) // Số điểm kiếm được từ đơn này
   pointsUsed     Int         @default(0) // Số điểm đã sử dụng để giảm giá
-  discountAmount Decimal     @default(0) // Tiền giảm do coupon + points
+  discountAmount Decimal     @default(0) @db.Decimal(10, 2) // Tiền giảm do coupon + points
   status         OrderStatus @default(PENDING)
 
   items          OrderItem[]
@@ -575,6 +577,8 @@ model WalletTransaction {
   description String?
 
   createdAt DateTime @default(now())
+
+  @@index([walletId])
 }
 
 model Event {
@@ -613,10 +617,14 @@ model EventPrize {
   isJackpot    Boolean @default(false)
   rewardPoints Int     @default(0) // If it's a point reward
   productId    String? // If it's a physical product reward
+  product      Product? @relation(fields: [productId], references: [id])
   pointCost    Int     @default(0) // Cost in Xu for POINT_EXCHANGE
   sellPriceXu  Int?    // Admin configured sell-back price
 
   createdAt DateTime @default(now())
+
+  @@index([eventId])
+  @@index([productId])
 }
 
 model UserEventHistory {
@@ -630,6 +638,9 @@ model UserEventHistory {
   cost      Int // Xu spent
 
   createdAt DateTime @default(now())
+
+  @@index([userId])
+  @@index([eventId])
 }
 
 enum UserInventoryStatus {
@@ -658,6 +669,16 @@ model UserInventory {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
+  @@index([productId])
+}
+
+enum DeliveryStatus {
+  PENDING
+  SHIPPED
+  DELIVERED
+  CANCELLED
 }
 
 model DeliveryRequest {
@@ -668,7 +689,7 @@ model DeliveryRequest {
   inventoryItemId String @unique
   inventoryItem   UserInventory @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
   
-  status          String @default("PENDING") // PENDING, SHIPPED, DELIVERED, CANCELLED
+  status          DeliveryStatus @default(PENDING)
   recipientName   String
   phoneNumber     String
   address         String
@@ -678,4 +699,6 @@ model DeliveryRequest {
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([userId])
 }

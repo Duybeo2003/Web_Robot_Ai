@@ -10,6 +10,7 @@ import {
   CarouselPrevious,
 } from "@/components/ui/carousel";
 import { ProductCard } from "@/components/ui/product-card";
+import Autoplay from "embla-carousel-autoplay";
 
 interface ProductCarouselProps {
   title: string;
@@ -29,6 +30,10 @@ export function ProductCarousel({
   badgeColor = "bg-[#FF3300]",
   userWishlistIds = [],
 }: ProductCarouselProps) {
+  const autoplayPlugin = React.useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true })
+  );
+
   if (!products || products.length === 0) return null;
 
   return (
@@ -62,9 +67,10 @@ export function ProductCarousel({
         {/* Carousel Block */}
         <div className="relative px-2 md:px-10">
           <Carousel
+            plugins={[autoplayPlugin.current]}
             opts={{
               align: "start",
-              loop: false,
+              loop: true,
             }}
             className="w-full"
           >
@@ -72,9 +78,9 @@ export function ProductCarousel({
               {products.map((product) => (
                 <CarouselItem
                   key={product.id}
-                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 flex"
                 >
-                  <div className="p-1">
+                  <div className="p-1 w-full flex">
                     <ProductCard
                       product={product}
                       isWished={userWishlistIds.includes(product.id)}
@@ -83,9 +89,9 @@ export function ProductCarousel({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="hidden md:block">
-              <CarouselPrevious className="-left-12" />
-              <CarouselNext className="-right-12" />
+            <div className="block">
+              <CarouselPrevious className="left-1 md:-left-12 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
+              <CarouselNext className="right-1 md:-right-12 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
             </div>
           </Carousel>
         </div>

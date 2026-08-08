@@ -9,7 +9,6 @@ import { SortForm } from "./components/sort-form";
 import { ShopSidebarFilters } from "./components/shop-sidebar-filters";
 import { auth } from "@/auth";
 
-export const revalidate = 0; // Dynamic page due to searchParams
 
 export const metadata = {
   title: "Cửa hàng - RoboEd",

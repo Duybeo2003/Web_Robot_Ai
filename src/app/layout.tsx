@@ -27,6 +27,7 @@ const manrope = Manrope({
 });
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
   manifest: "/manifest.json",
   title: "RoboEd - Đồ chơi Công nghệ & Giáo dục STEM",
   description:
@@ -50,7 +51,6 @@ export const metadata: Metadata = {
   },
 };
 
-export const dynamic = "force-dynamic";
 
 export default function RootLayout({
   children,

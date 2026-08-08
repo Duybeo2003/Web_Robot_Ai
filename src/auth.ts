@@ -5,6 +5,7 @@ import Google from "next-auth/providers/google";
 import Facebook from "next-auth/providers/facebook";
 import Credentials from "next-auth/providers/credentials";
 import bcrypt from "bcryptjs";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export const { handlers, signIn, signOut, auth } = NextAuth({
   debug: true,
@@ -37,6 +38,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
 
         const identifier = credentials.identifier as string;
         const password = credentials.password as string;
+
+        // Rate Limit: 5 attempts per minute per identifier
+        const rl = await checkRateLimit(`rl:login:${identifier}`, 5, 60);
+        if (!rl.success) {
+          throw new Error("Quá nhiều lần thử. Vui lòng thử lại sau 1 phút.");
+        }
 
         const user = await prisma.user.findFirst({
           where: {

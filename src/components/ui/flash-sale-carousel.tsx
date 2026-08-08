@@ -21,9 +21,8 @@ export function FlashSaleCarousel({
   products,
   userWishlistIds = [],
 }: FlashSaleCarouselProps) {
-  const plugin = React.useMemo(
-    () => Autoplay({ delay: 3000, stopOnInteraction: true }),
-    [],
+  const autoplayPlugin = React.useRef(
+    Autoplay({ delay: 3000, stopOnInteraction: true })
   );
 
   if (!products || products.length === 0) return null;
@@ -48,9 +47,7 @@ export function FlashSaleCarousel({
 
         <div className="bg-[#FF3300] pb-6 px-4 md:px-8 rounded-b-lg relative shadow-lg">
           <Carousel
-            plugins={[plugin]}
-            onMouseEnter={() => plugin.stop?.()}
-            onMouseLeave={() => plugin.reset?.()}
+            plugins={[autoplayPlugin.current]}
             opts={{
               align: "start",
               loop: true,
@@ -61,9 +58,9 @@ export function FlashSaleCarousel({
               {products.map((product) => (
                 <CarouselItem
                   key={`flash-${product.id}`}
-                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4"
+                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 flex"
                 >
-                  <div className="p-1">
+                  <div className="p-1 w-full flex">
                     <ProductCard
                       product={product}
                       isWished={userWishlistIds.includes(product.id)}
@@ -72,9 +69,9 @@ export function FlashSaleCarousel({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="hidden md:block">
-              <CarouselPrevious className="-left-4 bg-white/20 hover:bg-white text-white hover:text-black border-none" />
-              <CarouselNext className="-right-4 bg-white/20 hover:bg-white text-white hover:text-black border-none" />
+            <div className="block">
+              <CarouselPrevious className="left-1 md:-left-4 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
+              <CarouselNext className="right-1 md:-right-4 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
             </div>
           </Carousel>
         </div>

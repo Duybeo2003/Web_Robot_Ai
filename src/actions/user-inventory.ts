@@ -44,11 +44,15 @@ export async function sellItemForXu(inventoryId: string) {
     const priceInVnd = Number(item.product.price);
     const xuEarned = item.sellPriceXu !== null ? item.sellPriceXu : Math.floor(priceInVnd);
 
-    // Update inventory item to claimed
-    await tx.userInventory.update({
-      where: { id: inventoryId },
+    // Update inventory item to claimed, atomically checking status
+    const updateResult = await tx.userInventory.updateMany({
+      where: { id: inventoryId, status: "AVAILABLE" },
       data: { status: "SOLD", isClaimed: true }
     });
+
+    if (updateResult.count === 0) {
+      throw new Error("Vật phẩm đã được bán hoặc không khả dụng!");
+    }
 
     // Add Xu to wallet
     const wallet = await tx.userWallet.findUnique({

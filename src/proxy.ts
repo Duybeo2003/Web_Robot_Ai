@@ -1,7 +1,49 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
+import type { NextRequest } from "next/server";
+
+const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
+
+function checkRateLimitSync(request: NextRequest): NextResponse | null {
+  const ip = request.headers.get("x-forwarded-for") ?? request.ip ?? "127.0.0.1";
+  
+  const WINDOW_MS = 60 * 1000;
+  const MAX_REQUESTS = 200;
+  const currentTime = Date.now();
+  const record = rateLimitMap.get(ip);
+
+  if (!record) {
+    rateLimitMap.set(ip, { count: 1, lastReset: currentTime });
+  } else {
+    if (currentTime - record.lastReset > WINDOW_MS) {
+      rateLimitMap.set(ip, { count: 1, lastReset: currentTime });
+    } else {
+      record.count += 1;
+      if (record.count > MAX_REQUESTS) {
+        return new NextResponse("Too Many Requests", {
+          status: 429,
+          headers: { "Retry-After": "60" },
+        });
+      }
+    }
+  }
+
+  // Periodic cleanup
+  if (Math.random() < 0.01) {
+    const expiredTime = currentTime - WINDOW_MS;
+    for (const [key, value] of rateLimitMap.entries()) {
+      if (value.lastReset < expiredTime) {
+        rateLimitMap.delete(key);
+      }
+    }
+  }
+  return null;
+}
 
 export default auth((req) => {
+  const rlResponse = checkRateLimitSync(req);
+  if (rlResponse) return rlResponse;
+
   const isAuth = !!req.auth;
   const isAuthPage =
     req.nextUrl.pathname.startsWith("/login") ||
@@ -34,5 +76,7 @@ export default auth((req) => {
 });
 
 export const config = {
-  matcher: ["/admin/:path*", "/portal/:path*", "/login", "/register"],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
 };

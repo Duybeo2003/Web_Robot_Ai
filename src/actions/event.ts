@@ -2,6 +2,7 @@
 
 import { prisma } from "@/lib/prisma";
 import { auth } from "@/auth";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 export async function getActiveEvents() {
   return prisma.event.findMany({
@@ -58,6 +59,12 @@ export async function spinWheel(eventId: string) {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
+  }
+
+  // Rate Limiting: Max 30 spins per minute per user
+  const rl = await checkRateLimit(`rl:spin:${session.user.id}`, 30, 60);
+  if (!rl.success) {
+    throw new Error("Bạn thao tác quá nhanh. Vui lòng chậm lại.");
   }
   const userId = session.user.id;
 
@@ -177,6 +184,12 @@ export async function exchangePoints(eventId: string, prizeId: string) {
   const session = await auth();
   if (!session?.user?.id) {
     throw new Error("Unauthorized");
+  }
+
+  // Rate Limiting: Max 10 exchanges per minute
+  const rl = await checkRateLimit(`rl:exchange:${session.user.id}`, 10, 60);
+  if (!rl.success) {
+    throw new Error("Bạn thao tác quá nhanh. Vui lòng chậm lại.");
   }
   const userId = session.user.id;
 

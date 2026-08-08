@@ -71,7 +71,7 @@ export function Header() {
   };
 
   return (
-    <header className="w-full bg-white border-b border-border">
+    <header className="w-full bg-white border-b border-border sticky top-0 z-50 shadow-sm">
       {/* Top Bar - Logo, Search, Actions */}
       <div className="container mx-auto px-4 py-4 flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
         {/* Logo */}
