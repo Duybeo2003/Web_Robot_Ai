@@ -6,3 +6,12 @@ export default async function EventsPage() {
 
   return <EventsClientPage events={events} />;
 }
+
+
+
+
+
+
+
+export const dynamic = 'force-dynamic';
+

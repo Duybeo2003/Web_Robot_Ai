@@ -92,3 +92,12 @@ export default async function EducationBlogPage() {
     </div>
   );
 }
+
+
+
+
+
+
+
+export const dynamic = 'force-dynamic';
+

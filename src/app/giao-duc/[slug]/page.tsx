@@ -113,3 +113,9 @@ export default async function ArticleDetailPage({
     </div>
   );
 }
+
+
+
+
+export const dynamic = 'force-dynamic';
+
