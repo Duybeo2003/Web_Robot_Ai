@@ -41,87 +41,50 @@ export function HeroCarousel() {
                 {/* Slide 1 */}
                 <CarouselItem>
                   <div className="relative w-full h-[250px] sm:h-[300px] md:h-[450px] cursor-pointer shadow-sm rounded-lg overflow-hidden">
-                    <Image
-                      src="https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?q=80&w=1200&auto=format&fit=crop"
-                      alt="Mừng Khai Trương Robot Thông Minh"
-                      fill
-                      priority
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-r from-black/80 to-transparent flex flex-col justify-center px-6 md:px-12">
-                      <div className="text-white space-y-2 md:space-y-4 max-w-lg">
-                        <span
-                          className="px-2 py-1 text-[10px] md:text-xs font-bold uppercase rounded-sm inline-block"
-                          style={{ backgroundColor: theme.primary }}
-                        >
-                          Khai trương hồng phát
-                        </span>
-                        <h2 className="text-2xl md:text-5xl font-bold leading-tight">
-                          ROBOT GIÁO DỤC <br />
-                          <span style={{ color: theme.primary }}>
-                            SỐ 1 VIỆT NAM
-                          </span>
-                        </h2>
-                        <p className="hidden md:block text-base opacity-90">
-                          Giảm giá lên đến 50% cho tất cả các bộ Kit STEM và
-                          Robot Lập Trình.
-                        </p>
-                        <Link
-                          href="#flash-sale-section"
-                          className="inline-block mt-2 md:mt-4"
-                        >
-                          <Button
-                            size="sm"
-                            className="hover:bg-[#E64A19] text-white font-bold px-6 md:h-12 text-xs md:text-base w-fit"
-                            style={{ backgroundColor: theme.primary }}
-                          >
-                            MUA NGAY
-                          </Button>
-                        </Link>
-                      </div>
+                    {/* Desktop Image */}
+                    <div className="hidden md:block w-full h-full relative">
+                      <Image
+                        src="/images/banners/banner1-desktop.png"
+                        alt="Robot AI thông minh cho trẻ"
+                        fill
+                        priority
+                        className="object-cover"
+                      />
+                    </div>
+                    {/* Mobile Image */}
+                    <div className="block md:hidden w-full h-full relative">
+                      <Image
+                        src="/images/banners/banner1-mobile.png"
+                        alt="Robot AI thông minh cho trẻ"
+                        fill
+                        priority
+                        className="object-cover"
+                      />
                     </div>
                   </div>
                 </CarouselItem>
                 {/* Slide 2 */}
                 <CarouselItem>
                   <div className="relative w-full h-[250px] sm:h-[300px] md:h-[450px] cursor-pointer shadow-sm rounded-lg overflow-hidden">
-                    <Image
-                      src="https://images.unsplash.com/photo-1485827404703-89b55fcc595e?q=80&w=1200&auto=format&fit=crop"
-                      alt="Đồ chơi Logic Thông Minh"
-                      fill
-                      priority={true}
-                      className="object-cover"
-                    />
-                    <div className="absolute inset-0 bg-gradient-to-l from-black/80 to-transparent flex flex-col justify-center items-end px-6 md:px-12 text-right">
-                      <div className="text-white space-y-2 md:space-y-4 max-w-lg">
-                        <span
-                          className="px-2 py-1 text-[10px] md:text-xs font-bold uppercase rounded-sm inline-block"
-                          style={{ backgroundColor: theme.secondary }}
-                        >
-                          Mới ra mắt
-                        </span>
-                        <h2 className="text-2xl md:text-5xl font-bold leading-tight">
-                          PHÁT TRIỂN <br />
-                          <span style={{ color: theme.secondary }}>
-                            TƯ DUY LOGIC
-                          </span>
-                        </h2>
-                        <p className="hidden md:block text-base opacity-90">
-                          Bộ sưu tập đồ chơi trí tuệ xếp hình 3D cao cấp.
-                        </p>
-                        <Link
-                          href="#flash-sale-section"
-                          className="inline-block mt-2 md:mt-4"
-                        >
-                          <Button
-                            size="sm"
-                            className="hover:bg-[#1976D2] text-white font-bold px-6 md:h-12 text-xs md:text-base w-fit"
-                            style={{ backgroundColor: theme.secondary }}
-                          >
-                            KHÁM PHÁ
-                          </Button>
-                        </Link>
-                      </div>
+                    {/* Desktop Image */}
+                    <div className="hidden md:block w-full h-full relative">
+                      <Image
+                        src="/images/banners/banner2-desktop.png"
+                        alt="Đồ chơi giáo dục RoboEQ"
+                        fill
+                        priority={true}
+                        className="object-cover"
+                      />
+                    </div>
+                    {/* Mobile Image */}
+                    <div className="block md:hidden w-full h-full relative">
+                      <Image
+                        src="/images/banners/banner2-mobile.jpg"
+                        alt="Bảng vẽ thông minh tự xóa"
+                        fill
+                        priority={true}
+                        className="object-cover"
+                      />
                     </div>
                   </div>
                 </CarouselItem>
