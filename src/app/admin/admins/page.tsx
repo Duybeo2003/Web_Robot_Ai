@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import {
   Table,
   TableBody,
@@ -16,7 +16,7 @@ import { auth } from "@/auth";
 
 import { AddAdminModal } from "./components/add-admin-modal";
 
-const prisma = new PrismaClient();
+
 
 export default async function AdminManagementPage() {
   const session = await auth();

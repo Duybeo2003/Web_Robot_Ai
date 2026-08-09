@@ -7,7 +7,7 @@ services:
       MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-root_password_123}
       MYSQL_DATABASE: ${DB_NAME:-web_robot_ai}
     volumes:
-      - /var/lib/mysql_data:/var/lib/mysql
+      - mysql_data:/var/lib/mysql
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
       interval: 10s
@@ -57,3 +57,4 @@ services:
 
 volumes:
   redis_data:
+  mysql_data:

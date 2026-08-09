@@ -11,7 +11,7 @@ const withPWA = withPWAInit({
 const nextConfig: NextConfig = {
   output: "standalone",
   typescript: { ignoreBuildErrors: true },
-  eslint: { ignoreDuringBuilds: true },
+  // eslint: { ignoreDuringBuilds: true }, // Obsolete in Next 16
   turbopack: {},
 
   

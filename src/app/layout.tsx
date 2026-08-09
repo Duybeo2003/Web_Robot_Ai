@@ -59,7 +59,7 @@ export default function RootLayout({
 }>) {
   return (
     <html
-      lang="en"
+      lang="vi"
       className={`${manrope.variable} ${lora.variable} h-full antialiased`}
       suppressHydrationWarning
     >

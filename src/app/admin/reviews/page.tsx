@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import {
   Table,
   TableBody,
@@ -14,7 +14,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 
-const prisma = new PrismaClient();
+
 
 export default async function AdminReviewsPage(props: { searchParams: Promise<{ page?: string }> }) {
   const searchParams = await props.searchParams;

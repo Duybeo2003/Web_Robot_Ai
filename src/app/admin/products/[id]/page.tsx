@@ -1,8 +1,8 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ProductForm } from "../components/product-form";
 import { notFound } from "next/navigation";
 
-const prisma = new PrismaClient();
+
 
 export default async function EditProductPage({
   params,

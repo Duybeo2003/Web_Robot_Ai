@@ -2,10 +2,10 @@ import { redirect } from "next/navigation";
 import { auth } from "@/auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/admin/app-sidebar";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import Breadcrumbs from "@/components/admin/breadcrumbs";
 
-const prisma = new PrismaClient();
+
 
 export default async function AdminLayout({
   children,

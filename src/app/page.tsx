@@ -32,16 +32,13 @@ const getCachedProducts = unstable_cache(
         : undefined,
     });
 
-    const robotProducts = (
-      await prisma.product.findMany({
+    const [robotRaw, comboRaw, logicRaw] = await Promise.all([
+      prisma.product.findMany({
         where: { type: "ROBOT_STEM", isCombo: false },
         take: 8,
         orderBy: { createdAt: "desc" },
-      })
-    ).map(serializeProduct);
-
-    const comboProducts = (
-      await prisma.product.findMany({
+      }),
+      prisma.product.findMany({
         where: { isCombo: true },
         include: {
           comboItems: {
@@ -50,16 +47,17 @@ const getCachedProducts = unstable_cache(
         },
         take: 8,
         orderBy: { createdAt: "desc" },
-      })
-    ).map(serializeProduct);
-
-    const logicProducts = (
-      await prisma.product.findMany({
+      }),
+      prisma.product.findMany({
         where: { type: "DO_CHOI_LOGIC", isCombo: false },
         take: 8,
         orderBy: { createdAt: "desc" },
-      })
-    ).map(serializeProduct);
+      }),
+    ]);
+
+    const robotProducts = robotRaw.map(serializeProduct);
+    const comboProducts = comboRaw.map(serializeProduct);
+    const logicProducts = logicRaw.map(serializeProduct);
 
     return { robotProducts, comboProducts, logicProducts };
   },

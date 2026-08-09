@@ -1,5 +1,20 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
+import { cache } from "react"
+
+const getProduct = cache(async (slug: string) => {
+  return prisma.product.findUnique({
+    where: { slug },
+    include: { 
+      category: true,
+      variants: true,
+      reviews: {
+        include: { user: true },
+        orderBy: { createdAt: "desc" }
+      }
+    },
+  });
+});
 import { ProductGallery } from "./components/product-gallery"
 import { AddToCartForm } from "./components/add-to-cart-form"
 import { ProductTabs } from "./components/product-tabs"
@@ -13,9 +28,7 @@ import { WishlistButton } from "@/components/ui/wishlist-button"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const product = await prisma.product.findUnique({
-    where: { slug: resolvedParams.slug },
-  })
+  const product = await getProduct(resolvedParams.slug)
 
   if (!product) {
     return { title: "Không tìm thấy sản phẩm" }
@@ -38,17 +51,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function ProductDetailPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const product = await prisma.product.findUnique({
-    where: { slug: resolvedParams.slug },
-    include: { 
-      category: true,
-      variants: true,
-      reviews: {
-        include: { user: true },
-        orderBy: { createdAt: "desc" }
-      }
-    },
-  })
+  const product = await getProduct(resolvedParams.slug)
 
   if (!product) {
     notFound()

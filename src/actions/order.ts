@@ -16,6 +16,7 @@ export async function updateOrderStatus(
       !session?.user?.role ||
       !["ADMIN", "STORE_MANAGER"].includes(session.user.role)
     ) {
+      return { success: false, error: "Unauthorized" };
     }
 
     // C4 Fix: Valid state transitions map

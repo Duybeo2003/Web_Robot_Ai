@@ -69,7 +69,18 @@ export async function POST(req: Request) {
       where: { userId },
       include: {
         items: {
-          include: { product: true },
+          include: { 
+            product: { 
+              select: { 
+                id: true, 
+                title: true, 
+                slug: true, 
+                price: true, 
+                imageUrl: true, 
+                inventoryCount: true 
+              } 
+            } 
+          },
         },
       },
     });

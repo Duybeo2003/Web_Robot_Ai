@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { ProductForm } from "../components/product-form";
 
-const prisma = new PrismaClient();
+
 
 export const metadata = {
   title: "Thêm sản phẩm mới - Admin",

@@ -20,6 +20,8 @@ export const redis =
 if (process.env.NODE_ENV !== "production") globalForRedis.redis = redis;
 
 // Add error listener to prevent uncaught exceptions when Redis is down
-redis.on("error", (err) => {
-  console.error("Redis Client Error", err);
+redis.on("error", (err: any) => {
+  if (err.code !== "ECONNREFUSED") {
+    console.error("Redis Client Error", err);
+  }
 });

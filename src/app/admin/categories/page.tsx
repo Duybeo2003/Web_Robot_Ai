@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -21,7 +21,7 @@ import {
 } from "@/components/ui/dialog";
 import { Plus } from "lucide-react";
 
-const prisma = new PrismaClient();
+
 
 export default async function AdminCategoriesPage(props: { searchParams: Promise<{ page?: string }> }) {
   const searchParams = props.searchParams;

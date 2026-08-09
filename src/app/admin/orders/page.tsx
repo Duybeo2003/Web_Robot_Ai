@@ -1,7 +1,7 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { OrdersTableClient } from "./components/orders-table-client";
 
-const prisma = new PrismaClient();
+
 
 export default async function AdminOrdersPage(props: { searchParams: Promise<{ page?: string }> }) {
   const searchParams = props.searchParams;

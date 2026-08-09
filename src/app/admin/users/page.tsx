@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import {
@@ -13,7 +13,7 @@ import { Badge } from "@/components/ui/badge";
 import { format } from "date-fns";
 import { UserActions } from "./components/user-actions";
 
-const prisma = new PrismaClient();
+
 
 export default async function AdminUsersPage(props: { searchParams: Promise<{ page?: string }> }) {
   const searchParams = props.searchParams;

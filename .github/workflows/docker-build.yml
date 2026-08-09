@@ -29,3 +29,5 @@ jobs:
           file: ./Dockerfile
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/web-robot-ai:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max

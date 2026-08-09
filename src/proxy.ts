@@ -31,13 +31,17 @@ function checkRateLimitSync(request: NextRequest): NextResponse | null {
     }
   }
 
-  // Periodic cleanup
-  if (Math.random() < 0.01) {
+  // Periodic cleanup + safety cap to prevent memory leak
+  if (rateLimitMap.size > 10000 || Math.random() < 0.01) {
     const expiredTime = currentTime - WINDOW_MS;
     for (const [key, value] of rateLimitMap.entries()) {
       if (value.lastReset < expiredTime) {
         rateLimitMap.delete(key);
       }
+    }
+    // Hard cap: if still too large, clear entirely
+    if (rateLimitMap.size > 10000) {
+      rateLimitMap.clear();
     }
   }
   return null;

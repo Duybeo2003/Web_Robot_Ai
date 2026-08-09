@@ -1,11 +1,9 @@
 "use server";
 
 import { auth } from "@/auth";
-import { PrismaClient } from "@prisma/client";
+import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import bcrypt from "bcryptjs";
-
-const prisma = new PrismaClient();
 
 // C5 Fix: Removed duplicate updateOrderStatus.
 

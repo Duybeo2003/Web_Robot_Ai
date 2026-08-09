@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { LazyMotion, domAnimation, m, AnimatePresence } from "framer-motion";
 import {
   Baby,
   Smile,
@@ -60,10 +60,11 @@ export function GiftRecommender() {
       </div>
 
       <div className="relative min-h-[200px]">
-        <AnimatePresence mode="wait">
-          {/* STEP 1: CHỌN TUỔI */}
-          {step === "AGE" && (
-            <motion.div
+        <LazyMotion features={domAnimation}>
+          <AnimatePresence mode="wait">
+            {/* STEP 1: CHỌN TUỔI */}
+            {step === "AGE" && (
+              <m.div
               key="step-age"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -108,12 +109,12 @@ export function GiftRecommender() {
                   </span>
                 </button>
               </div>
-            </motion.div>
-          )}
+              </m.div>
+            )}
 
-          {/* STEP 2: CHỌN KỸ NĂNG */}
-          {step === "SKILL" && (
-            <motion.div
+            {/* STEP 2: CHỌN KỸ NĂNG */}
+            {step === "SKILL" && (
+              <m.div
               key="step-skill"
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
@@ -177,12 +178,12 @@ export function GiftRecommender() {
               >
                 Quay lại
               </Button>
-            </motion.div>
-          )}
+                </m.div>
+            )}
 
-          {/* STEP 3: KẾT QUẢ GỢI Ý */}
-          {step === "RESULT" && (
-            <motion.div
+            {/* STEP 3: KẾT QUẢ GỢI Ý */}
+            {step === "RESULT" && (
+              <m.div
               key="step-result"
               initial={{ opacity: 0, scale: 0.95 }}
               animate={{ opacity: 1, scale: 1 }}
@@ -258,9 +259,10 @@ export function GiftRecommender() {
                   )}
                 </div>
               )}
-            </motion.div>
-          )}
-        </AnimatePresence>
+                </m.div>
+            )}
+          </AnimatePresence>
+        </LazyMotion>
       </div>
     </div>
   );
