@@ -12,7 +12,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
   const discountPercent = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
   
   return (
-    <div className="group relative bg-white h-full w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
+    <div className="group relative bg-white h-fit w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
       
       {/* Badges */}
       <div className="absolute top-0 left-0 z-10 flex flex-row flex-wrap items-start gap-[2px]">
@@ -51,13 +51,13 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
         )}
       </Link>
       
-      <div className="px-2 py-1.5 md:px-2 md:py-2 flex flex-col flex-1 border-t border-neutral-100">
+      <div className="px-2 py-1.5 md:px-2 md:py-2 flex flex-col border-t border-neutral-100">
         <Link href={`/shop/${product.slug}`}>
           <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 min-h-[32px] md:min-h-[36px] leading-tight" style={{ color: theme.primary }}>
             {product.title}
           </h3>
         </Link>
-        <div className="mt-auto pt-0 pb-0.5">
+        <div className="mt-1.5 md:mt-2 pb-0.5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
             <p className={`text-[10px] md:text-xs text-neutral-400 line-through ${hasDiscount ? '' : 'invisible'}`}>
               {hasDiscount ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice) : '0đ'}
