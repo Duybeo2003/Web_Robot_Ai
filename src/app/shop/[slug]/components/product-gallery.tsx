@@ -1,15 +1,23 @@
 "use client";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 
 export function ProductGallery({
   images,
   title,
+  selectedImage,
 }: {
   images: string[];
   title: string;
+  selectedImage?: string | null;
 }) {
-  const [activeImage, setActiveImage] = useState(images[0] || null);
+  const [activeImage, setActiveImage] = useState(selectedImage || images[0] || null);
+
+  useEffect(() => {
+    if (selectedImage) {
+      setActiveImage(selectedImage);
+    }
+  }, [selectedImage]);
 
   // The user wants 3 thumbnails even if there's only 1 image.
   // We'll prioritize unique images from variants, but pad with the main image if needed.

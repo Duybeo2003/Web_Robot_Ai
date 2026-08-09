@@ -5,7 +5,9 @@ import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Trash2, Plus, RefreshCw } from "lucide-react";
+import { Trash2, Plus, RefreshCw, Image as ImageIcon } from "lucide-react";
+import Image from "next/image";
+import { toast } from "sonner";
 
 export interface Variant {
   id?: string;
@@ -131,6 +133,29 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
     onChange(newVariants);
   };
 
+  const handleVariantImageUpload = async (index: number, file: File) => {
+    const data = new FormData();
+    data.append("file", file);
+    toast.loading("Đang tải ảnh lên...", { id: `upload-var-${index}` });
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: data,
+      });
+      const result = await res.json();
+      if (result.success) {
+        updateVariant(index, "imageUrl", result.url);
+        toast.success("Tải ảnh thành công", { id: `upload-var-${index}` });
+      } else {
+        toast.error(result.error || "Lỗi tải ảnh", {
+          id: `upload-var-${index}`,
+        });
+      }
+    } catch (err) {
+      toast.error("Lỗi kết nối", { id: `upload-var-${index}` });
+    }
+  };
+
   return (
     <div className="space-y-4 border p-4 rounded-md bg-neutral-50/50">
       <div className="flex justify-between items-center">
@@ -186,7 +211,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
                 <th className="px-4 py-3 font-semibold min-w-[120px]">Giá Bán (VNĐ)</th>
                 <th className="px-4 py-3 font-semibold min-w-[100px]">Tồn kho</th>
                 <th className="px-4 py-3 font-semibold min-w-[120px]">Mã SKU</th>
-                <th className="px-4 py-3 font-semibold min-w-[150px]">Link Ảnh</th>
+                <th className="px-4 py-3 font-semibold min-w-[180px]">Hình ảnh</th>
                 <th className="px-4 py-3 w-10"></th>
               </tr>
             </thead>
@@ -230,12 +255,32 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
                     />
                   </td>
                   <td className="px-4 py-3">
-                    <Input 
-                      value={v.imageUrl || ""} 
-                      onChange={(e) => updateVariant(idx, "imageUrl", e.target.value)} 
-                      placeholder="https://..."
-                      className="h-8"
-                    />
+                    <div className="flex items-center gap-2">
+                      <div className="relative w-8 h-8 rounded border bg-white overflow-hidden shrink-0">
+                        {v.imageUrl ? (
+                          <Image src={v.imageUrl} alt="Variant" fill className="object-cover" sizes="32px" />
+                        ) : (
+                          <div className="w-full h-full flex items-center justify-center text-neutral-300">
+                            <ImageIcon className="w-4 h-4" />
+                          </div>
+                        )}
+                      </div>
+                      <div className="relative">
+                        <Input 
+                          type="file" 
+                          accept="image/*" 
+                          className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                          onChange={(e) => {
+                            if (e.target.files?.[0]) {
+                              handleVariantImageUpload(idx, e.target.files[0]);
+                            }
+                          }}
+                        />
+                        <Button type="button" variant="outline" size="sm" className="h-8 px-2 text-xs">
+                          Tải ảnh
+                        </Button>
+                      </div>
+                    </div>
                   </td>
                   <td className="px-4 py-3">
                     <Button type="button" variant="ghost" size="icon" onClick={() => removeVariant(idx)}>

@@ -1,8 +1,15 @@
 "use client";
 
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 
 export function FloatingSocialBar() {
+  const pathname = usePathname();
+
+  if (pathname?.startsWith("/admin")) {
+    return null;
+  }
+
   return (
     <div className="fixed right-4 bottom-24 z-50 flex flex-col gap-4">
       {/* Shopee */}

@@ -33,13 +33,13 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
       </div>
 
       {/* Image Container */}
-      <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full block bg-white p-1 md:p-3">
+      <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full block bg-white p-1 md:p-3 overflow-hidden">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={product.title}
             fill
-            className="object-contain group-hover:scale-105 transition-transform duration-500 p-2 md:p-4 text-transparent"
+            className="object-cover group-hover:scale-105 transition-transform duration-500 p-2 md:p-4 text-transparent"
             sizes="(max-width: 768px) 100vw, 300px"
           />
         ) : (

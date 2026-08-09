@@ -32,11 +32,12 @@ interface AddToCartProps {
     estimatedArrivalDate?: string | null;
     variants?: ProductVariant[];
   };
+  selectedVariant?: ProductVariant | null;
+  setSelectedVariant?: (variant: ProductVariant) => void;
 }
 
-export function AddToCartForm({ product }: AddToCartProps) {
+export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: AddToCartProps) {
   const [quantity, setQuantity] = useState(1);
-  const [selectedVariant, setSelectedVariant] = useState<ProductVariant | null>(null);
   
   const addItem = useCartStore((state) => state.addItem);
   const openCart = useCartUI((state) => state.openCart);
@@ -56,7 +57,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
   const isPreOrder = product.supplyType === "PRE_ORDER";
   const isAffiliateSell = product.supplyType === "AFFILIATE_SELL";
   const isOutOfStock = !isPreOrder && !isAffiliateSell && (currentInventory === undefined || currentInventory <= 0);
-  const canAddToCart = (!hasVariants || selectedVariant !== null) && !isOutOfStock;
+  const canAddToCart = (!hasVariants || selectedVariant) && !isOutOfStock;
 
   // Render variant options dynamically based on JSON attributes
   const renderVariantSelectors = () => {
@@ -79,7 +80,7 @@ export function AddToCartForm({ product }: AddToCartProps) {
             return (
               <button
                 key={variant.id}
-                onClick={() => setSelectedVariant(variant)}
+                onClick={() => setSelectedVariant?.(variant)}
                 className={cn(
                   "px-4 py-2 text-sm border rounded-sm font-medium transition-colors",
                   isSelected 
@@ -135,24 +136,6 @@ export function AddToCartForm({ product }: AddToCartProps) {
 
   return (
     <div>
-      {/* Price Display Override if Variant Selected */}
-      {hasVariants && selectedVariant && (
-        <div className="mb-6 flex items-end gap-3">
-          <div className="text-2xl font-bold text-[#FF5722]">
-            {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentPrice)}
-          </div>
-          {discountPercent > 0 && (
-            <>
-              <span className="text-sm text-neutral-400 line-through mb-1">
-                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentOriginalPrice!)}
-              </span>
-              <span className="text-xs font-bold text-white bg-red-500 px-2 py-0.5 rounded-sm mb-1">
-                -{discountPercent}%
-              </span>
-            </>
-          )}
-        </div>
-      )}
 
       {renderVariantSelectors()}
 
