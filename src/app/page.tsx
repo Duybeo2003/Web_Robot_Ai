@@ -32,7 +32,7 @@ const getCachedProducts = unstable_cache(
         : undefined,
     });
 
-    const [robotRaw, comboRaw, logicRaw] = await Promise.all([
+    const [robotRaw, comboRaw, logicRaw, flashSaleRaw] = await Promise.all([
       prisma.product.findMany({
         where: { type: "ROBOT_STEM", isCombo: false },
         take: 8,
@@ -53,13 +53,19 @@ const getCachedProducts = unstable_cache(
         take: 8,
         orderBy: { createdAt: "desc" },
       }),
+      prisma.product.findMany({
+        where: { flashSaleActive: true },
+        take: 8,
+        orderBy: { updatedAt: "desc" },
+      }),
     ]);
 
     const robotProducts = robotRaw.map(serializeProduct);
     const comboProducts = comboRaw.map(serializeProduct);
     const logicProducts = logicRaw.map(serializeProduct);
+    const flashSaleProductsData = flashSaleRaw.map(serializeProduct);
 
-    return { robotProducts, comboProducts, logicProducts };
+    return { robotProducts, comboProducts, logicProducts, flashSaleProductsData };
   },
   ["homepage-products"],
   { revalidate: 3600 } // Cache for 1 hour
@@ -79,16 +85,11 @@ export default async function Home() {
     userWishlistIds = wishlistItems.map((w) => w.productId);
   }
 
-  const { robotProducts, comboProducts, logicProducts } = await getCachedProducts();
+  const { robotProducts, comboProducts, logicProducts, flashSaleProductsData } = await getCachedProducts();
 
-  // Combine some products for the Flash Sale and deduplicate by id
-  const rawFlashSale = [
-    ...robotProducts.slice(0, 2),
-    ...comboProducts.slice(0, 2),
-    ...logicProducts.slice(0, 2),
-  ];
+  // Deduplicate by id just in case
   const flashSaleProducts = Array.from(
-    new Map(rawFlashSale.map((p) => [p.id, p])).values(),
+    new Map(flashSaleProductsData.map((p) => [p.id, p])).values(),
   );
 
   return (
