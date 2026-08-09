@@ -230,6 +230,8 @@ export async function upsertProduct(data: ProductData, id?: string) {
     }
     revalidatePath("/admin/products");
     revalidatePath("/"); // revalidate store
+    revalidatePath("/shop"); // revalidate shop page
+    revalidatePath(`/shop/${data.slug}`); // revalidate product details page
     return { success: true };
   } catch (error) {
     console.error("Failed to upsert product:", error);
