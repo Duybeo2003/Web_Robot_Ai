@@ -16,9 +16,13 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
       
       {/* Badges */}
       <div className="flex flex-row flex-wrap items-start gap-1 p-2 pb-0">
-        {product.supplyType === "PRE_ORDER" && (
+        {product.supplyType === "PRE_ORDER" ? (
           <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm bg-amber-500">
             Hàng Order (7-10 ngày)
+          </div>
+        ) : (
+          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm bg-emerald-500">
+            Hàng có sẵn
           </div>
         )}
         {hasDiscount && (
