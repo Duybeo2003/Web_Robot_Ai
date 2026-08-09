@@ -51,13 +51,13 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
         )}
       </Link>
       
-      <div className="p-2 md:p-3 flex flex-col flex-1 border-t border-neutral-100">
+      <div className="px-2 py-1.5 md:px-2 md:py-2 flex flex-col flex-1 border-t border-neutral-100">
         <Link href={`/shop/${product.slug}`}>
-          <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 min-h-[32px] md:min-h-[40px] leading-tight" style={{ color: theme.primary }}>
+          <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 min-h-[32px] md:min-h-[36px] leading-tight" style={{ color: theme.primary }}>
             {product.title}
           </h3>
         </Link>
-        <div className="mt-auto pt-1 pb-1">
+        <div className="mt-auto pt-0 pb-0.5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
             <p className={`text-[10px] md:text-xs text-neutral-400 line-through ${hasDiscount ? '' : 'invisible'}`}>
               {hasDiscount ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice) : '0đ'}
@@ -71,11 +71,11 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
 
       {/* Action Area or Free Shipping Bar */}
       {action ? (
-        <div className="px-2 md:px-3 pb-2 md:pb-3 shrink-0">
+        <div className="px-2 md:px-2 pb-1.5 md:pb-2 shrink-0">
           {action}
         </div>
       ) : (
-        <Link href={`/shop/${product.slug}`} className="w-full text-white py-1.5 text-center text-[10px] md:text-xs font-semibold flex items-center justify-center gap-1 md:gap-1.5 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0 block" style={{ backgroundColor: theme.primary }}>
+        <Link href={`/shop/${product.slug}`} className="w-full text-white py-1 text-center text-[10px] md:text-xs font-semibold flex items-center justify-center gap-1 md:gap-1.5 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0 block" style={{ backgroundColor: theme.primary }}>
           <Truck className="w-3.5 h-3.5" />
           Miễn phí giao hàng
         </Link>
