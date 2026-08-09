@@ -1,6 +1,16 @@
 import { prisma } from "@/lib/prisma"
 import { notFound } from "next/navigation"
 import { cache } from "react"
+import { ProductGallery } from "./components/product-gallery"
+import { AddToCartForm } from "./components/add-to-cart-form"
+import { ProductTabs } from "./components/product-tabs"
+import { PromotionalBanner } from "./components/promotional-banner"
+import { ProductCard } from "@/components/ui/product-card"
+import { AddToCartButton } from "../components/add-to-cart-button"
+import Link from "next/link"
+import { ShieldCheck, Wrench, RefreshCcw } from "lucide-react"
+import { auth } from "@/auth"
+import { WishlistButton } from "@/components/ui/wishlist-button"
 
 const getProduct = cache(async (slug: string) => {
   return prisma.product.findUnique({
@@ -15,16 +25,6 @@ const getProduct = cache(async (slug: string) => {
     },
   });
 });
-import { ProductGallery } from "./components/product-gallery"
-import { AddToCartForm } from "./components/add-to-cart-form"
-import { ProductTabs } from "./components/product-tabs"
-import { PromotionalBanner } from "./components/promotional-banner"
-import { ProductCard } from "@/components/ui/product-card"
-import { AddToCartButton } from "../components/add-to-cart-button"
-import Link from "next/link"
-import { ShieldCheck, Wrench, RefreshCcw } from "lucide-react"
-import { auth } from "@/auth"
-import { WishlistButton } from "@/components/ui/wishlist-button"
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
