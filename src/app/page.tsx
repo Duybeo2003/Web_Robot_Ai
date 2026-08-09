@@ -17,20 +17,23 @@ const getCachedProducts = unstable_cache(
       [key: string]: unknown;
     };
 
-    const serializeProduct = (p: ProductWithCombo) => ({
-      ...p,
-      price: Number(p.price),
-      originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-      comboItems: p.comboItems
-        ? p.comboItems.map((ci) => ({
-            ...ci,
-            product: {
-              ...ci.product,
-              price: Number(ci.product.price),
-            },
-          }))
-        : undefined,
-    });
+    const serializeProduct = (p: ProductWithCombo) => {
+      const serialized = {
+        ...p,
+        price: Number(p.price),
+        originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
+        comboItems: p.comboItems
+          ? p.comboItems.map((ci) => ({
+              ...ci,
+              product: {
+                ...ci.product,
+                price: Number(ci.product.price),
+              },
+            }))
+          : undefined,
+      };
+      return JSON.parse(JSON.stringify(serialized));
+    };
 
     const [robotRaw, comboRaw, logicRaw, flashSaleRaw] = await Promise.all([
       prisma.product.findMany({
@@ -67,7 +70,7 @@ const getCachedProducts = unstable_cache(
 
     return { robotProducts, comboProducts, logicProducts, flashSaleProductsData };
   },
-  ["homepage-products-v2"],
+  ["homepage-products-v3"],
   { revalidate: 3600 } // Cache for 1 hour
 );
 
