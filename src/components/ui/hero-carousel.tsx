@@ -40,7 +40,7 @@ export function HeroCarousel() {
               <CarouselContent>
                 {/* Slide 1 */}
                 <CarouselItem>
-                  <div className="relative w-full h-[250px] sm:h-[300px] md:h-[450px] cursor-pointer shadow-sm rounded-lg overflow-hidden">
+                  <div className="relative w-full h-[250px] sm:h-[300px] md:h-auto md:aspect-[27/10] cursor-pointer shadow-sm rounded-lg overflow-hidden">
                     {/* Desktop Image */}
                     <div className="hidden md:block w-full h-full relative">
                       <Image
@@ -65,7 +65,7 @@ export function HeroCarousel() {
                 </CarouselItem>
                 {/* Slide 2 */}
                 <CarouselItem>
-                  <div className="relative w-full h-[250px] sm:h-[300px] md:h-[450px] cursor-pointer shadow-sm rounded-lg overflow-hidden">
+                  <div className="relative w-full h-[250px] sm:h-[300px] md:h-auto md:aspect-[27/10] cursor-pointer shadow-sm rounded-lg overflow-hidden">
                     {/* Desktop Image */}
                     <div className="hidden md:block w-full h-full relative">
                       <Image
