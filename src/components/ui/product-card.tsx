@@ -15,7 +15,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
     <div className="group relative bg-white h-full w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
       
       {/* Badges */}
-      <div className="absolute top-0 left-0 z-10 flex flex-col items-start gap-[2px]">
+      <div className="absolute top-0 left-0 z-10 flex flex-row flex-wrap items-start gap-[2px]">
         {product.supplyType === "PRE_ORDER" && (
           <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm bg-amber-500">
             Hàng Order (7-10 ngày)
@@ -35,7 +35,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
       </div>
 
       {/* Image Container */}
-      <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full block bg-white p-1 md:p-4 mt-1 md:mt-2">
+      <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full block bg-white p-1 md:p-3">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -51,13 +51,13 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
         )}
       </Link>
       
-      <div className="p-2 md:p-4 flex flex-col flex-1 border-t border-neutral-100 mt-1 md:mt-2">
+      <div className="p-2 md:p-3 flex flex-col flex-1 border-t border-neutral-100">
         <Link href={`/shop/${product.slug}`}>
-          <h3 className="font-medium text-[12px] md:text-base line-clamp-2 transition-colors text-neutral-800 min-h-[36px] md:min-h-[44px] leading-tight md:leading-snug" style={{ color: theme.primary }}>
+          <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 min-h-[32px] md:min-h-[40px] leading-tight" style={{ color: theme.primary }}>
             {product.title}
           </h3>
         </Link>
-        <div className="mt-auto pt-2 md:pt-3 pb-1">
+        <div className="mt-auto pt-1 pb-1">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
             <p className={`text-[10px] md:text-xs text-neutral-400 line-through ${hasDiscount ? '' : 'invisible'}`}>
               {hasDiscount ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice) : '0đ'}
@@ -71,12 +71,12 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
 
       {/* Action Area or Free Shipping Bar */}
       {action ? (
-        <div className="px-2 md:px-4 pb-2 md:pb-4 shrink-0">
+        <div className="px-2 md:px-3 pb-2 md:pb-3 shrink-0">
           {action}
         </div>
       ) : (
-        <Link href={`/shop/${product.slug}`} className="w-full text-white py-1.5 md:py-2 text-center text-[10px] md:text-xs font-semibold flex items-center justify-center gap-1.5 md:gap-2 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0 block" style={{ backgroundColor: theme.primary }}>
-          <Truck className="w-3.5 h-3.5 md:w-4 md:h-4" />
+        <Link href={`/shop/${product.slug}`} className="w-full text-white py-1.5 text-center text-[10px] md:text-xs font-semibold flex items-center justify-center gap-1 md:gap-1.5 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0 block" style={{ backgroundColor: theme.primary }}>
+          <Truck className="w-3.5 h-3.5" />
           Miễn phí giao hàng
         </Link>
       )}
