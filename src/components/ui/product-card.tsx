@@ -22,7 +22,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
           </div>
         ) : (
           <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm bg-emerald-500">
-            Hàng có sẵn
+            Hàng có sẵn (2-4 ngày)
           </div>
         )}
         {hasDiscount && (
