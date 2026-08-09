@@ -86,6 +86,7 @@ export function CartSheet() {
                             src={item.imageUrl}
                             alt={item.title}
                             fill
+                            unoptimized
                             className="object-cover"
                             sizes="80px"
                           />

@@ -43,6 +43,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
             src={product.imageUrl}
             alt={product.title}
             fill
+            unoptimized
             className="object-cover group-hover:scale-105 transition-transform duration-500 p-2 md:p-4 text-transparent"
             sizes="(max-width: 768px) 100vw, 300px"
           />
