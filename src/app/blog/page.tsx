@@ -90,5 +90,5 @@ export default async function BlogPage() {
 
 
 
-export const revalidate = 3600; // ISR: cache 1 giờ
+export const dynamic = 'force-dynamic';
 

@@ -13,5 +13,5 @@ export default async function EventsPage() {
 
 
 
-export const revalidate = 1800; // ISR: cache 30 phút
+export const dynamic = 'force-dynamic';
 
