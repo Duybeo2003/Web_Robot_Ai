@@ -20,6 +20,8 @@ services:
     restart: always
     ports:
       - "3000:3000"
+    volumes:
+      - web_uploads:/app/public/uploads
     environment:
       - DATABASE_URL=mysql://root:${DB_ROOT_PASSWORD:-root_password_123}@mysql:3306/${DB_NAME:-web_robot_ai}
       - REDIS_URL=redis://redis:6379
@@ -58,3 +60,4 @@ services:
 volumes:
   redis_data:
   mysql_data:
+  web_uploads:
