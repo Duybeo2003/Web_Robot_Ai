@@ -84,7 +84,7 @@ export function ProductGallery({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative w-full aspect-square max-h-[400px] md:max-h-[500px] bg-white rounded-md shadow-sm border border-neutral-100 group overflow-hidden p-0 mx-auto flex items-center justify-center bg-black/5">
+      <div className="relative w-full max-w-[400px] md:max-w-[500px] aspect-square bg-white rounded-md shadow-sm border border-neutral-100 group overflow-hidden p-0 mx-auto flex items-center justify-center bg-black/5">
         {activeMedia === "video" ? (
           renderVideoPlayer()
         ) : activeMedia ? (
