@@ -15,7 +15,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
     <div className="group relative bg-white h-fit w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
       
       {/* Badges */}
-      <div className="absolute top-0 left-0 z-10 flex flex-row flex-wrap items-start gap-[2px]">
+      <div className="absolute top-0 left-0 z-10 flex flex-row flex-wrap items-start gap-[2px] max-w-[calc(100%-40px)]">
         {product.supplyType === "PRE_ORDER" && (
           <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm bg-amber-500">
             Hàng Order (7-10 ngày)

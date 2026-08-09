@@ -137,7 +137,13 @@ const sanitizedProduct = {
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
         {/* Gallery */}
-        <ProductGallery imageUrl={product.imageUrl} title={product.title} />
+        <ProductGallery 
+          images={[
+            product.imageUrl,
+            ...product.variants.map(v => v.imageUrl).filter(Boolean)
+          ].filter(Boolean) as string[]} 
+          title={product.title} 
+        />
 
         {/* Product Info */}
         <div className="flex flex-col">
@@ -155,7 +161,7 @@ const sanitizedProduct = {
           </div>
           
           {/* Average Rating Display */}
-          <div className="flex items-center gap-2 mb-4">
+          <div className="flex items-center gap-2 mb-2">
             <div className="flex text-yellow-400">
               {[1, 2, 3, 4, 5].map((star) => {
                 const avgRating = product.reviews.length > 0 
@@ -182,7 +188,7 @@ const sanitizedProduct = {
             stock={product.flashSaleStock}
           />
 
-          <div className="flex flex-wrap items-end gap-3 md:gap-4 mb-4">
+          <div className="flex flex-wrap items-end gap-2 md:gap-3 mb-3">
             <div className="text-3xl font-bold text-[#E30019]">
               {formatPrice(Number(product.price))}
             </div>

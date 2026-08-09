@@ -55,7 +55,7 @@ export function PromotionalBanner({
   const seconds = timeLeft % 60;
 
   return (
-    <div className="flex flex-col gap-3 mb-6 w-full">
+    <div className="flex flex-col gap-3 mb-3 w-full">
       {/* Flash Sale Header */}
       <div className="bg-gradient-to-r from-[#E30019] to-[#FF5722] rounded-sm p-3 flex flex-col sm:flex-row sm:items-center justify-between text-white shadow-sm gap-2">
         <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-sm">

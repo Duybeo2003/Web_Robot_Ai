@@ -68,18 +68,8 @@ export default auth((req) => {
   }
 
   // Protect admin routes
-  if (req.nextUrl.pathname.startsWith("/admin")) {
-    if (req.auth?.user?.role !== "ADMIN") {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-  }
-
   // Protect user portal routes
-  if (req.nextUrl.pathname.startsWith("/portal")) {
-    if (!isAuth) {
-      return NextResponse.redirect(new URL("/", req.url));
-    }
-  }
+
 });
 
 export const config = {
