@@ -27,7 +27,7 @@ export default function ContactPage() {
                 <p className="text-neutral-600 mt-1">
                   CÔNG TY TNHH TM&DV GTK_REVEILLE
                   <br />
-                  Chi nhánh: Goertek Nam Sơn - Hạp Lĩnh, Bắc Ninh
+                  Chi nhánh: Quế Võ Hill View, Nam Sơn, Bắc Ninh, Việt Nam
                 </p>
               </div>
             </div>
@@ -48,7 +48,7 @@ export default function ContactPage() {
               </div>
               <div>
                 <h3 className="font-bold text-lg">Email</h3>
-                <p className="text-neutral-600 mt-1">support@roboed.vn</p>
+                <p className="text-neutral-600 mt-1">Nguyenquocduyth03@gmail.com</p>
               </div>
             </div>
 

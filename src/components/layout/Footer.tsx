@@ -13,8 +13,7 @@ export function Footer() {
             </p>
             <ul className="text-sm text-neutral-300 space-y-2 mt-4">
               <li>
-                <strong className="text-white">Chi nhánh:</strong> Goertek Nam
-                Sơn - Hạp Lĩnh
+                <strong className="text-white">Chi nhánh:</strong> Quế Võ Hill View, Nam Sơn, Bắc Ninh, Việt Nam
               </li>
               <li>
                 <strong className="text-white">Hotline:</strong> 0385.333.111
