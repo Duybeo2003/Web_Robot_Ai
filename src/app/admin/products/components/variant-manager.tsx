@@ -25,7 +25,7 @@ interface VariantManagerProps {
 
 export function VariantManager({ variants, onChange, basePrice }: VariantManagerProps) {
   // Option Types (e.g. "Color", "Size") and their possible values
-  const [optionGroups, setOptionGroups] = useState<{ name: string; values: string[] }[]>(() => {
+  const [optionGroups, setOptionGroups] = useState<{ name: string; rawValues: string }[]>(() => {
     if (variants.length > 0) {
       const groups: Record<string, Set<string>> = {};
       variants.forEach((v) => {
@@ -36,7 +36,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
       });
       return Object.entries(groups).map(([name, set]) => ({
         name,
-        values: Array.from(set),
+        rawValues: Array.from(set).join(", "),
       }));
     }
     return [];
@@ -49,7 +49,11 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
     }
 
     // Filter out empty groups
-    const validGroups = optionGroups.filter(g => g.name.trim() !== "" && g.values.length > 0);
+    const parsedGroups = optionGroups.map(g => ({
+      name: g.name,
+      values: g.rawValues.split(",").map(v => v.trim()).filter(Boolean)
+    }));
+    const validGroups = parsedGroups.filter(g => g.name.trim() !== "" && g.values.length > 0);
     if (validGroups.length === 0) return;
 
     // Cartesian product
@@ -94,7 +98,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
   };
 
   const addOptionGroup = () => {
-    setOptionGroups([...optionGroups, { name: "", values: [] }]);
+    setOptionGroups([...optionGroups, { name: "", rawValues: "" }]);
   };
 
   const removeOptionGroup = (index: number) => {
@@ -111,7 +115,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
 
   const updateOptionValues = (index: number, valuesStr: string) => {
     const newGroups = [...optionGroups];
-    newGroups[index].values = valuesStr.split(",").map(v => v.trim()).filter(Boolean);
+    newGroups[index].rawValues = valuesStr;
     setOptionGroups(newGroups);
   };
 
@@ -155,7 +159,7 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
                 <div className="flex items-center gap-2">
                   <Input 
                     placeholder="VD: Đỏ, Xanh, Vàng" 
-                    value={group.values.join(", ")}
+                    value={group.rawValues}
                     onChange={(e) => updateOptionValues(idx, e.target.value)}
                   />
                   <Button type="button" variant="ghost" size="icon" onClick={() => removeOptionGroup(idx)}>
