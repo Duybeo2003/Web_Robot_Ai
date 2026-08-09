@@ -5,10 +5,13 @@ import type { NextRequest } from "next/server";
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 
 function checkRateLimitSync(request: NextRequest): NextResponse | null {
-  const ip = request.headers.get("x-forwarded-for") ?? request.ip ?? "127.0.0.1";
+  let ip = request.headers.get("x-forwarded-for") ?? request.ip ?? "127.0.0.1";
+  if (ip.includes(",")) {
+    ip = ip.split(",")[0].trim();
+  }
   
   const WINDOW_MS = 60 * 1000;
-  const MAX_REQUESTS = 200;
+  const MAX_REQUESTS = 5000; // Increased significantly to prevent false positives behind reverse proxies
   const currentTime = Date.now();
   const record = rateLimitMap.get(ip);
 
