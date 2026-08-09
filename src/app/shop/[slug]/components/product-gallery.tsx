@@ -30,14 +30,14 @@ export function ProductGallery({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative w-full aspect-square max-h-[400px] md:max-h-[500px] bg-white rounded-md shadow-sm border border-neutral-100 group overflow-hidden p-2 md:p-4 mx-auto">
+      <div className="relative w-full aspect-square max-h-[400px] md:max-h-[500px] bg-white rounded-md shadow-sm border border-neutral-100 group overflow-hidden p-0 mx-auto">
         {activeImage ? (
           <Image
             src={activeImage}
             alt={title}
             fill
             priority
-            className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
+            className="object-cover transition-transform duration-700 ease-out group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         ) : (
