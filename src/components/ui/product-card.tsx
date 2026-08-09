@@ -12,7 +12,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
   const discountPercent = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
   
   return (
-    <div className="group relative bg-white h-fit w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
+    <div className="group relative bg-white h-full w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
       
       {/* Badges */}
       <div className="flex flex-row flex-wrap items-start gap-1 p-2 pb-0">
@@ -33,7 +33,7 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
       </div>
 
       {/* Image Container */}
-      <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full block bg-white p-1 md:p-3 overflow-hidden">
+      <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full block bg-white p-1 md:p-3 overflow-hidden shrink-0">
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
@@ -49,13 +49,13 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
         )}
       </Link>
       
-      <div className="px-2 py-1.5 md:px-2 md:py-2 flex flex-col border-t border-neutral-100">
+      <div className="px-2 py-1.5 md:px-2 md:py-2 flex flex-col flex-grow border-t border-neutral-100">
         <Link href={`/shop/${product.slug}`}>
           <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 leading-tight" style={{ color: theme.primary }}>
             {product.title}
           </h3>
         </Link>
-        <div className="mt-1 md:mt-1.5 pb-0.5">
+        <div className="mt-auto pt-1 md:pt-1.5 pb-0.5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
             <p className={`text-[10px] md:text-xs text-neutral-400 line-through ${hasDiscount ? '' : 'invisible'}`}>
               {hasDiscount ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice) : '0đ'}
