@@ -39,6 +39,8 @@ export function ProductForm({
     inventoryCount: initialData?.inventoryCount || 0,
     sku: initialData?.sku || "",
     imageUrl: initialData?.imageUrl || "",
+    gallery: (initialData?.gallery as string[]) || [],
+    videoUrl: initialData?.videoUrl || "",
     originalPrice: initialData?.originalPrice
       ? Number(initialData.originalPrice)
       : 0,
@@ -704,8 +706,8 @@ export function ProductForm({
           )}
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="imageUrl">Hình ảnh Sản phẩm</Label>
+        <div className="space-y-2 border-t pt-4">
+          <Label htmlFor="imageUrl">Ảnh chính (Cover)</Label>
           <div className="flex gap-4 items-center">
             {formData.imageUrl && (
               <div className="relative w-16 h-16 shrink-0">
@@ -755,6 +757,135 @@ export function ProductForm({
             }
             placeholder="Hoặc nhập URL trực tiếp..."
           />
+        </div>
+
+        <div className="space-y-2 border-t pt-4">
+          <Label>Thư viện Ảnh Phụ (Gallery)</Label>
+          <div className="flex flex-wrap gap-4 items-center">
+            {formData.gallery?.map((imgUrl: string, idx: number) => (
+              <div key={idx} className="relative w-16 h-16 shrink-0 group">
+                <Image
+                  src={imgUrl}
+                  alt="Gallery Preview"
+                  fill
+                  className="object-cover rounded-md border bg-neutral-50"
+                  sizes="64px"
+                />
+                <button
+                  type="button"
+                  className="absolute -top-2 -right-2 bg-red-500 text-white rounded-full p-1 opacity-0 group-hover:opacity-100 transition-opacity shadow-sm"
+                  onClick={() => {
+                    const newGallery = [...formData.gallery];
+                    newGallery.splice(idx, 1);
+                    setFormData({ ...formData, gallery: newGallery });
+                  }}
+                >
+                  <Trash2 className="w-3 h-3" />
+                </button>
+              </div>
+            ))}
+            <div className="relative w-16 h-16 flex items-center justify-center border-2 border-dashed border-neutral-300 rounded-md bg-neutral-50 hover:bg-neutral-100 transition-colors">
+              <span className="text-2xl text-neutral-400">+</span>
+              <Input
+                type="file"
+                accept="image/*"
+                multiple
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer"
+                onChange={async (e) => {
+                  const files = e.target.files;
+                  if (!files || files.length === 0) return;
+                  
+                  toast.loading(`Đang tải ${files.length} ảnh lên...`, { id: "upload-gallery" });
+                  
+                  const newGallery = [...(formData.gallery || [])];
+                  let successCount = 0;
+                  
+                  try {
+                    for (let i = 0; i < files.length; i++) {
+                      const data = new FormData();
+                      data.append("file", files[i]);
+                      
+                      const res = await fetch("/api/upload", {
+                        method: "POST",
+                        body: data,
+                      });
+                      const result = await res.json();
+                      if (result.success) {
+                        newGallery.push(result.url);
+                        successCount++;
+                      }
+                    }
+                    setFormData({ ...formData, gallery: newGallery });
+                    toast.success(`Tải thành công ${successCount}/${files.length} ảnh`, { id: "upload-gallery" });
+                  } catch (err) {
+                    toast.error("Lỗi kết nối", { id: "upload-gallery" });
+                  }
+                }}
+              />
+            </div>
+          </div>
+        </div>
+
+        <div className="space-y-2 border-t pt-4">
+          <Label htmlFor="videoUrl">Video Sản Phẩm (Link YouTube / TikTok hoặc Tải Lên)</Label>
+          <div className="flex gap-4 items-start">
+            <div className="flex-1 space-y-2">
+              <Input
+                id="videoUrl"
+                value={formData.videoUrl || ""}
+                onChange={(e) =>
+                  setFormData({ ...formData, videoUrl: e.target.value })
+                }
+                placeholder="Ví dụ: https://www.youtube.com/watch?v=..."
+              />
+              <p className="text-xs text-neutral-500">
+                * Khuyên dùng link YouTube/TikTok để tiết kiệm dung lượng, video sẽ được nhúng tự động.
+              </p>
+            </div>
+            
+            <div className="relative overflow-hidden group">
+              <Button type="button" variant="outline" className="w-32 relative">
+                Tải Video
+              </Button>
+              <Input
+                type="file"
+                accept="video/mp4,video/webm"
+                className="absolute inset-0 w-full h-full opacity-0 cursor-pointer z-10"
+                onChange={async (e) => {
+                  const file = e.target.files?.[0];
+                  if (!file) return;
+                  const data = new FormData();
+                  data.append("file", file);
+                  toast.loading("Đang tải video lên (có thể mất vài phút)...", { id: "upload-video" });
+                  try {
+                    const res = await fetch("/api/upload", {
+                      method: "POST",
+                      body: data,
+                    });
+                    const result = await res.json();
+                    if (result.success) {
+                      setFormData({ ...formData, videoUrl: result.url });
+                      toast.success("Tải video thành công", { id: "upload-video" });
+                    } else {
+                      toast.error(result.error || "Lỗi tải video", {
+                        id: "upload-video",
+                      });
+                    }
+                  } catch (err) {
+                    toast.error("Lỗi kết nối", { id: "upload-video" });
+                  }
+                }}
+              />
+            </div>
+          </div>
+          {formData.videoUrl && (
+            <div className="mt-2 text-sm">
+              <span className="text-green-600 font-medium">✓ Đã gắn Video</span>
+              {formData.videoUrl.startsWith("/") && (
+                <span className="ml-2 text-neutral-500 text-xs">(Video tải lên trực tiếp)</span>
+              )}
+            </div>
+          )}
         </div>
 
         <div className="space-y-2">

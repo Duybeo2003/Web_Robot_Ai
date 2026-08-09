@@ -1,17 +1,20 @@
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 
-// Allowed MIME types (images only)
+// Allowed MIME types (images and videos)
 const ALLOWED_MIME_TYPES = [
   "image/jpeg",
   "image/png",
   "image/gif",
   "image/webp",
   "image/svg+xml",
+  "video/mp4",
+  "video/webm",
+  "video/quicktime",
 ];
 
-// Max file size: 5MB
-const MAX_FILE_SIZE = 5 * 1024 * 1024;
+// Max file size: 30MB for videos
+const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
 export async function POST(request: Request) {
   try {
@@ -30,7 +33,7 @@ export async function POST(request: Request) {
       return NextResponse.json(
         {
           success: false,
-          error: `Chỉ chấp nhận file ảnh (JPEG, PNG, GIF, WebP)`,
+          error: `Chỉ chấp nhận file ảnh (JPEG, PNG, GIF, WebP) và video (MP4, WebM)`,
         },
         { status: 400 },
       );
@@ -39,7 +42,7 @@ export async function POST(request: Request) {
     // SECURITY: Validate file size
     if (file.size > MAX_FILE_SIZE) {
       return NextResponse.json(
-        { success: false, error: "File quá lớn. Tối đa 5MB." },
+        { success: false, error: "File quá lớn. Tối đa 30MB." },
         { status: 400 },
       );
     }
@@ -77,15 +80,18 @@ export async function POST(request: Request) {
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = await new Promise<any>((resolve, reject) => {
+      const isVideo = file.type.startsWith("video/");
       cloudinary.uploader
         .upload_stream(
           {
             folder: "roboed-products",
-            resource_type: "image",
-            transformation: [
-              { quality: "auto", fetch_format: "auto" },
-              { width: 1200, height: 1200, crop: "limit" },
-            ],
+            resource_type: isVideo ? "video" : "image",
+            transformation: isVideo
+              ? undefined
+              : [
+                  { quality: "auto", fetch_format: "auto" },
+                  { width: 1200, height: 1200, crop: "limit" },
+                ],
           },
           (error, result) => {
             if (error) reject(error);

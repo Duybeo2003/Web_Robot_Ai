@@ -188,6 +188,8 @@ model Product {
   sku            String?     @unique
   inventoryCount Int         @default(0)
   imageUrl       String?
+  gallery        Json?       @default("[]")
+  videoUrl       String?
 
   // Promotional Fields
   originalPrice    Decimal?  @db.Decimal(10, 2)

@@ -69,6 +69,8 @@ export interface ProductData {
   supplyType?: string;
   inventoryCount: number;
   imageUrl: string;
+  gallery?: string[];
+  videoUrl?: string | null;
   originalPrice?: number | null;
   flashSaleActive?: boolean;
   flashSaleEndDate?: string | Date | null;
@@ -105,6 +107,8 @@ export async function upsertProduct(data: ProductData, id?: string) {
     supplyType: (data.supplyType || "IN_HOUSE") as any,
     inventoryCount: data.inventoryCount,
     imageUrl: data.imageUrl,
+    gallery: data.gallery || [],
+    videoUrl: data.videoUrl || null,
     originalPrice: data.originalPrice || null,
     flashSaleActive: data.flashSaleActive || false,
     flashSaleEndDate:

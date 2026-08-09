@@ -40,10 +40,12 @@ export function ProductDetailsClient({
       <ProductGallery
         images={[
           product.imageUrl,
+          ...(Array.isArray(product.gallery) ? (product.gallery as string[]) : []),
           ...product.variants.map((v: any) => v.imageUrl).filter(Boolean),
         ].filter(Boolean) as string[]}
         title={product.title}
         selectedImage={selectedVariant?.imageUrl || null}
+        videoUrl={product.videoUrl as string | null}
       />
 
       {/* Product Info */}
