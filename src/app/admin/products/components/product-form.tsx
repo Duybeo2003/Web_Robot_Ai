@@ -35,7 +35,7 @@ export function ProductForm({
     price: initialData?.price ? Number(initialData.price) : 0,
     type: initialData?.type || "ROBOT_STEM", // fallback enum
     supplyType: initialData?.supplyType || "IN_HOUSE",
-    categoryId: initialData?.categoryId || categories?.[0]?.id || "", // new category link
+    categoryId: initialData?.categoryId || "", // new category link
     inventoryCount: initialData?.inventoryCount || 0,
     sku: initialData?.sku || "",
     imageUrl: initialData?.imageUrl || "",
@@ -175,15 +175,13 @@ export function ProductForm({
               }
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:border-orange-500"
             >
-              {categories.length > 0 ? (
+              <option value="">-- Không thuộc danh mục nào --</option>
+              {categories.length > 0 &&
                 categories.map((cat) => (
                   <option key={cat.id} value={cat.id}>
                     {cat.name}
                   </option>
-                ))
-              ) : (
-                <option value="">-- Chưa có danh mục --</option>
-              )}
+                ))}
             </select>
           </div>
           <div className="space-y-2">
