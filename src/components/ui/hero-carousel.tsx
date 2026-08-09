@@ -88,32 +88,6 @@ export function HeroCarousel() {
                     </div>
                   </div>
                 </CarouselItem>
-                {/* Slide 3 */}
-                <CarouselItem>
-                  <div className="relative w-full h-[250px] sm:h-[300px] md:h-auto md:aspect-[27/10] cursor-pointer shadow-sm rounded-lg overflow-hidden">
-                    {/* Desktop Image */}
-                    <div className="hidden md:block w-full h-full relative">
-                      <Image
-                        src="/images/banners/banner3-desktop.png"
-                        alt="Bảng vẽ thông minh cho bé"
-                        fill
-                        priority={true}
-                        className="object-cover"
-                      />
-                    </div>
-                    {/* Mobile Image */}
-                    <div className="block md:hidden w-full h-full relative">
-                      {/* Temporary reuse of banner 2 mobile for slide 3 */}
-                      <Image
-                        src="/images/banners/banner2-mobile.jpg"
-                        alt="Bảng vẽ thông minh tự xóa"
-                        fill
-                        priority={true}
-                        className="object-cover"
-                      />
-                    </div>
-                  </div>
-                </CarouselItem>
               </CarouselContent>
               <CarouselPrevious className="absolute left-4 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 hidden md:flex" />
               <CarouselNext className="absolute right-4 top-1/2 -translate-y-1/2 opacity-70 hover:opacity-100 hidden md:flex" />
