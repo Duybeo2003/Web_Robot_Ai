@@ -15,18 +15,16 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
     <div className="group relative bg-white h-fit w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
       
       {/* Badges */}
-      <div className="absolute top-0 left-0 z-10 flex flex-row flex-wrap items-start gap-[2px] max-w-[calc(100%-40px)]">
+      <div className="flex flex-row flex-wrap items-start gap-1 p-2 pb-0">
         {product.supplyType === "PRE_ORDER" && (
-          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm bg-amber-500">
+          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm bg-amber-500">
             Hàng Order (7-10 ngày)
           </div>
         )}
         {hasDiscount && (
-          <>
-            <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-br-lg rounded-tl-sm shadow-sm" style={{ backgroundColor: theme.primary }}>
-              Giảm {discountPercent}%
-            </div>
-          </>
+          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm" style={{ backgroundColor: theme.primary }}>
+            Giảm {discountPercent}%
+          </div>
         )}
       </div>
 
@@ -53,11 +51,11 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
       
       <div className="px-2 py-1.5 md:px-2 md:py-2 flex flex-col border-t border-neutral-100">
         <Link href={`/shop/${product.slug}`}>
-          <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 min-h-[32px] md:min-h-[36px] leading-tight" style={{ color: theme.primary }}>
+          <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 leading-tight" style={{ color: theme.primary }}>
             {product.title}
           </h3>
         </Link>
-        <div className="mt-1.5 md:mt-2 pb-0.5">
+        <div className="mt-1 md:mt-1.5 pb-0.5">
           <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
             <p className={`text-[10px] md:text-xs text-neutral-400 line-through ${hasDiscount ? '' : 'invisible'}`}>
               {hasDiscount ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice) : '0đ'}

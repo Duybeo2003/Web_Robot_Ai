@@ -11,14 +11,14 @@ export function ProductGallery({
 }) {
   const [activeImage, setActiveImage] = useState(images[0] || null);
 
-  // If there are less than 3 images, we pad with the main image to make it look full if we really want to,
-  // but it's better to just show unique images. Since the user wanted 3 thumbnails, if there's only 1 image,
-  // we can just duplicate it so they can see the effect they wanted.
-  const displayImages = images.length > 0 ? Array.from(new Set([
-    images[0],
-    images[1] || images[0],
-    images[2] || images[0]
-  ])).filter(Boolean) : [];
+  // The user wants 3 thumbnails even if there's only 1 image.
+  // We'll prioritize unique images from variants, but pad with the main image if needed.
+  let displayImages = Array.from(new Set(images.filter(Boolean)));
+  if (displayImages.length === 1) {
+    displayImages = [displayImages[0], displayImages[0], displayImages[0]];
+  } else if (displayImages.length === 2) {
+    displayImages = [...displayImages, displayImages[0]];
+  }
 
   return (
     <div className="flex flex-col gap-4">
@@ -39,7 +39,7 @@ export function ProductGallery({
         )}
       </div>
       {/* Thumbnails */}
-      {displayImages.length > 1 && (
+      {displayImages.length > 0 && (
         <div className="flex gap-4">
           {displayImages.map((imgUrl, i) => (
             <div
