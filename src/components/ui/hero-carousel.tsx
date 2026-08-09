@@ -48,6 +48,8 @@ export function HeroCarousel() {
                         alt="Robot AI thông minh cho trẻ"
                         fill
                         priority
+                        unoptimized={true}
+                        quality={100}
                         className="object-cover"
                       />
                     </div>
@@ -58,6 +60,8 @@ export function HeroCarousel() {
                         alt="Robot AI thông minh cho trẻ"
                         fill
                         priority
+                        unoptimized={true}
+                        quality={100}
                         className="object-cover"
                       />
                     </div>
@@ -73,6 +77,8 @@ export function HeroCarousel() {
                         alt="Đồ chơi giáo dục RoboEQ"
                         fill
                         priority={true}
+                        unoptimized={true}
+                        quality={100}
                         className="object-cover"
                       />
                     </div>
@@ -83,6 +89,8 @@ export function HeroCarousel() {
                         alt="Bảng vẽ thông minh tự xóa"
                         fill
                         priority={true}
+                        unoptimized={true}
+                        quality={100}
                         className="object-cover"
                       />
                     </div>
