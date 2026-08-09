@@ -318,8 +318,16 @@ export async function upsertCategory(
         data,
       });
     } else {
+      const slug =
+        data.name.toLowerCase().replace(/[^a-z0-9]+/g, "-") +
+        "-" +
+        Date.now().toString().slice(-4);
+
       await prisma.category.create({
-        data,
+        data: {
+          ...data,
+          slug,
+        },
       });
     }
     revalidatePath("/admin/categories");
