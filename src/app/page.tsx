@@ -67,7 +67,7 @@ const getCachedProducts = unstable_cache(
 
     return { robotProducts, comboProducts, logicProducts, flashSaleProductsData };
   },
-  ["homepage-products"],
+  ["homepage-products-v2"],
   { revalidate: 3600 } // Cache for 1 hour
 );
 
@@ -89,7 +89,7 @@ export default async function Home() {
 
   // Deduplicate by id just in case
   const flashSaleProducts = Array.from(
-    new Map(flashSaleProductsData.map((p) => [p.id, p])).values(),
+    new Map((flashSaleProductsData || []).map((p) => [p.id, p])).values(),
   );
 
   return (
