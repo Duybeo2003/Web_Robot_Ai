@@ -1,0 +1,400 @@
+/* eslint-disable react-hooks/set-state-in-effect */
+"use client";
+
+import Link from "next/link";
+import { useSession, signOut } from "next-auth/react";
+import { Button } from "@/components/ui/button";
+import { useTheme } from "next-themes";
+import {
+  Moon,
+  Sun,
+  ShoppingCart,
+  User as UserIcon,
+  LogOut,
+  LayoutDashboard,
+  Menu,
+  Cpu,
+  Search,
+  Phone,
+  Trophy,
+} from "lucide-react";
+import { useEffect, useState } from "react";
+import { useAuthModal } from "@/store/use-auth-modal";
+import { useCartUI } from "@/store/use-cart-ui";
+import { useCartStore } from "@/lib/store/cart";
+import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+  DropdownMenuGroup,
+} from "@/components/ui/dropdown-menu";
+import { useRouter } from "next/navigation";
+
+function CartBadge() {
+  const totalItems = useCartStore((state) =>
+    state.items.reduce((total, item) => total + item.quantity, 0),
+  );
+  // Removed mounted state; component renders directly
+
+  if (totalItems === 0) return null;
+
+  return (
+    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#C86B5A] text-[10px] text-white font-bold animate-in zoom-in duration-300">
+      {totalItems}
+    </span>
+  );
+}
+
+export function Header() {
+  const { data: session } = useSession();
+  const { theme, setTheme } = useTheme();
+  const [mounted, setMounted] = useState(false);
+  const { openModal } = useAuthModal();
+  const { openCart } = useCartUI();
+  const router = useRouter();
+  const [searchQuery, setSearchQuery] = useState("");
+  const [openMobileMenu, setOpenMobileMenu] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (searchQuery.trim()) {
+      router.push(`/shop?q=${encodeURIComponent(searchQuery.trim())}`);
+    }
+  };
+
+  return (
+    <header className="w-full bg-white border-b border-border sticky top-0 z-50 shadow-sm">
+      {/* Top Bar - Logo, Search, Actions */}
+      <div className="container mx-auto px-4 py-4 flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
+        {/* Logo */}
+        <Link href="/" className="flex items-center gap-2 group shrink-0">
+          <div className="bg-primary text-white p-2 rounded-lg">
+            <Cpu className="w-6 h-6" />
+          </div>
+          <span className="font-bold text-2xl tracking-tight text-primary">
+            RoboEQ
+          </span>
+        </Link>
+
+        {/* Search Bar */}
+        <div className="flex-1 max-w-2xl hidden md:flex items-center">
+          <form onSubmit={handleSearch} className="relative w-full">
+            <input
+              type="text"
+              placeholder="Tìm kiếm robot, kit STEM, đồ chơi logic..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full h-10 pl-4 pr-10 border border-primary/50 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+            />
+            <button
+              type="submit"
+              className="absolute right-0 top-0 h-10 w-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+            >
+              <Search className="h-5 w-5" />
+            </button>
+          </form>
+        </div>
+
+        {/* Contact & Actions */}
+        <div className="flex items-center gap-4 shrink-0">
+          <div className="hidden lg:flex items-center gap-4 mr-4 text-sm font-medium">
+            <div className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors">
+              <Phone className="w-4 h-4 text-primary" />
+              <span>0385.333.111</span>
+            </div>
+            <Link
+              href="https://zalo.me/0385333111"
+              target="_blank"
+              className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors text-[#0068FF]"
+            >
+              <svg
+                viewBox="0 0 24 24"
+                width="20"
+                height="20"
+                className="fill-current"
+              >
+                <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
+              </svg>
+              <span>Zalo Tư Vấn</span>
+            </Link>
+          </div>
+
+          {/* Theme Toggle */}
+          {mounted && (
+            <Button
+              variant="ghost"
+              size="icon"
+              className="hidden sm:flex hover:text-primary"
+              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            >
+              {theme === "dark" ? (
+                <Sun className="h-5 w-5" />
+              ) : (
+                <Moon className="h-5 w-5" />
+              )}
+            </Button>
+          )}
+
+          {/* User / Login */}
+          {session ? (
+            <DropdownMenu>
+              <DropdownMenuTrigger
+                className="hover:text-primary h-10 w-10 flex items-center justify-center rounded-md hover:bg-accent transition-colors"
+                title="Tài khoản"
+              >
+                <UserIcon className="h-5 w-5" />
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56 mt-2">
+                <DropdownMenuGroup>
+                  <DropdownMenuLabel className="font-normal">
+                    <div className="flex flex-col space-y-1">
+                      <p className="text-sm font-medium leading-none">
+                        {session?.user?.name ||
+                          (["ADMIN", "STORE_MANAGER", "EDITOR"].includes(session?.user?.role as string)
+                            ? "Quản trị viên"
+                            : "Tài khoản của tôi")}
+                      </p>
+                      <p className="text-xs leading-none text-muted-foreground">
+                        {session?.user?.email ||
+                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                          (session?.user as any)?.phoneNumber ||
+                          ""}
+                      </p>
+                    </div>
+                  </DropdownMenuLabel>
+                </DropdownMenuGroup>
+                <DropdownMenuSeparator />
+                {["ADMIN", "STORE_MANAGER", "EDITOR"].includes(session?.user?.role as string) ? (
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Link href="/admin" className="w-full flex items-center">
+                      <LayoutDashboard className="mr-2 h-4 w-4" />
+                      <span>Bảng điều khiển</span>
+                    </Link>
+                  </DropdownMenuItem>
+                ) : (
+                  <DropdownMenuItem className="cursor-pointer">
+                    <Link href="/profile" className="w-full flex items-center">
+                      <UserIcon className="mr-2 h-4 w-4" />
+                      <span>Hồ sơ cá nhân</span>
+                    </Link>
+                  </DropdownMenuItem>
+                )}
+                <DropdownMenuSeparator />
+                <DropdownMenuItem
+                  className="cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50 dark:focus:bg-red-950"
+                  onClick={() => signOut({ callbackUrl: "/" })}
+                >
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Đăng xuất</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          ) : (
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={openModal}
+              className="hover:text-primary"
+              title="Đăng nhập"
+            >
+              <UserIcon className="h-5 w-5" />
+            </Button>
+          )}
+
+          {/* Cart */}
+          <Button
+            variant="ghost"
+            size="icon"
+            className="relative hover:text-primary"
+            onClick={openCart}
+            title="Giỏ hàng"
+          >
+            <ShoppingCart className="h-5 w-5" />
+            <CartBadge />
+          </Button>
+
+          {/* Mobile Menu Toggle */}
+          <Sheet open={openMobileMenu} onOpenChange={setOpenMobileMenu}>
+            <SheetTrigger className="lg:hidden flex h-10 w-10 items-center justify-center hover:text-primary">
+              <Menu className="h-6 w-6" />
+            </SheetTrigger>
+            <SheetContent side="left" className="w-[300px] p-0">
+              <div className="p-4 bg-primary text-white flex items-center gap-2">
+                <Menu className="h-5 w-5" />
+                <span className="font-bold">Danh mục sản phẩm</span>
+              </div>
+              <div className="p-4 border-b border-border bg-neutral-50">
+                <form onSubmit={(e) => { handleSearch(e); setOpenMobileMenu(false); }} className="relative w-full">
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="w-full h-10 pl-4 pr-10 border border-primary/30 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm bg-white"
+                  />
+                  <button type="submit" className="absolute right-0 top-0 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-primary">
+                    <Search className="h-4 w-4" />
+                  </button>
+                </form>
+              </div>
+              <div className="flex flex-col py-2">
+                <Link
+                  href="/shop?type=ROBOT_STEM"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
+                >
+                  Robot Giáo Dục
+                </Link>
+                <Link
+                  href="/shop?type=DO_CHOI_LOGIC"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
+                >
+                  Đồ Chơi Tư Duy Logic
+                </Link>
+                <Link
+                  href="/shop?type=COMBO"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 bg-red-50 hover:bg-red-100 font-bold text-sm text-red-600 border-b border-border"
+                >
+                  Combo Tiết Kiệm
+                </Link>
+                <Link
+                  href="/huong-dan"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
+                >
+                  Hướng Dẫn Sử Dụng
+                </Link>
+                <Link
+                  href="/bao-hanh"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
+                >
+                  Tra Cứu Bảo Hành
+                </Link>
+                <Link
+                  href="/blog"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
+                >
+                  Blog & Kiến Thức
+                </Link>
+                <Link
+                  href="/events"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-bold text-sm text-orange-600 border-b border-border flex items-center gap-2"
+                >
+                  <Trophy className="w-4 h-4" />
+                  Sự Kiện & Vòng Quay
+                </Link>
+                <Link
+                  href="/shop?flashsale=true"
+                  onClick={() => setOpenMobileMenu(false)}
+                  className="px-4 py-3 hover:bg-muted font-bold text-sm text-[#FF5722]"
+                >
+                  🔥 KHUYẾN MÃI HOT
+                </Link>
+              </div>
+            </SheetContent>
+          </Sheet>
+        </div>
+      </div>
+
+      {/* Bottom Nav - Orange Background */}
+      <div className="w-full bg-primary text-primary-foreground hidden lg:block">
+        <div className="container mx-auto px-4 h-12 flex items-center gap-8">
+          {/* Category Dropdown */}
+          <div className="relative group h-full flex items-center cursor-pointer bg-secondary px-4 min-w-[200px]">
+            <Menu className="h-5 w-5 mr-2" />
+            <span className="font-bold text-sm">SẢN PHẨM GIÁO DỤC</span>
+
+            {/* Dropdown Menu */}
+            <div className="absolute top-full left-0 w-[400px] bg-white text-foreground shadow-lg border border-border hidden group-hover:grid grid-cols-2 gap-2 p-4 z-50 rounded-b-xl">
+              <Link
+                href="/shop?type=ROBOT_STEM"
+                className="p-3 hover:bg-neutral-50 rounded-lg flex flex-col"
+              >
+                <h4 className="font-bold text-neutral-800">Robot Giáo Dục</h4>
+                <p className="text-xs text-neutral-500">
+                  Phát triển tư duy & EQ
+                </p>
+              </Link>
+              <Link
+                href="/shop?type=DO_CHOI_LOGIC"
+                className="p-3 hover:bg-neutral-50 rounded-lg flex flex-col"
+              >
+                <h4 className="font-bold text-neutral-800">Đồ Chơi Logic</h4>
+                <p className="text-xs text-neutral-500">Rèn luyện trí tuệ</p>
+              </Link>
+              <Link
+                href="/shop?type=COMBO"
+                className="col-span-2 p-3 bg-red-50 hover:bg-red-100 rounded-lg flex flex-col border border-red-100"
+              >
+                <h4 className="font-bold text-red-600">Combo Tiết Kiệm</h4>
+                <p className="text-xs text-red-500">
+                  Giải pháp toàn diện - Mua nhiều giảm sâu
+                </p>
+              </Link>
+            </div>
+          </div>
+
+          {/* Quick Links */}
+          <nav className="flex items-center gap-6">
+            <Link
+              href="/shop?type=ROBOT_STEM"
+              className="text-sm font-medium hover:text-white/80 transition-colors"
+            >
+              Robot Giáo Dục
+            </Link>
+            <Link
+              href="/shop?type=DO_CHOI_LOGIC"
+              className="text-sm font-medium hover:text-white/80 transition-colors"
+            >
+              Đồ Chơi Tư Duy Logic
+            </Link>
+            <Link
+              href="/blog"
+              className="text-sm font-medium hover:text-white/80 transition-colors"
+            >
+              Blog & Kiến Thức
+            </Link>
+            <Link
+              href="/huong-dan"
+              className="text-sm font-medium hover:text-white/80 transition-colors"
+            >
+              Hướng Dẫn Sử Dụng
+            </Link>
+            <Link
+              href="/bao-hanh"
+              className="text-sm font-medium hover:text-white/80 transition-colors"
+            >
+              Tra Cứu Bảo Hành
+            </Link>
+            <Link
+              href="/events"
+              className="text-sm font-bold text-orange-200 hover:text-white transition-colors flex items-center gap-1"
+            >
+              <Trophy className="w-4 h-4" />
+              Sự Kiện
+            </Link>
+            <Link
+              href="/shop?flashsale=true"
+              className="text-sm font-bold text-yellow-300 hover:text-yellow-100 transition-colors flex items-center gap-1"
+            >
+              ⚡ FLASH SALE
+            </Link>
+          </nav>
+        </div>
+      </div>
+    </header>
+  );
+}
