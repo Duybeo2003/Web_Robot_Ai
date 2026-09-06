@@ -60,8 +60,6 @@ export default function ContactPage() {
                 <h3 className="font-bold text-lg">Giờ làm việc</h3>
                 <p className="text-neutral-600 mt-1">
                   Thứ 2 - Thứ 7: 08:00 - 17:30
-                  <br />
-                  Chủ nhật: Nghỉ
                 </p>
               </div>
             </div>
