@@ -8,7 +8,7 @@ import { Loader2 } from "lucide-react";
 import { updateUserProfile } from "@/actions/user";
 import { toast } from "sonner";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function ProfileForm({ initialData }: { initialData: any }) {
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({

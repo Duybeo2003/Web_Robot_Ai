@@ -25,6 +25,7 @@ enum OrderStatus {
 
 enum PaymentStatus {
   UNPAID
+  PARTIALLY_PAID
   PAID
   REFUNDED
 }
@@ -32,6 +33,20 @@ enum PaymentStatus {
 enum PaymentMethod {
   COD
   BANK_TRANSFER
+  VNPAY
+}
+
+enum PaymentProvider {
+  COD
+  BANK_TRANSFER
+  VNPAY
+}
+
+enum PaymentTransactionStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
 }
 
 enum SupplyType {
@@ -281,6 +296,7 @@ model CartItem {
   product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
   variantId String?
   variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  selectionKey String @db.VarChar(383)
   quantity  Int             @default(1)
 
   createdAt DateTime @default(now())
@@ -289,6 +305,7 @@ model CartItem {
   @@index([cartId])
   @@index([productId])
   @@index([variantId])
+  @@unique([cartId, selectionKey])
 }
 
 model Order {
@@ -298,9 +315,27 @@ model Order {
   totalAmount   Decimal  @db.Decimal(10, 2)
   depositAmount Decimal? @db.Decimal(10, 2)
 
+  // Immutable commercial totals captured when the order is created.
+  subtotal       Decimal @default(0) @db.Decimal(10, 2)
+  shippingFee    Decimal @default(0) @db.Decimal(10, 2)
+  couponCode     String?
+  couponDiscount Decimal @default(0) @db.Decimal(10, 2)
+  pointDiscount  Decimal @default(0) @db.Decimal(10, 2)
+  amountPaid     Decimal @default(0) @db.Decimal(10, 2)
+  amountDue      Decimal @default(0) @db.Decimal(10, 2)
+  customerName   String?
+
+  // Makes checkout retries safe and gives guest orders a scoped access token.
+  idempotencyKey      String? @unique
+  guestAccessTokenHash String?
+  inventoryReservedUntil DateTime?
+
   // Logistics & Payment
   shippingAddress String?
   receiverPhone   String?
+  logisticsProvider String?
+  trackingCode      String?
+  shippedAt         DateTime?
   paymentMethod   PaymentMethod @default(COD)
   paymentStatus   PaymentStatus @default(UNPAID)
 
@@ -313,6 +348,7 @@ model Order {
   items          OrderItem[]
   returnRequests ReturnRequest[]
   commissions    Commission[]
+  paymentTransactions PaymentTransaction[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -320,6 +356,26 @@ model Order {
 
   @@index([userId])
   @@index([status])
+  @@index([createdAt])
+}
+
+model PaymentTransaction {
+  id                    String                   @id @default(cuid())
+  orderId               String
+  order                 Order                    @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider              PaymentProvider
+  status                PaymentTransactionStatus @default(PENDING)
+  amount                Decimal                  @db.Decimal(10, 2)
+  currency              String                   @default("VND")
+  idempotencyKey        String                   @unique
+  providerTransactionId String?                  @unique
+  rawResponse           Json?
+  processedAt           DateTime?
+  createdAt             DateTime                 @default(now())
+  updatedAt             DateTime                 @updatedAt
+
+  @@index([orderId])
+  @@index([provider, status])
   @@index([createdAt])
 }
 
@@ -452,6 +508,7 @@ model Review {
 
   @@index([userId])
   @@index([productId])
+  @@unique([userId, productId])
 }
 
 model Wishlist {

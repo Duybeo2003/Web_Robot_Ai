@@ -6,7 +6,7 @@ import { submitReview } from "@/actions/review";
 import { toast } from "sonner";
 import { format } from "date-fns";
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
+ 
 export function ProductTabs({ product }: { product: any }) {
   const [activeTab, setActiveTab] = useState<"desc" | "specs" | "reviews">(
     "desc",
@@ -17,7 +17,7 @@ export function ProductTabs({ product }: { product: any }) {
   const avgRating =
     reviews.length > 0
       ? (
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+           
           reviews.reduce((acc: any, r: any) => acc + r.rating, 0) /
           reviews.length
         ).toFixed(1)
@@ -200,7 +200,7 @@ export function ProductTabs({ product }: { product: any }) {
                     Chưa có đánh giá nào cho sản phẩm này.
                   </p>
                 ) : (
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                   
                   reviews.map((review: any) => (
                     <div
                       key={review.id}

@@ -17,7 +17,8 @@ export interface RateLimitResult {
 export async function checkRateLimit(
   key: string,
   limit: number,
-  windowSeconds: number
+  windowSeconds: number,
+  options: { failClosed?: boolean } = {},
 ): Promise<RateLimitResult> {
   const currentTimestamp = Math.floor(Date.now() / 1000);
   const windowKey = `${key}:${Math.floor(currentTimestamp / windowSeconds)}`;
@@ -31,8 +32,12 @@ export async function checkRateLimit(
     const results = await multi.exec();
     
     if (!results || results.length === 0) {
-      // Redis error, fail open to avoid crashing the app
-      return { success: true, limit, remaining: limit, reset: currentTimestamp + windowSeconds };
+      return {
+        success: !options.failClosed,
+        limit,
+        remaining: options.failClosed ? 0 : limit,
+        reset: currentTimestamp + windowSeconds,
+      };
     }
 
     const currentCount = results[0][1] as number;
@@ -46,6 +51,11 @@ export async function checkRateLimit(
   } catch (error) {
     console.error("Rate limiting error:", error);
     // If Redis fails, we default to allowing the request so the app stays up.
-    return { success: true, limit, remaining: limit, reset: currentTimestamp + windowSeconds };
+    return {
+      success: !options.failClosed,
+      limit,
+      remaining: options.failClosed ? 0 : limit,
+      reset: currentTimestamp + windowSeconds,
+    };
   }
 }

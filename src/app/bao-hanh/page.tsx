@@ -11,7 +11,7 @@ import Image from "next/image";
 export default function WarrantyPage() {
   const [serial, setSerial] = useState("");
   const [loading, setLoading] = useState(false);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState("");
 

@@ -38,6 +38,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { signOut } from "next-auth/react";
+import { adminLandingPage, canAccessAdminPath } from "@/lib/rbac";
 
 const overviewGroup = [{ title: "Tổng quan", url: "/admin", icon: BarChart3 }];
 
@@ -78,9 +79,8 @@ export function AppSidebar({ role = "ADMIN" }: { role?: string }) {
   const pathname = usePathname();
   const { setOpenMobile } = useSidebar();
   
-  const filteredSystemGroup = role === "STORE_MANAGER" 
-    ? systemGroup.filter(item => item.url !== "/admin/admins")
-    : systemGroup;
+  const permitted = <T extends { url: string }>(items: T[]) =>
+    items.filter((item) => canAccessAdminPath(role, item.url));
 
   const renderGroup = (label: string, items: typeof overviewGroup) => (
     <SidebarGroup>
@@ -133,27 +133,27 @@ export function AppSidebar({ role = "ADMIN" }: { role?: string }) {
       </SidebarHeader>
 
       <SidebarContent className="py-4">
-        {renderGroup("Dữ liệu", overviewGroup)}
+        {permitted(overviewGroup).length > 0 && renderGroup("Dữ liệu", permitted(overviewGroup))}
         <div className="px-4 py-2 opacity-50">
           <SidebarSeparator />
         </div>
-        {renderGroup("Bán hàng", salesGroup)}
+        {permitted(salesGroup).length > 0 && renderGroup("Bán hàng", permitted(salesGroup))}
         <div className="px-4 py-2 opacity-50">
           <SidebarSeparator />
         </div>
-        {renderGroup("Kho hàng", productGroup)}
+        {permitted(productGroup).length > 0 && renderGroup("Kho hàng", permitted(productGroup))}
         <div className="px-4 py-2 opacity-50">
           <SidebarSeparator />
         </div>
-        {renderGroup("Tiếp thị", marketingGroup)}
+        {permitted(marketingGroup).length > 0 && renderGroup("Tiếp thị", permitted(marketingGroup))}
         <div className="px-4 py-2 opacity-50">
           <SidebarSeparator />
         </div>
-        {renderGroup("Báo cáo", reportGroup)}
+        {permitted(reportGroup).length > 0 && renderGroup("Báo cáo", permitted(reportGroup))}
         <div className="px-4 py-2 opacity-50">
           <SidebarSeparator />
         </div>
-        {renderGroup("Hệ thống", filteredSystemGroup)}
+        {permitted(systemGroup).length > 0 && renderGroup("Hệ thống", permitted(systemGroup))}
       </SidebarContent>
 
       <SidebarFooter className="p-4 border-t border-orange-100 bg-orange-50/30">

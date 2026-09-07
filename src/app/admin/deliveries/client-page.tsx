@@ -29,6 +29,8 @@ interface DeliveryItem {
   };
 }
 
+type DeliveryStatus = "PENDING" | "SHIPPED" | "DELIVERED" | "CANCELLED";
+
 export default function AdminDeliveriesClientPage({ deliveries: initialDeliveries }: { deliveries: DeliveryItem[] }) {
   const [deliveries, setDeliveries] = useState(initialDeliveries);
   const [selectedDelivery, setSelectedDelivery] = useState<DeliveryItem | null>(null);
@@ -36,7 +38,7 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
   const [trackingCode, setTrackingCode] = useState("");
   const [loading, setLoading] = useState(false);
 
-  const handleStatusUpdate = async (id: string, status: string, newTrackingCode?: string) => {
+  const handleStatusUpdate = async (id: string, status: DeliveryStatus, newTrackingCode?: string) => {
     try {
       setLoading(true);
       const updated = await updateDeliveryStatus(id, status, newTrackingCode);
@@ -140,7 +142,7 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
                             className="text-red-600 border-red-200 hover:bg-red-50"
                             onClick={() => {
                               if (confirm("Từ chối đơn này? Vật phẩm sẽ được hoàn lại vào túi đồ của khách.")) {
-                                handleStatusUpdate(delivery.id, "REJECTED");
+                                handleStatusUpdate(delivery.id, "CANCELLED");
                               }
                             }}
                           >

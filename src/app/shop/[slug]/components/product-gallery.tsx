@@ -1,5 +1,5 @@
 "use client";
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import Image from "next/image";
 import { PlayCircle } from "lucide-react";
 
@@ -14,15 +14,16 @@ export function ProductGallery({
   selectedImage?: string | null;
   videoUrl?: string | null;
 }) {
-  const [activeMedia, setActiveMedia] = useState<string>(
-    videoUrl ? "video" : selectedImage || images[0] || ""
-  );
-
-  useEffect(() => {
-    if (selectedImage) {
-      setActiveMedia(selectedImage);
-    }
-  }, [selectedImage]);
+  const [mediaSelection, setMediaSelection] = useState(() => ({
+    sourceImage: selectedImage,
+    media: videoUrl ? "video" : selectedImage || images[0] || "",
+  }));
+  const activeMedia =
+    mediaSelection.sourceImage === selectedImage
+      ? mediaSelection.media
+      : selectedImage || images[0] || "";
+  const selectMedia = (media: string) =>
+    setMediaSelection({ sourceImage: selectedImage, media });
 
   let displayImages = Array.from(new Set(images.filter(Boolean)));
   // No longer faking 3 thumbnails if they have video or real gallery
@@ -58,7 +59,7 @@ export function ProductGallery({
     
     if (isTikTok) {
       // Basic tiktok embed (might need official embed script for full support, but iframe works for some formats)
-      let videoId = videoUrl.split("/video/")[1]?.split("?")[0];
+      const videoId = videoUrl.split("/video/")[1]?.split("?")[0];
       return (
         <iframe
           className="w-full h-full object-cover"
@@ -108,7 +109,7 @@ export function ProductGallery({
       <div className="flex gap-4 flex-wrap">
         {videoUrl && (
           <div
-            onClick={() => setActiveMedia("video")}
+            onClick={() => selectMedia("video")}
             className={`w-20 h-20 bg-neutral-900 flex flex-col items-center justify-center rounded-sm border overflow-hidden relative cursor-pointer group ${
               activeMedia === "video" ? 'border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20' : 'border-border'
             }`}
@@ -121,7 +122,7 @@ export function ProductGallery({
         {displayImages.map((imgUrl, i) => (
           <div
             key={i}
-            onClick={() => setActiveMedia(imgUrl)}
+            onClick={() => selectMedia(imgUrl)}
             className={`w-20 h-20 bg-muted rounded-sm border overflow-hidden relative cursor-pointer ${
               activeMedia === imgUrl ? 'border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20' : 'border-border'
             }`}

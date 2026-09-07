@@ -1,93 +1,105 @@
 import { NextResponse } from "next/server";
-import { auth } from "@/auth";
+import { z } from "zod";
+import { AuthorizationError, requireUser } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+
+const cartSyncSchema = z.object({
+  items: z
+    .array(
+      z.object({
+        id: z.string().min(1).max(191),
+        variantId: z.string().min(1).max(191).optional(),
+        quantity: z.number().int().min(1).max(99),
+      }),
+    )
+    .max(100)
+    .refine(
+      (items) =>
+        new Set(items.map((item) => `${item.id}:${item.variantId || "base"}`)).size ===
+        items.length,
+      "Duplicate cart item",
+    ),
+});
 
 export const dynamic = "force-dynamic";
 
-export async function POST(req: Request) {
+export async function POST(request: Request) {
   try {
-    const session = await auth();
-    if (!session?.user?.id) {
-      return new NextResponse("Unauthorized", { status: 401 });
+    const user = await requireUser();
+    const parsed = cartSyncSchema.safeParse(await request.json());
+    if (!parsed.success) {
+      return NextResponse.json({ error: "Invalid cart" }, { status: 400 });
     }
-
-    const { items } = await req.json();
-
-    if (!items || !Array.isArray(items)) {
-      return new NextResponse("Invalid items array", { status: 400 });
-    }
-
-    const userId = session.user.id;
-
-    // Get or create cart for user
-    let cart = await prisma.cart.findUnique({
-      where: { userId },
-      include: { items: true },
+    const items = parsed.data.items;
+    const productIds = [...new Set(items.map((item) => item.id))];
+    const products = await prisma.product.findMany({
+      where: { id: { in: productIds }, deletedAt: null },
+      select: { id: true, variants: { select: { id: true } } },
     });
-
-    if (!cart) {
-      cart = await prisma.cart.create({
-        data: { userId },
-        include: { items: true },
-      });
+    if (products.length !== productIds.length) {
+      return NextResponse.json({ error: "Product is unavailable" }, { status: 409 });
     }
-
-    // Merge logic using transaction for performance
-    const updates = [];
-    const creates = [];
-    for (const localItem of items) {
-      const existingDbItem = cart.items.find(
-        (i) => i.productId === localItem.id,
-      );
-
-      if (existingDbItem) {
-        updates.push(
-          prisma.cartItem.update({
-            where: { id: existingDbItem.id },
-            data: { quantity: localItem.quantity }, // Update DB with local quantity
-          })
-        );
-      } else {
-        creates.push(
-          prisma.cartItem.create({
-            data: {
-              cartId: cart.id,
-              productId: localItem.id,
-              quantity: localItem.quantity,
-            },
-          })
-        );
+    for (const item of items) {
+      if (!item.variantId) continue;
+      const product = products.find((candidate) => candidate.id === item.id)!;
+      if (!product.variants.some((variant) => variant.id === item.variantId)) {
+        return NextResponse.json({ error: "Invalid product variant" }, { status: 409 });
       }
     }
 
-    if (updates.length > 0 || creates.length > 0) {
-      await prisma.$transaction([...updates, ...creates]);
-    }
+    await prisma.$transaction(async (tx) => {
+      const cart = await tx.cart.upsert({
+        where: { userId: user.id },
+        update: {},
+        create: { userId: user.id },
+      });
+      const selectionKeys = items.map(
+        (item) => `${item.id}:${item.variantId || "base"}`,
+      );
+      await tx.cartItem.deleteMany({
+        where: { cartId: cart.id, selectionKey: { notIn: selectionKeys } },
+      });
+      for (const item of items) {
+        const selectionKey = `${item.id}:${item.variantId || "base"}`;
+        await tx.cartItem.upsert({
+          where: { cartId_selectionKey: { cartId: cart.id, selectionKey } },
+          update: { quantity: item.quantity },
+          create: {
+            cartId: cart.id,
+            productId: item.id,
+            variantId: item.variantId,
+            selectionKey,
+            quantity: item.quantity,
+          },
+        });
+      }
+    });
 
-    // Return the updated DB cart items so the local store can align
-    const updatedCart = await prisma.cart.findUnique({
-      where: { userId },
+    const cart = await prisma.cart.findUnique({
+      where: { userId: user.id },
       include: {
         items: {
-          include: { 
-            product: { 
-              select: { 
-                id: true, 
-                title: true, 
-                slug: true, 
-                price: true, 
-                imageUrl: true, 
-                inventoryCount: true 
-              } 
-            } 
+          include: {
+            product: {
+              select: {
+                id: true,
+                title: true,
+                slug: true,
+                price: true,
+                imageUrl: true,
+                inventoryCount: true,
+              },
+            },
           },
         },
       },
     });
-
-    return NextResponse.json({ success: true, cart: updatedCart });
+    return NextResponse.json({ success: true, cart });
   } catch (error) {
-    console.error("[CART_SYNC]", error);
-    return new NextResponse("Internal error", { status: 500 });
+    console.error("[CART_SYNC_ERROR]", error);
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+    return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }

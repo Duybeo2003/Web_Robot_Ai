@@ -1,18 +1,26 @@
 "use server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireRole } from "@/lib/authz";
+import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/utils";
 
-export async function getArticles(publishedOnly = false) {
+const articleSchema = z.object({
+  title: z.string().trim().min(3).max(200),
+  content: z.string().trim().min(20).max(500_000),
+  thumbnail: z.string().trim().max(2_000).optional(),
+  tags: z.string().trim().max(500).optional(),
+  published: z.boolean(),
+});
+
+export async function getArticles(publishedOnly = true) {
   try {
+    if (!publishedOnly) await requireRole("ADMIN", "EDITOR");
     const articles = await prisma.article.findMany({
       where: publishedOnly ? { published: true } : undefined,
       orderBy: { createdAt: "desc" },
-      include: {
-        author: { select: { name: true, image: true } },
-      },
+      include: { author: { select: { name: true, image: true } } },
     });
     return { success: true, data: articles };
   } catch {
@@ -22,118 +30,73 @@ export async function getArticles(publishedOnly = false) {
 
 export async function getArticleBySlug(slug: string) {
   try {
+    const safeSlug = z.string().min(1).max(191).parse(slug);
     const article = await prisma.article.findUnique({
-      where: { slug },
-      include: {
-        author: { select: { name: true, image: true } },
-      },
+      where: { slug: safeSlug },
+      include: { author: { select: { name: true, image: true } } },
     });
     if (!article) return { error: "Không tìm thấy bài viết." };
+    if (!article.published) await requireRole("ADMIN", "EDITOR");
     return { success: true, data: article };
   } catch {
-    return { error: "Đã xảy ra lỗi." };
+    return { error: "Không tìm thấy bài viết." };
   }
 }
 
-export async function createArticle(data: {
-  title: string;
-  content: string;
-  thumbnail?: string;
-  tags?: string;
-  published: boolean;
-}) {
-  const session = await auth();
-
-  if (
-    !session?.user?.id ||
-    (session.user.role !== "ADMIN" && session.user.role !== "EDITOR")
-  ) {
-    return { error: "Bạn không có quyền thực hiện chức năng này." };
-  }
-
+export async function createArticle(input: unknown) {
   try {
-    let slug = generateSlug(data.title);
-    // Ensure slug is unique
-    const existing = await prisma.article.findUnique({ where: { slug } });
-    if (existing) {
-      slug = `${slug}-${Date.now().toString().slice(-4)}`;
+    const user = await requireRole("ADMIN", "EDITOR");
+    const data = articleSchema.parse(input);
+    const baseSlug = generateSlug(data.title);
+    let slug = baseSlug;
+    if (await prisma.article.findUnique({ where: { slug } })) {
+      slug = `${baseSlug}-${crypto.randomUUID().slice(0, 8)}`;
     }
 
     const article = await prisma.article.create({
-      data: {
-        title: data.title,
-        slug,
-        content: data.content,
-        thumbnail: data.thumbnail,
-        tags: data.tags,
-        published: data.published,
-        authorId: session.user.id,
-      },
+      data: { ...data, slug, authorId: user.id },
     });
-
     revalidatePath("/admin/articles");
     revalidatePath("/giao-duc");
     return { success: true, data: article };
-  } catch {
-    return { error: "Không thể tạo bài viết." };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Không thể tạo bài viết.",
+    };
   }
 }
 
-export async function updateArticle(
-  id: string,
-  data: {
-    title: string;
-    content: string;
-    thumbnail?: string;
-    tags?: string;
-    published: boolean;
-  },
-) {
-  const session = await auth();
-
-  if (
-    !session?.user?.id ||
-    (session.user.role !== "ADMIN" && session.user.role !== "EDITOR")
-  ) {
-    return { error: "Bạn không có quyền thực hiện chức năng này." };
-  }
-
+export async function updateArticle(id: string, input: unknown) {
   try {
+    await requireRole("ADMIN", "EDITOR");
+    const data = articleSchema.parse(input);
     const article = await prisma.article.update({
-      where: { id },
-      data: {
-        title: data.title,
-        content: data.content,
-        thumbnail: data.thumbnail,
-        tags: data.tags,
-        published: data.published,
-      },
+      where: { id: z.string().min(1).max(191).parse(id) },
+      data,
     });
-
     revalidatePath("/admin/articles");
-    revalidatePath("/blog");
-    revalidatePath(`/blog/${article.slug}`);
+    revalidatePath("/giao-duc");
+    revalidatePath(`/giao-duc/${article.slug}`);
     return { success: true, data: article };
-  } catch {
-    return { error: "Không thể cập nhật bài viết." };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Không thể cập nhật bài viết.",
+    };
   }
 }
 
 export async function deleteArticle(id: string) {
-  const session = await auth();
-  if (
-    !session?.user?.id ||
-    (session.user.role !== "ADMIN" && session.user.role !== "EDITOR")
-  ) {
-    return { error: "Unauthorized" };
-  }
-
   try {
-    await prisma.article.delete({ where: { id } });
+    await requireRole("ADMIN", "EDITOR");
+    await prisma.article.delete({
+      where: { id: z.string().min(1).max(191).parse(id) },
+    });
     revalidatePath("/admin/articles");
     revalidatePath("/giao-duc");
     return { success: true };
-  } catch {
-    return { error: "Không thể xóa bài viết." };
+  } catch (error) {
+    return {
+      error: error instanceof Error ? error.message : "Không thể xóa bài viết.",
+    };
   }
 }

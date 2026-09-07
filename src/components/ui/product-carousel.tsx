@@ -16,7 +16,7 @@ interface ProductCarouselProps {
   title: string;
   categoryLink: string;
   subLinkText: string;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   products: any[];
   badgeColor?: string; // e.g., "bg-[#FF3300]"
   userWishlistIds?: string[];

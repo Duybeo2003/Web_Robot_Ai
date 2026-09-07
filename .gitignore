@@ -32,6 +32,16 @@ yarn-error.log*
 
 # env files (can opt-in for committing if needed)
 .env*
+!.env.example
+
+# local exports and runtime artifacts
+backup.json
+old_data.json
+old_users.json
+*.log
+out.html
+error.html
+Web_Robot_Ai.zip
 
 # vercel
 .vercel

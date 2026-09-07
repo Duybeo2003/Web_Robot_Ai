@@ -160,7 +160,7 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
               </h2>
               <div className="prose prose-sm text-neutral-600 max-w-none">
                 {event.rules ? (
-                  <div dangerouslySetInnerHTML={{ __html: event.rules.replace(/\n/g, '<br/>') }} />
+                  <div className="whitespace-pre-line">{event.rules}</div>
                 ) : (
                   <p className="italic text-neutral-400">Chưa có thể lệ cụ thể cho sự kiện này.</p>
                 )}

@@ -1,6 +1,8 @@
 "use client";
 
 import { useState } from "react";
+import type { OrderStatus, PaymentStatus } from "@prisma/client";
+import { updateOrderStatus } from "@/actions/order";
 import {
   Select,
   SelectContent,
@@ -9,8 +11,6 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { toast } from "sonner";
-import { updateOrderStatus } from "@/actions/order";
-import { OrderStatus, PaymentStatus } from "@prisma/client";
 
 export function OrderStatusUpdater({
   orderId,
@@ -25,39 +25,25 @@ export function OrderStatusUpdater({
   const [payStatus, setPayStatus] = useState(paymentStatus);
   const [loading, setLoading] = useState(false);
 
-  const handleStatusChange = async (newStatus: string) => {
+  const update = async (nextStatus: string, nextPaymentStatus: string) => {
     setLoading(true);
-    setStatus(newStatus);
     try {
-      const res = await updateOrderStatus(orderId, newStatus as OrderStatus, payStatus as PaymentStatus);
-      if (res.success) {
-        toast.success("Cập nhật trạng thái thành công");
-      } else {
-        toast.error("Lỗi cập nhật trạng thái");
-        setStatus(currentStatus); // revert
+      const result = await updateOrderStatus(
+        orderId,
+        nextStatus as OrderStatus,
+        nextPaymentStatus as PaymentStatus,
+      );
+      if (!result.success || !("status" in result)) {
+        toast.error(result.error || "Không thể cập nhật đơn hàng.");
+        return false;
       }
+      setStatus(result.status);
+      setPayStatus(result.paymentStatus);
+      toast.success("Đã cập nhật đơn hàng.");
+      return true;
     } catch {
-      toast.error("Đã xảy ra lỗi");
-      setStatus(currentStatus);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handlePaymentChange = async (newPayStatus: string) => {
-    setLoading(true);
-    setPayStatus(newPayStatus);
-    try {
-      const res = await updateOrderStatus(orderId, status as OrderStatus, newPayStatus as PaymentStatus);
-      if (res.success) {
-        toast.success("Cập nhật thanh toán thành công");
-      } else {
-        toast.error("Lỗi cập nhật thanh toán");
-        setPayStatus(paymentStatus); // revert
-      }
-    } catch {
-      toast.error("Đã xảy ra lỗi");
-      setPayStatus(paymentStatus);
+      toast.error("Đã xảy ra lỗi khi cập nhật đơn hàng.");
+      return false;
     } finally {
       setLoading(false);
     }
@@ -71,18 +57,17 @@ export function OrderStatusUpdater({
         </label>
         <Select
           value={status}
-          onValueChange={(val) => handleStatusChange(val as string)}
+          onValueChange={(value) => value && void update(value, payStatus)}
           disabled={loading}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Trạng thái đơn" />
-          </SelectTrigger>
+          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="PENDING">Chờ xử lý</SelectItem>
             <SelectItem value="PROCESSING">Đang chuẩn bị</SelectItem>
             <SelectItem value="SHIPPED">Đang giao</SelectItem>
             <SelectItem value="COMPLETED">Đã giao thành công</SelectItem>
             <SelectItem value="CANCELLED">Đã hủy</SelectItem>
+            <SelectItem value="RETURNED">Đã trả hàng</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -93,16 +78,15 @@ export function OrderStatusUpdater({
         </label>
         <Select
           value={payStatus}
-          onValueChange={(val) => handlePaymentChange(val as string)}
-          disabled={loading}
+          onValueChange={(value) => value && void update(status, value)}
+          disabled={loading || payStatus === "PAID" || payStatus === "REFUNDED"}
         >
-          <SelectTrigger className="w-full">
-            <SelectValue placeholder="Thanh toán" />
-          </SelectTrigger>
+          <SelectTrigger className="w-full"><SelectValue /></SelectTrigger>
           <SelectContent>
             <SelectItem value="UNPAID">Chưa thanh toán</SelectItem>
-            <SelectItem value="PAID">Đã thanh toán</SelectItem>
-            <SelectItem value="REFUNDED">Đã hoàn tiền</SelectItem>
+            <SelectItem value="PARTIALLY_PAID" disabled>Đã thanh toán một phần</SelectItem>
+            <SelectItem value="PAID">Xác nhận khoản đang chờ</SelectItem>
+            <SelectItem value="REFUNDED" disabled>Đã hoàn tiền</SelectItem>
           </SelectContent>
         </Select>
       </div>

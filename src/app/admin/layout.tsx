@@ -5,6 +5,8 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/admin/app-sidebar";
 import { prisma } from "@/lib/prisma";
 import Breadcrumbs from "@/components/admin/breadcrumbs";
+import { headers } from "next/headers";
+import { adminLandingPage, canAccessAdminPath } from "@/lib/rbac";
 
 
 
@@ -14,10 +16,20 @@ export default async function AdminLayout({
   children: React.ReactNode;
 }) {
   const session = await auth();
-  if (!session?.user || session.user.role !== "ADMIN") {
+  if (!session?.user?.id) {
     redirect("/");
   }
-  const user = session.user;
+  const currentUser = await prisma.user.findFirst({
+    where: { id: session.user.id, deletedAt: null },
+    select: { id: true, role: true },
+  });
+  if (!currentUser) redirect("/");
+
+  const pathname = (await headers()).get("x-roboeq-path") || "/admin";
+  if (!canAccessAdminPath(currentUser.role, pathname)) {
+    redirect(adminLandingPage(currentUser.role));
+  }
+  const user = { ...session.user, role: currentUser.role };
 
 
   return (

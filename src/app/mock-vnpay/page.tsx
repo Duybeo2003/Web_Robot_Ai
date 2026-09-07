@@ -7,6 +7,7 @@ import { Button } from "@/components/ui/button";
 
 function MockVnpayContent() {
   const searchParams = useSearchParams();
+  if (process.env.NODE_ENV !== "development") return null;
   
 
   const amount = searchParams.get("vnp_Amount");

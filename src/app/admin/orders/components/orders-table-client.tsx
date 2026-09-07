@@ -43,7 +43,7 @@ export function OrdersTableClient({
   totalCount,
   currentPage,
 }: {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   orders: any[];
   totalPages: number;
   totalCount: number;

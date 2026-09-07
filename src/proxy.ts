@@ -1,11 +1,15 @@
 import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
+import { adminLandingPage, canAccessAdminPath } from "@/lib/rbac";
 
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 
 function checkRateLimitSync(request: NextRequest): NextResponse | null {
-  let ip = request.headers.get("x-forwarded-for") ?? request.ip ?? "127.0.0.1";
+  let ip =
+    request.headers.get("x-forwarded-for") ??
+    request.headers.get("x-real-ip") ??
+    "127.0.0.1";
   if (ip.includes(",")) {
     ip = ip.split(",")[0].trim();
   }
@@ -58,8 +62,10 @@ export default auth((req) => {
 
   if (isAuthPage) {
     if (isAuth) {
-      if (req.auth?.user?.role === "ADMIN") {
-        return NextResponse.redirect(new URL("/admin", req.url));
+      if (req.auth?.user?.role && req.auth.user.role !== "USER") {
+        return NextResponse.redirect(
+          new URL(adminLandingPage(req.auth.user.role), req.url),
+        );
       }
       return NextResponse.redirect(new URL("/", req.url));
     }
@@ -67,8 +73,25 @@ export default auth((req) => {
     return null;
   }
 
-  // Protect admin routes
-  // Protect user portal routes
+  const pathname = req.nextUrl.pathname;
+  if (pathname.startsWith("/profile") && !isAuth) {
+    const loginUrl = new URL("/", req.url);
+    loginUrl.searchParams.set("login", "true");
+    return NextResponse.redirect(loginUrl);
+  }
+
+  if (pathname.startsWith("/admin")) {
+    const role = req.auth?.user?.role;
+    if (!role || !canAccessAdminPath(role, pathname)) {
+      return NextResponse.redirect(
+        new URL(role ? adminLandingPage(role) : "/", req.url),
+      );
+    }
+  }
+
+  const requestHeaders = new Headers(req.headers);
+  requestHeaders.set("x-roboeq-path", pathname);
+  return NextResponse.next({ request: { headers: requestHeaders } });
 
 });
 

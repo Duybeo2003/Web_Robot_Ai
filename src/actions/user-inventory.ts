@@ -1,120 +1,97 @@
 "use server";
 
-import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireUser } from "@/lib/authz";
+import { normalizeVietnamPhone } from "@/lib/phone";
+import { prisma } from "@/lib/prisma";
+
+const idSchema = z.string().min(1).max(191);
+const deliverySchema = z.object({
+  name: z.string().trim().min(2).max(100),
+  phone: z.string().transform((value, context) => {
+    const phone = normalizeVietnamPhone(value);
+    if (!phone) context.addIssue({ code: "custom", message: "Số điện thoại không hợp lệ." });
+    return phone || "";
+  }),
+  address: z.string().trim().min(8).max(500),
+  notes: z.string().trim().max(1_000).optional(),
+});
 
 export async function getUserInventory() {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
+  const user = await requireUser();
   return prisma.userInventory.findMany({
-    where: {
-      userId: session.user.id,
-      status: "AVAILABLE",
-    },
-    include: {
-      product: true,
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
+    where: { userId: user.id, status: "AVAILABLE" },
+    include: { product: true },
+    orderBy: { createdAt: "desc" },
   });
 }
 
-export async function sellItemForXu(inventoryId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  return prisma.$transaction(async (tx) => {
-    const item = await tx.userInventory.findUnique({
-      where: { id: inventoryId },
-      include: { product: true }
+export async function sellItemForXu(rawInventoryId: string) {
+  const user = await requireUser();
+  const inventoryId = idSchema.parse(rawInventoryId);
+  const earned = await prisma.$transaction(async (tx) => {
+    const item = await tx.userInventory.findFirst({
+      where: { id: inventoryId, userId: user.id, status: "AVAILABLE" },
+      include: { product: { select: { title: true } } },
     });
-
-    if (!item || item.userId !== session.user.id || item.status !== "AVAILABLE") {
-      throw new Error("Vật phẩm không hợp lệ hoặc đã được sử dụng");
+    if (!item) throw new Error("Vật phẩm không khả dụng.");
+    if (item.sellPriceXu === null || item.sellPriceXu <= 0) {
+      throw new Error("Vật phẩm này không được cấu hình giá bán lại.");
     }
 
-    // Sell for admin configured price, or fallback to 100% of product price
-    const priceInVnd = Number(item.product.price);
-    const xuEarned = item.sellPriceXu !== null ? item.sellPriceXu : Math.floor(priceInVnd);
-
-    // Update inventory item to claimed, atomically checking status
-    const updateResult = await tx.userInventory.updateMany({
-      where: { id: inventoryId, status: "AVAILABLE" },
-      data: { status: "SOLD", isClaimed: true }
+    const claimed = await tx.userInventory.updateMany({
+      where: { id: inventoryId, userId: user.id, status: "AVAILABLE" },
+      data: { status: "SOLD", isClaimed: true },
     });
+    if (claimed.count === 0) throw new Error("Vật phẩm đã được xử lý trước đó.");
 
-    if (updateResult.count === 0) {
-      throw new Error("Vật phẩm đã được bán hoặc không khả dụng!");
-    }
-
-    // Add Xu to wallet
-    const wallet = await tx.userWallet.findUnique({
-      where: { userId: session.user.id }
+    const wallet = await tx.userWallet.upsert({
+      where: { userId: user.id },
+      update: { balance: { increment: item.sellPriceXu } },
+      create: { userId: user.id, balance: item.sellPriceXu },
     });
-
-    if (!wallet) throw new Error("Wallet not found");
-
-    await tx.userWallet.update({
-      where: { id: wallet.id },
-      data: { balance: { increment: xuEarned } }
-    });
-
     await tx.walletTransaction.create({
       data: {
         walletId: wallet.id,
-        amount: xuEarned,
-        type: "REWARD", 
+        amount: item.sellPriceXu,
+        type: "REWARD",
         status: "COMPLETED",
-        description: `Bán vật phẩm: ${item.product.title}`
-      }
+        description: `Bán vật phẩm: ${item.product.title}`,
+      },
     });
-
-    revalidatePath("/profile/inventory");
-    return xuEarned;
+    return item.sellPriceXu;
   });
+  revalidatePath("/profile/inventory");
+  revalidatePath("/profile/wallet");
+  return earned;
 }
 
-export async function requestDelivery(inventoryId: string, address: { name: string, phone: string, address: string, notes?: string }) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  return prisma.$transaction(async (tx) => {
-    const item = await tx.userInventory.findUnique({
-      where: { id: inventoryId }
+export async function requestDelivery(
+  rawInventoryId: string,
+  rawAddress: unknown,
+) {
+  const user = await requireUser();
+  const inventoryId = idSchema.parse(rawInventoryId);
+  const address = deliverySchema.parse(rawAddress);
+  await prisma.$transaction(async (tx) => {
+    const claimed = await tx.userInventory.updateMany({
+      where: { id: inventoryId, userId: user.id, status: "AVAILABLE" },
+      data: { status: "PENDING_DELIVERY", isClaimed: true },
     });
+    if (claimed.count === 0) throw new Error("Vật phẩm không khả dụng.");
 
-    if (!item || item.userId !== session.user.id || item.status !== "AVAILABLE") {
-      throw new Error("Vật phẩm không hợp lệ hoặc không khả dụng");
-    }
-
-    // Create delivery request
     await tx.deliveryRequest.create({
       data: {
-        userId: session.user.id,
+        userId: user.id,
         inventoryItemId: inventoryId,
         recipientName: address.name,
         phoneNumber: address.phone,
         address: address.address,
         notes: address.notes,
-        shippingFee: 0, // Events items are freeship for now
-      }
+        shippingFee: 0,
+      },
     });
-
-    // Update item status
-    await tx.userInventory.update({
-      where: { id: inventoryId },
-      data: { status: "PENDING_DELIVERY", isClaimed: true }
-    });
-
-    revalidatePath("/profile/inventory");
   });
+  revalidatePath("/profile/inventory");
 }

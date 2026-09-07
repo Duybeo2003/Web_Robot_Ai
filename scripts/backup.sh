@@ -1,32 +1,31 @@
-#!/bin/bash
-# Backup script for Web Robot AI Database
-# This script should be run via cron on the host machine.
-# Example cron: 0 2 * * * /path/to/backup.sh >> /var/log/backup.log 2>&1
+#!/usr/bin/env bash
+set -Eeuo pipefail
 
-# Configuration
-BACKUP_DIR="/var/backups/RoboEQ"
-DB_CONTAINER="RoboEQ-db"
-DB_NAME="web_robot_ai"
-DB_USER="root"
-DB_PASS="${DB_ROOT_PASSWORD:-root_password_123}"
-DATE=$(date +"%Y%m%d_%H%M%S")
-BACKUP_FILE="$BACKUP_DIR/backup_${DB_NAME}_${DATE}.sql.gz"
+: "${DB_ROOT_PASSWORD:?DB_ROOT_PASSWORD is required}"
 
-# Create backup directory if it doesn't exist
+BACKUP_DIR="${BACKUP_DIR:-/var/backups/roboeq}"
+DB_NAME="${DB_NAME:-web_robot_ai}"
+RETENTION_DAYS="${BACKUP_RETENTION_DAYS:-30}"
+STAMP="$(date -u +'%Y%m%dT%H%M%SZ')"
+BACKUP_FILE="${BACKUP_DIR}/${DB_NAME}_${STAMP}.sql.gz"
+TEMP_FILE="${BACKUP_FILE}.tmp"
+
 mkdir -p "$BACKUP_DIR"
+trap 'rm -f "$TEMP_FILE"' EXIT
 
-# Dump database from the docker container and compress
-echo "[$(date)] Starting backup of $DB_NAME..."
-docker exec "$DB_CONTAINER" /usr/bin/mysqldump -u "$DB_USER" -p"$DB_PASS" "$DB_NAME" | gzip > "$BACKUP_FILE"
+docker compose exec -T \
+  -e MYSQL_PWD="$DB_ROOT_PASSWORD" \
+  mysql mysqldump \
+  --user=root \
+  --single-transaction \
+  --quick \
+  --routines \
+  --triggers \
+  --events \
+  "$DB_NAME" | gzip -9 > "$TEMP_FILE"
 
-if [ $? -eq 0 ]; then
-  echo "[$(date)] Backup completed successfully: $BACKUP_FILE"
-  
-  # Remove backups older than 7 days
-  find "$BACKUP_DIR" -name "backup_${DB_NAME}_*.sql.gz" -type f -mtime +7 -delete
-  echo "[$(date)] Cleaned up old backups."
-else
-  echo "[$(date)] Backup failed!"
-  # Optional: Send alert email here or ping a Slack webhook
-  exit 1
-fi
+gzip -t "$TEMP_FILE"
+mv "$TEMP_FILE" "$BACKUP_FILE"
+find "$BACKUP_DIR" -type f -name "${DB_NAME}_*.sql.gz" -mtime "+$RETENTION_DAYS" -delete
+
+echo "Backup created: $BACKUP_FILE"

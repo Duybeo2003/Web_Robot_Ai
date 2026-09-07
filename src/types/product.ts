@@ -6,6 +6,6 @@ export interface Product {
   imageUrl?: string | null;
   slug: string;
   // additional fields as needed
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   [key: string]: any;
 }

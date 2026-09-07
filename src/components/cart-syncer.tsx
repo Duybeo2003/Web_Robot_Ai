@@ -9,7 +9,7 @@ export function CartSyncer() {
   const items = useCartStore((state) => state.items);
 
   useEffect(() => {
-    if (status !== "authenticated" || items.length === 0) return;
+    if (status !== "authenticated") return;
     
     const abortController = new AbortController();
     const syncTimeout = setTimeout(async () => {

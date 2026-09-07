@@ -1,5 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { MOCK_PRODUCTS } from "@/lib/mock-data";
 import Link from "next/link";
 import { Prisma, AgeRange, PrimarySkill } from "@prisma/client";
 import { AddToCartButton } from "./components/add-to-cart-button";
@@ -58,6 +57,8 @@ export default async function ShopPage({
       price: true;
       imageUrl: true;
       type: true;
+      supplyType: true;
+      depositPercent: true;
       inventoryCount: true;
       category: { select: { name: true } };
     };
@@ -68,13 +69,13 @@ export default async function ShopPage({
   let userWishlistIds: string[] = [];
 
   try {
-    const whereClause: Prisma.ProductWhereInput = {};
+    const whereClause: Prisma.ProductWhereInput = { deletedAt: null };
     if (query) {
       whereClause.title = { contains: query };
     }
     if (
       typeFilter &&
-      ["ROBOT_STEM", "DO_CHOI_LOGIC", "COMBO"].includes(typeFilter)
+      ["ROBOT_STEM", "KIT_ARDUINO", "DO_CHOI_LOGIC", "COMBO"].includes(typeFilter)
     ) {
       if (typeFilter === "COMBO") {
         whereClause.isCombo = true;
@@ -96,7 +97,10 @@ export default async function ShopPage({
         whereClause.ageRange = { in: ageEnumMatches };
       }
     }
-    if (skillFilter) {
+    if (
+      skillFilter &&
+      ["LOGIC", "LANGUAGE", "MOTOR_SKILLS", "EQ"].includes(skillFilter)
+    ) {
       whereClause.primarySkill = skillFilter as PrimarySkill;
     }
     if (minPrice !== undefined || maxPrice !== undefined) {
@@ -124,6 +128,7 @@ export default async function ShopPage({
           imageUrl: true,
           type: true,
           supplyType: true,
+          depositPercent: true,
           inventoryCount: true,
           category: {
             select: { name: true },
@@ -146,22 +151,9 @@ export default async function ShopPage({
       });
       userWishlistIds = wishlistItems.map((w) => w.productId);
     }
-  } catch {
-    console.error("Database connection failed, using mock data for demo.");
-    products = MOCK_PRODUCTS as unknown as typeof products;
-    if (query || typeFilter) {
-      products = products.filter(
-        (p) =>
-          (query
-            ? p.title.toLowerCase().includes(query.toLowerCase())
-            : true) && (typeFilter ? p.type === typeFilter : true),
-      );
-    }
-    totalCount = products.length;
-    products = products.slice(
-      (currentPage - 1) * itemsPerPage,
-      currentPage * itemsPerPage,
-    );
+  } catch (error) {
+    console.error("[SHOP_QUERY_ERROR]", error);
+    throw error;
   }
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -244,6 +236,8 @@ export default async function ShopPage({
                             price: Number(product.price),
                             slug: product.slug,
                             imageUrl: product.imageUrl || "",
+                            supplyType: product.supplyType,
+                            depositPercent: product.depositPercent,
                           }}
                         />
                       }

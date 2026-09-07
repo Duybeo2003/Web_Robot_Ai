@@ -2,6 +2,20 @@ import { streamText } from "ai";
 import { createOpenAI } from "@ai-sdk/openai";
 import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { z } from "zod";
+
+const chatRequestSchema = z.object({
+  messages: z
+    .array(
+      z.object({
+        role: z.enum(["user", "assistant"]),
+        content: z.string().trim().min(1).max(4_000),
+      }),
+    )
+    .min(1)
+    .max(20),
+});
 
 const getCachedProducts = unstable_cache(
   async () => {
@@ -23,7 +37,26 @@ export const maxDuration = 30;
 
 export async function POST(req: Request) {
   try {
-    const { messages } = await req.json();
+    const forwardedFor = req.headers.get("x-forwarded-for");
+    const clientId =
+      forwardedFor?.split(",")[0]?.trim() ||
+      req.headers.get("x-real-ip") ||
+      "anonymous";
+    const rateLimit = await checkRateLimit(`rl:chat:${clientId}`, 15, 60, {
+      failClosed: true,
+    });
+    if (!rateLimit.success) {
+      return new Response("Bạn đang gửi yêu cầu quá nhanh.", {
+        status: 429,
+        headers: { "Retry-After": "60" },
+      });
+    }
+
+    const parsedBody = chatRequestSchema.safeParse(await req.json());
+    if (!parsedBody.success) {
+      return new Response("Dữ liệu hội thoại không hợp lệ.", { status: 400 });
+    }
+    const { messages } = parsedBody.data;
 
     const apiKey = process.env.OPENROUTER_API_KEY;
     if (!apiKey || apiKey === "YOUR_OPENROUTER_API_KEY_HERE") {

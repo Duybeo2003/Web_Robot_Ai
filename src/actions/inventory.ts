@@ -1,99 +1,79 @@
 "use server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireRole } from "@/lib/authz";
+import { prisma } from "@/lib/prisma";
 
-export async function createInventoryTransaction(data: {
-  productId: string;
-  type: "IN" | "OUT";
-  quantity: number;
-  costPrice?: number;
-  reference?: string;
-  note?: string;
-}) {
-  const session = await auth();
+const inventorySchema = z.object({
+  productId: z.string().min(1).max(191),
+  type: z.enum(["IN", "OUT"]),
+  quantity: z.number().int().min(1).max(1_000_000),
+  costPrice: z.number().min(0).max(1_000_000_000).optional(),
+  reference: z.string().trim().max(191).optional(),
+  note: z.string().trim().max(1_000).optional(),
+});
 
-  if (
-    !session?.user?.id ||
-    (session.user.role !== "ADMIN" && session.user.role !== "STORE_MANAGER")
-  ) {
-    return { error: "Bạn không có quyền thực hiện chức năng này." };
-  }
-
-  if (data.quantity <= 0) {
-    return { error: "Số lượng phải lớn hơn 0." };
-  }
-
+export async function createInventoryTransaction(input: unknown) {
   try {
+    const user = await requireRole("ADMIN", "STORE_MANAGER");
+    const data = inventorySchema.parse(input);
+
     const result = await prisma.$transaction(async (tx) => {
-      const product = await tx.product.findUnique({
-        where: { id: data.productId },
+      const product = await tx.product.findFirst({
+        where: { id: data.productId, deletedAt: null },
       });
+      if (!product) throw new Error("Sản phẩm không tồn tại.");
 
-      if (!product) {
-        throw new Error("Sản phẩm không tồn tại.");
+      if (data.type === "OUT") {
+        const claimed = await tx.product.updateMany({
+          where: { id: product.id, inventoryCount: { gte: data.quantity } },
+          data: { inventoryCount: { decrement: data.quantity } },
+        });
+        if (claimed.count === 0) throw new Error("Số lượng tồn kho không đủ để xuất.");
+      } else {
+        await tx.product.update({
+          where: { id: product.id },
+          data: { inventoryCount: { increment: data.quantity } },
+        });
       }
 
-      if (data.type === "OUT" && product.inventoryCount < data.quantity) {
-        throw new Error("Số lượng tồn kho không đủ để xuất.");
-      }
-
-      // Create transaction record
       const transaction = await tx.inventoryTransaction.create({
         data: {
-          productId: data.productId,
+          productId: product.id,
           type: data.type,
           quantity: data.quantity,
           costPrice: data.costPrice,
           reference: data.reference,
           note: data.note,
-          userId: session.user.id,
+          userId: user.id,
         },
       });
-
-      // Update product inventory count
-      const updatedProduct = await tx.product.update({
-        where: { id: data.productId },
-        data: {
-          inventoryCount: {
-            [data.type === "IN" ? "increment" : "decrement"]: data.quantity,
-          },
-        },
+      const updatedProduct = await tx.product.findUniqueOrThrow({
+        where: { id: product.id },
       });
-
       return { transaction, updatedProduct };
     });
 
     revalidatePath("/admin/inventory");
     revalidatePath("/admin/products");
     revalidatePath(`/admin/products/${data.productId}`);
-
     return { success: true, data: result };
-  } catch (error: unknown) {
+  } catch (error) {
     console.error("[INVENTORY_ERROR]", error);
-    const msg = error instanceof Error ? error.message : "Có lỗi xảy ra khi cập nhật kho.";
-    return { error: msg };
+    return {
+      error: error instanceof Error ? error.message : "Không thể cập nhật kho.",
+    };
   }
 }
 
 export async function getLowStockProducts(threshold = 10) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role === "USER") {
-    return { error: "Unauthorized" };
-  }
-
   try {
+    await requireRole("ADMIN", "STORE_MANAGER");
+    const safeThreshold = z.number().int().min(0).max(1_000_000).parse(threshold);
     const products = await prisma.product.findMany({
-      where: {
-        inventoryCount: {
-          lte: threshold,
-        },
-        deletedAt: null,
-      },
-      orderBy: {
-        inventoryCount: "asc",
-      },
+      where: { inventoryCount: { lte: safeThreshold }, deletedAt: null },
+      orderBy: { inventoryCount: "asc" },
       select: {
         id: true,
         title: true,
@@ -102,9 +82,8 @@ export async function getLowStockProducts(threshold = 10) {
         imageUrl: true,
       },
     });
-
     return { success: true, data: products };
   } catch {
-    return { error: "Failed to fetch low stock products." };
+    return { error: "Không thể tải danh sách sắp hết hàng." };
   }
 }

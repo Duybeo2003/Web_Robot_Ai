@@ -1,7 +1,7 @@
 {
-  "name": "Nutrition Hub",
-  "short_name": "NutritionHub",
-  "description": "Mua sắm quà tặng và đồ chơi giáo dục an toàn cho bé.",
+  "name": "RoboEQ",
+  "short_name": "RoboEQ",
+  "description": "Robot, kit STEM và đồ chơi giáo dục giúp trẻ học qua thực hành.",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",

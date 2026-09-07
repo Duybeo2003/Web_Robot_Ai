@@ -12,6 +12,8 @@ interface AddToCartButtonProps {
     price: number;
     slug: string;
     imageUrl: string;
+    supplyType?: string;
+    depositPercent?: number | null;
   };
 }
 
@@ -23,7 +25,11 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
     e.preventDefault(); // Prevent navigation if wrapped in link
     e.stopPropagation(); // Prevent event bubbling
 
-    addItem({ ...product, quantity: 1 });
+    addItem({
+      ...product,
+      depositPercent: product.depositPercent ?? undefined,
+      quantity: 1,
+    });
     openCart();
   };
 

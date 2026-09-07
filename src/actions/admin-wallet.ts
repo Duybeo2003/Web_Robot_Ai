@@ -1,14 +1,11 @@
 "use server";
 
-import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { requireRole } from "@/lib/authz";
 
 export async function getPendingTopups() {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  await requireRole("ADMIN");
 
   return prisma.walletTransaction.findMany({
     where: { 
@@ -27,10 +24,7 @@ export async function getPendingTopups() {
 }
 
 export async function approveTopup(transactionId: string) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  await requireRole("ADMIN");
 
   // Use a transaction to ensure atomicity
   const transaction = await prisma.$transaction(async (tx) => {
@@ -43,11 +37,11 @@ export async function approveTopup(transactionId: string) {
       throw new Error("Invalid transaction");
     }
 
-    // Mark as completed
-    const updatedTx = await tx.walletTransaction.update({
-      where: { id: transactionId },
+    const claimed = await tx.walletTransaction.updateMany({
+      where: { id: transactionId, status: "PENDING", type: "TOPUP" },
       data: { status: "COMPLETED" },
     });
+    if (claimed.count === 0) throw new Error("Transaction was already processed");
 
     // Add balance to wallet
     await tx.userWallet.update({
@@ -59,7 +53,7 @@ export async function approveTopup(transactionId: string) {
       },
     });
 
-    return updatedTx;
+    return tx.walletTransaction.findUniqueOrThrow({ where: { id: transactionId } });
   });
 
   revalidatePath("/admin/wallet");
@@ -67,16 +61,14 @@ export async function approveTopup(transactionId: string) {
 }
 
 export async function rejectTopup(transactionId: string) {
-  const session = await auth();
-  if (!session?.user?.id || session.user.role !== "ADMIN") {
-    throw new Error("Unauthorized");
-  }
+  await requireRole("ADMIN");
 
-  const updatedTx = await prisma.walletTransaction.update({
-    where: { id: transactionId, status: "PENDING" },
+  const updated = await prisma.walletTransaction.updateMany({
+    where: { id: transactionId, status: "PENDING", type: "TOPUP" },
     data: { status: "REJECTED" },
   });
+  if (updated.count === 0) throw new Error("Transaction was already processed");
 
   revalidatePath("/admin/wallet");
-  return updatedTx;
+  return prisma.walletTransaction.findUniqueOrThrow({ where: { id: transactionId } });
 }

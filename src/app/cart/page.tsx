@@ -50,7 +50,7 @@ export default function CartPage() {
         <div className="lg:col-span-2 space-y-6">
           {items.map((item) => (
             <div
-              key={item.id}
+              key={`${item.id}:${item.variantId || "base"}`}
               className="glass-card p-4 rounded-2xl flex flex-col sm:flex-row gap-6 items-center"
             >
               <div className="w-24 h-24 bg-muted rounded-xl overflow-hidden shrink-0">
@@ -87,7 +87,7 @@ export default function CartPage() {
                 <div className="flex items-center border border-border/50 rounded-full bg-background">
                   <button
                     className="w-8 h-8 flex items-center justify-center hover:text-primary"
-                    onClick={() => updateQuantity(item.id, item.quantity - 1)}
+                    onClick={() => updateQuantity(item.id, item.quantity - 1, item.variantId)}
                   >
                     <Minus className="w-4 h-4" />
                   </button>
@@ -96,14 +96,14 @@ export default function CartPage() {
                   </span>
                   <button
                     className="w-8 h-8 flex items-center justify-center hover:text-primary"
-                    onClick={() => updateQuantity(item.id, item.quantity + 1)}
+                    onClick={() => updateQuantity(item.id, item.quantity + 1, item.variantId)}
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
 
                 <button
-                  onClick={() => removeItem(item.id)}
+                  onClick={() => removeItem(item.id, item.variantId)}
                   className="w-10 h-10 flex items-center justify-center text-destructive hover:bg-destructive/10 rounded-full transition-colors"
                 >
                   <Trash2 className="w-5 h-5" />

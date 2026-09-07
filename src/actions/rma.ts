@@ -1,142 +1,116 @@
 "use server";
 
-import { auth } from "@/auth";
-import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
+import { z } from "zod";
+import { requireRole, requireUser } from "@/lib/authz";
+import { prisma } from "@/lib/prisma";
 
-export async function createReturnRequest(data: {
-  orderId: string;
-  reason: string;
-  imageUrl?: string;
-}) {
-  const session = await auth();
-  if (!session?.user?.id) return { error: "Unauthorized" };
+const returnRequestSchema = z.object({
+  orderId: z.string().min(1).max(191),
+  reason: z.string().trim().min(10).max(2_000),
+  imageUrl: z.string().trim().max(2_000).optional(),
+});
+const returnStatusSchema = z.enum(["APPROVED", "REJECTED", "COMPLETED"]);
 
-  if (!data.reason || data.reason.length < 10) {
-    return { error: "Lý do đổi trả phải có ít nhất 10 ký tự." };
-  }
-
+export async function createReturnRequest(input: unknown) {
   try {
-    // Check if order exists and belongs to user
-    const order = await prisma.order.findUnique({
-      where: { id: data.orderId },
+    const user = await requireUser();
+    const data = returnRequestSchema.parse(input);
+    const order = await prisma.order.findFirst({
+      where: { id: data.orderId, userId: user.id },
+      select: { id: true, status: true },
     });
-
-    if (!order || order.userId !== session.user.id) {
-      return { error: "Không tìm thấy đơn hàng." };
-    }
-
-    // Must be COMPLETED to request return (or SHIPPED, depending on logic, let's allow COMPLETED & SHIPPED)
-    if (order.status !== "COMPLETED" && order.status !== "SHIPPED") {
+    if (!order) return { error: "Không tìm thấy đơn hàng." };
+    if (!(["COMPLETED", "SHIPPED"] as string[]).includes(order.status)) {
       return { error: "Chỉ có thể yêu cầu đổi trả cho đơn hàng đã giao." };
     }
 
-    // Check if already requested
     const existing = await prisma.returnRequest.findFirst({
-      where: { orderId: data.orderId },
+      where: { orderId: order.id },
     });
-
-    if (existing) {
-      return { error: "Bạn đã gửi yêu cầu cho đơn hàng này rồi." };
-    }
+    if (existing) return { error: "Đơn hàng này đã có yêu cầu đổi trả." };
 
     await prisma.returnRequest.create({
-      data: {
-        userId: session.user.id,
-        orderId: data.orderId,
-        reason: data.reason,
-        imageUrl: data.imageUrl,
-        status: "PENDING",
-      },
+      data: { ...data, userId: user.id, status: "PENDING" },
     });
-
     revalidatePath("/profile/orders");
     return { success: true };
-  } catch (e: unknown) {
-    console.error("[CREATE_RMA]", e);
-    return { error: "Lỗi tạo yêu cầu đổi trả." };
+  } catch (error) {
+    console.error("[CREATE_RMA_ERROR]", error);
+    return { error: "Không thể tạo yêu cầu đổi trả." };
   }
 }
 
-export async function updateReturnRequestStatus(
-  id: string,
-  status: "APPROVED" | "REJECTED" | "COMPLETED",
-) {
-  const session = await auth();
-  if (!session?.user?.id) return { error: "Unauthorized" };
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-  if (user?.role !== "ADMIN") return { error: "Unauthorized" };
-
+export async function updateReturnRequestStatus(id: string, input: unknown) {
   try {
+    await requireRole("ADMIN");
+    const requestId = z.string().min(1).max(191).parse(id);
+    const status = returnStatusSchema.parse(input);
+
     await prisma.$transaction(async (tx) => {
-      const returnReq = await tx.returnRequest.update({
-        where: { id },
-        data: { status },
+      const returnRequest = await tx.returnRequest.findUnique({
+        where: { id: requestId },
         include: { order: { include: { items: true } } },
       });
+      if (!returnRequest) throw new Error("Không tìm thấy yêu cầu đổi trả.");
+      if (returnRequest.status === "COMPLETED") {
+        if (status === "COMPLETED") return;
+        throw new Error("Yêu cầu đã hoàn tất nên không thể thay đổi.");
+      }
 
-      // If return is COMPLETED, refund inventory and points (similar to cancel)
-      if (status === "COMPLETED" && returnReq.order) {
-        const order = returnReq.order;
-        
-        // Prevent double return if order was already cancelled/returned
-        if (order.status !== "CANCELLED" && order.status !== "RETURNED") {
-          for (const item of order.items) {
-            if (item.variantId) {
-              await tx.productVariant.update({
-                where: { id: item.variantId },
-                data: { inventoryCount: { increment: item.quantity } },
-              });
-            } else {
-              const dbProduct = await tx.product.findUnique({ where: { id: item.productId } });
-              if (dbProduct) {
-                await tx.product.update({
-                  where: { id: item.productId },
-                  data: {
-                    inventoryCount: { increment: item.quantity },
-                    ...(dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null
-                      ? { flashSaleStock: { increment: item.quantity } }
-                      : {})
-                  }
-                });
-              }
-            }
-          }
-          
-          // Refund used points
-          if (order.pointsUsed > 0) {
-            await tx.user.update({
-              where: { id: order.userId },
-              data: { points: { increment: order.pointsUsed } }
-            });
-          }
+      await tx.returnRequest.update({ where: { id: requestId }, data: { status } });
+      if (status !== "COMPLETED") return;
 
-          // Revoke earned points
-          if (order.pointsEarned > 0) {
-             await tx.user.update({
-              where: { id: order.userId },
-              data: { points: { decrement: order.pointsEarned } }
-            });
-          }
+      const claimed = await tx.order.updateMany({
+        where: {
+          id: returnRequest.order.id,
+          status: { notIn: ["CANCELLED", "RETURNED"] },
+        },
+        data: { status: "RETURNED" },
+      });
+      if (claimed.count === 0) return;
 
-          // Update order status
-          await tx.order.update({
-            where: { id: order.id },
-            data: { status: "RETURNED" },
+      for (const item of returnRequest.order.items) {
+        if (item.variantId) {
+          await tx.productVariant.updateMany({
+            where: { id: item.variantId },
+            data: { inventoryCount: { increment: item.quantity } },
+          });
+        } else {
+          await tx.product.updateMany({
+            where: { id: item.productId },
+            data: { inventoryCount: { increment: item.quantity } },
           });
         }
       }
+
+      if (returnRequest.order.pointsEarned > 0) {
+        const owner = await tx.user.findUnique({
+          where: { id: returnRequest.order.userId },
+          select: { points: true },
+        });
+        if (owner) {
+          await tx.user.update({
+            where: { id: returnRequest.order.userId },
+            data: {
+              points: Math.max(0, owner.points - returnRequest.order.pointsEarned),
+            },
+          });
+        }
+      }
+      await tx.commission.updateMany({
+        where: { orderId: returnRequest.order.id, status: "PENDING" },
+        data: { status: "CANCELLED" },
+      });
     });
 
     revalidatePath("/admin/returns");
     revalidatePath("/profile/orders");
     return { success: true };
-  } catch (e: unknown) {
-    console.error("[RMA_UPDATE]", e);
-    return { error: "Lỗi cập nhật trạng thái." };
+  } catch (error) {
+    console.error("[UPDATE_RMA_ERROR]", error);
+    return {
+      error: error instanceof Error ? error.message : "Không thể cập nhật yêu cầu đổi trả.",
+    };
   }
 }

@@ -4,8 +4,10 @@ import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
 import { ProductType } from "@prisma/client";
+import { requireRole } from "@/lib/authz";
 
 export async function createProduct(formData: FormData) {
+  await requireRole("ADMIN", "STORE_MANAGER");
   const title = formData.get("title") as string;
   const description = formData.get("description") as string;
   const price = parseFloat(formData.get("price") as string);
@@ -49,9 +51,21 @@ export async function createProduct(formData: FormData) {
 
 export async function deleteProduct(id: string) {
   try {
-    await prisma.product.delete({
-      where: { id },
-    });
+    await requireRole("ADMIN");
+    await prisma.$transaction([
+      prisma.cartItem.deleteMany({ where: { productId: id } }),
+      prisma.wishlist.deleteMany({ where: { productId: id } }),
+      prisma.product.update({
+        where: { id },
+        data: {
+          deletedAt: new Date(),
+          inventoryCount: 0,
+          flashSaleActive: false,
+          flashSaleEndDate: null,
+          flashSaleStock: null,
+        },
+      }),
+    ]);
     revalidatePath("/admin/products");
     revalidatePath("/shop");
     return { success: true };
@@ -63,6 +77,7 @@ export async function deleteProduct(id: string) {
 
 export async function removeFlashSale(id: string) {
   try {
+    await requireRole("ADMIN", "STORE_MANAGER");
     await prisma.product.update({
       where: { id },
       data: {

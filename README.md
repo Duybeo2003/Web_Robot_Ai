@@ -1,36 +1,37 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# RoboEQ
 
-## Getting Started
+RoboEQ là nền tảng thương mại điện tử cho robot giáo dục, kit STEM và đồ chơi tư duy. Ứng dụng dùng Next.js 16, React 19, Prisma/MySQL, Redis, Auth.js và tích hợp VNPay.
 
-First, run the development server:
+## Phát triển cục bộ
+
+Yêu cầu Node.js 22, MySQL 8 và Redis 7.
 
 ```bash
+cp .env.example .env
+npm ci
+npx prisma generate
+npx prisma db push
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Các lệnh kiểm tra bắt buộc trước khi tạo pull request:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```bash
+npm run lint
+npm run typecheck
+npm run build
+```
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## Cấu trúc chính
 
-## Learn More
+- `src/app`: giao diện và Route Handlers theo Next.js App Router.
+- `src/actions`: Server Actions; mọi mutation quản trị phải kiểm tra quyền ở máy chủ.
+- `src/lib`: xác thực quyền, thanh toán, tồn kho, rate limit và hạ tầng.
+- `prisma/schema.prisma`: mô hình dữ liệu MySQL.
+- `prisma/migrations`: thay đổi cơ sở dữ liệu có phiên bản.
+- `RUNBOOK.md`: triển khai, giám sát, sao lưu và xử lý sự cố.
+- `SECURITY.md`: cách báo cáo lỗ hổng và yêu cầu bảo mật.
 
-To learn more about Next.js, take a look at the following resources:
+## Production
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Image Docker chạy bằng user không đặc quyền và có healthcheck tại `/api/health`. Sao chép `.env.example`, thay toàn bộ giá trị mẫu bằng secret thật, sau đó làm theo `RUNBOOK.md`. Không commit tệp `.env`, bản sao dữ liệu hoặc log runtime.

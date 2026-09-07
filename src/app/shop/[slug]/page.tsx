@@ -105,7 +105,7 @@ const sanitizedProduct = {
     sku: product.sku || product.id,
     offers: {
       "@type": "Offer",
-      url: `https://RoboEQ.vn/shop/${product.slug}`,
+      url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/shop/${product.slug}`,
       priceCurrency: "VND",
       price: Number(product.price),
       availability:
@@ -120,7 +120,9 @@ const sanitizedProduct = {
     <>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(schemaMarkup) }}
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify(schemaMarkup).replace(/</g, "\\u003c"),
+        }}
       />
       <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
         {/* Breadcrumbs */}

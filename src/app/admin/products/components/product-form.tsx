@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
-/* eslint-disable @typescript-eslint/no-unused-vars */
+ 
+ 
 /* eslint-disable react/no-unescaped-entities */
 "use client";
 
@@ -101,7 +101,7 @@ export function ProductForm({
 
     const res = await upsertProduct(formData, initialData?.id);
 
-    if (res.error) {
+    if (!res.success) {
       toast.error(res.error);
     } else {
       toast.success(

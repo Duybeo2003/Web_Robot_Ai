@@ -27,6 +27,7 @@ interface AddToCartProps {
     slug: string;
     imageUrl: string;
     supplyType?: string;
+    depositPercent?: number | null;
     inventoryCount?: number;
     externalAffiliateLink?: string | null;
     estimatedArrivalDate?: string | null;
@@ -108,6 +109,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
       slug: product.slug,
       imageUrl: (selectedVariant?.imageUrl || product.imageUrl) as string,
       supplyType: product.supplyType,
+      depositPercent: product.depositPercent ?? undefined,
       quantity,
       variantId: selectedVariant?.id as string | undefined,
       variantAttributes: selectedVariant?.attributes as Record<string, string> | undefined
@@ -126,6 +128,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
       slug: product.slug,
       imageUrl: (selectedVariant?.imageUrl || product.imageUrl) as string,
       supplyType: product.supplyType,
+      depositPercent: product.depositPercent ?? undefined,
       quantity,
       variantId: selectedVariant?.id as string | undefined,
       variantAttributes: selectedVariant?.attributes as Record<string, string> | undefined

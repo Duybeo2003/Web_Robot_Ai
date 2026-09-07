@@ -12,7 +12,7 @@ import { ProductCard } from "@/components/ui/product-card";
 import Autoplay from "embla-carousel-autoplay";
 
 interface FlashSaleCarouselProps {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+   
   products: any[];
   userWishlistIds?: string[];
 }

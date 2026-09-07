@@ -1,4 +1,4 @@
-/* eslint-disable */
+ 
 import { PrismaClient, Prisma, ProductType } from "@prisma/client";
 
 const prisma = new PrismaClient();

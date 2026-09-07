@@ -1,292 +1,193 @@
 "use server";
 
+import crypto from "crypto";
+import type { EventPrize, Prisma } from "@prisma/client";
+import { z } from "zod";
+import { requireUser } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
 import { checkRateLimit } from "@/lib/rate-limit";
 
+const idSchema = z.string().min(1).max(191);
+
 export async function getActiveEvents() {
+  const now = new Date();
   return prisma.event.findMany({
-    where: {
-      isActive: true,
-      endDate: {
-        gte: new Date(),
-      },
-    },
-    orderBy: {
-      createdAt: "desc",
-    },
-    include: {
-      _count: {
-        select: { prizes: true }
-      }
-    }
+    where: { isActive: true, startDate: { lte: now }, endDate: { gte: now } },
+    orderBy: { createdAt: "desc" },
+    include: { _count: { select: { prizes: true } } },
   });
 }
 
 export async function getEventBySlug(slug: string) {
-  return prisma.event.findUnique({
-    where: { slug },
+  const now = new Date();
+  return prisma.event.findFirst({
+    where: {
+      slug: z.string().min(1).max(191).parse(slug),
+      isActive: true,
+      startDate: { lte: now },
+      endDate: { gte: now },
+    },
     include: {
-      prizes: {
-        orderBy: { probability: 'asc' }
-      },
-      _count: {
-        select: { histories: true }
-      }
-    }
+      prizes: { orderBy: { probability: "asc" } },
+      _count: { select: { histories: true } },
+    },
   });
 }
 
 export async function getRecentWinners(eventId: string) {
   return prisma.userEventHistory.findMany({
-    where: { eventId },
-    orderBy: { createdAt: 'desc' },
+    where: { eventId: idSchema.parse(eventId) },
+    orderBy: { createdAt: "desc" },
     take: 10,
-    include: {
-      user: {
-        select: {
-          name: true,
-          email: true,
-          phoneNumber: true,
-          image: true
-        }
-      }
-    }
+    include: { user: { select: { name: true, image: true } } },
   });
 }
 
-export async function spinWheel(eventId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
+function choosePrize(prizes: EventPrize[]) {
+  const eligible = prizes.filter(
+    (prize) => prize.probability > 0 && (prize.stock === null || prize.stock > 0),
+  );
+  const totalWeight = eligible.reduce((sum, prize) => sum + prize.probability, 0);
+  if (!Number.isFinite(totalWeight) || totalWeight <= 0) {
+    throw new Error("Sự kiện hiện không còn phần thưởng khả dụng.");
   }
 
-  // Rate Limiting: Max 30 spins per minute per user
-  const rl = await checkRateLimit(`rl:spin:${session.user.id}`, 30, 60);
-  if (!rl.success) {
-    throw new Error("Bạn thao tác quá nhanh. Vui lòng chậm lại.");
+  const scale = 1_000_000;
+  let roll = crypto.randomInt(Math.max(1, Math.round(totalWeight * scale))) / scale;
+  for (const prize of eligible) {
+    if (roll < prize.probability) return prize;
+    roll -= prize.probability;
   }
-  const userId = session.user.id;
+  return eligible[eligible.length - 1];
+}
+
+async function grantPrize(
+  tx: Prisma.TransactionClient,
+  userId: string,
+  walletId: string,
+  eventId: string,
+  eventName: string,
+  prize: EventPrize,
+  cost: number,
+) {
+  if (prize.stock !== null) {
+    const claimed = await tx.eventPrize.updateMany({
+      where: { id: prize.id, stock: { gt: 0 } },
+      data: { stock: { decrement: 1 } },
+    });
+    if (claimed.count === 0) throw new Error("Phần thưởng vừa hết. Vui lòng thử lại.");
+  }
+
+  await tx.userEventHistory.create({
+    data: { userId, eventId, prizeName: prize.name, cost },
+  });
+  if (prize.productId) {
+    await tx.userInventory.create({
+      data: {
+        userId,
+        productId: prize.productId,
+        quantity: 1,
+        status: "AVAILABLE",
+        source: "EVENT_PRIZE",
+        sellPriceXu: prize.sellPriceXu,
+      },
+    });
+  } else if (prize.rewardPoints > 0) {
+    await tx.userWallet.update({
+      where: { id: walletId },
+      data: { balance: { increment: prize.rewardPoints } },
+    });
+    await tx.walletTransaction.create({
+      data: {
+        walletId,
+        amount: prize.rewardPoints,
+        type: "REWARD",
+        status: "COMPLETED",
+        description: `Trúng thưởng ${eventName}: ${prize.name}`,
+      },
+    });
+  }
+}
+
+export async function spinWheel(rawEventId: string) {
+  const user = await requireUser();
+  const eventId = idSchema.parse(rawEventId);
+  const rateLimit = await checkRateLimit(`rl:spin:${user.id}`, 30, 60, {
+    failClosed: true,
+  });
+  if (!rateLimit.success) throw new Error("Bạn thao tác quá nhanh. Vui lòng chậm lại.");
 
   return prisma.$transaction(async (tx) => {
-    // 1. Get Event and Wallet
-    const event = await tx.event.findUnique({
-      where: { id: eventId },
-      include: { prizes: true }
+    const now = new Date();
+    const event = await tx.event.findFirst({
+      where: { id: eventId, isActive: true, startDate: { lte: now }, endDate: { gte: now } },
+      include: { prizes: true },
     });
-    if (!event || !event.isActive) throw new Error("Sự kiện không tồn tại hoặc đã kết thúc");
+    if (!event || event.type !== "LUCKY_WHEEL") throw new Error("Sự kiện không khả dụng.");
+    const prize = choosePrize(event.prizes);
+    const wallet = await tx.userWallet.findUnique({ where: { userId: user.id } });
+    if (!wallet) throw new Error("Không tìm thấy ví Xu.");
 
-    const wallet = await tx.userWallet.findUnique({ where: { userId } });
-    if (!wallet || wallet.balance < event.pricePerPlay) {
-      throw new Error("Không đủ số dư Xu. Vui lòng nạp thêm!");
-    }
-
-    // 2. Deduct Xu
-    const walletUpdate = await tx.userWallet.updateMany({
+    const charged = await tx.userWallet.updateMany({
       where: { id: wallet.id, balance: { gte: event.pricePerPlay } },
-      data: { balance: { decrement: event.pricePerPlay } }
+      data: { balance: { decrement: event.pricePerPlay } },
     });
-    
-    if (walletUpdate.count === 0) {
-      throw new Error("Số dư không đủ trong quá trình giao dịch!");
-    }
-
+    if (charged.count === 0) throw new Error("Số dư Xu không đủ.");
     await tx.walletTransaction.create({
       data: {
         walletId: wallet.id,
         amount: event.pricePerPlay,
         type: "SPEND",
         status: "COMPLETED",
-        description: `Chơi vòng quay: ${event.name}`
-      }
+        description: `Chơi vòng quay: ${event.name}`,
+      },
     });
-
-    // 3. Roll the dice based on probability
-    const prizes = event.prizes;
-    const totalWeight = prizes.reduce((sum, prize) => sum + prize.probability, 0);
-    let randomNum = Math.random() * totalWeight;
-    
-    let wonPrize = prizes[prizes.length - 1]; // Default to last
-    for (const prize of prizes) {
-      if (randomNum <= prize.probability) {
-        // Check stock if it has limit
-        if (prize.stock !== null) {
-          if (prize.stock > 0) {
-            wonPrize = prize;
-            break;
-          }
-          // If out of stock, continue to next prize
-        } else {
-          wonPrize = prize;
-          break;
-        }
-      }
-      randomNum -= prize.probability;
-    }
-
-    // 4. Update Prize Stock
-    if (wonPrize.stock !== null) {
-      const updateStockResult = await tx.eventPrize.updateMany({
-        where: { id: wonPrize.id, stock: { gt: 0 } },
-        data: { stock: { decrement: 1 } }
-      });
-      if (updateStockResult.count === 0) {
-        throw new Error("Phần thưởng này vừa hết cách đây 1 giây. Vui lòng quay lại!");
-      }
-    }
-
-    // 5. Add to User History
-    await tx.userEventHistory.create({
-      data: {
-        userId,
-        eventId,
-        prizeName: wonPrize.name,
-        cost: event.pricePerPlay
-      }
-    });
-
-    // 6. Give Reward
-    if (wonPrize.productId) {
-      // Physical item -> Add to Inventory
-      await tx.userInventory.create({
-        data: {
-          userId: userId,
-          productId: wonPrize.productId,
-          quantity: 1,
-          isClaimed: false,
-          status: "AVAILABLE",
-          source: "EVENT_PRIZE",
-          sellPriceXu: wonPrize.sellPriceXu
-        }
-      });
-    } else if (wonPrize.rewardPoints > 0) {
-      // Points reward -> Add directly to wallet or points
-      await tx.userWallet.update({
-        where: { id: wallet.id },
-        data: { balance: { increment: wonPrize.rewardPoints } }
-      });
-      await tx.walletTransaction.create({
-        data: {
-          walletId: wallet.id,
-          amount: wonPrize.rewardPoints,
-          type: "REWARD",
-          status: "COMPLETED",
-          description: `Trúng thưởng: ${wonPrize.name}`
-        }
-      });
-    }
-
-    return wonPrize;
+    await grantPrize(tx, user.id, wallet.id, event.id, event.name, prize, event.pricePerPlay);
+    return prize;
   });
 }
 
-export async function exchangePoints(eventId: string, prizeId: string) {
-  const session = await auth();
-  if (!session?.user?.id) {
-    throw new Error("Unauthorized");
-  }
-
-  // Rate Limiting: Max 10 exchanges per minute
-  const rl = await checkRateLimit(`rl:exchange:${session.user.id}`, 10, 60);
-  if (!rl.success) {
-    throw new Error("Bạn thao tác quá nhanh. Vui lòng chậm lại.");
-  }
-  const userId = session.user.id;
+export async function exchangePoints(rawEventId: string, rawPrizeId: string) {
+  const user = await requireUser();
+  const eventId = idSchema.parse(rawEventId);
+  const prizeId = idSchema.parse(rawPrizeId);
+  const rateLimit = await checkRateLimit(`rl:exchange:${user.id}`, 10, 60, {
+    failClosed: true,
+  });
+  if (!rateLimit.success) throw new Error("Bạn thao tác quá nhanh. Vui lòng chậm lại.");
 
   return prisma.$transaction(async (tx) => {
-    // 1. Get Event, Prize and Wallet
-    const event = await tx.event.findUnique({
-      where: { id: eventId },
+    const now = new Date();
+    const event = await tx.event.findFirst({
+      where: {
+        id: eventId,
+        type: "POINT_EXCHANGE",
+        isActive: true,
+        startDate: { lte: now },
+        endDate: { gte: now },
+      },
     });
-    if (!event || !event.isActive) throw new Error("Sự kiện không tồn tại hoặc đã kết thúc");
-    if (event.type !== "POINT_EXCHANGE") throw new Error("Loại sự kiện không hợp lệ");
+    if (!event) throw new Error("Sự kiện không khả dụng.");
+    const prize = await tx.eventPrize.findFirst({ where: { id: prizeId, eventId } });
+    if (!prize) throw new Error("Phần thưởng không hợp lệ.");
+    const wallet = await tx.userWallet.findUnique({ where: { userId: user.id } });
+    if (!wallet) throw new Error("Không tìm thấy ví Xu.");
 
-    const prize = await tx.eventPrize.findUnique({
-      where: { id: prizeId }
-    });
-    if (!prize || prize.eventId !== eventId) throw new Error("Vật phẩm không hợp lệ");
-
-    const wallet = await tx.userWallet.findUnique({ where: { userId } });
-    if (!wallet || wallet.balance < prize.pointCost) {
-      throw new Error(`Bạn không đủ Xu để đổi vật phẩm này. Cần thêm ${prize.pointCost - (wallet?.balance || 0)} Xu!`);
-    }
-
-    if (prize.stock !== null && prize.stock <= 0) {
-      throw new Error("Vật phẩm này đã hết hàng!");
-    }
-
-    // 2. Deduct Xu (with lock check)
-    const walletUpdate = await tx.userWallet.updateMany({
+    const charged = await tx.userWallet.updateMany({
       where: { id: wallet.id, balance: { gte: prize.pointCost } },
-      data: { balance: { decrement: prize.pointCost } }
+      data: { balance: { decrement: prize.pointCost } },
     });
-    
-    if (walletUpdate.count === 0) {
-      throw new Error("Số dư không đủ trong quá trình giao dịch!");
-    }
-
+    if (charged.count === 0) throw new Error("Số dư Xu không đủ.");
     await tx.walletTransaction.create({
       data: {
         walletId: wallet.id,
         amount: prize.pointCost,
         type: "SPEND",
         status: "COMPLETED",
-        description: `Đổi vật phẩm: ${prize.name}`
-      }
+        description: `Đổi vật phẩm: ${prize.name}`,
+      },
     });
-
-    // 3. Update Prize Stock (with lock check)
-    if (prize.stock !== null) {
-      const updateStockResult = await tx.eventPrize.updateMany({
-        where: { id: prize.id, stock: { gt: 0 } },
-        data: { stock: { decrement: 1 } }
-      });
-      if (updateStockResult.count === 0) {
-        throw new Error("Phần thưởng này vừa bị đổi hết cách đây 1 giây. Vui lòng chọn món khác!");
-      }
-    }
-
-    // 4. Add to User History
-    await tx.userEventHistory.create({
-      data: {
-        userId,
-        eventId,
-        prizeName: prize.name,
-        cost: prize.pointCost
-      }
-    });
-
-    // 5. Give Reward
-    if (prize.productId) {
-      // Physical item -> Add to Inventory
-      await tx.userInventory.create({
-        data: {
-          userId,
-          productId: prize.productId,
-          quantity: 1,
-          isClaimed: false,
-          status: "AVAILABLE",
-          source: "EVENT_PRIZE",
-          sellPriceXu: prize.sellPriceXu
-        }
-      });
-    } else if (prize.rewardPoints > 0) {
-      // It's weird to exchange points for points, but supported
-      await tx.userWallet.update({
-        where: { id: wallet.id },
-        data: { balance: { increment: prize.rewardPoints } }
-      });
-      await tx.walletTransaction.create({
-        data: {
-          walletId: wallet.id,
-          amount: prize.rewardPoints,
-          type: "REWARD",
-          status: "COMPLETED",
-          description: `Nhận lại Xu: ${prize.name}`
-        }
-      });
-    }
-
+    await grantPrize(tx, user.id, wallet.id, event.id, event.name, prize, prize.pointCost);
     return prize;
   });
 }

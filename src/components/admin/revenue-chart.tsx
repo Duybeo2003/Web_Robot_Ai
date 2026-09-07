@@ -79,7 +79,7 @@ export function RevenueChart({ data }: { data: RevenueData[] }) {
                 tickFormatter={(value) => `${(value / 1000000).toFixed(1)}tr`}
               />
               <Tooltip
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                 
                 formatter={(value: any) =>
                   new Intl.NumberFormat("vi-VN", {
                     style: "currency",

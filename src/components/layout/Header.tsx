@@ -164,7 +164,7 @@ export function Header() {
                       </p>
                       <p className="text-xs leading-none text-muted-foreground">
                         {session?.user?.email ||
-                          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                           
                           (session?.user as any)?.phoneNumber ||
                           ""}
                       </p>

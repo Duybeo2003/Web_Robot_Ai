@@ -78,7 +78,7 @@ export function CartSheet() {
             <ScrollArea className="flex-1 p-6">
               <div className="space-y-6">
                 {items.map((item) => (
-                  <div key={item.id} className="flex gap-4">
+                  <div key={`${item.id}:${item.variantId || "base"}`} className="flex gap-4">
                     <div className="h-20 w-20 bg-gray-100 rounded-lg overflow-hidden shrink-0">
                       {item.imageUrl ? (
                         <div className="relative w-full h-full">
@@ -113,7 +113,7 @@ export function CartSheet() {
                           </div>
                         )}
                         <button
-                          onClick={() => removeItem(item.id)}
+                          onClick={() => removeItem(item.id, item.variantId)}
                           className="text-gray-400 hover:text-red-500 p-1"
                         >
                           <Trash2 className="w-4 h-4" />
@@ -124,7 +124,7 @@ export function CartSheet() {
                         <div className="flex items-center border rounded-lg bg-background">
                           <button
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity - 1)
+                              updateQuantity(item.id, item.quantity - 1, item.variantId)
                             }
                             className="p-1.5 hover:bg-gray-100 rounded-l-lg transition-colors"
                           >
@@ -135,7 +135,7 @@ export function CartSheet() {
                           </span>
                           <button
                             onClick={() =>
-                              updateQuantity(item.id, item.quantity + 1)
+                              updateQuantity(item.id, item.quantity + 1, item.variantId)
                             }
                             className="p-1.5 hover:bg-gray-100 rounded-r-lg transition-colors"
                           >

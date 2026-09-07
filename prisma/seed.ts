@@ -12,6 +12,7 @@ async function main() {
   const robotCategory = await prisma.category.create({
     data: {
       name: "Robot Giáo Dục",
+      slug: "robot-giao-duc",
       description:
         "Các sản phẩm robot thông minh giúp trẻ vừa học vừa chơi, làm quen với lập trình và công nghệ.",
     },
@@ -52,6 +53,7 @@ async function main() {
   const kitCategory = await prisma.category.create({
     data: {
       name: "Kit Arduino & Mạch",
+      slug: "kit-arduino-mach",
       description:
         "Bộ học tập và thực hành vi điều khiển Arduino, cảm biến dành cho người mới bắt đầu.",
     },
@@ -77,6 +79,7 @@ async function main() {
   const logicCategory = await prisma.category.create({
     data: {
       name: "Đồ Chơi Logic",
+      slug: "do-choi-logic",
       description:
         "Đồ chơi phát triển trí tuệ, kỹ năng tư duy không gian và giải quyết vấn đề.",
     },

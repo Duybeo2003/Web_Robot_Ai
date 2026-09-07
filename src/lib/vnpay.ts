@@ -6,13 +6,18 @@ export function createVnPayUrl(
   amount: number,
   ipAddr: string = "127.0.0.1",
 ) {
-  const tmnCode = process.env.VNP_TMN_CODE || "MOCK_TMN_CODE";
-  const secretKey = process.env.VNP_HASH_SECRET || "MOCK_SECRET_KEY";
-  const vnpUrl =
-    process.env.VNP_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-  const returnUrl =
-    process.env.VNP_RETURN_URL ||
-    "http://localhost:3000/api/vnpay/vnpay_return";
+  if (!Number.isSafeInteger(amount) || amount <= 0) {
+    throw new Error("Invalid VNPay amount");
+  }
+  const isDevelopment = process.env.NODE_ENV === "development";
+  const tmnCode = process.env.VNP_TMN_CODE || (isDevelopment ? "MOCK_TMN_CODE" : "");
+  const secretKey = process.env.VNP_HASH_SECRET || (isDevelopment ? "MOCK_SECRET_KEY" : "");
+  const vnpUrl = process.env.VNP_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
+  const returnUrl = process.env.VNP_RETURN_URL ||
+    (isDevelopment ? "http://localhost:3000/api/vnpay/vnpay_return" : "");
+  if (!tmnCode || !secretKey || !returnUrl) {
+    throw new Error("VNPay is not configured");
+  }
 
   const date = new Date();
   const createDate =
@@ -67,12 +72,15 @@ export function createVnPayUrl(
 }
 
 export function verifyVnPayReturn(vnp_Params: Record<string, string>) {
-  const secretKey = process.env.VNP_HASH_SECRET || "MOCK_SECRET_KEY";
+  const secretKey =
+    process.env.VNP_HASH_SECRET ||
+    (process.env.NODE_ENV === "development" ? "MOCK_SECRET_KEY" : "");
 
   // Only allow mock bypass in development — NEVER in production
   if (vnp_Params["mock_status"] && process.env.NODE_ENV === "development") {
     return true;
   }
+  if (!secretKey) return false;
 
   const secureHash = vnp_Params["vnp_SecureHash"];
   
@@ -86,7 +94,8 @@ export function verifyVnPayReturn(vnp_Params: Record<string, string>) {
   const hmac = crypto.createHmac("sha512", secretKey);
   const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
-  return secureHash === signed;
+  if (!secureHash || secureHash.length !== signed.length) return false;
+  return crypto.timingSafeEqual(Buffer.from(secureHash), Buffer.from(signed));
 }
 
 function sortObject(obj: Record<string, unknown>) {

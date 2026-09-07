@@ -1,5 +1,7 @@
 import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
+import { AuthorizationError, requireRole } from "@/lib/authz";
+import type { UploadApiResponse } from "cloudinary";
 
 // Allowed MIME types (images and videos)
 const ALLOWED_MIME_TYPES = [
@@ -7,7 +9,6 @@ const ALLOWED_MIME_TYPES = [
   "image/png",
   "image/gif",
   "image/webp",
-  "image/svg+xml",
   "video/mp4",
   "video/webm",
   "video/quicktime",
@@ -16,10 +17,27 @@ const ALLOWED_MIME_TYPES = [
 // Max file size: 30MB for videos
 const MAX_FILE_SIZE = 30 * 1024 * 1024;
 
+function hasExpectedSignature(type: string, buffer: Buffer) {
+  const hex = buffer.subarray(0, 12).toString("hex");
+  if (type === "image/jpeg") return hex.startsWith("ffd8ff");
+  if (type === "image/png") return hex.startsWith("89504e470d0a1a0a");
+  if (type === "image/gif") return buffer.subarray(0, 4).toString("ascii") === "GIF8";
+  if (type === "image/webp") {
+    return buffer.subarray(0, 4).toString("ascii") === "RIFF" && buffer.subarray(8, 12).toString("ascii") === "WEBP";
+  }
+  if (type === "video/webm") return hex.startsWith("1a45dfa3");
+  if (type === "video/mp4" || type === "video/quicktime") {
+    return buffer.subarray(4, 8).toString("ascii") === "ftyp";
+  }
+  return false;
+}
+
 export async function POST(request: Request) {
   try {
+    await requireRole("ADMIN", "STORE_MANAGER", "EDITOR");
     const data = await request.formData();
-    const file: File | null = data.get("file") as unknown as File;
+    const candidate = data.get("file");
+    const file = candidate instanceof File ? candidate : null;
 
     if (!file) {
       return NextResponse.json(
@@ -47,16 +65,33 @@ export async function POST(request: Request) {
       );
     }
 
-    // Check if Cloudinary is configured
-    if (!process.env.CLOUDINARY_CLOUD_NAME) {
+    const bytes = await file.arrayBuffer();
+    const buffer = Buffer.from(bytes);
+    if (!hasExpectedSignature(file.type, buffer)) {
+      return NextResponse.json(
+        { success: false, error: "Nội dung tệp không khớp định dạng đã khai báo." },
+        { status: 400 },
+      );
+    }
+
+    const cloudinaryConfigured = Boolean(
+      process.env.CLOUDINARY_CLOUD_NAME &&
+        process.env.CLOUDINARY_API_KEY &&
+        process.env.CLOUDINARY_API_SECRET,
+    );
+    if (!cloudinaryConfigured) {
+      if (process.env.NODE_ENV === "production") {
+        return NextResponse.json(
+          { success: false, error: "Dịch vụ lưu trữ tệp chưa được cấu hình." },
+          { status: 503 },
+        );
+      }
       // Fallback to local storage for development
       const { writeFile } = await import("fs/promises");
       const path = await import("path");
       const fs = await import("fs");
       const crypto = await import("crypto");
 
-      const bytes = await file.arrayBuffer();
-      const buffer = Buffer.from(bytes);
       const uploadDir = path.default.join(process.cwd(), "public", "uploads");
       if (!fs.default.existsSync(uploadDir)) {
         fs.default.mkdirSync(uploadDir, { recursive: true });
@@ -75,11 +110,7 @@ export async function POST(request: Request) {
     }
 
     // Upload to Cloudinary
-    const bytes = await file.arrayBuffer();
-    const buffer = Buffer.from(bytes);
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const result = await new Promise<any>((resolve, reject) => {
+    const result = await new Promise<UploadApiResponse>((resolve, reject) => {
       const isVideo = file.type.startsWith("video/");
       cloudinary.uploader
         .upload_stream(
@@ -106,6 +137,12 @@ export async function POST(request: Request) {
       url: result.secure_url,
     });
   } catch (error) {
+    if (error instanceof AuthorizationError) {
+      return NextResponse.json(
+        { success: false, error: error.message },
+        { status: error.message === "Forbidden" ? 403 : 401 },
+      );
+    }
     console.error("Upload Error:", error);
     return NextResponse.json(
       { success: false, error: "Upload failed" },

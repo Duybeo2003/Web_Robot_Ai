@@ -58,7 +58,7 @@ export default async function WishlistPage() {
           {wishlists.map((w) => (
             <ProductCard
               key={w.productId}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+               
               product={w.product as any}
               isWished={true}
               action={

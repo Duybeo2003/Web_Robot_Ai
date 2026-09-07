@@ -2,7 +2,7 @@
 
 import { useSession } from "next-auth/react";
 import { useCartStore } from "@/lib/store/cart";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { processCheckout } from "@/actions/checkout";
 import { Button } from "@/components/ui/button";
@@ -34,7 +34,7 @@ export default function CheckoutPage() {
   const hasPreOrder = items.some(item => item.supplyType === "PRE_ORDER");
   const depositTotal = items.reduce((total, item) => {
     if (item.supplyType === "PRE_ORDER") {
-      return total + (item.price * item.quantity * 0.7);
+      return total + (item.price * item.quantity * ((item.depositPercent ?? 70) / 100));
     }
     return total + (item.price * item.quantity);
   }, 0);
@@ -52,6 +52,7 @@ export default function CheckoutPage() {
 
   const [couponInput, setCouponInput] = useState("");
   const [appliedDiscount, setAppliedDiscount] = useState(0);
+  const idempotencyKeyRef = useRef<string | null>(null);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -77,12 +78,13 @@ export default function CheckoutPage() {
     }
 
     setLoading(true);
+    idempotencyKeyRef.current ||= crypto.randomUUID();
     const res = await processCheckout({
       receiverName: formData.receiverName,
       shippingAddress: formData.shippingAddress,
       receiverPhone: formData.receiverPhone,
       paymentMethod:
-        formData.paymentMethod === "VNPAY"
+        hasPreOrder && formData.paymentMethod === "COD"
           ? "BANK_TRANSFER"
           : formData.paymentMethod,
       cartItems: items.map((i) => ({ 
@@ -92,6 +94,7 @@ export default function CheckoutPage() {
       })),
       couponCode: appliedDiscount > 0 ? couponInput : undefined,
       affiliateRef: localStorage.getItem("affiliate_ref") || undefined,
+      idempotencyKey: idempotencyKeyRef.current,
     });
 
     if (res.error) {
@@ -99,7 +102,20 @@ export default function CheckoutPage() {
       setLoading(false);
     } else if (res.success) {
       clearCart(); // Clear local Zustand cart
-      router.push(`/checkout/success/${res.orderId}`);
+      const guestQuery = res.guestAccessToken
+        ? `?token=${encodeURIComponent(res.guestAccessToken)}`
+        : "";
+      if (formData.paymentMethod === "VNPAY") {
+        window.location.assign(
+          `/api/vnpay/create_url?orderId=${encodeURIComponent(res.orderId)}${
+            res.guestAccessToken
+              ? `&token=${encodeURIComponent(res.guestAccessToken)}`
+              : ""
+          }`,
+        );
+      } else {
+        router.push(`/checkout/success/${res.orderId}${guestQuery}`);
+      }
     }
   };
 
@@ -209,8 +225,12 @@ export default function CheckoutPage() {
                 Phương thức thanh toán
               </h2>
               <RadioGroup
-                value={formData.paymentMethod}
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                value={
+                  hasPreOrder && formData.paymentMethod === "COD"
+                    ? "BANK_TRANSFER"
+                    : formData.paymentMethod
+                }
+                 
                 onValueChange={(val: any) =>
                   setFormData({ ...formData, paymentMethod: val })
                 }
@@ -239,6 +259,15 @@ export default function CheckoutPage() {
                     className="cursor-pointer font-bold text-[#005BAA] flex-1"
                   >
                     Chuyển khoản Ngân hàng (Quét mã QR)
+                  </Label>
+                </div>
+                <div className="flex items-center space-x-4 border border-neutral-200 p-4 rounded-sm cursor-pointer hover:border-[#FF5722] transition-colors bg-neutral-50/50">
+                  <RadioGroupItem value="VNPAY" id="vnpay" />
+                  <Label
+                    htmlFor="vnpay"
+                    className="cursor-pointer font-bold text-[#005BAA] flex-1"
+                  >
+                    Thanh toán trực tuyến qua VNPay
                   </Label>
                 </div>
               </RadioGroup>
@@ -394,7 +423,7 @@ export default function CheckoutPage() {
               {hasPreOrder && (
                 <>
                   <div className="flex justify-between font-bold text-lg pt-2 text-amber-600">
-                    <span>Thanh toán ngay (Cọc 70% hàng Order)</span>
+                    <span>Thanh toán ngay theo mức cọc của từng sản phẩm</span>
                     <span>
                       {formatPrice(
                         Math.max(0, depositTotal - calculatedTotal * (appliedDiscount / 100))
