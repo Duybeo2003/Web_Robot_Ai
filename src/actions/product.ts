@@ -18,6 +18,12 @@ export async function deleteProduct(rawId: string) {
       select: { title: true },
     });
     if (!product) throw new Error("Không tìm thấy sản phẩm.");
+    const activePrizeLinks = await prisma.eventPrize.count({
+      where: { productId: id, event: { isActive: true } },
+    });
+    if (activePrizeLinks > 0) {
+      throw new Error("Hãy tạm dừng sự kiện đang dùng sản phẩm này làm phần thưởng trước khi xóa.");
+    }
 
     await prisma.$transaction([
       prisma.cartItem.deleteMany({ where: { productId: id } }),

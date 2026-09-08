@@ -48,7 +48,7 @@ export function HeroCarousel() {
                         alt="Robot AI thông minh cho trẻ"
                         fill
                         sizes="(min-width: 1024px) 70vw, 100vw"
-                        priority
+                        fetchPriority="high"
                         quality={90}
                         className="object-cover"
                       />
@@ -59,8 +59,8 @@ export function HeroCarousel() {
                         src="/images/banners/banner1-mobile.png"
                         alt="Robot AI thông minh cho trẻ"
                         fill
-                        sizes="100vw"
-                        priority
+                        sizes="(max-width: 767px) calc(100vw - 32px), 1px"
+                        fetchPriority="high"
                         quality={90}
                         className="object-cover"
                       />

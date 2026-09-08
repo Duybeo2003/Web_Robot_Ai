@@ -43,6 +43,8 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
   });
 
   const totalProbability = prizes.reduce((sum, p) => sum + Number(p.probability), 0);
+  const isWheel = event.type === "LUCKY_WHEEL";
+  const probabilityReady = !isWheel || Math.abs(totalProbability - 100) < 0.000_001;
 
   const handleOpenModal = (prize?: EventPrize) => {
     if (prize) {
@@ -111,8 +113,8 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
       await deletePrize(id);
       setPrizes(prizes.filter(p => p.id !== id));
       toast.success("Đã xóa");
-    } catch {
-      toast.error("Không thể xóa");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Không thể xóa");
     }
   };
 
@@ -125,23 +127,37 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
           </Button>
         </Link>
         <div>
-          <h1 className="text-2xl font-bold text-foreground">Cấu hình Vòng Quay: {event.name}</h1>
-          <p className="text-neutral-500">Giá 1 lượt quay: <strong className="text-orange-500">{event.pricePerPlay} Xu</strong></p>
+          <h1 className="text-2xl font-bold text-foreground">Cấu hình phần thưởng: {event.name}</h1>
+          <p className="text-neutral-500">
+            {isWheel ? "Giá 1 lượt quay" : "Loại sự kiện"}:{" "}
+            <strong className="text-orange-500">
+              {isWheel ? `${event.pricePerPlay} Xu` : "Đổi Xu lấy quà"}
+            </strong>
+          </p>
         </div>
       </div>
 
-      <div className={`p-4 rounded-xl flex items-center justify-between border ${totalProbability !== 100 ? 'bg-red-50 border-red-200' : 'bg-green-50 border-green-200'}`}>
+      <div className={`p-4 rounded-xl flex items-center justify-between border ${!probabilityReady || event.isActive ? 'bg-amber-50 border-amber-200' : 'bg-green-50 border-green-200'}`}>
         <div>
-          <h3 className={`font-bold ${totalProbability !== 100 ? 'text-red-700' : 'text-green-700'}`}>
-            Tổng Tỉ Lệ: {totalProbability}%
+          <h3 className={`font-bold ${!probabilityReady || event.isActive ? 'text-amber-700' : 'text-green-700'}`}>
+            {isWheel ? `Tổng tỷ lệ: ${totalProbability}%` : "Danh mục quà đổi Xu"}
           </h3>
-          {totalProbability !== 100 && (
-            <p className="text-sm text-red-600 flex items-center gap-1 mt-1">
-              <AlertTriangle className="w-4 h-4" /> Tổng tỉ lệ bắt buộc phải tròn 100% để thuật toán hoạt động chính xác.
+          {!probabilityReady && (
+            <p className="text-sm text-amber-700 flex items-center gap-1 mt-1">
+              <AlertTriangle className="w-4 h-4" /> Tổng tỷ lệ phải bằng đúng 100% trước khi kích hoạt.
+            </p>
+          )}
+          {event.isActive && (
+            <p className="text-sm text-amber-700 flex items-center gap-1 mt-1">
+              <AlertTriangle className="w-4 h-4" /> Hãy tạm dừng sự kiện trước khi sửa phần thưởng.
             </p>
           )}
         </div>
-        <Button onClick={() => handleOpenModal()} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+        <Button
+          onClick={() => handleOpenModal()}
+          disabled={event.isActive}
+          className="bg-[#FF5722] hover:bg-[#E64A19] text-white"
+        >
           <Plus className="w-4 h-4 mr-2" />
           Thêm Ô Thưởng
         </Button>
@@ -212,6 +228,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
                             variant="outline" 
                             size="sm"
                             onClick={() => handleOpenModal(prize)}
+                            disabled={event.isActive}
                           >
                             <Edit className="w-4 h-4" />
                           </Button>
@@ -220,6 +237,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
                             size="sm"
                             className="border-red-200 text-red-600 hover:bg-red-50"
                             onClick={() => handleDelete(prize.id)}
+                            disabled={event.isActive}
                           >
                             <Trash2 className="w-4 h-4" />
                           </Button>

@@ -9,18 +9,40 @@ import { checkRateLimit } from "@/lib/rate-limit";
 
 const idSchema = z.string().min(1).max(191);
 
+function isConfiguredForPublicPlay(event: {
+  type: "LUCKY_WHEEL" | "MYSTERY_BOX" | "POINT_EXCHANGE";
+  prizes: EventPrize[];
+}) {
+  if (event.type === "MYSTERY_BOX" || event.prizes.length === 0) return false;
+  if (event.type === "POINT_EXCHANGE") {
+    return event.prizes.every(
+      (prize) => prize.pointCost > 0 && Boolean(prize.productId || prize.rewardPoints > 0),
+    );
+  }
+  const available = event.prizes.filter(
+    (prize) => prize.probability > 0 && (prize.stock === null || prize.stock > 0),
+  );
+  return available.length > 0;
+}
+
 export async function getActiveEvents() {
   const now = new Date();
-  return prisma.event.findMany({
-    where: { isActive: true, startDate: { lte: now }, endDate: { gte: now } },
+  const events = await prisma.event.findMany({
+    where: {
+      isActive: true,
+      type: { in: ["LUCKY_WHEEL", "POINT_EXCHANGE"] },
+      startDate: { lte: now },
+      endDate: { gte: now },
+    },
     orderBy: { createdAt: "desc" },
-    include: { _count: { select: { prizes: true } } },
+    include: { prizes: true, _count: { select: { prizes: true } } },
   });
+  return events.filter(isConfiguredForPublicPlay);
 }
 
 export async function getEventBySlug(slug: string) {
   const now = new Date();
-  return prisma.event.findFirst({
+  const event = await prisma.event.findFirst({
     where: {
       slug: z.string().min(1).max(191).parse(slug),
       isActive: true,
@@ -32,11 +54,12 @@ export async function getEventBySlug(slug: string) {
       _count: { select: { histories: true } },
     },
   });
+  return event && isConfiguredForPublicPlay(event) ? event : null;
 }
 
 export async function getRecentWinners(eventId: string) {
   const now = new Date();
-  return prisma.userEventHistory.findMany({
+  const winners = await prisma.userEventHistory.findMany({
     where: {
       eventId: idSchema.parse(eventId),
       event: { isActive: true, startDate: { lte: now }, endDate: { gte: now } },
@@ -45,6 +68,19 @@ export async function getRecentWinners(eventId: string) {
     take: 10,
     include: { user: { select: { name: true, image: true } } },
   });
+  return winners.map((winner) => ({
+    ...winner,
+    user: {
+      name: winner.user.name
+        ? winner.user.name
+            .trim()
+            .split(/\s+/)
+            .map((part) => `${part.slice(0, 1)}${"*".repeat(Math.max(1, part.length - 1))}`)
+            .join(" ")
+        : "Khách hàng",
+      image: null,
+    },
+  }));
 }
 
 function choosePrize(prizes: EventPrize[]) {
@@ -125,7 +161,16 @@ export async function spinWheel(rawEventId: string) {
     const now = new Date();
     const event = await tx.event.findFirst({
       where: { id: eventId, isActive: true, startDate: { lte: now }, endDate: { gte: now } },
-      include: { prizes: true },
+      include: {
+        prizes: {
+          where: {
+            OR: [
+              { productId: null },
+              { product: { deletedAt: null, supplyType: { not: "AFFILIATE_SELL" } } },
+            ],
+          },
+        },
+      },
     });
     if (!event || event.type !== "LUCKY_WHEEL") throw new Error("Sự kiện không khả dụng.");
     const prize = choosePrize(event.prizes);
@@ -172,8 +217,20 @@ export async function exchangePoints(rawEventId: string, rawPrizeId: string) {
       },
     });
     if (!event) throw new Error("Sự kiện không khả dụng.");
-    const prize = await tx.eventPrize.findFirst({ where: { id: prizeId, eventId } });
+    const prize = await tx.eventPrize.findFirst({
+      where: {
+        id: prizeId,
+        eventId,
+        OR: [
+          { productId: null },
+          { product: { deletedAt: null, supplyType: { not: "AFFILIATE_SELL" } } },
+        ],
+      },
+    });
     if (!prize) throw new Error("Phần thưởng không hợp lệ.");
+    if (prize.pointCost <= 0 || (!prize.productId && prize.rewardPoints <= 0)) {
+      throw new Error("Phần thưởng chưa được cấu hình đầy đủ.");
+    }
     const wallet = await tx.userWallet.findUnique({ where: { userId: user.id } });
     if (!wallet) throw new Error("Không tìm thấy ví Xu.");
 

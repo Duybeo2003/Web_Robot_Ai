@@ -57,8 +57,9 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
   
   const isPreOrder = product.supplyType === "PRE_ORDER";
   const isAffiliateSell = product.supplyType === "AFFILIATE_SELL";
-  const isOutOfStock = !isPreOrder && !isAffiliateSell && (currentInventory === undefined || currentInventory <= 0);
+  const isOutOfStock = !isAffiliateSell && (currentInventory === undefined || currentInventory <= 0);
   const canAddToCart = (!hasVariants || selectedVariant) && !isOutOfStock;
+  const maxQuantity = Math.max(1, Math.min(99, currentInventory ?? 0));
 
   // Render variant options dynamically based on JSON attributes
   const renderVariantSelectors = () => {
@@ -81,13 +82,17 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
             return (
               <button
                 key={variant.id}
-                onClick={() => setSelectedVariant?.(variant)}
+                onClick={() => {
+                  setSelectedVariant?.(variant);
+                  setQuantity(1);
+                }}
+                disabled={isVariantOutOfStock}
                 className={cn(
                   "px-4 py-2 text-sm border rounded-sm font-medium transition-colors",
                   isSelected 
                     ? "border-[#FF5722] bg-orange-50 text-[#FF5722]" 
                     : "border-neutral-200 hover:border-[#FF5722]",
-                  isVariantOutOfStock && !isSelected ? "opacity-50 line-through bg-neutral-100" : ""
+                  isVariantOutOfStock ? "opacity-50 line-through bg-neutral-100 cursor-not-allowed" : ""
                 )}
               >
                 {label}
@@ -110,6 +115,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
       imageUrl: (selectedVariant?.imageUrl || product.imageUrl) as string,
       supplyType: product.supplyType,
       depositPercent: product.depositPercent ?? undefined,
+      inventoryCount: currentInventory,
       quantity,
       variantId: selectedVariant?.id as string | undefined,
       variantAttributes: selectedVariant?.attributes as Record<string, string> | undefined
@@ -129,6 +135,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
       imageUrl: (selectedVariant?.imageUrl || product.imageUrl) as string,
       supplyType: product.supplyType,
       depositPercent: product.depositPercent ?? undefined,
+      inventoryCount: currentInventory,
       quantity,
       variantId: selectedVariant?.id as string | undefined,
       variantAttributes: selectedVariant?.attributes as Record<string, string> | undefined
@@ -143,17 +150,21 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
       {renderVariantSelectors()}
 
       {isAffiliateSell ? (
-        <Button
-          onClick={() => {
-            if (product.externalAffiliateLink) {
-              window.open(product.externalAffiliateLink, "_blank");
-            }
-          }}
-          className="w-full h-14 rounded-sm text-base font-bold shadow-md transition-all gap-2 text-white bg-[#FF5722] hover:bg-[#E64A19] hover:-translate-y-0.5"
-        >
-          <ShoppingBag className="w-5 h-5" />
-          Mua Trên Sàn Thương Mại (Shopee/Lazada)
-        </Button>
+        product.externalAffiliateLink ? (
+          <a
+            href={product.externalAffiliateLink}
+            target="_blank"
+            rel="noopener noreferrer sponsored"
+            className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-sm bg-[#FF5722] text-base font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#E64A19]"
+          >
+              <ShoppingBag className="w-5 h-5" />
+              Mua tại website đối tác
+          </a>
+        ) : (
+          <Button disabled className="h-14 w-full rounded-sm text-base font-bold">
+            Liên kết đối tác chưa khả dụng
+          </Button>
+        )
       ) : (
         <>
           <div className="flex flex-col sm:flex-row gap-4">
@@ -171,9 +182,9 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
               </button>
               <span className="font-bold text-lg w-8 text-center">{quantity}</span>
               <button
-                onClick={() => setQuantity(quantity + 1)}
+                onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
                 className="p-3 hover:bg-gray-100 rounded-xl transition-colors text-gray-600"
-                disabled={!canAddToCart}
+                disabled={!canAddToCart || quantity >= maxQuantity}
               >
                 <Plus className="w-4 h-4" />
               </button>

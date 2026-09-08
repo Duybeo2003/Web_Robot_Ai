@@ -49,7 +49,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
     startDate: defaultStartDate,
     endDate: defaultEndDate,
     bannerUrl: "",
-    isActive: true
+    isActive: false
   });
 
   const handleOpenModal = (event?: EventWithCounts) => {
@@ -81,7 +81,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
         startDate: defaultStartDate,
         endDate: defaultEndDate,
         bannerUrl: "",
-        isActive: true
+        isActive: false
       });
     }
     setIsModalOpen(true);
@@ -132,8 +132,8 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
       await deleteEvent(id);
       setEvents(events.filter(e => e.id !== id));
       toast.success("Đã xóa sự kiện");
-    } catch {
-      toast.error("Không thể xóa sự kiện");
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : "Không thể xóa sự kiện");
     }
   };
 
@@ -152,7 +152,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
         <div className="text-sm text-orange-800">
           <p className="font-bold mb-1">Hướng dẫn Cấu hình:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Tạo Sự kiện trước, sau đó bấm vào nút <strong>Cấu hình Vật phẩm</strong> để cài đặt các ô quà trong Vòng Quay.</li>
+            <li>Tạo sự kiện ở trạng thái tạm dừng, cấu hình phần thưởng, rồi kích hoạt sau khi đã kiểm tra.</li>
             <li><strong>Tỉ lệ %:</strong> Đây là độ xanh chín. Bạn có thể tự do set % rớt đồ cho từng vật phẩm (Tổng = 100%).</li>
           </ul>
         </div>
@@ -286,7 +286,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
                 >
                   <option value="LUCKY_WHEEL">Vòng Quay May Mắn</option>
                   <option value="POINT_EXCHANGE">Tích Điểm Đổi Quà</option>
-                  <option value="MYSTERY_BOX">Hộp Mù (Sắp ra mắt)</option>
+                  <option value="MYSTERY_BOX" disabled>Hộp Mù (Chưa hỗ trợ vận hành)</option>
                 </select>
               </div>
             </div>

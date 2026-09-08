@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import cloudinary from "@/lib/cloudinary";
 import { AuthorizationError, requireRole } from "@/lib/authz";
 import type { UploadApiResponse } from "cloudinary";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 // Allowed MIME types (images and videos)
 const ALLOWED_MIME_TYPES = [
@@ -34,7 +35,29 @@ function hasExpectedSignature(type: string, buffer: Buffer) {
 
 export async function POST(request: Request) {
   try {
-    await requireRole("ADMIN", "EDITOR");
+    const user = await requireRole("ADMIN", "EDITOR");
+    const contentLengthHeader = request.headers.get("content-length");
+    const contentLength = Number(contentLengthHeader);
+    if (
+      !contentLengthHeader ||
+      !Number.isFinite(contentLength) ||
+      contentLength < 0 ||
+      contentLength > MAX_FILE_SIZE + 1_000_000
+    ) {
+      return NextResponse.json(
+        { success: false, error: "Nội dung tải lên vượt quá giới hạn." },
+        { status: contentLengthHeader ? 413 : 411 },
+      );
+    }
+    const rateLimit = await checkRateLimit(`rl:catalog-upload:${user.id}`, 200, 86_400, {
+      failClosed: true,
+    });
+    if (!rateLimit.success) {
+      return NextResponse.json(
+        { success: false, error: "Bạn đã vượt giới hạn tải tệp trong ngày." },
+        { status: 429 },
+      );
+    }
     const data = await request.formData();
     const candidate = data.get("file");
     const file = candidate instanceof File ? candidate : null;

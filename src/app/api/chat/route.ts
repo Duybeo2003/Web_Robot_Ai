@@ -5,6 +5,7 @@ import { unstable_cache } from "next/cache";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
 import { logger } from "@/lib/logger";
+import { readJsonBody, RequestBodyError } from "@/lib/read-json-body";
 
 const chatRequestSchema = z.object({
   messages: z
@@ -61,7 +62,7 @@ export async function POST(req: Request) {
       });
     }
 
-    const parsedBody = chatRequestSchema.safeParse(await req.json());
+    const parsedBody = chatRequestSchema.safeParse(await readJsonBody(req, 100_000));
     if (!parsedBody.success) {
       return new Response("Dữ liệu hội thoại không hợp lệ.", { status: 400 });
     }
@@ -110,6 +111,9 @@ Nếu khách hỏi về kiến thức lập trình (Arduino, Python) hoặc lắ
 
     return result.toTextStreamResponse();
   } catch (error: unknown) {
+    if (error instanceof RequestBodyError) {
+      return new Response(error.message, { status: error.status });
+    }
     const err = error as Error;
     logger.error("chat.request_failed", { error: err?.message || "unknown" });
 

@@ -66,7 +66,7 @@ export default async function ArticleDetailPage({
               alt={article.title}
               fill
               className="object-cover"
-              priority
+              preload
             />
           </div>
         )}

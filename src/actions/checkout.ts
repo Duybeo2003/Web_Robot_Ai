@@ -14,6 +14,7 @@ import { createGuestOrderToken, hashGuestOrderToken } from "@/lib/order-access";
 import { z } from "zod";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { getRequestFingerprint } from "@/lib/request-fingerprint";
+import { hashOtp } from "@/lib/otp";
 import {
   PAYMENT_RESERVATION_HOURS,
   POLICY_VERSION,
@@ -29,12 +30,14 @@ const checkoutSchema = z.object({
     .string()
     .trim()
     .regex(/^(?:\+84|0)[0-9]{9,10}$/, "Số điện thoại không hợp lệ."),
+  guestOtp: z.string().regex(/^\d{6}$/).optional(),
   paymentMethod: z.enum(["COD", "BANK_TRANSFER", "VNPAY"]),
   cartItems: z
     .array(
       z.object({
         productId: z.string().min(1).max(191),
         quantity: z.number().int().min(1).max(99),
+        expectedUnitPrice: z.number().finite().nonnegative().max(100_000_000_000),
         variantId: z.string().min(1).max(191).nullish(),
       }),
     )
@@ -57,8 +60,14 @@ export async function processCheckout(data: {
   receiverName: string;
   shippingAddress: string;
   receiverPhone: string;
+  guestOtp?: string;
   paymentMethod: PaymentMethod;
-  cartItems: { productId: string; quantity: number, variantId?: string | null }[];
+  cartItems: {
+    productId: string;
+    quantity: number;
+    expectedUnitPrice: number;
+    variantId?: string | null;
+  }[];
   couponCode?: string;
   pointsToUse?: number;
   affiliateRef?: string;
@@ -121,6 +130,10 @@ export async function processCheckout(data: {
     };
   }
 
+  if (isGuestCheckout && !data.guestOtp) {
+    return { error: "Vui lòng xác thực số điện thoại trước khi đặt hàng." };
+  }
+
   if (userId) {
     const existingUser = await prisma.user.findFirst({
       where: { id: userId, deletedAt: null },
@@ -146,6 +159,17 @@ export async function processCheckout(data: {
   try {
     const order = await prisma.$transaction(async (tx) => {
       if (!userId) {
+        const consumedOtp = await tx.otpCode.deleteMany({
+          where: {
+            phoneNumber: data.receiverPhone,
+            code: hashOtp(data.receiverPhone, data.guestOtp!),
+            expiresAt: { gt: new Date() },
+          },
+        });
+        if (consumedOtp.count !== 1) {
+          throw new CheckoutError("Mã OTP không chính xác hoặc đã hết hạn.");
+        }
+
         const phoneOwner = await tx.user.findUnique({
           where: { phoneNumber: data.receiverPhone },
           select: { id: true, deletedAt: true },
@@ -185,6 +209,12 @@ export async function processCheckout(data: {
         throw new CheckoutError("Một số sản phẩm không tồn tại hoặc đã bị xóa.");
       }
 
+      if (dbProducts.some((product) => product.supplyType === "AFFILIATE_SELL")) {
+        throw new CheckoutError(
+          "Sản phẩm bán qua đối tác cần được mua tại liên kết trên trang sản phẩm.",
+        );
+      }
+
       if (
         data.paymentMethod === "COD" &&
         dbProducts.some((product) => product.supplyType === "PRE_ORDER")
@@ -209,6 +239,12 @@ export async function processCheckout(data: {
         
         const currentInventory = variant ? variant.inventoryCount : dbProduct.inventoryCount;
         const currentPrice = variant ? Number(variant.price) : Number(dbProduct.price);
+
+        if (currentPrice !== cartItem.expectedUnitPrice) {
+          throw new CheckoutError(
+            `Giá của "${dbProduct.title}" vừa thay đổi. Vui lòng tải lại trang và kiểm tra tổng tiền trước khi đặt hàng.`,
+          );
+        }
         
         let itemName = dbProduct.title;
         if (variant && variant.attributes && typeof variant.attributes === 'object') {

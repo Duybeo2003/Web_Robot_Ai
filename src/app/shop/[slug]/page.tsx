@@ -69,7 +69,7 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
       deletedAt: null,
     },
     take: 4,
-    include: { category: true }
+    include: { category: true, _count: { select: { variants: true } } }
   })
 
   const session = await auth()
@@ -98,6 +98,9 @@ const sanitizedProduct = {
     isWished = userWishlistIds.includes(product.id)
   }
 
+  const inventoryAvailable = product.variants.length
+    ? product.variants.some((variant) => variant.inventoryCount > 0)
+    : product.inventoryCount > 0;
   const schemaMarkup = {
     "@context": "https://schema.org/",
     "@type": "Product",
@@ -105,17 +108,19 @@ const sanitizedProduct = {
     image: product.imageUrl || "",
     description: product.description.substring(0, 160),
     sku: product.sku || product.id,
-    offers: {
-      "@type": "Offer",
-      url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/shop/${product.slug}`,
-      priceCurrency: "VND",
-      price: Number(product.price),
-      availability:
-        Number(product.inventoryCount) > 0
-          ? "https://schema.org/InStock"
-          : "https://schema.org/OutOfStock",
-      itemCondition: "https://schema.org/NewCondition",
-    },
+    offers:
+      product.supplyType === "AFFILIATE_SELL"
+        ? undefined
+        : {
+            "@type": "Offer",
+            url: `${process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"}/shop/${product.slug}`,
+            priceCurrency: "VND",
+            price: Number(product.price),
+            availability: inventoryAvailable
+              ? "https://schema.org/InStock"
+              : "https://schema.org/OutOfStock",
+            itemCondition: "https://schema.org/NewCondition",
+          },
   };
 
   return (
@@ -173,6 +178,8 @@ const sanitizedProduct = {
                       imageUrl: rp.imageUrl || "",
                       supplyType: rp.supplyType,
                       depositPercent: rp.depositPercent || undefined,
+                      inventoryCount: rp.inventoryCount,
+                      hasVariants: rp._count.variants > 0,
                     }}
                   />
                 }

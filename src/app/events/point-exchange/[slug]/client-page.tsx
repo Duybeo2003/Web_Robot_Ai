@@ -37,7 +37,7 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
   const handleExchange = async (prizeId: string, pointCost: number) => {
     if (!userId) {
       toast.error("Vui lòng đăng nhập để đổi quà!");
-      router.push("/login");
+      router.push("/?login=true");
       return;
     }
     

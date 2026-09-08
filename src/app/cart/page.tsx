@@ -86,6 +86,8 @@ export default function CartPage() {
               <div className="flex items-center gap-4">
                 <div className="flex items-center border border-border/50 rounded-full bg-background">
                   <button
+                    type="button"
+                    aria-label={`Giảm số lượng ${item.title}`}
                     className="w-8 h-8 flex items-center justify-center hover:text-primary"
                     onClick={() => updateQuantity(item.id, item.quantity - 1, item.variantId)}
                   >
@@ -95,14 +97,21 @@ export default function CartPage() {
                     {item.quantity}
                   </span>
                   <button
+                    type="button"
+                    aria-label={`Tăng số lượng ${item.title}`}
                     className="w-8 h-8 flex items-center justify-center hover:text-primary"
                     onClick={() => updateQuantity(item.id, item.quantity + 1, item.variantId)}
+                    disabled={
+                      item.quantity >= Math.min(99, item.inventoryCount ?? 99)
+                    }
                   >
                     <Plus className="w-4 h-4" />
                   </button>
                 </div>
 
                 <button
+                  type="button"
+                  aria-label={`Xóa ${item.title} khỏi giỏ hàng`}
                   onClick={() => removeItem(item.id, item.variantId)}
                   className="w-10 h-10 flex items-center justify-center text-destructive hover:bg-destructive/10 rounded-full transition-colors"
                 >
@@ -134,12 +143,12 @@ export default function CartPage() {
               </div>
             </div>
 
-            <Button
-              size="lg"
-              className="w-full rounded-full gap-2 shadow-lg hover:shadow-primary/20 h-14 text-base"
+            <Link
+              href="/checkout"
+              className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-full bg-primary px-6 text-base font-medium text-primary-foreground shadow-lg transition-colors hover:bg-primary/80 hover:shadow-primary/20"
             >
               Tiến hành Thanh toán <ArrowRight className="w-5 h-5" />
-            </Button>
+            </Link>
           </div>
         </div>
       </div>

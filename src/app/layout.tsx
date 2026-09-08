@@ -12,6 +12,7 @@ import { AffiliateTracker } from "@/components/affiliate-tracker";
 import { FloatingSocialBar } from "@/components/layout/floating-social-bar";
 import dynamicImport from "next/dynamic";
 import { getBusinessIdentity } from "@/lib/commerce-policy";
+import { AuthModalLauncher } from "@/components/auth-modal-launcher";
 
 const AuthModal = dynamicImport(() => import("@/components/auth-modal").then((mod) => mod.AuthModal));
 
@@ -65,13 +66,21 @@ export default function RootLayout({
           <main className="flex-1 flex flex-col">{children}</main>
           <StoreWrapper>
             <Footer />
-            <AuthModal />
+            <AuthModal
+              googleEnabled={Boolean(
+                process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
+              )}
+              facebookEnabled={Boolean(
+                process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET,
+              )}
+            />
             <CartSheet />
             <CartSyncer />
           </StoreWrapper>
           <Toaster />
           <FloatingSocialBar />
           <Suspense fallback={null}>
+            <AuthModalLauncher />
             <AffiliateTracker />
           </Suspense>
         </Providers>

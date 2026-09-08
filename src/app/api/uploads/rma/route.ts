@@ -6,6 +6,8 @@ import type { UploadApiResponse } from "cloudinary";
 import cloudinary from "@/lib/cloudinary";
 import { AuthorizationError, requireUser } from "@/lib/authz";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { prisma } from "@/lib/prisma";
+import { RETURN_WINDOW_DAYS } from "@/lib/commerce-policy";
 
 export const runtime = "nodejs";
 
@@ -29,6 +31,19 @@ function hasExpectedSignature(type: string, buffer: Buffer) {
 export async function POST(request: Request) {
   try {
     const user = await requireUser();
+    const contentLengthHeader = request.headers.get("content-length");
+    const contentLength = Number(contentLengthHeader);
+    if (
+      !contentLengthHeader ||
+      !Number.isFinite(contentLength) ||
+      contentLength < 0 ||
+      contentLength > maxFileSize + 500_000
+    ) {
+      return NextResponse.json(
+        { error: "Nội dung tải lên thiếu kích thước hoặc vượt quá giới hạn." },
+        { status: contentLengthHeader ? 413 : 411 },
+      );
+    }
     const rateLimit = await checkRateLimit(`rl:rma-upload:${user.id}`, 10, 86_400, {
       failClosed: true,
     });
@@ -37,6 +52,30 @@ export async function POST(request: Request) {
     }
 
     const formData = await request.formData();
+    const orderId = formData.get("orderId");
+    if (typeof orderId !== "string" || orderId.length < 1 || orderId.length > 191) {
+      return NextResponse.json({ error: "Thiếu đơn hàng cần đổi trả." }, { status: 400 });
+    }
+    const eligibleOrder = await prisma.order.findFirst({
+      where: {
+        id: orderId,
+        userId: user.id,
+        status: "COMPLETED",
+        returnRequests: { none: {} },
+      },
+      select: { completedAt: true, updatedAt: true },
+    });
+    const completedAt = eligibleOrder?.completedAt || eligibleOrder?.updatedAt;
+    const withinReturnWindow = Boolean(
+      completedAt &&
+        completedAt.getTime() + RETURN_WINDOW_DAYS * 24 * 60 * 60 * 1_000 >= Date.now(),
+    );
+    if (!eligibleOrder || !withinReturnWindow) {
+      return NextResponse.json(
+        { error: "Đơn hàng không đủ điều kiện nhận ảnh đổi trả." },
+        { status: 403 },
+      );
+    }
     const candidate = formData.get("file");
     if (!(candidate instanceof File)) {
       return NextResponse.json({ error: "Thiếu tệp ảnh." }, { status: 400 });
@@ -74,7 +113,7 @@ export async function POST(request: Request) {
       cloudinary.uploader
         .upload_stream(
           {
-            folder: `RoboEQ-rma/${user.id}`,
+            folder: "RoboEQ-rma",
             resource_type: "image",
             transformation: [
               { quality: "auto", fetch_format: "auto" },

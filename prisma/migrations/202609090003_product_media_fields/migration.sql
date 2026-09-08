@@ -1,0 +1,3 @@
+ALTER TABLE `Product`
+  ADD COLUMN `gallery` JSON NULL,
+  ADD COLUMN `videoUrl` VARCHAR(191) NULL;

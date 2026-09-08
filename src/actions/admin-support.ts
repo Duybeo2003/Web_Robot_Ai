@@ -26,7 +26,13 @@ export async function updateContactRequestStatus(
   if (!request) throw new Error("Không tìm thấy yêu cầu hỗ trợ.");
   if (request.status === status) return;
 
-  await prisma.contactRequest.update({ where: { id }, data: { status } });
+  const updated = await prisma.contactRequest.updateMany({
+    where: { id, status: request.status },
+    data: { status },
+  });
+  if (updated.count === 0) {
+    throw new Error("Yêu cầu vừa được cập nhật ở phiên khác. Vui lòng tải lại.");
+  }
   await recordAudit({
     actorId: operator.id,
     action: "support.status_update",

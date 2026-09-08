@@ -38,9 +38,26 @@ export default function LuckyWheelClientPage({
   const [wonPrize, setWonPrize] = useState<EventPrize | null>(null);
   
   const wheelRef = useRef<HTMLDivElement>(null);
-  const prizes = event.prizes;
-  const numPrizes = prizes.length;
-  const sliceAngle = 360 / numPrizes;
+  const prizes = event.prizes.filter(
+    (prize) => prize.probability > 0 && (prize.stock === null || prize.stock > 0),
+  );
+  const totalWeight = prizes.reduce((sum, prize) => sum + prize.probability, 0);
+  const sectors = prizes.map((prize, index) => {
+    const cumulativeAngle = prizes
+      .slice(0, index)
+      .reduce(
+        (sum, current) =>
+          sum + (totalWeight > 0 ? (current.probability / totalWeight) * 360 : 0),
+        0,
+      );
+    const angle = totalWeight > 0 ? (prize.probability / totalWeight) * 360 : 0;
+    return {
+      prize,
+      start: cumulativeAngle,
+      end: cumulativeAngle + angle,
+      middle: cumulativeAngle + angle / 2,
+    };
+  });
 
   const handleSpin = async () => {
     if (!isLoggedIn) {
@@ -65,17 +82,13 @@ export default function LuckyWheelClientPage({
       const result = await spinWheel(event.id);
       
       // Calculate rotation
-      const prizeIndex = prizes.findIndex(p => p.id === result.id);
-      if (prizeIndex === -1) throw new Error("Lỗi xác định phần thưởng");
+      const winningSector = sectors.find((sector) => sector.prize.id === result.id);
+      if (!winningSector) throw new Error("Lỗi xác định phần thưởng");
 
-      // We want the winning slice to point upwards (270 degrees in CSS context, or we just align it)
-      // The pointer is at the TOP (0 degrees).
-      // Each slice is at (i * sliceAngle). We need the center of the winning slice to be at 360 (top).
-      // So we rotate by: (Spins * 360) - (prizeIndex * sliceAngle)
-      
-      const spins = 5 + Math.floor(Math.random() * 3); // 5 to 8 full spins
-      // Offset by half a slice so the pointer is in the middle of the slice
-      const targetRotation = (spins * 360) - (prizeIndex * sliceAngle); 
+      const spins = 6;
+      const currentAngle = ((rotation % 360) + 360) % 360;
+      const alignment = (360 - ((currentAngle + winningSector.middle) % 360)) % 360;
+      const targetRotation = spins * 360 + alignment;
 
       setRotation(prev => prev + targetRotation);
 
@@ -101,9 +114,9 @@ export default function LuckyWheelClientPage({
 
   // Generate Conic Gradient for the wheel
   const colors = ["#FF5722", "#FF9800", "#FFC107", "#E91E63", "#9C27B0", "#2196F3", "#4CAF50", "#00BCD4"];
-  const gradientStops = prizes.map((_, i) => {
+  const gradientStops = sectors.map((sector, i) => {
     const color = colors[i % colors.length];
-    return `${color} ${i * sliceAngle}deg ${(i + 1) * sliceAngle}deg`;
+    return `${color} ${sector.start}deg ${sector.end}deg`;
   }).join(", ");
 
   return (
@@ -165,9 +178,8 @@ export default function LuckyWheelClientPage({
                 }}
               >
                 {/* Prize Labels */}
-                {prizes.map((prize, i) => {
-                  // Position each label in the center of its slice
-                  const rotationAngle = (i * sliceAngle) + (sliceAngle / 2);
+                {sectors.map(({ prize, middle }) => {
+                  const rotationAngle = middle;
                   return (
                     <div 
                       key={prize.id}
@@ -262,12 +274,19 @@ export default function LuckyWheelClientPage({
                         </p>
                       </div>
                       <div className="shrink-0 text-right">
-                        <span className="text-sm font-black text-orange-400">{prize.probability}%</span>
+                        <span className="text-sm font-black text-orange-400">
+                          {((prize.probability / totalWeight) * 100).toLocaleString("vi-VN", {
+                            maximumFractionDigits: 2,
+                          })}%
+                        </span>
                       </div>
                     </div>
                   ))
                 )}
               </div>
+              <p className="mt-3 text-xs text-neutral-500">
+                Tỷ lệ được tính trên các phần thưởng còn hàng và được thể hiện theo kích thước từng ô.
+              </p>
             </div>
           </div>
 

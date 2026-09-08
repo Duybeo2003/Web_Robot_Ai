@@ -36,8 +36,10 @@ npm run test:e2e
 
 ## Production
 
-Image Docker chạy bằng user không đặc quyền và có healthcheck tại `/api/health`. Sao chép `.env.example`, thay toàn bộ giá trị mẫu bằng secret thật, sau đó làm theo `RUNBOOK.md`. Không commit tệp `.env`, bản sao dữ liệu hoặc log runtime.
+Image Docker chạy bằng user không đặc quyền, ứng dụng dùng tài khoản MySQL riêng và có healthcheck tại `/api/health`. Cổng ứng dụng chỉ bind vào loopback để reverse proxy HTTPS truy cập. Sao chép `.env.example`, thay toàn bộ giá trị mẫu bằng secret thật, sau đó làm theo `RUNBOOK.md`. Không commit tệp `.env`, bản sao dữ liệu hoặc log runtime.
 
 Email giao dịch được gửi qua API HTTPS tương thích Resend. Khai báo `EMAIL_API_KEY`, `EMAIL_FROM` và `ADMIN_EMAIL`; có thể đổi `EMAIL_API_URL` nếu dùng cổng tương thích khác.
 
 Thông tin pháp nhân và kênh hỗ trợ hiển thị trong điều khoản được lấy từ nhóm biến `LEGAL_*`, `SUPPORT_PHONE` và `SUPPORT_EMAIL`. Production sẽ từ chối khởi động nếu thiếu các trường pháp nhân bắt buộc để tránh xuất bản website với thông tin người bán chưa hoàn chỉnh.
+
+Ảnh sản phẩm và ảnh minh chứng production được lưu trên Cloudinary. Cấu hình đủ `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET`; production sẽ không ghi upload vào filesystem tạm của container.

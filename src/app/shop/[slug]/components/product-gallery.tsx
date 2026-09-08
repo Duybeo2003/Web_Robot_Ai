@@ -104,7 +104,7 @@ export function ProductGallery({
             src={activeMedia}
             alt={title}
             fill
-            priority
+            loading="eager"
             className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
           />

@@ -3,15 +3,19 @@
 ## Chuẩn bị lần đầu
 
 1. Cài Docker Engine và Docker Compose.
-2. Sao chép `.env.example` thành `.env` trên máy chủ và thay toàn bộ giá trị mẫu.
+2. Sao chép `.env.example` thành `.env` trên máy chủ và thay toàn bộ giá trị mẫu. Dùng mật khẩu MySQL chỉ gồm ký tự URL-safe, ví dụ `openssl rand -hex 32`, vì mật khẩu nằm trong `DATABASE_URL`.
 3. Đặt `NEXTAUTH_URL`, `AUTH_URL` và `NEXT_PUBLIC_APP_URL` về HTTPS của tên miền thật.
 4. Cấu hình VNPay Return URL là `https://<domain>/api/vnpay/vnpay_return` và IPN URL là `https://<domain>/api/vnpay/ipn` trong cổng merchant.
 5. Xác minh domain gửi email, sau đó cấu hình `EMAIL_API_KEY`, `EMAIL_FROM` và `ADMIN_EMAIL`.
-6. Điền đúng thông tin công khai của đơn vị bán hàng: `LEGAL_COMPANY_NAME`, `LEGAL_TAX_CODE`, `LEGAL_ADDRESS`, `SUPPORT_PHONE`, `SUPPORT_EMAIL` và `LEGAL_REGISTRATION_NUMBER` nếu có. Đối chiếu lại các trang điều khoản/chính sách sau khi triển khai.
-7. Đặt `ROBOEQ_IMAGE` thành tag SHA đã được pipeline xuất bản. Không triển khai bằng tag `latest`.
-8. Chỉ mở cổng 80/443 ra Internet. MySQL và Redis không được public.
+6. Cấu hình `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET`, rồi thử upload ảnh trên staging.
+7. Điền đúng thông tin công khai của đơn vị bán hàng: `LEGAL_COMPANY_NAME`, `LEGAL_TAX_CODE`, `LEGAL_ADDRESS`, `SUPPORT_PHONE`, `SUPPORT_EMAIL` và `LEGAL_REGISTRATION_NUMBER` nếu có. Đối chiếu lại các trang điều khoản/chính sách sau khi triển khai.
+8. Đặt `ROBOEQ_IMAGE` thành tag SHA đã được pipeline xuất bản. Không triển khai bằng tag `latest`.
+9. Chỉ mở cổng 80/443 ra Internet. Web bind ở `127.0.0.1:3000`; MySQL và Redis không được public.
+10. Cấu hình reverse proxy ghi đè header địa chỉ khách, ví dụ Nginx dùng `proxy_set_header X-Forwarded-For $remote_addr;` và `proxy_set_header X-Real-IP $remote_addr;`. Đặt giới hạn request body khoảng 31 MB để chặn payload lớn trước khi tới Next.js.
 
 Tạo secret bằng trình quản lý mật khẩu hoặc `openssl rand -base64 48`. `NEXTAUTH_SECRET`, `VNP_HASH_SECRET`, `CRON_SECRET`, mật khẩu DB và token SMS phải khác nhau.
+
+Với volume MySQL đã tồn tại từ bản cũ, biến `MYSQL_USER` không tự tạo lại tài khoản. Trước khi chuyển ứng dụng khỏi tài khoản root, đăng nhập MySQL bằng root, tạo user theo `DB_USER`, cấp quyền trên riêng database `DB_NAME`, rồi kiểm tra kết nối bằng `DATABASE_URL` mới.
 
 ## Triển khai
 
@@ -23,7 +27,14 @@ docker compose ps
 curl --fail https://<domain>/api/health
 ```
 
-Pipeline chỉ xuất bản image sau khi Prisma validate, ESLint, TypeScript và Next.js build đều đạt. Mỗi image có tag SHA để rollback chính xác.
+Pipeline chỉ xuất bản image sau khi npm audit, Prisma validate, toàn bộ migration trên MySQL sạch, ESLint, TypeScript, Next.js build và Playwright E2E đều đạt. Mỗi image có tag SHA để rollback chính xác.
+
+## Đối soát ví Xu và sự kiện
+
+- Chỉ duyệt yêu cầu nạp Xu sau khi khớp số tiền, nội dung chuyển khoản và người gửi trên sao kê. Mã đối soát ngân hàng là bắt buộc và không được dùng lại.
+- Tạo sự kiện ở trạng thái tạm dừng. Với vòng quay, tổng tỷ lệ các ô còn hàng phải bằng 100% trước khi kích hoạt.
+- Tạm dừng sự kiện trước khi sửa phần thưởng. Sự kiện đã có lượt chơi phải được giữ lại để bảo toàn lịch sử đối soát.
+- Kiểm tra các yêu cầu giao vật phẩm và tồn kho giải thưởng mỗi ngày trong thời gian sự kiện chạy.
 
 ## Tác vụ định kỳ
 

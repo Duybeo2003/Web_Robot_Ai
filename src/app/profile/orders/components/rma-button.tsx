@@ -42,6 +42,7 @@ export function RmaButton({ orderId }: { orderId: string }) {
       if (evidence) {
         const upload = new FormData();
         upload.set("file", evidence);
+        upload.set("orderId", orderId);
         const response = await fetch("/api/uploads/rma", { method: "POST", body: upload });
         const result = (await response.json().catch(() => ({}))) as {
           url?: string;

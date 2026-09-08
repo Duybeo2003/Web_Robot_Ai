@@ -31,6 +31,8 @@ export default async function WishlistPage() {
           imageUrl: true,
           supplyType: true,
           depositPercent: true,
+          inventoryCount: true,
+          _count: { select: { variants: true } },
         },
       },
     },
@@ -82,6 +84,8 @@ export default async function WishlistPage() {
                     imageUrl: w.product.imageUrl || "",
                     supplyType: w.product.supplyType,
                     depositPercent: w.product.depositPercent || undefined,
+                    inventoryCount: w.product.inventoryCount,
+                    hasVariants: w.product._count.variants > 0,
                   }}
                 />
               }

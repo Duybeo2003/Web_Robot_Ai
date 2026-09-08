@@ -30,6 +30,12 @@ export function register() {
   const missing: string[] = REQUIRED_PRODUCTION_ENV.filter(
     (name) => !process.env[name],
   );
+  for (const name of REQUIRED_PRODUCTION_ENV) {
+    const value = process.env[name];
+    if (value && /replace-with|example\.com/i.test(value)) {
+      missing.push(`${name} still contains an example value`);
+    }
+  }
   const httpsVariables = [
     "AUTH_URL",
     "NEXT_PUBLIC_APP_URL",

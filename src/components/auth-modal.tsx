@@ -21,7 +21,13 @@ import {
 } from "@/components/ui/input-otp";
 import { Loader2, ArrowLeft } from "lucide-react";
 
-export function AuthModal() {
+export function AuthModal({
+  googleEnabled,
+  facebookEnabled,
+}: {
+  googleEnabled: boolean;
+  facebookEnabled: boolean;
+}) {
   const { isOpen, closeModal } = useAuthModal();
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -222,7 +228,7 @@ export function AuthModal() {
                     <Input
                       id="email"
                       type="text"
-                      placeholder="admin@gmail.com hoặc 0912345678"
+                      placeholder="email@domain.com hoặc 0912345678"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
                       className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
@@ -274,20 +280,20 @@ export function AuthModal() {
                 </button>
               </div>
 
-              <div className="relative py-6">
-                <div className="absolute inset-0 flex items-center">
-                  <span className="w-full border-t border-stone-200" />
-                </div>
-                <div className="relative flex justify-center text-xs uppercase font-medium">
-                  <span className="bg-[#F9F8F6] px-4 text-[#2C2C2C]/60">
-                    Hoặc đăng nhập với
-                  </span>
-                </div>
-              </div>
-
-              {!session?.user && (
-                <div className="grid grid-cols-2 gap-3">
-                  <Button
+              {!session?.user && (googleEnabled || facebookEnabled) && (
+                <>
+                  <div className="relative py-6">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-stone-200" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase font-medium">
+                      <span className="bg-[#F9F8F6] px-4 text-[#2C2C2C]/60">
+                        Hoặc đăng nhập với
+                      </span>
+                    </div>
+                  </div>
+                  <div className={`grid gap-3 ${googleEnabled && facebookEnabled ? "grid-cols-2" : "grid-cols-1"}`}>
+                  {googleEnabled && <Button
                     type="button"
                     variant="outline"
                     className="h-12 rounded-sm border border-stone-200 bg-white hover:bg-stone-50 text-[#2C2C2C] transition-colors font-medium"
@@ -313,8 +319,8 @@ export function AuthModal() {
                       />
                     </svg>
                     Google
-                  </Button>
-                  <Button
+                  </Button>}
+                  {facebookEnabled && <Button
                     type="button"
                     variant="outline"
                     className="h-12 rounded-sm border border-stone-200 bg-white hover:bg-[#1877F2]/5 hover:border-[#1877F2]/20 hover:text-[#1877F2] transition-colors font-medium"
@@ -329,8 +335,9 @@ export function AuthModal() {
                       <path d="M22.675 0h-21.35c-.732 0-1.325.593-1.325 1.325v21.351c0 .731.593 1.324 1.325 1.324h11.495v-9.294h-3.128v-3.622h3.128v-2.671c0-3.1 1.893-4.788 4.659-4.788 1.325 0 2.463.099 2.795.143v3.24l-1.918.001c-1.504 0-1.795.715-1.795 1.763v2.313h3.587l-.467 3.622h-3.12v9.293h6.116c.73 0 1.323-.593 1.323-1.325v-21.35c0-.732-.593-1.325-1.325-1.325z" />
                     </svg>
                     Facebook
-                  </Button>
-                </div>
+                  </Button>}
+                  </div>
+                </>
               )}
             </div>
           ) : (

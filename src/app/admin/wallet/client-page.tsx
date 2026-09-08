@@ -6,6 +6,7 @@ import { approveTopup, rejectTopup } from "@/actions/admin-wallet";
 import { toast } from "sonner";
 import { Check, X, Clock, User as UserIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Input } from "@/components/ui/input";
 
 interface PendingTopup {
   id: string;
@@ -29,11 +30,13 @@ interface AdminWalletClientPageProps {
 export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClientPageProps) {
   const [topups, setTopups] = useState(pendingTopups);
   const [loadingId, setLoadingId] = useState<string | null>(null);
+  const [references, setReferences] = useState<Record<string, string>>({});
 
   const handleApprove = async (id: string) => {
     try {
       setLoadingId(id);
-      await approveTopup(id);
+      const result = await approveTopup(id, references[id] || "");
+      if (!result.success) throw new Error(result.error);
       setTopups(prev => prev.filter(t => t.id !== id));
       toast.success("Đã duyệt nạp Xu thành công");
     } catch (error: unknown) {
@@ -47,7 +50,8 @@ export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClie
   const handleReject = async (id: string) => {
     try {
       setLoadingId(id);
-      await rejectTopup(id);
+      const result = await rejectTopup(id);
+      if (!result.success) throw new Error(result.error);
       setTopups(prev => prev.filter(t => t.id !== id));
       toast.success("Đã từ chối nạp Xu");
     } catch (error: unknown) {
@@ -71,15 +75,16 @@ export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClie
               <tr>
                 <th className="px-6 py-4 font-bold">Người dùng</th>
                 <th className="px-6 py-4 font-bold">Số lượng Xu</th>
-                <th className="px-6 py-4 font-bold">Mã giao dịch</th>
+                <th className="px-6 py-4 font-bold">Mã yêu cầu</th>
                 <th className="px-6 py-4 font-bold">Thời gian</th>
+                <th className="px-6 py-4 font-bold">Mã đối soát ngân hàng</th>
                 <th className="px-6 py-4 font-bold text-right">Hành động</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
               {topups.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="px-6 py-12 text-center text-neutral-500">
+                  <td colSpan={6} className="px-6 py-12 text-center text-neutral-500">
                     <Clock className="w-8 h-8 mx-auto mb-3 text-neutral-300" />
                     Không có yêu cầu nạp Xu nào đang chờ duyệt.
                   </td>
@@ -112,6 +117,23 @@ export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClie
                     <td className="px-6 py-4 text-neutral-600">
                       {new Date(tx.createdAt).toLocaleString('vi-VN')}
                     </td>
+                    <td className="px-6 py-4">
+                      <Input
+                        aria-label={`Mã đối soát cho yêu cầu ${tx.id}`}
+                        placeholder="Nhập mã trên sao kê"
+                        minLength={6}
+                        maxLength={191}
+                        value={references[tx.id] || ""}
+                        onChange={(event) =>
+                          setReferences((current) => ({
+                            ...current,
+                            [tx.id]: event.target.value,
+                          }))
+                        }
+                        disabled={loadingId === tx.id}
+                        className="min-w-44"
+                      />
+                    </td>
                     <td className="px-6 py-4 text-right">
                       <div className="flex justify-end gap-2">
                         <Button 
@@ -127,7 +149,10 @@ export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClie
                           size="sm"
                           className="bg-green-600 hover:bg-green-700 text-white"
                           onClick={() => handleApprove(tx.id)}
-                          disabled={loadingId === tx.id}
+                          disabled={
+                            loadingId === tx.id ||
+                            (references[tx.id]?.trim().length || 0) < 6
+                          }
                         >
                           <Check className="w-4 h-4 mr-1" />
                           Đã nhận tiền

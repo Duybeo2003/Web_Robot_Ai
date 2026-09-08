@@ -667,14 +667,17 @@ model WalletTransaction {
   walletId String
   wallet   UserWallet @relation(fields: [walletId], references: [id], onDelete: Cascade)
 
-  amount      Int // Positive for TOPUP/REWARD, Negative for SPEND
-  type        TransactionType
-  status      TransactionStatus @default(COMPLETED)
-  description String?
+  amount            Int // Absolute amount; type determines whether the balance increases or decreases
+  type              TransactionType
+  status            TransactionStatus @default(COMPLETED)
+  description       String?
+  providerReference String?           @unique
+  processedAt       DateTime?
 
   createdAt DateTime @default(now())
 
   @@index([walletId])
+  @@index([type, status, createdAt])
 }
 
 model Event {

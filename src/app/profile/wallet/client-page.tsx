@@ -140,6 +140,11 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
                     <p className="text-sm text-neutral-500">
                       {new Date(tx.createdAt).toLocaleString('vi-VN')}
                     </p>
+                    {tx.providerReference && (
+                      <p className="mt-1 text-xs font-mono text-neutral-500">
+                        Đối soát: {tx.providerReference}
+                      </p>
+                    )}
                     <div className="mt-1 sm:hidden">
                       {getStatusBadge(tx.status)}
                     </div>
@@ -261,7 +266,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
                 </div>
 
                 <div className="bg-blue-50 text-blue-800 p-2.5 rounded-lg text-xs text-center border border-blue-100 shadow-sm leading-relaxed">
-                  Xu sẽ được cộng tự động trong <strong>1-5 phút</strong>.
+                  Xu được cộng sau khi nhân viên đối soát khoản chuyển trong giờ làm việc.
                 </div>
               </div>
             </div>

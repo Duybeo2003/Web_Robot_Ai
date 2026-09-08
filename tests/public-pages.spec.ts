@@ -47,28 +47,13 @@ test.describe("Public commercial pages", () => {
     await expect(page.getByRole("button", { name: "Quay lại cửa hàng" })).toBeVisible();
   });
 
-  test("requires explicit policy acceptance before enabling checkout", async ({ page }) => {
-    await page.addInitScript(() => {
-      localStorage.setItem(
-        "RoboEQ-cart",
-        JSON.stringify({
-          state: {
-            items: [
-              {
-                id: "test-product",
-                title: "Sản phẩm kiểm thử",
-                slug: "san-pham-kiem-thu",
-                price: 100000,
-                quantity: 1,
-                supplyType: "IN_HOUSE",
-              },
-            ],
-          },
-          version: 0,
-        }),
-      );
-    });
-    await page.goto("/checkout");
+  test("requires policy acceptance and guest phone verification before checkout", async ({ page }) => {
+    await page.goto("/shop");
+    await page.getByRole("button", { name: "Thêm vào giỏ hàng" }).first().click();
+    await page.goto("/cart");
+    const checkoutLink = page.getByRole("link", { name: /Tiến hành Thanh toán/ });
+    await expect(checkoutLink).toHaveAttribute("href", "/checkout");
+    await checkoutLink.click();
 
     const submit = page.getByRole("button", { name: "ĐẶT HÀNG NGAY" });
     const consent = page.getByRole("checkbox");
@@ -81,6 +66,13 @@ test.describe("Public commercial pages", () => {
       "/dieu-khoan-su-dung",
     );
     await consent.check();
-    await expect(submit).toBeEnabled();
+    await expect(submit).toBeDisabled();
+    await expect(page.getByRole("button", { name: /OTP$/ })).toBeVisible();
+  });
+
+  test("opens the login dialog from the canonical login URL", async ({ page }) => {
+    await page.goto("/login");
+    await expect(page).toHaveURL(/\?login=true$/);
+    await expect(page.getByRole("dialog")).toBeVisible();
   });
 });

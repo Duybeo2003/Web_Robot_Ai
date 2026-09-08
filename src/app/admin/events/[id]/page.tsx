@@ -13,6 +13,7 @@ export default async function AdminEventConfigPage({ params }: { params: Promise
 
   // Also fetch simple product list so admin can assign product to prize
   const products = await prisma.product.findMany({
+    where: { deletedAt: null, supplyType: { not: "AFFILIATE_SELL" } },
     select: { id: true, title: true, price: true },
     orderBy: { createdAt: 'desc' }
   });

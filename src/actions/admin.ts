@@ -103,6 +103,44 @@ const productSchema = z
     if (data.supplyType === "AFFILIATE_SELL" && !data.externalAffiliateLink) {
       context.addIssue({ code: "custom", path: ["externalAffiliateLink"], message: "Sản phẩm liên kết cần URL HTTPS." });
     }
+    if (data.isCombo && (!data.comboItems || data.comboItems.length === 0)) {
+      context.addIssue({
+        code: "custom",
+        path: ["comboItems"],
+        message: "Combo cần có ít nhất một sản phẩm thành phần.",
+      });
+    }
+    if (
+      data.comboItems &&
+      new Set(data.comboItems.map((item) => item.productId)).size !== data.comboItems.length
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["comboItems"],
+        message: "Mỗi sản phẩm chỉ được xuất hiện một lần trong combo.",
+      });
+    }
+    if (
+      data.originalPrice !== null &&
+      data.originalPrice !== undefined &&
+      data.originalPrice < data.price
+    ) {
+      context.addIssue({
+        code: "custom",
+        path: ["originalPrice"],
+        message: "Giá niêm yết không được thấp hơn giá bán.",
+      });
+    }
+    const availableStock = data.variants?.length
+      ? data.variants.reduce((total, variant) => total + variant.inventoryCount, 0)
+      : data.inventoryCount;
+    if (data.flashSaleActive && (data.flashSaleStock || 0) > availableStock) {
+      context.addIssue({
+        code: "custom",
+        path: ["flashSaleStock"],
+        message: "Số suất Flash Sale không được vượt quá tồn kho khả dụng.",
+      });
+    }
   });
 
 export type ProductData = z.input<typeof productSchema>;
@@ -131,6 +169,12 @@ function actionError(error: unknown, fallback: string) {
     success: false as const,
     error: error instanceof Error ? error.message : fallback,
   };
+}
+
+async function lockActiveAdministrators(tx: Prisma.TransactionClient) {
+  return tx.$queryRaw<{ id: string }[]>(
+    Prisma.sql`SELECT \`id\` FROM \`User\` WHERE \`role\` = 'ADMIN' AND \`deletedAt\` IS NULL ORDER BY \`id\` FOR UPDATE`,
+  );
 }
 
 export async function pushOrderToLogistics(
@@ -254,7 +298,11 @@ export async function upsertProduct(input: unknown, productId?: string) {
           throw new Error("Combo không thể chứa chính nó.");
         }
         const childCount = await tx.product.count({
-          where: { id: { in: comboItems.map((item) => item.productId) }, deletedAt: null },
+          where: {
+            id: { in: comboItems.map((item) => item.productId) },
+            isCombo: false,
+            deletedAt: null,
+          },
         });
         if (childCount !== new Set(comboItems.map((item) => item.productId)).size) {
           throw new Error("Combo chứa sản phẩm không hợp lệ.");
@@ -339,9 +387,25 @@ export async function updateUserRole(
     const id = idSchema.parse(userId);
     const nextRole = z.enum(["USER", "ADMIN", "STORE_MANAGER", "EDITOR"]).parse(role) as Role;
     if (currentUser.id === id) throw new Error("Bạn không thể tự thay đổi quyền của mình.");
-    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
-    if (!target) throw new Error("Không tìm thấy người dùng.");
-    await prisma.user.update({ where: { id }, data: { role: nextRole } });
+    const target = await prisma.$transaction(async (tx) => {
+      const current = await tx.user.findFirst({
+        where: { id, deletedAt: null },
+        select: { role: true },
+      });
+      if (!current) throw new Error("Không tìm thấy người dùng.");
+      if (current.role === "ADMIN" && nextRole !== "ADMIN") {
+        const administrators = await lockActiveAdministrators(tx);
+        if (administrators.length <= 1) {
+          throw new Error("Không thể hạ quyền quản trị viên cuối cùng.");
+        }
+      }
+      const updated = await tx.user.updateMany({
+        where: { id, deletedAt: null, role: current.role },
+        data: { role: nextRole },
+      });
+      if (updated.count === 0) throw new Error("Quyền người dùng vừa được thay đổi ở phiên khác.");
+      return current;
+    });
     await recordAudit({
       actorId: currentUser.id,
       action: "user.role_update",
@@ -362,12 +426,25 @@ export async function deleteUser(userId: string) {
     const currentUser = await requireRole("ADMIN");
     const id = idSchema.parse(userId);
     if (currentUser.id === id) throw new Error("Bạn không thể tự xóa tài khoản của mình.");
-    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
-    if (target?.role === "ADMIN") {
-      const admins = await prisma.user.count({ where: { role: "ADMIN", deletedAt: null } });
-      if (admins <= 1) throw new Error("Không thể xóa quản trị viên cuối cùng.");
-    }
-    await prisma.user.update({ where: { id }, data: { deletedAt: new Date() } });
+    const target = await prisma.$transaction(async (tx) => {
+      const current = await tx.user.findFirst({
+        where: { id, deletedAt: null },
+        select: { role: true },
+      });
+      if (!current) throw new Error("Không tìm thấy người dùng.");
+      if (current.role === "ADMIN") {
+        const administrators = await lockActiveAdministrators(tx);
+        if (administrators.length <= 1) {
+          throw new Error("Không thể xóa quản trị viên cuối cùng.");
+        }
+      }
+      const deleted = await tx.user.updateMany({
+        where: { id, deletedAt: null, role: current.role },
+        data: { deletedAt: new Date() },
+      });
+      if (deleted.count === 0) throw new Error("Tài khoản vừa được thay đổi ở phiên khác.");
+      return current;
+    });
     await recordAudit({
       actorId: currentUser.id,
       action: "user.soft_delete",
@@ -593,15 +670,38 @@ export async function createAdminAccount(input: unknown) {
       role: z.enum(["ADMIN", "STORE_MANAGER", "EDITOR"]),
     }).parse(input);
 
-    const existing = await prisma.user.findFirst({
+    const matches = await prisma.user.findMany({
       where: { OR: [{ email: data.email }, { phoneNumber: data.phoneNumber }] },
+      take: 2,
     });
+    if (matches.length > 1) {
+      throw new Error("Email và số điện thoại đang thuộc hai tài khoản khác nhau.");
+    }
+    const existing = matches[0];
+    if (
+      existing &&
+      (existing.email?.toLowerCase() !== data.email ||
+        existing.phoneNumber !== data.phoneNumber)
+    ) {
+      throw new Error("Email hoặc số điện thoại đã được một tài khoản khác sử dụng.");
+    }
+    if (existing?.id === operator.id) {
+      throw new Error("Hãy dùng luồng hồ sơ riêng để cập nhật tài khoản của bạn.");
+    }
     const password = data.password ? await bcrypt.hash(data.password, 12) : undefined;
     let accountId: string;
     if (existing) {
-      await prisma.user.update({
-        where: { id: existing.id },
-        data: { name: data.name, role: data.role, password, deletedAt: null },
+      await prisma.$transaction(async (tx) => {
+        if (existing.deletedAt === null && existing.role === "ADMIN" && data.role !== "ADMIN") {
+          const administrators = await lockActiveAdministrators(tx);
+          if (administrators.length <= 1) {
+            throw new Error("Không thể hạ quyền quản trị viên cuối cùng.");
+          }
+        }
+        await tx.user.update({
+          where: { id: existing.id },
+          data: { name: data.name, role: data.role, password, deletedAt: null },
+        });
       });
       accountId = existing.id;
     } else {

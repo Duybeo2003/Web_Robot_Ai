@@ -64,10 +64,13 @@ export async function updateDeliveryStatus(
       throw new Error("Cần nhập mã vận đơn trước khi giao hàng.");
     }
 
-    const updated = await tx.deliveryRequest.update({
-      where: { id },
+    const claimed = await tx.deliveryRequest.updateMany({
+      where: { id, status: delivery.status },
       data: { status, ...(trackingCode !== undefined ? { trackingCode } : {}) },
     });
+    if (claimed.count === 0) {
+      throw new Error("Yêu cầu vừa được cập nhật ở phiên khác. Vui lòng tải lại.");
+    }
     if (status === "CANCELLED") {
       await tx.userInventory.update({
         where: { id: delivery.inventoryItemId },
@@ -79,6 +82,7 @@ export async function updateDeliveryStatus(
         data: { status: "DELIVERED" },
       });
     }
+    const updated = await tx.deliveryRequest.findUniqueOrThrow({ where: { id } });
     return { updated, previousStatus: delivery.status };
   });
   await recordAudit({

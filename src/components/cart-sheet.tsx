@@ -113,6 +113,8 @@ export function CartSheet() {
                           </div>
                         )}
                         <button
+                          type="button"
+                          aria-label={`Xóa ${item.title} khỏi giỏ hàng`}
                           onClick={() => removeItem(item.id, item.variantId)}
                           className="text-gray-400 hover:text-red-500 p-1"
                         >
@@ -123,6 +125,8 @@ export function CartSheet() {
                       <div className="mt-auto flex items-center justify-between">
                         <div className="flex items-center border rounded-lg bg-background">
                           <button
+                            type="button"
+                            aria-label={`Giảm số lượng ${item.title}`}
                             onClick={() =>
                               updateQuantity(item.id, item.quantity - 1, item.variantId)
                             }
@@ -134,10 +138,15 @@ export function CartSheet() {
                             {item.quantity}
                           </span>
                           <button
+                            type="button"
+                            aria-label={`Tăng số lượng ${item.title}`}
                             onClick={() =>
                               updateQuantity(item.id, item.quantity + 1, item.variantId)
                             }
                             className="p-1.5 hover:bg-gray-100 rounded-r-lg transition-colors"
+                            disabled={
+                              item.quantity >= Math.min(99, item.inventoryCount ?? 99)
+                            }
                           >
                             <Plus className="w-3.5 h-3.5" />
                           </button>

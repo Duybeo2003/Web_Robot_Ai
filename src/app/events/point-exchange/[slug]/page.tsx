@@ -33,12 +33,26 @@ export default async function PointExchangeEventPage({ params }: { params: Promi
     },
     include: {
       prizes: {
+        where: {
+          OR: [
+            { productId: null },
+            { product: { deletedAt: null, supplyType: { not: "AFFILIATE_SELL" } } },
+          ],
+        },
         orderBy: { pointCost: "asc" }
       }
     }
   });
 
   if (!event || event.type !== "POINT_EXCHANGE") {
+    notFound();
+  }
+  if (
+    event.prizes.length === 0 ||
+    event.prizes.some(
+      (prize) => prize.pointCost <= 0 || (!prize.productId && prize.rewardPoints <= 0),
+    )
+  ) {
     notFound();
   }
 

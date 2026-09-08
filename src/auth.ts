@@ -136,9 +136,8 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         });
         if (consumed.count === 0) return null;
 
-        let user = await prisma.user.findFirst({
-          where: { phoneNumber: phone, deletedAt: null },
-        });
+        let user = await prisma.user.findUnique({ where: { phoneNumber: phone } });
+        if (user?.deletedAt) return null;
         if (!user) {
           user = await prisma.user.create({
             data: { phoneNumber: phone, role: "USER" },

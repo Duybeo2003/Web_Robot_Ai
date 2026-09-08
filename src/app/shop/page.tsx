@@ -55,14 +55,16 @@ export default async function ShopPage({
       title: true;
       slug: true;
       price: true;
+      originalPrice: true;
       imageUrl: true;
       type: true;
       supplyType: true;
       depositPercent: true;
       inventoryCount: true;
+      _count: { select: { variants: true } };
       category: { select: { name: true } };
     };
-  }>, "price"> & { price: number };
+  }>, "price" | "originalPrice"> & { price: number; originalPrice: number | null };
   
   let products: ShopProduct[] = [];
   let totalCount = 0;
@@ -130,6 +132,7 @@ export default async function ShopPage({
           supplyType: true,
           depositPercent: true,
           inventoryCount: true,
+          _count: { select: { variants: true } },
           category: {
             select: { name: true },
           },
@@ -141,7 +144,11 @@ export default async function ShopPage({
       prisma.product.count({ where: whereClause }),
     ]);
 
-    products = fetchedProducts.map((p) => ({ ...p, price: Number(p.price) }));
+    products = fetchedProducts.map((p) => ({
+      ...p,
+      price: Number(p.price),
+      originalPrice: p.originalPrice ? Number(p.originalPrice) : null,
+    }));
     totalCount = count;
 
     if (userId) {
@@ -180,7 +187,9 @@ export default async function ShopPage({
                     ? "Kit Arduino"
                     : typeFilter === "DO_CHOI_LOGIC"
                       ? "Đồ Chơi Logic"
-                      : "Tất Cả Sản Phẩm"}
+                      : typeFilter === "COMBO"
+                        ? "Combo Tiết Kiệm"
+                        : "Tất Cả Sản Phẩm"}
               </h1>
               <p className="text-muted-foreground text-sm mt-1">
                 Hiển thị {products.length} sản phẩm
@@ -222,11 +231,12 @@ export default async function ShopPage({
           ) : (
             <div className="space-y-8">
               <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
-                {products.map((product) => {
+                {products.map((product, index) => {
                   return (
                     <ProductCard
                       key={product.id}
                       product={product}
+                      eager={index === 0}
                       isWished={userWishlistIds.includes(product.id)}
                       action={
                         <AddToCartButton
@@ -238,6 +248,8 @@ export default async function ShopPage({
                             imageUrl: product.imageUrl || "",
                             supplyType: product.supplyType,
                             depositPercent: product.depositPercent,
+                            inventoryCount: product.inventoryCount,
+                            hasVariants: product._count.variants > 0,
                           }}
                         />
                       }

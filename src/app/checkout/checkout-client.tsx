@@ -5,6 +5,7 @@ import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { processCheckout } from "@/actions/checkout";
+import { generateOtp } from "@/actions/auth";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -69,6 +70,10 @@ export default function CheckoutClient({
   const [couponLoading, setCouponLoading] = useState(false);
   const [pointsToUse, setPointsToUse] = useState(0);
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [guestOtp, setGuestOtp] = useState("");
+  const [otpSentTo, setOtpSentTo] = useState("");
+  const [otpSending, setOtpSending] = useState(false);
+  const [otpCountdown, setOtpCountdown] = useState(0);
   const idempotencyKeyRef = useRef<string | null>(null);
   const discountedTotal = Math.max(0, calculatedTotal - couponDiscountAmount);
   const availablePoints = Math.max(0, customer?.points || 0);
@@ -103,11 +108,24 @@ export default function CheckoutClient({
     : methodIsAvailable(formData.paymentMethod)
       ? formData.paymentMethod
       : "COD";
+  const guestVerificationReady = Boolean(
+    customer ||
+      (otpSentTo === formData.receiverPhone.trim() && /^\d{6}$/.test(guestOtp)),
+  );
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (otpCountdown <= 0) return;
+    const timer = window.setTimeout(
+      () => setOtpCountdown((seconds) => seconds - 1),
+      1_000,
+    );
+    return () => window.clearTimeout(timer);
+  }, [otpCountdown]);
 
   if (!mounted) return null;
 
@@ -116,6 +134,32 @@ export default function CheckoutClient({
       style: "currency",
       currency: "VND",
     }).format(price);
+  };
+
+  const handleSendGuestOtp = async () => {
+    setError("");
+    const phone = formData.receiverPhone.trim();
+    if (!/^(?:\+84|0)[0-9]{9,10}$/.test(phone)) {
+      setError("Vui lòng nhập số điện thoại hợp lệ trước khi nhận OTP.");
+      return;
+    }
+
+    setOtpSending(true);
+    try {
+      const result = await generateOtp(phone);
+      if (!result.success) {
+        setError(result.error || "Không thể gửi OTP lúc này.");
+        return;
+      }
+      setGuestOtp("");
+      setOtpSentTo(phone);
+      setOtpCountdown(60);
+      toast.success("Mã OTP đã được gửi và có hiệu lực trong 5 phút.");
+    } catch {
+      setError("Không thể gửi OTP lúc này. Vui lòng thử lại sau.");
+    } finally {
+      setOtpSending(false);
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -131,6 +175,13 @@ export default function CheckoutClient({
       setError("Đơn có sản phẩm đặt trước nhưng chưa có kênh thanh toán trước khả dụng.");
       return;
     }
+    if (
+      !customer &&
+      (otpSentTo !== formData.receiverPhone.trim() || !/^\d{6}$/.test(guestOtp))
+    ) {
+      setError("Vui lòng nhận và nhập đúng 6 chữ số OTP của số điện thoại đặt hàng.");
+      return;
+    }
     if (!acceptedTerms) {
       setError("Bạn cần đọc và đồng ý với điều khoản mua hàng.");
       return;
@@ -144,10 +195,12 @@ export default function CheckoutClient({
         receiverName: formData.receiverName,
         shippingAddress: formData.shippingAddress,
         receiverPhone: formData.receiverPhone,
+        guestOtp: customer ? undefined : guestOtp,
         paymentMethod,
         cartItems: items.map((item) => ({
           productId: item.id,
           quantity: item.quantity,
+          expectedUnitPrice: item.price,
           variantId: item.variantId || undefined,
         })),
         couponCode: couponDiscountAmount > 0 ? couponInput : undefined,
@@ -252,14 +305,63 @@ export default function CheckoutClient({
                 </Label>
                 <Input
                   id="receiverPhone"
+                  type="tel"
+                  autoComplete="tel"
                   required
                   placeholder="0912345678"
                   value={formData.receiverPhone}
-                  onChange={(e) =>
-                    setFormData({ ...formData, receiverPhone: e.target.value })
-                  }
+                  onChange={(e) => {
+                    const receiverPhone = e.target.value;
+                    setFormData({ ...formData, receiverPhone });
+                    if (receiverPhone.trim() !== otpSentTo) {
+                      setGuestOtp("");
+                      setOtpSentTo("");
+                      setOtpCountdown(0);
+                    }
+                  }}
                   className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
                 />
+                {!customer && (
+                  <div className="space-y-2 rounded-sm border border-blue-100 bg-blue-50/60 p-3">
+                    <Label htmlFor="guestOtp" className="text-sm font-medium text-neutral-700">
+                      Xác thực số điện thoại để đặt hàng
+                    </Label>
+                    <div className="flex gap-2">
+                      <Input
+                        id="guestOtp"
+                        inputMode="numeric"
+                        autoComplete="one-time-code"
+                        maxLength={6}
+                        placeholder="Nhập 6 chữ số OTP"
+                        value={guestOtp}
+                        onChange={(event) =>
+                          setGuestOtp(event.target.value.replace(/\D/g, "").slice(0, 6))
+                        }
+                        className="h-11 bg-white"
+                        disabled={!otpSentTo || loading}
+                      />
+                      <Button
+                        type="button"
+                        variant="outline"
+                        className="h-11 min-w-32 bg-white"
+                        disabled={otpSending || loading || otpCountdown > 0}
+                        onClick={handleSendGuestOtp}
+                      >
+                        {otpSending && <Loader2 className="mr-1 size-4 animate-spin" />}
+                        {otpCountdown > 0
+                          ? `Gửi lại (${otpCountdown}s)`
+                          : otpSentTo
+                            ? "Gửi lại OTP"
+                            : "Nhận OTP"}
+                      </Button>
+                    </div>
+                    <p className="text-xs text-neutral-600" aria-live="polite">
+                      {otpSentTo
+                        ? `Mã đã gửi tới ${otpSentTo}; mã dùng một lần và hết hạn sau 5 phút.`
+                        : "Chúng tôi dùng OTP để ngăn đơn giả mạo số điện thoại."}
+                    </p>
+                  </div>
+                )}
               </div>
 
               <div className="space-y-3">
@@ -378,7 +480,12 @@ export default function CheckoutClient({
             <div className="pt-6">
               <Button
                 type="submit"
-                disabled={loading || !acceptedTerms || (hasPreOrder && !prepaymentAvailable)}
+                disabled={
+                  loading ||
+                  !acceptedTerms ||
+                  !guestVerificationReady ||
+                  (hasPreOrder && !prepaymentAvailable)
+                }
                 className="w-full h-14 text-lg font-bold rounded-sm flex items-center justify-center bg-[#FF5722] hover:bg-[#E64A19] text-white transition-colors"
               >
                 {loading ? (

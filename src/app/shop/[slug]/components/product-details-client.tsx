@@ -127,9 +127,13 @@ export function ProductDetailsClient({
         <div className="mb-6 space-y-2 text-sm">
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground w-24">Tình trạng:</span>
-            {product.supplyType === "PRE_ORDER" ? (
-              <span className="font-medium text-amber-500">
-                Hàng Order (Chờ 7-10 ngày)
+            {product.supplyType === "AFFILIATE_SELL" ? (
+              <span className="font-medium text-blue-600">Bán qua đối tác</span>
+            ) : product.supplyType === "PRE_ORDER" ? (
+              <span className={`font-medium ${currentInventory > 0 ? "text-amber-600" : "text-red-500"}`}>
+                {currentInventory > 0
+                  ? `Đặt trước - còn ${currentInventory} suất`
+                  : "Hết suất đặt trước"}
               </span>
             ) : (
               <span
@@ -143,7 +147,11 @@ export function ProductDetailsClient({
           </div>
           <div className="flex items-center gap-2">
             <span className="text-muted-foreground w-24">Vận chuyển:</span>
-            <span className="font-medium text-foreground">Miễn phí giao hàng toàn quốc</span>
+            <span className="font-medium text-foreground">
+              {product.supplyType === "AFFILIATE_SELL"
+                ? "Theo chính sách của đối tác bán hàng"
+                : "Xác nhận theo chính sách giao hàng của RoboEQ"}
+            </span>
           </div>
 
           {product.supplyType === "PRE_ORDER" && (
@@ -169,21 +177,27 @@ export function ProductDetailsClient({
           />
         </div>
 
-        {/* Trust Indicators for Tech products */}
-        <div className="mt-8 pt-8 border-t border-border/50 grid grid-cols-3 gap-2">
-          <div className="flex flex-col items-center text-center space-y-2">
-            <ShieldCheck className="w-6 h-6 text-[#FF5722]" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Bảo hành 12 tháng</span>
+        {/* Service policy indicators */}
+        {product.supplyType === "AFFILIATE_SELL" ? (
+          <div className="mt-8 border-t border-border/50 pt-6 text-sm text-muted-foreground">
+            Giá, giao hàng, đổi trả và bảo hành được xác nhận tại website của đối tác trước khi thanh toán.
           </div>
-          <div className="flex flex-col items-center text-center space-y-2 border-l border-r border-border/50 px-2">
-            <RefreshCcw className="w-6 h-6 text-[#FF5722]" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">1 đổi 1 trong 7 ngày</span>
+        ) : (
+          <div className="mt-8 pt-8 border-t border-border/50 grid grid-cols-3 gap-2">
+            <div className="flex flex-col items-center text-center space-y-2">
+              <ShieldCheck className="w-6 h-6 text-[#FF5722]" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Bảo hành theo sản phẩm</span>
+            </div>
+            <div className="flex flex-col items-center text-center space-y-2 border-l border-r border-border/50 px-2">
+              <RefreshCcw className="w-6 h-6 text-[#FF5722]" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Đổi trả theo điều kiện</span>
+            </div>
+            <div className="flex flex-col items-center text-center space-y-2">
+              <Wrench className="w-6 h-6 text-[#FF5722]" />
+              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Hỗ trợ kỹ thuật</span>
+            </div>
           </div>
-          <div className="flex flex-col items-center text-center space-y-2">
-            <Wrench className="w-6 h-6 text-[#FF5722]" />
-            <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Hỗ trợ kỹ thuật 24/7</span>
-          </div>
-        </div>
+        )}
       </div>
     </div>
   );
