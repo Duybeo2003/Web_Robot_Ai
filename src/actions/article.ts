@@ -5,11 +5,18 @@ import { z } from "zod";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/utils";
+import { recordAudit } from "@/lib/audit";
+import { isAllowedImageUrl } from "@/lib/media-url";
 
 const articleSchema = z.object({
   title: z.string().trim().min(3).max(200),
   content: z.string().trim().min(20).max(500_000),
-  thumbnail: z.string().trim().max(2_000).optional(),
+  thumbnail: z
+    .union([
+      z.literal(""),
+      z.string().trim().max(2_000).refine(isAllowedImageUrl, "Ảnh đại diện không hợp lệ."),
+    ])
+    .optional(),
   tags: z.string().trim().max(500).optional(),
   published: z.boolean(),
 });
@@ -56,6 +63,13 @@ export async function createArticle(input: unknown) {
     const article = await prisma.article.create({
       data: { ...data, slug, authorId: user.id },
     });
+    await recordAudit({
+      actorId: user.id,
+      action: "article.create",
+      model: "Article",
+      recordId: article.id,
+      after: { title: article.title, published: article.published },
+    });
     revalidatePath("/admin/articles");
     revalidatePath("/giao-duc");
     return { success: true, data: article };
@@ -68,11 +82,18 @@ export async function createArticle(input: unknown) {
 
 export async function updateArticle(id: string, input: unknown) {
   try {
-    await requireRole("ADMIN", "EDITOR");
+    const user = await requireRole("ADMIN", "EDITOR");
     const data = articleSchema.parse(input);
     const article = await prisma.article.update({
       where: { id: z.string().min(1).max(191).parse(id) },
       data,
+    });
+    await recordAudit({
+      actorId: user.id,
+      action: "article.update",
+      model: "Article",
+      recordId: article.id,
+      after: { title: article.title, published: article.published },
     });
     revalidatePath("/admin/articles");
     revalidatePath("/giao-duc");
@@ -87,9 +108,16 @@ export async function updateArticle(id: string, input: unknown) {
 
 export async function deleteArticle(id: string) {
   try {
-    await requireRole("ADMIN", "EDITOR");
-    await prisma.article.delete({
+    const user = await requireRole("ADMIN", "EDITOR");
+    const article = await prisma.article.delete({
       where: { id: z.string().min(1).max(191).parse(id) },
+    });
+    await recordAudit({
+      actorId: user.id,
+      action: "article.delete",
+      model: "Article",
+      recordId: article.id,
+      before: { title: article.title, published: article.published },
     });
     revalidatePath("/admin/articles");
     revalidatePath("/giao-duc");

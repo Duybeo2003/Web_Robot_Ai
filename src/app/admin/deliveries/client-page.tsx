@@ -11,8 +11,6 @@ import { Label } from "@/components/ui/label";
 
 interface DeliveryItem {
   id: string;
-  userId: string;
-  inventoryItemId: string;
   status: string;
   recipientName: string;
   phoneNumber: string;
@@ -20,12 +18,9 @@ interface DeliveryItem {
   notes: string | null;
   trackingCode: string | null;
   shippingFee: number;
-  createdAt: Date;
-  updatedAt: Date;
-  user: { name: string | null; email: string | null };
+  createdAt: string;
   inventoryItem: {
-    product: { title: string; imageUrl: string | null };
-    quantity: number;
+    product: { title: string };
   };
 }
 
@@ -180,13 +175,15 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
           </DialogHeader>
           <div className="grid gap-4 py-4">
             <div className="grid gap-2">
-              <Label>Mã Vận Đơn (Tùy chọn)</Label>
+              <Label htmlFor="tracking-code">Mã vận đơn</Label>
               <Input 
+                id="tracking-code"
+                required
                 placeholder="VD: GHTK123456789"
                 value={trackingCode}
                 onChange={(e) => setTrackingCode(e.target.value)}
               />
-              <p className="text-xs text-neutral-500">Khách hàng sẽ dùng mã này để tra cứu trạng thái đơn hàng.</p>
+              <p className="text-xs text-neutral-500">Bắt buộc để khách hàng tra cứu trạng thái đơn hàng.</p>
             </div>
           </div>
           <DialogFooter>
@@ -197,7 +194,7 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
                   handleStatusUpdate(selectedDelivery.id, "SHIPPED", trackingCode)
                 }
               }} 
-              disabled={loading || !selectedDelivery} 
+              disabled={loading || !selectedDelivery || trackingCode.trim().length < 3}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
               Xác nhận Giao

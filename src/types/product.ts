@@ -5,7 +5,5 @@ export interface Product {
   originalPrice?: number | null;
   imageUrl?: string | null;
   slug: string;
-  // additional fields as needed
-   
-  [key: string]: any;
+  supplyType?: "IN_HOUSE" | "AFFILIATE_SELL" | "PRE_ORDER" | "AFFILIATE_HOST";
 }

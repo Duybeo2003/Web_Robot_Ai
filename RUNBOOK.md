@@ -6,7 +6,10 @@
 2. Sao chép `.env.example` thành `.env` trên máy chủ và thay toàn bộ giá trị mẫu.
 3. Đặt `NEXTAUTH_URL`, `AUTH_URL` và `NEXT_PUBLIC_APP_URL` về HTTPS của tên miền thật.
 4. Cấu hình VNPay Return URL là `https://<domain>/api/vnpay/vnpay_return` và IPN URL là `https://<domain>/api/vnpay/ipn` trong cổng merchant.
-5. Chỉ mở cổng 80/443 ra Internet. MySQL và Redis không được public.
+5. Xác minh domain gửi email, sau đó cấu hình `EMAIL_API_KEY`, `EMAIL_FROM` và `ADMIN_EMAIL`.
+6. Điền đúng thông tin công khai của đơn vị bán hàng: `LEGAL_COMPANY_NAME`, `LEGAL_TAX_CODE`, `LEGAL_ADDRESS`, `SUPPORT_PHONE`, `SUPPORT_EMAIL` và `LEGAL_REGISTRATION_NUMBER` nếu có. Đối chiếu lại các trang điều khoản/chính sách sau khi triển khai.
+7. Đặt `ROBOEQ_IMAGE` thành tag SHA đã được pipeline xuất bản. Không triển khai bằng tag `latest`.
+8. Chỉ mở cổng 80/443 ra Internet. MySQL và Redis không được public.
 
 Tạo secret bằng trình quản lý mật khẩu hoặc `openssl rand -base64 48`. `NEXTAUTH_SECRET`, `VNP_HASH_SECRET`, `CRON_SECRET`, mật khẩu DB và token SMS phải khác nhau.
 
@@ -66,3 +69,7 @@ Không phục hồi đè production trước khi đã xác minh file và có sna
 ## Rollback
 
 Đổi image của service `web` về tag SHA đã chạy ổn định, chạy `docker compose up -d`, rồi kiểm tra health. Không tự động hạ schema. Nếu thay đổi schema không tương thích, phục hồi theo kế hoạch migration và bản backup đã thử nghiệm.
+# Cấu hình tích hợp giao vận
+
+Khai báo `LOGISTICS_API_URL` bằng HTTPS và `LOGISTICS_API_KEY` do cổng tích
+hợp cấp. Tạo thử vận đơn trên staging trước khi mở tính năng cho nhân viên kho.

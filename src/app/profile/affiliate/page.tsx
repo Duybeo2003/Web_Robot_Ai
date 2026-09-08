@@ -8,16 +8,25 @@ import { AffiliateLinkGenerator } from "./components/affiliate-link-generator";
 export default async function AffiliateDashboard() {
   const session = await auth();
   if (!session?.user?.id) {
-    redirect("/auth/login");
+    redirect("/?login=true");
   }
 
   const userId = session.user.id;
 
   const commissions = await prisma.commission.findMany({
     where: { affiliateUserId: userId },
-    include: {
+    select: {
+      id: true,
+      orderId: true,
+      amount: true,
+      status: true,
       order: {
-        include: { items: { include: { product: true } } },
+        select: {
+          items: {
+            where: { product: { supplyType: "AFFILIATE_HOST" } },
+            select: { id: true, product: { select: { title: true } } },
+          },
+        },
       },
     },
     orderBy: { createdAt: "desc" },
@@ -33,7 +42,7 @@ export default async function AffiliateDashboard() {
 
   // Get eligible products
   const affiliateProducts = await prisma.product.findMany({
-    where: { supplyType: "AFFILIATE_HOST" },
+    where: { supplyType: "AFFILIATE_HOST", deletedAt: null },
     select: { id: true, title: true, slug: true, commissionRate: true },
   });
 
@@ -119,7 +128,12 @@ export default async function AffiliateDashboard() {
                         c.status === "PENDING" ? "bg-amber-100 text-amber-700" :
                         "bg-red-100 text-red-700"
                       }`}>
-                        {c.status}
+                        {{
+                          PAID: "Đã chi",
+                          PENDING: "Đang chờ",
+                          CANCELLED: "Đã hủy",
+                          REVERSED: "Đã đảo do hoàn hàng",
+                        }[c.status]}
                       </span>
                     </td>
                   </tr>

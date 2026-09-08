@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { unstable_cache } from "next/cache";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { z } from "zod";
+import { logger } from "@/lib/logger";
 
 const chatRequestSchema = z.object({
   messages: z
@@ -14,13 +15,21 @@ const chatRequestSchema = z.object({
       }),
     )
     .min(1)
-    .max(20),
+    .max(20)
+    .refine(
+      (messages) =>
+        messages.reduce((total, message) => total + message.content.length, 0) <=
+        12_000,
+      "Hội thoại quá dài.",
+    ),
 });
 
 const getCachedProducts = unstable_cache(
   async () => {
     return prisma.product.findMany({
       where: { deletedAt: null },
+      orderBy: { updatedAt: "desc" },
+      take: 200,
       select: {
         title: true,
         price: true,
@@ -58,11 +67,12 @@ export async function POST(req: Request) {
     }
     const { messages } = parsedBody.data;
 
-    const apiKey = process.env.OPENROUTER_API_KEY;
-    if (!apiKey || apiKey === "YOUR_OPENROUTER_API_KEY_HERE") {
+    const apiKey = process.env.OPENROUTER_API_KEY?.trim();
+    const modelId = process.env.OPENROUTER_MODEL?.trim();
+    if (!apiKey || !modelId) {
       return new Response(
-        "Chưa cấu hình API key. Vui lòng thêm OPENROUTER_API_KEY vào file .env",
-        { status: 500 },
+        "Trợ lý AI tạm thời chưa sẵn sàng. Vui lòng liên hệ RoboEQ để được hỗ trợ.",
+        { status: 503 },
       );
     }
 
@@ -79,7 +89,8 @@ export async function POST(req: Request) {
         (p) =>
           `- ${p.title} (${p.category?.name || "Chưa phân loại"}) - Giá: ${p.price} VND - Mã: ${p.sku}`,
       )
-      .join("\n");
+      .join("\n")
+      .slice(0, 20_000);
 
     const systemPrompt = `Bạn là RoboEQ - Trợ lý AI hỗ trợ tư vấn giáo dục STEM, linh kiện điện tử và robot.
 Bạn chuyên nghiệp, thân thiện, và sử dụng tiếng Việt.
@@ -91,15 +102,16 @@ Nếu khách hỏi về sản phẩm, hãy gợi ý dựa trên danh sách trên
 Nếu khách hỏi về kiến thức lập trình (Arduino, Python) hoặc lắp ráp robot, hãy hướng dẫn tận tình.`;
 
     const result = await streamText({
-      model: openrouter("google/gemma-4-26b-a4b-it:free"),
+      model: openrouter(modelId),
       messages,
       system: systemPrompt,
+      maxOutputTokens: 800,
     });
 
     return result.toTextStreamResponse();
   } catch (error: unknown) {
     const err = error as Error;
-    console.error("[Chat API Error]", err?.message || err);
+    logger.error("chat.request_failed", { error: err?.message || "unknown" });
 
     const errorMsg = err?.message || "";
 
@@ -109,13 +121,13 @@ Nếu khách hỏi về kiến thức lập trình (Arduino, Python) hoặc lắ
       errorMsg.includes("401")
     ) {
       return new Response(
-        "API key không hợp lệ. Vui lòng kiểm tra lại OPENROUTER_API_KEY trong file .env",
-        { status: 401 },
+        "Trợ lý AI chưa thể kết nối dịch vụ. Vui lòng thử lại sau.",
+        { status: 503 },
       );
     }
 
     return new Response(
-      `Lỗi: ${errorMsg || "Có lỗi xảy ra khi xử lý yêu cầu."}`,
+      "Trợ lý AI chưa thể trả lời lúc này. Vui lòng thử lại sau.",
       { status: 500 },
     );
   }

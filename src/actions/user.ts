@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireUser } from "@/lib/authz";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
+import { Prisma } from "@prisma/client";
 
 export async function updateUserProfile(input: unknown) {
   try {
@@ -25,13 +26,11 @@ export async function updateUserProfile(input: unknown) {
     return { success: true };
   } catch (error) {
     console.error("[UPDATE_PROFILE_ERROR]", error);
-    if (
-      typeof error === "object" &&
-      error !== null &&
-      "code" in error &&
-      error.code === "P2002"
-    ) {
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { error: "Số điện thoại đã được dùng bởi tài khoản khác." };
+    }
+    if (error instanceof Prisma.PrismaClientKnownRequestError) {
+      return { error: "Không thể cập nhật hồ sơ." };
     }
     return { error: error instanceof Error ? error.message : "Không thể cập nhật hồ sơ." };
   }

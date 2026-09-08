@@ -20,26 +20,57 @@ import {
 } from "lucide-react";
 import { OrderStatusUpdater } from "../order-status-updater";
 import { format } from "date-fns";
+import { Input } from "@/components/ui/input";
+import { confirmOrderRefund } from "@/actions/order";
+import { toast } from "sonner";
+import type { OrderStatus, PaymentStatus } from "@prisma/client";
 
-export function OrderDetailsModal({ order }: { order: {
+export type AdminOrderDetails = {
   id: string;
-  status: string;
-  paymentStatus: string;
-  shippingAddress: string;
-  receiverPhone: string;
+  status: OrderStatus;
+  paymentStatus: PaymentStatus;
+  shippingAddress: string | null;
+  receiverPhone: string | null;
   paymentMethod: string;
+  customerName: string | null;
   createdAt: string | Date;
   totalAmount: number | string;
+  depositAmount: number | string;
+  amountPaid: number | string;
+  amountDue: number | string;
+  termsVersion: string | null;
+  termsAcceptedAt: string | Date | null;
   user: { name: string | null; phoneNumber: string | null };
+  paymentTransactions: {
+    id: string;
+    provider: string;
+    status: string;
+    amount: number | string;
+    createdAt: string | Date;
+    processedAt: string | Date | null;
+  }[];
   items: {
     id: string;
     product: { title: string; supplyType?: string };
-    variant?: { attributes: Record<string, string> };
+    variant: { attributes: unknown } | null;
     quantity: number;
     priceAtPurchase: string | number;
   }[];
-} }) {
+};
+
+function variantLabel(attributes: unknown) {
+  if (!attributes || typeof attributes !== "object" || Array.isArray(attributes)) return "";
+  return Object.values(attributes)
+    .filter((value): value is string | number =>
+      typeof value === "string" || typeof value === "number",
+    )
+    .join(" - ");
+}
+
+export function OrderDetailsModal({ order }: { order: AdminOrderDetails }) {
   const [isPushing, setIsPushing] = useState(false);
+  const [refundReference, setRefundReference] = useState("");
+  const [isRefunding, setIsRefunding] = useState(false);
 
   return (
     <Sheet>
@@ -69,10 +100,11 @@ export function OrderDetailsModal({ order }: { order: {
               orderId={order.id}
               currentStatus={order.status}
               paymentStatus={order.paymentStatus}
+              pendingPaymentProvider={
+                order.paymentTransactions.find((payment) => payment.status === "PENDING")?.provider
+              }
             />
-            {order.status !== "SHIPPED" &&
-              order.status !== "COMPLETED" &&
-              order.status !== "CANCELLED" && (
+            {order.status === "PROCESSING" && (
                 <div className="pt-2 border-t mt-2 flex justify-end">
                     <Button
                       size="sm"
@@ -86,14 +118,14 @@ export function OrderDetailsModal({ order }: { order: {
                             await import("@/actions/admin");
                           const res = await pushOrderToLogistics(order.id, "GHN");
                           if (res.success) {
-                            alert(
+                            toast.success(
                               `Đã đẩy đơn sang GHN! Mã vận đơn: ${res.trackingCode}`,
                             );
                           } else {
-                            alert(`Lỗi: ${res.error}`);
+                            toast.error(res.error);
                           }
                         } catch {
-                          alert("Lỗi kết nối khi gọi vận chuyển");
+                          toast.error("Lỗi kết nối khi gọi vận chuyển");
                         } finally {
                           setIsPushing(false);
                         }
@@ -104,6 +136,41 @@ export function OrderDetailsModal({ order }: { order: {
                 </div>
               )}
           </div>
+
+          {["RETURNED", "CANCELLED"].includes(order.status) &&
+            ["PAID", "PARTIALLY_PAID"].includes(order.paymentStatus) && (
+            <div className="rounded-lg border border-red-200 bg-red-50 p-4">
+              <h4 className="text-sm font-semibold text-red-900">Xác nhận đã hoàn tiền</h4>
+              <p className="mt-1 text-xs text-red-800">
+                Chỉ dùng sau khi đã hoàn tiền trên cổng thanh toán hoặc ngân hàng.
+              </p>
+              <div className="mt-3 flex gap-2">
+                <Input
+                  value={refundReference}
+                  onChange={(event) => setRefundReference(event.target.value)}
+                  placeholder="Mã đối soát hoàn tiền"
+                  minLength={6}
+                  maxLength={191}
+                />
+                <Button
+                  variant="destructive"
+                  disabled={isRefunding || refundReference.trim().length < 6}
+                  onClick={async () => {
+                    setIsRefunding(true);
+                    const result = await confirmOrderRefund(order.id, refundReference);
+                    setIsRefunding(false);
+                    if (result.success) {
+                      toast.success("Đã ghi nhận hoàn tiền.");
+                    } else {
+                      toast.error(result.error);
+                    }
+                  }}
+                >
+                  {isRefunding ? "Đang lưu..." : "Xác nhận"}
+                </Button>
+              </div>
+            </div>
+          )}
 
           {/* Customer Info */}
           <div className="space-y-3 text-sm">
@@ -116,7 +183,7 @@ export function OrderDetailsModal({ order }: { order: {
             <div className="pl-9 space-y-1 text-muted-foreground">
               <p>
                 <strong className="text-foreground">Tên:</strong>{" "}
-                {order.user.name || "Khách"}
+                {order.customerName || order.user.name || "Khách"}
               </p>
               <p>
                 <strong className="text-foreground">SĐT:</strong>{" "}
@@ -155,6 +222,41 @@ export function OrderDetailsModal({ order }: { order: {
                 <strong className="text-foreground">Ngày đặt:</strong>{" "}
                 {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
               </p>
+              {order.termsAcceptedAt && (
+                <p>
+                  <strong className="text-foreground">Điều khoản:</strong>{" "}
+                  phiên bản {order.termsVersion || "không xác định"} · chấp nhận lúc{" "}
+                  {format(new Date(order.termsAcceptedAt), "dd/MM/yyyy HH:mm")}
+                </p>
+              )}
+              <p>
+                <strong className="text-foreground">Tiền cọc ban đầu:</strong>{" "}
+                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(order.depositAmount))}
+              </p>
+              <p>
+                <strong className="text-foreground">Đã thu:</strong>{" "}
+                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(order.amountPaid))}
+              </p>
+              <p>
+                <strong className="text-foreground">Còn phải thu:</strong>{" "}
+                {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(order.amountDue))}
+              </p>
+              {order.paymentTransactions.length > 0 && (
+                <details className="pt-2">
+                  <summary className="cursor-pointer font-medium text-blue-700">Lịch sử giao dịch</summary>
+                  <ul className="mt-2 space-y-2">
+                    {order.paymentTransactions.map((payment) => (
+                      <li key={payment.id} className="rounded border bg-white p-2 text-xs">
+                        <span className="font-semibold">{payment.provider} · {payment.status}</span>
+                        <span className="block">
+                          {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(payment.amount))}
+                          {" · "}{format(new Date(payment.createdAt), "dd/MM/yyyy HH:mm")}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </details>
+              )}
             </div>
           </div>
 
@@ -167,13 +269,7 @@ export function OrderDetailsModal({ order }: { order: {
               Sản phẩm ({order.items.length})
             </h4>
             <div className="space-y-3 pl-9">
-              {order.items.map((item: {
-                id: string;
-                product: { title: string; supplyType?: string };
-                variant?: { attributes: Record<string, string> };
-                quantity: number;
-                priceAtPurchase: string | number;
-              }) => (
+              {order.items.map((item) => (
                 <div
                   key={item.id}
                   className="flex justify-between items-start border-b pb-3 last:border-0 last:pb-0"
@@ -182,9 +278,9 @@ export function OrderDetailsModal({ order }: { order: {
                     <p className="font-medium leading-snug">
                       {item.product.title}
                     </p>
-                    {item.variant && item.variant.attributes && (
+                    {variantLabel(item.variant?.attributes) && (
                       <p className="text-xs text-muted-foreground mt-1 font-medium text-blue-600">
-                        {Object.values(item.variant.attributes).join(" - ")}
+                        {variantLabel(item.variant?.attributes)}
                       </p>
                     )}
                     <p className="text-xs text-muted-foreground mt-1">
@@ -208,25 +304,6 @@ export function OrderDetailsModal({ order }: { order: {
                   }).format(Number(order.totalAmount))}
                 </p>
               </div>
-              {order.items.some((item: { product: { supplyType?: string } }) => item.product.supplyType === "PRE_ORDER") && (() => {
-                const depositTotal = order.items.reduce((total: number, item: { product: { supplyType?: string }; priceAtPurchase: string | number; quantity: number }) => {
-                  if (item.product.supplyType === "PRE_ORDER") {
-                    return total + (Number(item.priceAtPurchase) * item.quantity * 0.7);
-                  }
-                  return total + (Number(item.priceAtPurchase) * item.quantity);
-                }, 0);
-                return (
-                  <div className="flex justify-between items-center pt-2 mt-2 border-t border-dashed border-primary/20 text-amber-600">
-                    <p className="font-semibold text-sm">Tiền cọc cần thu (70% hàng Order):</p>
-                    <p className="font-bold text-sm">
-                      {new Intl.NumberFormat("vi-VN", {
-                        style: "currency",
-                        currency: "VND",
-                      }).format(depositTotal)}
-                    </p>
-                  </div>
-                );
-              })()}
             </div>
           </div>
         </div>

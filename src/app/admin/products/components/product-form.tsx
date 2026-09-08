@@ -297,7 +297,7 @@ export function ProductForm({
               <Input
                 id="depositPercent"
                 type="number"
-                min="0"
+                min="1"
                 max="100"
                 value={formData.depositPercent}
                 onChange={(e) =>

@@ -10,10 +10,11 @@ import ReactMarkdown from "react-markdown";
 export async function generateMetadata({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }): Promise<Metadata> {
+  const { slug } = await params;
   const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
+    where: { slug, published: true },
   });
 
   if (!article) {
@@ -34,10 +35,11 @@ export async function generateMetadata({
 export default async function ArticleDetailPage({
   params,
 }: {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }) {
+  const { slug } = await params;
   const article = await prisma.article.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       author: { select: { name: true } },
     },
@@ -118,4 +120,3 @@ export default async function ArticleDetailPage({
 
 
 export const dynamic = 'force-dynamic';
-

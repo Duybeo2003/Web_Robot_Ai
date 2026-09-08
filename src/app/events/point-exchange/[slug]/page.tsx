@@ -5,8 +5,15 @@ import { auth } from "@/auth";
 
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const event = await prisma.event.findUnique({
-    where: { slug: resolvedParams.slug }
+  const now = new Date();
+  const event = await prisma.event.findFirst({
+    where: {
+      slug: resolvedParams.slug,
+      type: "POINT_EXCHANGE",
+      isActive: true,
+      startDate: { lte: now },
+      endDate: { gte: now },
+    },
   });
 
   if (!event) return { title: "Không tìm thấy Sự kiện" };
@@ -15,8 +22,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
 export default async function PointExchangeEventPage({ params }: { params: Promise<{ slug: string }> }) {
   const resolvedParams = await params;
-  const event = await prisma.event.findUnique({
-    where: { slug: resolvedParams.slug },
+  const now = new Date();
+  const event = await prisma.event.findFirst({
+    where: {
+      slug: resolvedParams.slug,
+      type: "POINT_EXCHANGE",
+      isActive: true,
+      startDate: { lte: now },
+      endDate: { gte: now },
+    },
     include: {
       prizes: {
         orderBy: { pointCost: "asc" }

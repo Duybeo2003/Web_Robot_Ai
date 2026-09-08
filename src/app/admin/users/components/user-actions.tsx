@@ -23,7 +23,9 @@ export function UserActions({
 }) {
   const [isLoading, setIsLoading] = useState(false);
 
-  const handleRoleChange = async (newRole: "USER" | "ADMIN" | "STORE_MANAGER") => {
+  const handleRoleChange = async (
+    newRole: "USER" | "ADMIN" | "STORE_MANAGER" | "EDITOR",
+  ) => {
     setIsLoading(true);
     try {
       const result = await updateUserRole(userId, newRole);
@@ -82,6 +84,10 @@ export function UserActions({
             <DropdownMenuItem onClick={() => handleRoleChange("STORE_MANAGER")}>
               <ShieldCheck className="mr-2 h-4 w-4 text-blue-600" />
               <span>Thăng cấp Quản lý (Cấp 2)</span>
+            </DropdownMenuItem>
+            <DropdownMenuItem onClick={() => handleRoleChange("EDITOR")}>
+              <ShieldCheck className="mr-2 h-4 w-4 text-purple-600" />
+              <span>Phân quyền biên tập viên</span>
             </DropdownMenuItem>
             <DropdownMenuItem onClick={() => handleRoleChange("ADMIN")}>
               <ShieldCheck className="mr-2 h-4 w-4 text-green-600" />

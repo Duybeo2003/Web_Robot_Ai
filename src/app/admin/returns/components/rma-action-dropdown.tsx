@@ -28,9 +28,10 @@ export function RmaActionDropdown({
 
   const handleUpdate = async (
     status: "APPROVED" | "REJECTED" | "COMPLETED",
+    restock = false,
   ) => {
     setLoading(true);
-    const res = await updateReturnRequestStatus(requestId, status);
+    const res = await updateReturnRequestStatus(requestId, status, restock);
     if (res.error) {
       toast.error(res.error);
     } else {
@@ -69,13 +70,22 @@ export function RmaActionDropdown({
           </>
         )}
         {currentStatus === "APPROVED" && (
-          <DropdownMenuItem
-            onClick={() => handleUpdate("COMPLETED")}
-            className="cursor-pointer text-green-600"
-          >
-            <PackageCheck className="mr-2 h-4 w-4" />
-            Đã hoàn thành Đổi/Trả
-          </DropdownMenuItem>
+          <>
+            <DropdownMenuItem
+              onClick={() => handleUpdate("COMPLETED", true)}
+              className="cursor-pointer text-green-600"
+            >
+              <PackageCheck className="mr-2 h-4 w-4" />
+              Hoàn tất và nhập lại kho
+            </DropdownMenuItem>
+            <DropdownMenuItem
+              onClick={() => handleUpdate("COMPLETED", false)}
+              className="cursor-pointer text-amber-700"
+            >
+              <PackageCheck className="mr-2 h-4 w-4" />
+              Hoàn tất, không nhập kho
+            </DropdownMenuItem>
+          </>
         )}
         {(currentStatus === "COMPLETED" || currentStatus === "REJECTED") && (
           <DropdownMenuItem disabled>Không có hành động</DropdownMenuItem>

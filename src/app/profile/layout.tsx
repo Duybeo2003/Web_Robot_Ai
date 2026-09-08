@@ -30,7 +30,7 @@ export default async function ProfileLayout({ children }: { children: React.Reac
               </div>
               <div className="overflow-hidden">
                 <p className="font-semibold text-foreground truncate">{session.user.name || "Khách hàng"}</p>
-                <p className="text-xs text-neutral-500 truncate">{session.user.email || (session.user as any).phoneNumber}</p>
+                <p className="truncate text-xs text-neutral-500">{session.user.email || session.user.phoneNumber}</p>
               </div>
             </div>
 

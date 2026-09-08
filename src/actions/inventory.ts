@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+import { recordAudit } from "@/lib/audit";
 
 const inventorySchema = z.object({
   productId: z.string().min(1).max(191),
@@ -53,6 +54,18 @@ export async function createInventoryTransaction(input: unknown) {
         where: { id: product.id },
       });
       return { transaction, updatedProduct };
+    });
+
+    await recordAudit({
+      actorId: user.id,
+      action: `inventory.${data.type.toLowerCase()}`,
+      model: "Product",
+      recordId: data.productId,
+      after: {
+        quantity: data.quantity,
+        inventoryCount: result.updatedProduct.inventoryCount,
+        reference: data.reference || null,
+      },
     });
 
     revalidatePath("/admin/inventory");

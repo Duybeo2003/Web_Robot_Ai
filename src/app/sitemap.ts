@@ -22,6 +22,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     "/gioi-thieu",
     "/lien-he",
     "/bao-hanh",
+    "/dieu-khoan-su-dung",
     "/chinh-sach-van-chuyen",
     "/chinh-sach-thanh-toan",
     "/chinh-sach-doi-tra",

@@ -2,13 +2,25 @@
 
 import { auth } from "@/auth";
 import { prisma } from "@/lib/prisma";
-import { PaymentMethod } from "@prisma/client";
+import { Prisma, type PaymentMethod } from "@prisma/client";
 import { revalidatePath } from "next/cache";
-import { sendOrderConfirmationEmail } from "@/lib/email";
+import {
+  sendAdminNewOrderNotification,
+  sendOrderConfirmationEmail,
+} from "@/lib/email";
+import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { createGuestOrderToken, hashGuestOrderToken } from "@/lib/order-access";
 import { z } from "zod";
-import crypto from "crypto";
+import { normalizeVietnamPhone } from "@/lib/phone";
+import { getRequestFingerprint } from "@/lib/request-fingerprint";
+import {
+  PAYMENT_RESERVATION_HOURS,
+  POLICY_VERSION,
+  VNPAY_RESERVATION_MINUTES,
+} from "@/lib/commerce-policy";
+
+class CheckoutError extends Error {}
 
 const checkoutSchema = z.object({
   receiverName: z.string().trim().min(2).max(100),
@@ -38,10 +50,11 @@ const checkoutSchema = z.object({
   pointsToUse: z.number().int().min(0).max(1_000_000).optional(),
   affiliateRef: z.string().min(1).max(191).optional(),
   idempotencyKey: z.string().uuid(),
+  acceptedTerms: z.boolean().refine(Boolean, "Bạn cần đồng ý với điều khoản mua hàng."),
 });
 
 export async function processCheckout(data: {
-  receiverName?: string;
+  receiverName: string;
   shippingAddress: string;
   receiverPhone: string;
   paymentMethod: PaymentMethod;
@@ -50,6 +63,7 @@ export async function processCheckout(data: {
   pointsToUse?: number;
   affiliateRef?: string;
   idempotencyKey: string;
+  acceptedTerms: boolean;
 }) {
   const parsed = checkoutSchema.safeParse(data);
   if (!parsed.success) {
@@ -58,6 +72,22 @@ export async function processCheckout(data: {
     };
   }
   data = parsed.data;
+  const normalizedPhone = normalizeVietnamPhone(data.receiverPhone);
+  if (!normalizedPhone) return { error: "Số điện thoại không hợp lệ." };
+  data.receiverPhone = normalizedPhone;
+
+  if (
+    data.paymentMethod === "VNPAY" &&
+    (!process.env.VNP_TMN_CODE || !process.env.VNP_HASH_SECRET || !process.env.VNP_RETURN_URL)
+  ) {
+    return { error: "Cổng VNPay chưa được cấu hình. Vui lòng chọn phương thức khác." };
+  }
+  if (
+    data.paymentMethod === "BANK_TRANSFER" &&
+    (!process.env.BANK_ID || !process.env.BANK_ACCOUNT_NO || !process.env.BANK_ACCOUNT_NAME)
+  ) {
+    return { error: "Tài khoản nhận chuyển khoản chưa được cấu hình. Vui lòng chọn phương thức khác." };
+  }
 
   const session = await auth();
   let userId = session?.user?.id;
@@ -68,7 +98,13 @@ export async function processCheckout(data: {
 
   const existingOrder = await prisma.order.findUnique({
     where: { idempotencyKey: data.idempotencyKey },
-    select: { id: true, userId: true, guestAccessTokenHash: true },
+    select: {
+      id: true,
+      userId: true,
+      guestAccessTokenHash: true,
+      amountDue: true,
+      paymentStatus: true,
+    },
   });
   if (existingOrder) {
     const canReuse = userId
@@ -76,38 +112,54 @@ export async function processCheckout(data: {
       : existingOrder.guestAccessTokenHash ===
         hashGuestOrderToken(guestAccessToken!);
     if (!canReuse) return { error: "Yêu cầu đặt hàng không hợp lệ." };
-    return { success: true, orderId: existingOrder.id, guestAccessToken };
+    return {
+      success: true,
+      orderId: existingOrder.id,
+      guestAccessToken,
+      paymentRequired:
+        existingOrder.paymentStatus !== "PAID" && Number(existingOrder.amountDue) > 0,
+    };
   }
 
   if (userId) {
-    const existingUser = await prisma.user.findUnique({
-      where: { id: userId },
+    const existingUser = await prisma.user.findFirst({
+      where: { id: userId, deletedAt: null },
+      select: { id: true },
     });
     if (!existingUser) {
-      return { error: "Tài khoản của bạn không tồn tại (có thể do hệ thống vừa được phục hồi dữ liệu). Vui lòng Đăng xuất và Đăng nhập lại để tiếp tục." };
+      return { error: "Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại." };
     }
   }
 
-  // Rate Limiting: 3 orders per minute per user or phone number
-  const rateLimitKey = userId 
+  const rateLimitKey = userId
     ? `rl:checkout:uid:${userId}` 
     : `rl:checkout:phone:${data.receiverPhone.replace(/\D/g, "")}`;
-  
-  const rl = await checkRateLimit(rateLimitKey, 3, 60, { failClosed: true });
-  if (!rl.success) {
+  const fingerprint = await getRequestFingerprint();
+  const [customerLimit, addressLimit] = await Promise.all([
+    checkRateLimit(rateLimitKey, 3, 60, { failClosed: true }),
+    checkRateLimit(`rl:checkout:address:${fingerprint}`, 10, 60, { failClosed: true }),
+  ]);
+  if (!customerLimit.success || !addressLimit.success) {
     return { error: "Bạn đã đặt quá nhiều đơn hàng trong thời gian ngắn. Vui lòng thử lại sau 1 phút." };
   }
 
   try {
     const order = await prisma.$transaction(async (tx) => {
       if (!userId) {
-        const shadowUser = await tx.user.create({
-          data: {
-            phoneNumber: `guest_${Date.now()}_${crypto.randomUUID()}`,
-            name: data.receiverName,
-          },
+        const phoneOwner = await tx.user.findUnique({
+          where: { phoneNumber: data.receiverPhone },
+          select: { id: true, deletedAt: true },
         });
-        userId = shadowUser.id;
+        if (phoneOwner?.deletedAt) {
+          throw new CheckoutError("Số điện thoại này thuộc tài khoản đã ngừng hoạt động. Vui lòng liên hệ hỗ trợ.");
+        }
+        const guestUser = await tx.user.upsert({
+          where: { phoneNumber: data.receiverPhone },
+          update: {},
+          create: { phoneNumber: data.receiverPhone, name: data.receiverName },
+          select: { id: true },
+        });
+        userId = guestUser.id;
       }
 
       // 1. Query the current price directly from DB
@@ -120,6 +172,7 @@ export async function processCheckout(data: {
           price: true, 
           inventoryCount: true, 
           flashSaleActive: true, 
+          flashSaleEndDate: true,
           flashSaleStock: true,
           variants: true,
           supplyType: true,
@@ -129,7 +182,14 @@ export async function processCheckout(data: {
       });
 
       if (dbProducts.length !== productIds.length) {
-        throw new Error("Một số sản phẩm không tồn tại hoặc đã bị xóa.");
+        throw new CheckoutError("Một số sản phẩm không tồn tại hoặc đã bị xóa.");
+      }
+
+      if (
+        data.paymentMethod === "COD" &&
+        dbProducts.some((product) => product.supplyType === "PRE_ORDER")
+      ) {
+        throw new CheckoutError("Đơn có sản phẩm đặt trước cần thanh toán tiền cọc trước.");
       }
 
       let subtotal = 0;
@@ -144,7 +204,7 @@ export async function processCheckout(data: {
           ? dbProduct.variants.find((v) => v.id === cartItem.variantId) 
           : null;
         if (cartItem.variantId && !variant) {
-          throw new Error(`Phân loại của sản phẩm "${dbProduct.title}" không còn tồn tại.`);
+          throw new CheckoutError(`Phân loại của sản phẩm "${dbProduct.title}" không còn tồn tại.`);
         }
         
         const currentInventory = variant ? variant.inventoryCount : dbProduct.inventoryCount;
@@ -155,36 +215,55 @@ export async function processCheckout(data: {
           itemName = `${dbProduct.title} - ${Object.values(variant.attributes as Record<string, string>).join(' - ')}`;
         }
 
-        // 1. Deduct Inventory FIRST (atomic), then check result
-        // This prevents race conditions where two concurrent requests both
-        // read "1 in stock" and both proceed to decrement.
+        const flashSaleIsActive = Boolean(
+          dbProduct.flashSaleActive &&
+            dbProduct.flashSaleEndDate &&
+            dbProduct.flashSaleEndDate > new Date() &&
+            dbProduct.flashSaleStock !== null,
+        );
+
         if (variant) {
-          const updatedVariant = await tx.productVariant.update({
-            where: { id: variant.id },
+          const updatedVariant = await tx.productVariant.updateMany({
+            where: {
+              id: variant.id,
+              productId: dbProduct.id,
+              inventoryCount: { gte: cartItem.quantity },
+            },
             data: { inventoryCount: { decrement: cartItem.quantity } }
           });
-          if (updatedVariant.inventoryCount < 0) {
-            throw new Error(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
+          if (updatedVariant.count === 0) {
+            throw new CheckoutError(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
           }
         } else {
-          const updatedProduct = await tx.product.update({
-            where: { id: dbProduct.id },
+          const updatedProduct = await tx.product.updateMany({
+            where: {
+              id: dbProduct.id,
+              deletedAt: null,
+              inventoryCount: { gte: cartItem.quantity },
+            },
             data: {
               inventoryCount: { decrement: cartItem.quantity }
             }
           });
-          if (updatedProduct.inventoryCount < 0) {
-            throw new Error(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
+          if (updatedProduct.count === 0) {
+            throw new CheckoutError(`Sản phẩm "${itemName}" không đủ số lượng trong kho (còn ${currentInventory}).`);
           }
-          // Deduct Flash Sale stock if applicable
-          if (dbProduct.flashSaleActive && dbProduct.flashSaleStock !== null) {
-            const updatedFS = await tx.product.update({
-              where: { id: dbProduct.id },
-              data: { flashSaleStock: { decrement: cartItem.quantity } },
-            });
-            if (updatedFS.flashSaleStock !== null && updatedFS.flashSaleStock < 0) {
-              throw new Error(`Sản phẩm "${dbProduct.title}" chỉ còn ${dbProduct.flashSaleStock} suất Flash Sale.`);
-            }
+        }
+
+        if (flashSaleIsActive) {
+          const updatedFlashSale = await tx.product.updateMany({
+            where: {
+              id: dbProduct.id,
+              flashSaleActive: true,
+              flashSaleEndDate: { gt: new Date() },
+              flashSaleStock: { gte: cartItem.quantity },
+            },
+            data: { flashSaleStock: { decrement: cartItem.quantity } },
+          });
+          if (updatedFlashSale.count === 0) {
+            throw new CheckoutError(
+              `Sản phẩm "${dbProduct.title}" không còn đủ suất Flash Sale.`,
+            );
           }
         }
         
@@ -220,12 +299,12 @@ export async function processCheckout(data: {
         if (coupon && coupon.isActive) {
           const now = new Date();
           if (coupon.expiresAt && coupon.expiresAt <= now) {
-            throw new Error("Mã giảm giá đã hết hạn.");
+            throw new CheckoutError("Mã giảm giá đã hết hạn.");
           }
 
           // Check minOrderValue
           if (coupon.minOrderValue && subtotal < Number(coupon.minOrderValue)) {
-            throw new Error(`Mã giảm giá yêu cầu đơn hàng tối thiểu ${Number(coupon.minOrderValue).toLocaleString("vi-VN")}đ`);
+            throw new CheckoutError(`Mã giảm giá yêu cầu đơn hàng tối thiểu ${Number(coupon.minOrderValue).toLocaleString("vi-VN")}đ`);
           }
           
           if (coupon.discountPercent) {
@@ -240,10 +319,10 @@ export async function processCheckout(data: {
             data: { usageCount: { increment: 1 } },
           });
           if (coupon.usageLimit && updatedCoupon.usageCount > coupon.usageLimit) {
-            throw new Error("Mã giảm giá đã hết lượt sử dụng.");
+            throw new CheckoutError("Mã giảm giá đã hết lượt sử dụng.");
           }
         } else {
-           throw new Error("Mã giảm giá không tồn tại hoặc đã ngừng hoạt động.");
+           throw new CheckoutError("Mã giảm giá không tồn tại hoặc đã ngừng hoạt động.");
         }
       }
 
@@ -271,7 +350,7 @@ export async function processCheckout(data: {
             data: { points: { decrement: pointsUsed } }
           });
           if (updatedUser.points < 0) {
-            throw new Error("Bạn không đủ điểm thưởng.");
+            throw new CheckoutError("Bạn không đủ điểm thưởng.");
           }
         }
       }
@@ -279,14 +358,21 @@ export async function processCheckout(data: {
       // Calculate final total (ensure it doesn't go below 0)
       discountAmount = couponDiscount + pointDiscount;
       const totalAmount = Math.max(0, Math.round(subtotal - discountAmount));
-      depositAmount = Math.min(
-        totalAmount,
-        Math.max(0, Math.round(depositAmount - discountAmount)),
-      );
-      totalCommissionAmount = Math.max(0, Math.round(totalCommissionAmount));
+      depositAmount =
+        subtotal > 0 && totalAmount > 0
+          ? Math.min(
+              totalAmount,
+              Math.max(1, Math.round(depositAmount * (totalAmount / subtotal))),
+            )
+          : 0;
+      totalCommissionAmount =
+        subtotal > 0
+          ? Math.max(0, Math.round(totalCommissionAmount * (totalAmount / subtotal)))
+          : 0;
       
       // Calculate points earned (10,000 VND = 1 point based on FINAL amount)
       const pointsEarned = Math.floor(totalAmount / 10000);
+      const paymentRequired = totalAmount > 0;
 
       // 2 & 3. Create the Order with the verified total amount
       const newOrder = await tx.order.create({
@@ -301,15 +387,25 @@ export async function processCheckout(data: {
           pointDiscount,
           amountPaid: 0,
           amountDue: totalAmount,
+          paymentStatus: paymentRequired ? "UNPAID" : "PAID",
+          status: paymentRequired ? "PENDING" : "PROCESSING",
           customerName: data.receiverName,
           idempotencyKey: data.idempotencyKey,
           guestAccessTokenHash: guestAccessToken
             ? hashGuestOrderToken(guestAccessToken)
             : null,
+          termsVersion: POLICY_VERSION,
+          termsAcceptedAt: new Date(),
           inventoryReservedUntil:
-            data.paymentMethod === "VNPAY"
-              ? new Date(Date.now() + 20 * 60 * 1000)
-              : null,
+            !paymentRequired
+                ? null
+              : data.paymentMethod === "VNPAY"
+                ? new Date(Date.now() + VNPAY_RESERVATION_MINUTES * 60 * 1000)
+                : data.paymentMethod === "BANK_TRANSFER"
+                  ? new Date(
+                      Date.now() + PAYMENT_RESERVATION_HOURS * 60 * 60 * 1000,
+                    )
+                  : null,
           shippingAddress: data.shippingAddress,
           receiverPhone: data.receiverPhone,
           paymentMethod: data.paymentMethod,
@@ -325,7 +421,15 @@ export async function processCheckout(data: {
               amount:
                 data.paymentMethod === "COD" ? totalAmount : depositAmount,
               idempotencyKey: `checkout:${data.idempotencyKey}:payment`,
+              status: paymentRequired ? "PENDING" : "SUCCEEDED",
+              processedAt: paymentRequired ? null : new Date(),
             },
+          },
+        },
+        include: {
+          user: { select: { email: true } },
+          items: {
+            include: { product: { select: { title: true } } },
           },
         },
       });
@@ -339,6 +443,7 @@ export async function processCheckout(data: {
             deletedAt: null,
             NOT: { id: userId },
           },
+          select: { id: true },
         });
         if (affiliateUser) {
           await tx.commission.create({
@@ -353,12 +458,18 @@ export async function processCheckout(data: {
       }
 
       // 4. Clear the specific user's CartItem records
-      const userCart = await tx.cart.findUnique({ where: { userId } });
+      const userCart = !isGuestCheckout
+        ? await tx.cart.findUnique({ where: { userId } })
+        : null;
       if (userCart) {
         await tx.cartItem.deleteMany({
           where: {
             cartId: userCart.id,
-            productId: { in: data.cartItems.map(i => i.productId) }
+            selectionKey: {
+              in: data.cartItems.map(
+                (item) => `${item.productId}:${item.variantId || "base"}`,
+              ),
+            },
           }
         });
       }
@@ -366,81 +477,58 @@ export async function processCheckout(data: {
       return newOrder;
     });
 
-    // 5. Send Email Notifications in the background
-    if (session?.user?.email) {
-      sendOrderConfirmationEmail(
-        session.user.email,
-        order.id,
-        Number(order.totalAmount),
-      ).catch(console.error);
+    const notifications: Promise<unknown>[] = [
+      sendAdminNewOrderNotification(order.id, Number(order.totalAmount)),
+    ];
+    if (order.user.email) {
+      notifications.push(
+        sendOrderConfirmationEmail(
+          order.user.email,
+          order.id,
+          Number(order.totalAmount),
+          order.items.map((item) => ({
+            quantity: item.quantity,
+            priceAtPurchase: Number(item.priceAtPurchase),
+            product: item.product,
+          })),
+        ),
+      );
     }
-
-    // Notify admin
+    await Promise.allSettled(notifications);
 
     revalidatePath("/admin/orders");
-    return { success: true, orderId: order.id, guestAccessToken };
+    return {
+      success: true,
+      orderId: order.id,
+      guestAccessToken,
+      paymentRequired: Number(order.amountDue) > 0,
+    };
   } catch (error: unknown) {
-    console.error("[CHECKOUT_ERROR]", error);
-    const msg = error instanceof Error ? error.message : "Có lỗi xảy ra khi xử lý đơn hàng.";
-    return { error: msg };
-  }
-}
-
-export async function processVNPayMock(orderId: string) {
-  const session = await auth();
-  if (!session?.user?.id) return { error: "Unauthorized" };
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-    select: { role: true },
-  });
-
-  // SECURITY: Only ADMIN can trigger mock payments
-  if (user?.role !== "ADMIN") {
-    return { error: "Chỉ Admin mới có quyền thực hiện thao tác này." };
-  }
-
-  try {
-    const order = await prisma.order.findUnique({
-      where: { id: orderId },
-      include: {
-        paymentTransactions: {
-          where: { provider: "VNPAY" },
-          orderBy: { createdAt: "desc" },
-          take: 1,
-        },
-      },
+    logger.error("checkout.failed", {
+      error: error instanceof Error ? error.message : "unknown",
     });
-
-    if (!order) return { error: "Order not found" };
-    const payment = order.paymentTransactions[0];
-    if (!payment) return { error: "Payment not found" };
-
-    await prisma.$transaction(async (tx) => {
-      const claimed = await tx.paymentTransaction.updateMany({
-        where: { id: payment.id, status: "PENDING" },
-        data: { status: "SUCCEEDED", processedAt: new Date() },
+    if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
+      const racedOrder = await prisma.order.findUnique({
+        where: { idempotencyKey: data.idempotencyKey },
+        select: { id: true, userId: true, guestAccessTokenHash: true, amountDue: true },
       });
-      if (claimed.count === 0) return;
-
-      const amountPaid = Number(order.amountPaid) + Number(payment.amount);
-      const amountDue = Math.max(0, Number(order.totalAmount) - amountPaid);
-      await tx.order.update({
-        where: { id: orderId },
-        data: {
-          amountPaid,
-          amountDue,
-          paymentStatus: amountDue === 0 ? "PAID" : "PARTIALLY_PAID",
-          status: "PROCESSING",
-          inventoryReservedUntil: null,
-        },
-      });
-    });
-
-    revalidatePath("/profile/orders");
-    revalidatePath("/admin/orders");
-    return { success: true };
-  } catch {
-    return { error: "Failed to process mock payment" };
+      const ownsRacedOrder = racedOrder && (isGuestCheckout
+        ? racedOrder.guestAccessTokenHash === hashGuestOrderToken(guestAccessToken!)
+        : racedOrder.userId === session?.user?.id);
+      if (racedOrder && ownsRacedOrder) {
+        return {
+          success: true,
+          orderId: racedOrder.id,
+          guestAccessToken,
+          paymentRequired: Number(racedOrder.amountDue) > 0,
+        };
+      }
+    }
+    return {
+      error:
+        error instanceof CheckoutError
+          ? error.message
+          : "Có lỗi xảy ra khi xử lý đơn hàng. Vui lòng thử lại.",
+    };
   }
 }

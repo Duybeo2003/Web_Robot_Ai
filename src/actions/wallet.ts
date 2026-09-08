@@ -26,6 +26,9 @@ export async function getWalletTransactions() {
 
 export async function createTopupRequest(input: unknown) {
   const user = await requireUser();
+  if (!process.env.BANK_ID || !process.env.BANK_ACCOUNT_NO || !process.env.BANK_ACCOUNT_NAME) {
+    throw new Error("Kênh nạp Xu bằng chuyển khoản chưa được cấu hình.");
+  }
   const amount = z.number().int().min(10_000).max(100_000_000).parse(input);
   const rateLimit = await checkRateLimit(`rl:wallet-topup:${user.id}`, 5, 3600, {
     failClosed: true,

@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+import { recordAudit } from "@/lib/audit";
 
 const idSchema = z.string().min(1).max(191);
 const eventSchema = z
@@ -59,59 +60,66 @@ export async function getAdminEventById(id: string) {
 }
 
 export async function createEvent(input: unknown) {
-  await requireRole("ADMIN");
+  const operator = await requireRole("ADMIN");
   const data = eventSchema.parse(input);
   const event = await prisma.event.create({
     data: { ...data, uiConfig: jsonValue(data.uiConfig) },
   });
+  await recordAudit({ actorId: operator.id, action: "event.create", model: "Event", recordId: event.id, after: { name: event.name, type: event.type } });
   revalidatePath("/admin/events");
   return event;
 }
 
 export async function updateEvent(id: string, input: unknown) {
-  await requireRole("ADMIN");
+  const operator = await requireRole("ADMIN");
   const data = eventSchema.parse(input);
   const event = await prisma.event.update({
     where: { id: idSchema.parse(id) },
     data: { ...data, uiConfig: jsonValue(data.uiConfig) },
   });
+  await recordAudit({ actorId: operator.id, action: "event.update", model: "Event", recordId: event.id, after: { name: event.name, type: event.type, isActive: event.isActive } });
   revalidatePath("/admin/events");
   revalidatePath(`/admin/events/${event.id}`);
   return event;
 }
 
 export async function deleteEvent(id: string) {
-  await requireRole("ADMIN");
-  await prisma.event.delete({ where: { id: idSchema.parse(id) } });
+  const operator = await requireRole("ADMIN");
+  const eventId = idSchema.parse(id);
+  await prisma.event.delete({ where: { id: eventId } });
+  await recordAudit({ actorId: operator.id, action: "event.delete", model: "Event", recordId: eventId });
   revalidatePath("/admin/events");
   return true;
 }
 
 export async function createPrize(eventId: string, input: unknown) {
-  await requireRole("ADMIN");
+  const operator = await requireRole("ADMIN");
   const data = prizeSchema.parse(input);
   const prize = await prisma.eventPrize.create({
     data: { ...data, eventId: idSchema.parse(eventId) },
   });
+  await recordAudit({ actorId: operator.id, action: "event_prize.create", model: "EventPrize", recordId: prize.id, after: { eventId: prize.eventId, name: prize.name } });
   revalidatePath(`/admin/events/${eventId}`);
   return prize;
 }
 
 export async function updatePrize(id: string, input: unknown) {
-  await requireRole("ADMIN");
+  const operator = await requireRole("ADMIN");
   const prize = await prisma.eventPrize.update({
     where: { id: idSchema.parse(id) },
     data: prizeSchema.parse(input),
   });
+  await recordAudit({ actorId: operator.id, action: "event_prize.update", model: "EventPrize", recordId: prize.id, after: { eventId: prize.eventId, name: prize.name } });
   revalidatePath(`/admin/events/${prize.eventId}`);
   return prize;
 }
 
 export async function deletePrize(id: string) {
-  await requireRole("ADMIN");
+  const operator = await requireRole("ADMIN");
   const prize = await prisma.eventPrize.delete({
     where: { id: idSchema.parse(id) },
   });
+  await recordAudit({ actorId: operator.id, action: "event_prize.delete", model: "EventPrize", recordId: prize.id, before: { eventId: prize.eventId, name: prize.name } });
   revalidatePath(`/admin/events/${prize.eventId}`);
   return true;
 }

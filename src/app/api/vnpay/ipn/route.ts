@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { verifyVnPayReturn } from "@/lib/vnpay";
 import { settleVnPayPayment } from "@/lib/payments/vnpay-settlement";
+import { logger } from "@/lib/logger";
 
 export const dynamic = "force-dynamic";
 
@@ -22,13 +23,18 @@ export async function GET(request: Request) {
     if (result === "order-unavailable") {
       return NextResponse.json({ RspCode: "99", Message: "Order unavailable" });
     }
+    if (result === "captured-after-cancellation") {
+      return NextResponse.json({ RspCode: "00", Message: "Confirm Success" });
+    }
     if (result === "already-confirmed") {
       return NextResponse.json({ RspCode: "02", Message: "Order already confirmed" });
     }
 
     return NextResponse.json({ RspCode: "00", Message: "Confirm Success" });
   } catch (error) {
-    console.error("[VNPAY_IPN_ERROR]", error);
+    logger.error("vnpay.ipn_failed", {
+      error: error instanceof Error ? error.message : "unknown",
+    });
     return NextResponse.json({ RspCode: "99", Message: "Internal error" });
   }
 }

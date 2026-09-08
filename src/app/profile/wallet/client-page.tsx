@@ -20,9 +20,10 @@ import {
 interface WalletClientPageProps {
   wallet: UserWallet;
   transactions: WalletTransaction[];
+  bankConfig: { bankId: string; accountNo: string; accountName: string };
 }
 
-export default function WalletClientPage({ wallet, transactions }: WalletClientPageProps) {
+export default function WalletClientPage({ wallet, transactions, bankConfig }: WalletClientPageProps) {
   const [isTopupOpen, setIsTopupOpen] = useState(false);
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(false);
@@ -30,6 +31,10 @@ export default function WalletClientPage({ wallet, transactions }: WalletClientP
 
   const handleTopup = async () => {
     try {
+      if (!bankConfig.bankId || !bankConfig.accountNo || !bankConfig.accountName) {
+        toast.error("Kênh nạp Xu bằng chuyển khoản chưa sẵn sàng.");
+        return;
+      }
       const parsedAmount = parseInt(amount);
       if (isNaN(parsedAmount) || parsedAmount < 10000) {
         toast.error("Số tiền tối thiểu là 10,000đ");
@@ -227,7 +232,7 @@ export default function WalletClientPage({ wallet, transactions }: WalletClientP
                 <div className="bg-white p-3 rounded-xl shadow-sm border border-orange-200">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
-                    src={`https://img.vietqr.io/image/vcb-1058744697-compact2.png?amount=${activeTransaction.amount}&addInfo=NAPXU%20${activeTransaction.id.slice(-6).toUpperCase()}&accountName=NGUYEN%20QUOC%20DUY`}
+                    src={`https://img.vietqr.io/image/${encodeURIComponent(bankConfig.bankId)}-${encodeURIComponent(bankConfig.accountNo)}-compact2.png?amount=${encodeURIComponent(activeTransaction.amount)}&addInfo=${encodeURIComponent(`NAPXU ${activeTransaction.id.slice(-6).toUpperCase()}`)}&accountName=${encodeURIComponent(bankConfig.accountName)}`}
                     alt="VietQR Payment"
                     className="w-48 h-48 object-contain"
                   />
@@ -243,11 +248,11 @@ export default function WalletClientPage({ wallet, transactions }: WalletClientP
                   </div>
                   <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
                     <span className="text-orange-800/70">Ngân hàng:</span>
-                    <span className="font-bold text-gray-800">Vietcombank</span>
+                    <span className="font-bold text-gray-800">{bankConfig.bankId.toUpperCase()}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
                     <span className="text-orange-800/70">Số tài khoản:</span>
-                    <span className="font-bold text-gray-800">1058744697</span>
+                    <span className="font-bold text-gray-800">{bankConfig.accountNo}</span>
                   </div>
                   <div className="flex justify-between items-center text-sm">
                     <span className="text-orange-800/70">Nội dung:</span>

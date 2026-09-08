@@ -11,7 +11,7 @@ export const metadata = {
 
 export default async function AdminFlashSalesPage() {
   const flashSales = await prisma.product.findMany({
-    where: { flashSaleActive: true },
+    where: { flashSaleActive: true, deletedAt: null },
     orderBy: { flashSaleEndDate: "asc" },
     select: {
       id: true,

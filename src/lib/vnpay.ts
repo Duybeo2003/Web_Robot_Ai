@@ -1,20 +1,20 @@
 import crypto from "crypto";
 import querystring from "qs";
+import { VNPAY_RESERVATION_MINUTES } from "@/lib/commerce-policy";
 
 export function createVnPayUrl(
-  orderId: string,
+  transactionReference: string,
   amount: number,
   ipAddr: string = "127.0.0.1",
+  orderId: string = transactionReference,
 ) {
   if (!Number.isSafeInteger(amount) || amount <= 0) {
     throw new Error("Invalid VNPay amount");
   }
-  const isDevelopment = process.env.NODE_ENV === "development";
-  const tmnCode = process.env.VNP_TMN_CODE || (isDevelopment ? "MOCK_TMN_CODE" : "");
-  const secretKey = process.env.VNP_HASH_SECRET || (isDevelopment ? "MOCK_SECRET_KEY" : "");
+  const tmnCode = process.env.VNP_TMN_CODE || "";
+  const secretKey = process.env.VNP_HASH_SECRET || "";
   const vnpUrl = process.env.VNP_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-  const returnUrl = process.env.VNP_RETURN_URL ||
-    (isDevelopment ? "http://localhost:3000/api/vnpay/vnpay_return" : "");
+  const returnUrl = process.env.VNP_RETURN_URL || "";
   if (!tmnCode || !secretKey || !returnUrl) {
     throw new Error("VNPay is not configured");
   }
@@ -28,7 +28,9 @@ export function createVnPayUrl(
     ("0" + date.getMinutes()).slice(-2) +
     ("0" + date.getSeconds()).slice(-2);
 
-  const expireDate = new Date(date.getTime() + 15 * 60000); // 15 mins expiry
+  const expireDate = new Date(
+    date.getTime() + VNPAY_RESERVATION_MINUTES * 60_000,
+  );
   const vnp_ExpireDate =
     expireDate.getFullYear().toString() +
     ("0" + (expireDate.getMonth() + 1)).slice(-2) +
@@ -43,7 +45,7 @@ export function createVnPayUrl(
   vnp_Params["vnp_TmnCode"] = tmnCode;
   vnp_Params["vnp_Locale"] = "vn";
   vnp_Params["vnp_CurrCode"] = "VND";
-  vnp_Params["vnp_TxnRef"] = orderId;
+  vnp_Params["vnp_TxnRef"] = transactionReference;
   vnp_Params["vnp_OrderInfo"] = "Thanh toan cho ma don hang " + orderId;
   vnp_Params["vnp_OrderType"] = "other";
   vnp_Params["vnp_Amount"] = amount * 100;
@@ -59,27 +61,14 @@ export function createVnPayUrl(
   const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
   vnp_Params["vnp_SecureHash"] = signed;
 
-  if (tmnCode === "MOCK_TMN_CODE") {
-    return (
-      "http://localhost:3000/mock-vnpay?" +
-      querystring.stringify(vnp_Params, { encode: false })
-    );
-  }
-
   const paymentUrl =
     vnpUrl + "?" + querystring.stringify(vnp_Params, { encode: false });
   return paymentUrl;
 }
 
 export function verifyVnPayReturn(vnp_Params: Record<string, string>) {
-  const secretKey =
-    process.env.VNP_HASH_SECRET ||
-    (process.env.NODE_ENV === "development" ? "MOCK_SECRET_KEY" : "");
+  const secretKey = process.env.VNP_HASH_SECRET || "";
 
-  // Only allow mock bypass in development — NEVER in production
-  if (vnp_Params["mock_status"] && process.env.NODE_ENV === "development") {
-    return true;
-  }
   if (!secretKey) return false;
 
   const secureHash = vnp_Params["vnp_SecureHash"];
@@ -94,8 +83,13 @@ export function verifyVnPayReturn(vnp_Params: Record<string, string>) {
   const hmac = crypto.createHmac("sha512", secretKey);
   const signed = hmac.update(Buffer.from(signData, "utf-8")).digest("hex");
 
-  if (!secureHash || secureHash.length !== signed.length) return false;
-  return crypto.timingSafeEqual(Buffer.from(secureHash), Buffer.from(signed));
+  if (!secureHash || !/^[a-f\d]{128}$/i.test(secureHash)) return false;
+  const providedSignature = Buffer.from(secureHash, "hex");
+  const expectedSignature = Buffer.from(signed, "hex");
+  return (
+    providedSignature.length === expectedSignature.length &&
+    crypto.timingSafeEqual(providedSignature, expectedSignature)
+  );
 }
 
 function sortObject(obj: Record<string, unknown>) {
@@ -103,7 +97,7 @@ function sortObject(obj: Record<string, unknown>) {
   const str = [];
   let key;
   for (key in obj) {
-    if (obj.hasOwnProperty(key)) {
+    if (Object.prototype.hasOwnProperty.call(obj, key)) {
       str.push(encodeURIComponent(key));
     }
   }

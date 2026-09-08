@@ -193,7 +193,7 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
                         {user.orders.map((order) => (
                           <TableRow key={order.id}>
                             <TableCell className="font-medium">
-                              <Link href={`/admin/orders/${order.id}`} className="text-blue-600 hover:underline">
+                              <Link href={`/admin/orders?q=${encodeURIComponent(order.id)}`} className="text-blue-600 hover:underline">
                                 #{order.id.slice(-6).toUpperCase()}
                               </Link>
                             </TableCell>
@@ -266,7 +266,7 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
                           <TableRow key={req.id}>
                             <TableCell className="font-medium">#{req.id.slice(-6).toUpperCase()}</TableCell>
                             <TableCell>
-                              <Link href={`/admin/orders/${req.order.id}`} className="text-blue-600 hover:underline">
+                              <Link href={`/admin/orders?q=${encodeURIComponent(req.order.id)}`} className="text-blue-600 hover:underline">
                                 #{req.order.id.slice(-6).toUpperCase()}
                               </Link>
                             </TableCell>

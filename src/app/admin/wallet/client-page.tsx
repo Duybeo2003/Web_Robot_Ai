@@ -1,16 +1,24 @@
 "use client";
 
 import { useState } from "react";
-import { User, UserWallet, WalletTransaction } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { approveTopup, rejectTopup } from "@/actions/admin-wallet";
 import { toast } from "sonner";
 import { Check, X, Clock, User as UserIcon } from "lucide-react";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 
-interface PendingTopup extends WalletTransaction {
-  wallet: UserWallet & {
-    user: User;
+interface PendingTopup {
+  id: string;
+  amount: number;
+  createdAt: string;
+  wallet: {
+    id: string;
+    user: {
+      name: string | null;
+      email: string | null;
+      phoneNumber: string | null;
+      image: string | null;
+    };
   };
 }
 

@@ -49,7 +49,7 @@ function CartBadge() {
   );
 }
 
-export function Header() {
+export function Header({ supportPhone }: { supportPhone: string }) {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -58,6 +58,8 @@ export function Header() {
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
+  const phoneHref = supportPhone.replace(/[^\d+]/g, "");
+  const zaloPhone = phoneHref.replace(/^\+84/, "0");
 
   useEffect(() => {
     setMounted(true);
@@ -96,6 +98,7 @@ export function Header() {
             />
             <button
               type="submit"
+              aria-label="Tìm kiếm"
               className="absolute right-0 top-0 h-10 w-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
             >
               <Search className="h-5 w-5" />
@@ -106,13 +109,14 @@ export function Header() {
         {/* Contact & Actions */}
         <div className="flex items-center gap-4 shrink-0">
           <div className="hidden lg:flex items-center gap-4 mr-4 text-sm font-medium">
-            <div className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors">
+            <a href={`tel:${phoneHref}`} className="flex items-center gap-1.5 hover:text-primary transition-colors">
               <Phone className="w-4 h-4 text-primary" />
-              <span>0385.333.111</span>
-            </div>
+              <span>{supportPhone}</span>
+            </a>
             <Link
-              href="https://zalo.me/0385333111"
+              href={`https://zalo.me/${zaloPhone}`}
               target="_blank"
+              rel="noopener noreferrer"
               className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors text-[#0068FF]"
             >
               <svg
@@ -134,6 +138,7 @@ export function Header() {
               size="icon"
               className="hidden sm:flex hover:text-primary"
               onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+              aria-label="Đổi giao diện sáng tối"
             >
               {theme === "dark" ? (
                 <Sun className="h-5 w-5" />
@@ -165,7 +170,7 @@ export function Header() {
                       <p className="text-xs leading-none text-muted-foreground">
                         {session?.user?.email ||
                            
-                          (session?.user as any)?.phoneNumber ||
+                          session?.user?.phoneNumber ||
                           ""}
                       </p>
                     </div>
@@ -223,7 +228,7 @@ export function Header() {
 
           {/* Mobile Menu Toggle */}
           <Sheet open={openMobileMenu} onOpenChange={setOpenMobileMenu}>
-            <SheetTrigger className="lg:hidden flex h-10 w-10 items-center justify-center hover:text-primary">
+            <SheetTrigger aria-label="Mở menu" className="lg:hidden flex h-10 w-10 items-center justify-center hover:text-primary">
               <Menu className="h-6 w-6" />
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] p-0">
@@ -240,7 +245,7 @@ export function Header() {
                     onChange={(e) => setSearchQuery(e.target.value)}
                     className="w-full h-10 pl-4 pr-10 border border-primary/30 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm bg-white"
                   />
-                  <button type="submit" className="absolute right-0 top-0 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-primary">
+                  <button type="submit" aria-label="Tìm kiếm" className="absolute right-0 top-0 h-10 w-10 flex items-center justify-center text-muted-foreground hover:text-primary">
                     <Search className="h-4 w-4" />
                   </button>
                 </form>
@@ -282,7 +287,7 @@ export function Header() {
                   Tra Cứu Bảo Hành
                 </Link>
                 <Link
-                  href="/blog"
+                  href="/giao-duc"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
                 >
@@ -362,7 +367,7 @@ export function Header() {
               Đồ Chơi Tư Duy Logic
             </Link>
             <Link
-              href="/blog"
+              href="/giao-duc"
               className="text-sm font-medium hover:text-white/80 transition-colors"
             >
               Blog & Kiến Thức

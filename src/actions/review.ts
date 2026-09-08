@@ -23,7 +23,7 @@ export async function submitReview(rawProductId: string, formData: FormData) {
     }
 
     await prisma.review.create({
-      data: { ...input, userId: user.id, productId },
+      data: { ...input, userId: user.id, productId, status: "PENDING" },
     });
     revalidatePath("/shop/[slug]", "page");
     return { success: true };

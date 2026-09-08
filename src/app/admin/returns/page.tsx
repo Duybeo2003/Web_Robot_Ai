@@ -1,6 +1,4 @@
 import { prisma } from "@/lib/prisma";
-import { auth } from "@/auth";
-import { redirect } from "next/navigation";
 import {
   Table,
   TableBody,
@@ -18,32 +16,26 @@ import { Button } from "@/components/ui/button";
 
 export default async function AdminReturnsPage(props: { searchParams: Promise<{ page?: string }> }) {
   const searchParams = await props.searchParams;
-  const session = await auth();
-
-  if (!session?.user?.id) {
-    redirect("/login");
-  }
-
-  const user = await prisma.user.findUnique({
-    where: { id: session.user.id },
-  });
-
-  if (user?.role !== "ADMIN") {
-    redirect("/");
-  }
-
   const itemsPerPage = 20;
-  const currentPage = Number(searchParams?.page) || 1;
-
+  const requestedPage = Number.parseInt(searchParams.page || "1", 10);
   const totalCount = await prisma.returnRequest.count();
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
+  const currentPage = Math.min(
+    totalPages,
+    Number.isSafeInteger(requestedPage) && requestedPage > 0 ? requestedPage : 1,
+  );
 
   const returns = await prisma.returnRequest.findMany({
     skip: (currentPage - 1) * itemsPerPage,
     take: itemsPerPage,
-    include: {
+    select: {
+      id: true,
+      orderId: true,
+      reason: true,
+      imageUrl: true,
+      status: true,
+      createdAt: true,
       user: { select: { name: true, phoneNumber: true, email: true } },
-      order: true,
     },
     orderBy: { createdAt: "desc" },
   });
@@ -107,6 +99,7 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
               <TableHead>Khách hàng</TableHead>
               <TableHead>Mã Đơn hàng</TableHead>
               <TableHead>Lý do</TableHead>
+              <TableHead>Minh chứng</TableHead>
               <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày gửi</TableHead>
               <TableHead className="text-right">Hành động</TableHead>
@@ -116,7 +109,7 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
             {returns.length === 0 ? (
               <TableRow>
                 <TableCell
-                  colSpan={7}
+                  colSpan={8}
                   className="text-center py-8 text-neutral-500"
                 >
                   Chưa có yêu cầu đổi/trả nào
@@ -144,6 +137,20 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
                     >
                       {req.reason}
                     </div>
+                  </TableCell>
+                  <TableCell>
+                    {req.imageUrl ? (
+                      <a
+                        href={req.imageUrl}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-sm font-medium text-blue-700 hover:underline"
+                      >
+                        Xem ảnh
+                      </a>
+                    ) : (
+                      <span className="text-neutral-400">—</span>
+                    )}
                   </TableCell>
                   <TableCell>{getStatusBadge(req.status)}</TableCell>
                   <TableCell className="text-sm text-neutral-500">

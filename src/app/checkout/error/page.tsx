@@ -5,11 +5,16 @@ import { Button } from "@/components/ui/button";
 export default async function CheckoutErrorPage({
   searchParams,
 }: {
-  searchParams: Promise<{ msg?: string }>;
+  searchParams: Promise<{ msg?: string; orderId?: string; token?: string }>;
 }) {
   const resolvedParams = await searchParams;
   const errorMsg =
     resolvedParams.msg || "Có lỗi xảy ra trong quá trình thanh toán.";
+  const retryUrl = resolvedParams.orderId
+    ? `/api/vnpay/create_url?orderId=${encodeURIComponent(resolvedParams.orderId)}${
+        resolvedParams.token ? `&token=${encodeURIComponent(resolvedParams.token)}` : ""
+      }`
+    : "/profile/orders";
 
   return (
     <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center min-h-[60vh] justify-center">
@@ -25,9 +30,9 @@ export default async function CheckoutErrorPage({
             Xem đơn hàng
           </Button>
         </Link>
-        <Link href="/checkout">
+        <Link href={retryUrl}>
           <Button className="h-12 px-6 bg-[#FF5722] hover:bg-[#E64A19] text-white">
-            Thử lại
+            Thử thanh toán lại
           </Button>
         </Link>
       </div>

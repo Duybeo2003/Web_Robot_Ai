@@ -160,17 +160,17 @@ export function AuthModal() {
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
       <DialogContent className="sm:max-w-[400px] rounded-sm p-6 sm:p-8 bg-[#F9F8F6] border-stone-200 shadow-none">
         <DialogHeader className="mb-4">
-          <DialogTitle className="text-2xl font-lora font-semibold text-center text-[#2C2C2C]">
+          <DialogTitle className="text-2xl font-heading font-semibold text-center text-[#2C2C2C]">
             {step === 1 ? "Đăng nhập" : "Xác thực OTP"}
           </DialogTitle>
-          <DialogDescription className="text-center text-[#2C2C2C]/70 mt-2 font-manrope text-sm">
+          <DialogDescription className="text-center text-[#2C2C2C]/70 mt-2 font-sans text-sm">
             {step === 1
               ? "Chào mừng bạn đến với robot giáo dục."
               : `Mã 6 số đã được gửi đến ${phone}`}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-2 font-manrope">
+        <div className="py-2 font-sans">
           {error && (
             <div className="mb-6 p-3 bg-red-50 text-red-600 text-sm rounded-sm text-center border border-red-100 animate-in fade-in duration-300">
               {error}

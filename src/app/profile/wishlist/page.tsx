@@ -18,11 +18,19 @@ export default async function WishlistPage() {
   }
 
   const wishlists = await prisma.wishlist.findMany({
-    where: { userId },
-    include: {
+    where: { userId, product: { deletedAt: null } },
+    select: {
+      productId: true,
       product: {
-        include: {
-          category: true,
+        select: {
+          id: true,
+          title: true,
+          slug: true,
+          price: true,
+          originalPrice: true,
+          imageUrl: true,
+          supplyType: true,
+          depositPercent: true,
         },
       },
     },
@@ -58,8 +66,11 @@ export default async function WishlistPage() {
           {wishlists.map((w) => (
             <ProductCard
               key={w.productId}
-               
-              product={w.product as any}
+              product={{
+                ...w.product,
+                price: Number(w.product.price),
+                originalPrice: w.product.originalPrice ? Number(w.product.originalPrice) : null,
+              }}
               isWished={true}
               action={
                 <AddToCartButton
@@ -69,6 +80,8 @@ export default async function WishlistPage() {
                     price: Number(w.product.price),
                     slug: w.product.slug,
                     imageUrl: w.product.imageUrl || "",
+                    supplyType: w.product.supplyType,
+                    depositPercent: w.product.depositPercent || undefined,
                   }}
                 />
               }

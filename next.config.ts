@@ -1,20 +1,30 @@
 import type { NextConfig } from "next";
-import withPWAInit from "next-pwa";
 
-const withPWA = withPWAInit({
-  dest: "public",
-  register: true,
-  skipWaiting: true,
-  disable: process.env.NODE_ENV === 'development'
-});
+const contentSecurityPolicy = [
+  "default-src 'self'",
+  "base-uri 'self'",
+  "form-action 'self'",
+  "frame-ancestors 'self'",
+  "object-src 'none'",
+  "script-src 'self' 'unsafe-inline'" +
+    (process.env.NODE_ENV === "development" ? " 'unsafe-eval'" : ""),
+  "style-src 'self' 'unsafe-inline'",
+  "img-src 'self' data: blob: https://images.unsplash.com https://res.cloudinary.com https://img.vietqr.io",
+  "media-src 'self' blob: https://res.cloudinary.com",
+  "font-src 'self' data:",
+  "connect-src 'self'",
+  "frame-src https://www.youtube.com https://www.youtube-nocookie.com https://www.tiktok.com",
+  "worker-src 'self' blob:",
+  "manifest-src 'self'",
+  ...(process.env.NODE_ENV === "production" ? ["upgrade-insecure-requests"] : []),
+].join("; ");
 
 const nextConfig: NextConfig = {
   output: "standalone",
-  // eslint: { ignoreDuringBuilds: true }, // Obsolete in Next 16
+  poweredByHeader: false,
   turbopack: {},
-
-  
   images: {
+    qualities: [75, 90],
     remotePatterns: [
       {
         protocol: "https",
@@ -26,6 +36,16 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  async redirects() {
+    return [
+      { source: "/blog", destination: "/giao-duc", permanent: true },
+      {
+        source: "/blog/:slug",
+        destination: "/giao-duc/:slug",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {
@@ -33,6 +53,7 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "X-Content-Type-Options", value: "nosniff" },
           { key: "X-Frame-Options", value: "SAMEORIGIN" },
+          { key: "Content-Security-Policy", value: contentSecurityPolicy },
           { key: "Referrer-Policy", value: "strict-origin-when-cross-origin" },
           {
             key: "Permissions-Policy",
@@ -52,4 +73,4 @@ const nextConfig: NextConfig = {
   },
 };
 
-export default withPWA(nextConfig);
+export default nextConfig;

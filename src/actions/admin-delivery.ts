@@ -5,6 +5,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+import { recordAudit } from "@/lib/audit";
 
 const statuses = z.enum(["PENDING", "SHIPPED", "DELIVERED", "CANCELLED"]);
 const transitions: Record<DeliveryStatus, DeliveryStatus[]> = {
@@ -16,13 +17,28 @@ const transitions: Record<DeliveryStatus, DeliveryStatus[]> = {
 
 export async function getAdminDeliveries() {
   await requireRole("ADMIN");
-  return prisma.deliveryRequest.findMany({
+  const deliveries = await prisma.deliveryRequest.findMany({
     orderBy: { createdAt: "desc" },
-    include: {
-      user: { select: { name: true, email: true, phoneNumber: true } },
-      inventoryItem: { include: { product: true } },
+    select: {
+      id: true,
+      status: true,
+      recipientName: true,
+      phoneNumber: true,
+      address: true,
+      notes: true,
+      trackingCode: true,
+      shippingFee: true,
+      createdAt: true,
+      inventoryItem: {
+        select: { product: { select: { title: true } } },
+      },
     },
   });
+  return deliveries.map((delivery) => ({
+    ...delivery,
+    shippingFee: Number(delivery.shippingFee),
+    createdAt: delivery.createdAt.toISOString(),
+  }));
 }
 
 export async function updateDeliveryStatus(
@@ -30,7 +46,7 @@ export async function updateDeliveryStatus(
   rawStatus: DeliveryStatus,
   rawTrackingCode?: string,
 ) {
-  await requireRole("ADMIN");
+  const operator = await requireRole("ADMIN");
   const id = z.string().min(1).max(191).parse(rawId);
   const status = statuses.parse(rawStatus);
   const trackingCode = rawTrackingCode?.trim().slice(0, 191);
@@ -38,7 +54,9 @@ export async function updateDeliveryStatus(
   const result = await prisma.$transaction(async (tx) => {
     const delivery = await tx.deliveryRequest.findUnique({ where: { id } });
     if (!delivery) throw new Error("Yêu cầu giao hàng không tồn tại.");
-    if (delivery.status === status) return delivery;
+    if (delivery.status === status) {
+      return { updated: delivery, previousStatus: delivery.status };
+    }
     if (!transitions[delivery.status].includes(status)) {
       throw new Error(`Không thể chuyển từ ${delivery.status} sang ${status}.`);
     }
@@ -61,8 +79,20 @@ export async function updateDeliveryStatus(
         data: { status: "DELIVERED" },
       });
     }
-    return updated;
+    return { updated, previousStatus: delivery.status };
+  });
+  await recordAudit({
+    actorId: operator.id,
+    action: "delivery.status_update",
+    model: "DeliveryRequest",
+    recordId: id,
+    before: { status: result.previousStatus },
+    after: { status: result.updated.status, trackingCode: result.updated.trackingCode },
   });
   revalidatePath("/admin/deliveries");
-  return result;
+  return {
+    id: result.updated.id,
+    status: result.updated.status,
+    trackingCode: result.updated.trackingCode,
+  };
 }

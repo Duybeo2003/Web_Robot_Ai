@@ -22,7 +22,12 @@ export async function getUserInventory() {
   const user = await requireUser();
   return prisma.userInventory.findMany({
     where: { userId: user.id, status: "AVAILABLE" },
-    include: { product: true },
+    select: {
+      id: true,
+      quantity: true,
+      sellPriceXu: true,
+      product: { select: { title: true, description: true, imageUrl: true } },
+    },
     orderBy: { createdAt: "desc" },
   });
 }

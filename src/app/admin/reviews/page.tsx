@@ -19,18 +19,24 @@ import { Button } from "@/components/ui/button";
 export default async function AdminReviewsPage(props: { searchParams: Promise<{ page?: string }> }) {
   const searchParams = await props.searchParams;
   const itemsPerPage = 20;
-  const currentPage = Number(searchParams?.page) || 1;
+  const requestedPage = Math.max(1, Number(searchParams?.page) || 1);
 
   const totalCount = await prisma.review.count();
-  const totalPages = Math.ceil(totalCount / itemsPerPage);
+  const totalPages = Math.max(1, Math.ceil(totalCount / itemsPerPage));
+  const currentPage = Math.min(requestedPage, totalPages);
 
   const reviews = await prisma.review.findMany({
     skip: (currentPage - 1) * itemsPerPage,
     take: itemsPerPage,
     orderBy: { createdAt: "desc" },
-    include: {
-      user: true,
-      product: true,
+    select: {
+      id: true,
+      rating: true,
+      comment: true,
+      status: true,
+      createdAt: true,
+      user: { select: { name: true } },
+      product: { select: { slug: true, imageUrl: true, title: true } },
     },
   });
 
@@ -53,6 +59,7 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
               <TableHead>Sản phẩm</TableHead>
               <TableHead>Đánh giá</TableHead>
               <TableHead>Nội dung</TableHead>
+              <TableHead>Trạng thái</TableHead>
               <TableHead>Ngày đăng</TableHead>
               <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
@@ -60,7 +67,7 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
           <TableBody>
             {reviews.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={6} className="h-24 text-center">
+                <TableCell colSpan={7} className="h-24 text-center">
                   Không có đánh giá nào.
                 </TableCell>
               </TableRow>
@@ -74,6 +81,7 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
                     <Link
                       href={`/shop/${review.product?.slug}`}
                       target="_blank"
+                      rel="noopener noreferrer"
                       className="flex items-center gap-2 hover:underline"
                     >
                       {review.product?.imageUrl && (
@@ -113,10 +121,23 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
                     </p>
                   </TableCell>
                   <TableCell>
+                    <span
+                      className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
+                        review.status === "APPROVED"
+                          ? "bg-green-100 text-green-700"
+                          : review.status === "REJECTED"
+                            ? "bg-red-100 text-red-700"
+                            : "bg-amber-100 text-amber-700"
+                      }`}
+                    >
+                      {{ APPROVED: "Đã duyệt", REJECTED: "Từ chối", PENDING: "Chờ duyệt" }[review.status]}
+                    </span>
+                  </TableCell>
+                  <TableCell>
                     {format(new Date(review.createdAt), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell className="text-right">
-                    <ReviewActions reviewId={review.id} />
+                    <ReviewActions reviewId={review.id} status={review.status} />
                   </TableCell>
                 </TableRow>
               ))

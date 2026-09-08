@@ -1,140 +1,113 @@
-import { prisma } from "@/lib/prisma";
-import { ProductCarousel } from "@/components/ui/product-carousel";
-import { HeroCarousel } from "@/components/ui/hero-carousel";
-import { FlashSaleCarousel } from "@/components/ui/flash-sale-carousel";
-import { auth } from "@/auth";
-import { Prisma } from "@prisma/client";
-
 import { unstable_cache } from "next/cache";
+import type { Prisma } from "@prisma/client";
+import { auth } from "@/auth";
+import { FlashSaleCarousel } from "@/components/ui/flash-sale-carousel";
+import { HeroCarousel } from "@/components/ui/hero-carousel";
+import { ProductCarousel } from "@/components/ui/product-carousel";
+import { prisma } from "@/lib/prisma";
+
+const cardSelect = {
+  id: true,
+  title: true,
+  slug: true,
+  price: true,
+  originalPrice: true,
+  imageUrl: true,
+  supplyType: true,
+} satisfies Prisma.ProductSelect;
 
 const getCachedProducts = unstable_cache(
   async () => {
-    type ProductWithCombo = {
-      id: string;
-      price: Prisma.Decimal | number;
-      originalPrice?: Prisma.Decimal | number | null;
-      comboItems?: { product: { price: Prisma.Decimal | number } }[];
-      [key: string]: unknown;
-    };
-
-    const serializeProduct = (p: ProductWithCombo) => {
-      const serialized = {
-        ...p,
-        price: Number(p.price),
-        originalPrice: p.originalPrice ? Number(p.originalPrice) : undefined,
-        comboItems: p.comboItems
-          ? p.comboItems.map((ci) => ({
-              ...ci,
-              product: {
-                ...ci.product,
-                price: Number(ci.product.price),
-              },
-            }))
-          : undefined,
-      };
-      return JSON.parse(JSON.stringify(serialized));
-    };
-
+    const now = new Date();
     const [robotRaw, comboRaw, logicRaw, flashSaleRaw] = await Promise.all([
       prisma.product.findMany({
-        where: { type: "ROBOT_STEM", isCombo: false },
+        where: { type: "ROBOT_STEM", isCombo: false, deletedAt: null },
+        select: cardSelect,
         take: 8,
         orderBy: { createdAt: "desc" },
       }),
       prisma.product.findMany({
-        where: { isCombo: true },
-        include: {
-          comboItems: {
-            include: { product: { select: { imageUrl: true, price: true } } },
-          },
+        where: { isCombo: true, deletedAt: null },
+        select: cardSelect,
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.product.findMany({
+        where: { type: "DO_CHOI_LOGIC", isCombo: false, deletedAt: null },
+        select: cardSelect,
+        take: 8,
+        orderBy: { createdAt: "desc" },
+      }),
+      prisma.product.findMany({
+        where: {
+          flashSaleActive: true,
+          flashSaleEndDate: { gt: now },
+          flashSaleStock: { gt: 0 },
+          deletedAt: null,
         },
-        take: 8,
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.product.findMany({
-        where: { type: "DO_CHOI_LOGIC", isCombo: false },
-        take: 8,
-        orderBy: { createdAt: "desc" },
-      }),
-      prisma.product.findMany({
-        where: { flashSaleActive: true },
+        select: cardSelect,
         take: 8,
         orderBy: { updatedAt: "desc" },
       }),
     ]);
 
-    const robotProducts = robotRaw.map(serializeProduct);
-    const comboProducts = comboRaw.map(serializeProduct);
-    const logicProducts = logicRaw.map(serializeProduct);
-    const flashSaleProductsData = flashSaleRaw.map(serializeProduct);
+    const serialize = (products: typeof robotRaw) =>
+      products.map((product) => ({
+        ...product,
+        price: Number(product.price),
+        originalPrice: product.originalPrice ? Number(product.originalPrice) : null,
+      }));
 
-    return { robotProducts, comboProducts, logicProducts, flashSaleProductsData };
+    return {
+      robotProducts: serialize(robotRaw),
+      comboProducts: serialize(comboRaw),
+      logicProducts: serialize(logicRaw),
+      flashSaleProducts: serialize(flashSaleRaw),
+    };
   },
-  ["homepage-products-v3"],
-  { revalidate: 3600 } // Cache for 1 hour
+  ["homepage-products-v4"],
+  { revalidate: 60, tags: ["products"] },
 );
-
 
 export default async function Home() {
   const session = await auth();
   const userId = session?.user?.id;
-
-  let userWishlistIds: string[] = [];
-  if (userId) {
-    const wishlistItems = await prisma.wishlist.findMany({
-      where: { userId },
-      select: { productId: true },
-    });
-    userWishlistIds = wishlistItems.map((w) => w.productId);
-  }
-
-  const { robotProducts, comboProducts, logicProducts, flashSaleProductsData } = await getCachedProducts();
-
-  // Deduplicate by id just in case
-  const flashSaleProducts = Array.from(
-    new Map((flashSaleProductsData || []).map((p) => [p.id, p])).values(),
-  );
+  const [catalog, wishlistItems] = await Promise.all([
+    getCachedProducts(),
+    userId
+      ? prisma.wishlist.findMany({ where: { userId }, select: { productId: true } })
+      : Promise.resolve([]),
+  ]);
+  const userWishlistIds = wishlistItems.map((item) => item.productId);
 
   return (
-    <div className="flex flex-col flex-1 bg-[#F5F5F5] overflow-hidden">
-      {/* Hero Banner Area - Carousel */}
+    <div className="flex flex-1 flex-col overflow-hidden bg-[#F5F5F5]">
       <HeroCarousel />
-
-      {/* VALUE PROPOSITIONS SECTION */}
-      {/* (Phần Value Propositions tạm ẩn hoặc chuyển xuống Footer/About để tối ưu chiều dài trang) */}
-
-      {/* GIFT RECOMMENDER SECTION (Moved to HeroCarousel) */}
-
-      {/* FLASH SALE Section */}
       <FlashSaleCarousel
-        products={flashSaleProducts}
+        products={catalog.flashSaleProducts}
         userWishlistIds={userWishlistIds}
       />
-
-      {/* Categories using the new ProductCarousel */}
       <ProductCarousel
         title="COMBO PHÁT TRIỂN KỸ NĂNG"
         categoryLink="/shop?type=COMBO"
         subLinkText="Khám phá Gói Combo"
-        products={comboProducts}
+        products={catalog.comboProducts}
         badgeColor="bg-[#E91E63]"
         userWishlistIds={userWishlistIds}
       />
-
       <ProductCarousel
         title="ROBOT AI GIÁO DỤC"
         categoryLink="/shop?type=ROBOT_STEM"
         subLinkText="Robot mBot"
-        products={robotProducts}
+        products={catalog.robotProducts}
         badgeColor="bg-[#FF3300]"
         userWishlistIds={userWishlistIds}
       />
-
       <ProductCarousel
         title="ĐỒ CHƠI TƯ DUY LOGIC"
         categoryLink="/shop?type=DO_CHOI_LOGIC"
         subLinkText="Rubik & Xếp Hình"
-        products={logicProducts}
+        products={catalog.logicProducts}
         badgeColor="bg-[#F44336]"
         userWishlistIds={userWishlistIds}
       />

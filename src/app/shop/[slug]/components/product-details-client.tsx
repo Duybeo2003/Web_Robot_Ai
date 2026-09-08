@@ -148,7 +148,10 @@ export function ProductDetailsClient({
 
           {product.supplyType === "PRE_ORDER" && (
             <div className="p-3 bg-amber-50 text-amber-800 rounded-md border border-amber-200 mt-2 text-xs">
-              <span className="font-bold">Lưu ý:</span> Đây là sản phẩm đặt trước (Pre-order). Yêu cầu thanh toán cọc {product.depositPercent ?? 70}% giá trị. Hàng sẽ về sau 7-10 ngày.
+              <span className="font-bold">Lưu ý:</span> Đây là sản phẩm đặt trước. Yêu cầu thanh toán cọc {product.depositPercent ?? 100}% giá trị.
+              {product.estimatedArrivalDate
+                ? ` Ngày hàng về dự kiến: ${new Date(product.estimatedArrivalDate).toLocaleDateString("vi-VN")}.`
+                : " Ngày giao sẽ được RoboEQ xác nhận trước khi xử lý thanh toán."}
             </div>
           )}
         </div>

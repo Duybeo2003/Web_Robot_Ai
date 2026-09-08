@@ -1,105 +1,163 @@
-import nodemailer from "nodemailer";
+import "server-only";
 
-// Create a reusable transporter
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST || "smtp.gmail.com",
-  port: parseInt(process.env.SMTP_PORT || "465"),
-  secure: process.env.SMTP_PORT === "465",
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
-});
+import { logger } from "@/lib/logger";
+
+type OrderEmailItem = {
+  quantity: number;
+  priceAtPurchase: number | string;
+  product?: { title?: string };
+};
+
+type EmailPayload = {
+  to: string;
+  subject: string;
+  html: string;
+  replyTo?: string;
+};
+
+function escapeHtml(value: string) {
+  return value
+    .replaceAll("&", "&amp;")
+    .replaceAll("<", "&lt;")
+    .replaceAll(">", "&gt;")
+    .replaceAll('"', "&quot;")
+    .replaceAll("'", "&#039;");
+}
+
+function emailConfig() {
+  const apiKey = process.env.EMAIL_API_KEY?.trim();
+  const from = process.env.EMAIL_FROM?.trim();
+  if (!apiKey || !from) return null;
+  return {
+    apiKey,
+    from,
+    apiUrl: process.env.EMAIL_API_URL?.trim() || "https://api.resend.com/emails",
+  };
+}
+
+async function deliverEmail(kind: string, recordId: string, payload: EmailPayload) {
+  const config = emailConfig();
+  if (!config) {
+    logger.warn("email.skipped", { kind, recordId, reason: "email_api_not_configured" });
+    return { success: false as const, skipped: true as const };
+  }
+
+  try {
+    const response = await fetch(config.apiUrl, {
+      method: "POST",
+      headers: {
+        Authorization: `Bearer ${config.apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from: config.from,
+        to: [payload.to],
+        subject: payload.subject,
+        html: payload.html,
+        ...(payload.replyTo ? { reply_to: payload.replyTo } : {}),
+      }),
+      signal: AbortSignal.timeout(10_000),
+    });
+    if (!response.ok) throw new Error(`Email API returned HTTP ${response.status}`);
+
+    const result = (await response.json().catch(() => null)) as { id?: string } | null;
+    logger.info("email.sent", { kind, recordId, messageId: result?.id });
+    return { success: true as const };
+  } catch (error) {
+    logger.error("email.failed", {
+      kind,
+      recordId,
+      error: error instanceof Error ? error.message : "unknown",
+    });
+    return { success: false as const };
+  }
+}
+
+function appUrl() {
+  return process.env.NEXT_PUBLIC_APP_URL || process.env.AUTH_URL || "http://localhost:3000";
+}
 
 export async function sendOrderConfirmationEmail(
   userEmail: string,
   orderId: string,
   totalAmount: number,
-  items: Array<{
-    quantity: number;
-    priceAtPurchase: number | string;
-    product?: { title?: string };
-  }> = [],
+  items: OrderEmailItem[] = [],
 ) {
-  if (!process.env.SMTP_USER || process.env.SMTP_PASS === "your-app-password") {
-    console.log(`[MOCK EMAIL] To: ${userEmail} - Order ${orderId} confirmed.`);
-    return { success: true, mocked: true };
-  }
-
   const itemsListHtml = items
-    .map(
-      (item) =>
-        `<li>${item.product?.title || "Sản phẩm"} x ${item.quantity} - ${Number(item.priceAtPurchase).toLocaleString("vi-VN")}đ</li>`,
-    )
+    .map((item) => {
+      const title = escapeHtml(item.product?.title || "Sản phẩm");
+      return `<li>${title} × ${item.quantity} — ${Number(item.priceAtPurchase).toLocaleString("vi-VN")}đ</li>`;
+    })
     .join("");
 
-  const mailOptions = {
-    from: `"RoboEQ" <${process.env.SMTP_USER}>`,
+  return deliverEmail("order_confirmation", orderId, {
     to: userEmail,
     subject: `Xác nhận đơn hàng #${orderId} từ RoboEQ`,
     html: `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-        <h2 style="color: #FF5722;">Cảm ơn bạn đã đặt hàng tại RoboEQ!</h2>
-        <p>Đơn hàng <strong>#${orderId}</strong> của bạn đã được ghi nhận và đang được xử lý.</p>
-        
-        <h3>Chi tiết đơn hàng:</h3>
-        <ul>
-          ${itemsListHtml}
-        </ul>
-        
-        <p><strong>Tổng cộng:</strong> <span style="color: #FF5722; font-size: 18px; font-weight: bold;">${Number(totalAmount).toLocaleString("vi-VN")}đ</span></p>
-        
-        <p>Bạn có thể theo dõi trạng thái đơn hàng trong phần <a href="${process.env.NEXTAUTH_URL}/profile/orders">Lịch sử đơn hàng</a>.</p>
-        <p>Nếu có bất kỳ thắc mắc nào, vui lòng liên hệ với chúng tôi.</p>
-        
-        <br>
-        <p>Trân trọng,</p>
-        <p><strong>Đội ngũ RoboEQ</strong></p>
-      </div>
-    `,
-  };
-
-  try {
-    const info = await transporter.sendMail(mailOptions);
-    console.log("Message sent: %s", info.messageId);
-    return { success: true };
-  } catch (error) {
-    console.error("Error sending email:", error);
-    return { success: false, error: "Failed to send email" };
-  }
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <h2 style="color:#ff5722">Cảm ơn bạn đã đặt hàng tại RoboEQ!</h2>
+        <p>Đơn hàng <strong>#${escapeHtml(orderId)}</strong> đã được ghi nhận và đang được xử lý.</p>
+        ${itemsListHtml ? `<h3>Chi tiết đơn hàng</h3><ul>${itemsListHtml}</ul>` : ""}
+        <p><strong>Tổng cộng:</strong> <span style="color:#ff5722;font-size:18px;font-weight:bold">${totalAmount.toLocaleString("vi-VN")}đ</span></p>
+        <p>Bạn có thể theo dõi đơn hàng tại <a href="${appUrl()}/profile/orders">trang đơn hàng</a>.</p>
+        <p>Trân trọng,<br><strong>Đội ngũ RoboEQ</strong></p>
+      </div>`,
+  });
 }
 
-export async function sendAdminNewOrderNotification(
-  orderId: string,
-  totalAmount: number,
-) {
-  if (
-    !process.env.ADMIN_EMAIL ||
-    process.env.SMTP_PASS === "your-app-password"
-  ) {
-    console.log(`[MOCK EMAIL] To Admin: New order ${orderId}.`);
-    return { success: true, mocked: true };
+export async function sendAdminNewOrderNotification(orderId: string, totalAmount: number) {
+  const adminEmail = process.env.ADMIN_EMAIL?.trim();
+  if (!adminEmail) {
+    logger.warn("email.skipped", {
+      kind: "admin_new_order",
+      orderId,
+      reason: "admin_email_not_configured",
+    });
+    return { success: false as const, skipped: true as const };
   }
 
-  const mailOptions = {
-    from: `"RoboEQ System" <${process.env.SMTP_USER}>`,
-    to: process.env.ADMIN_EMAIL,
+  return deliverEmail("admin_new_order", orderId, {
+    to: adminEmail,
     subject: `[Thông báo] Có đơn hàng mới #${orderId}`,
     html: `
-      <div style="font-family: Arial, sans-serif;">
-        <h2 style="color: #2E7D32;">Có đơn đặt hàng mới!</h2>
-        <p>Một khách hàng vừa đặt đơn hàng <strong>#${orderId}</strong> trên hệ thống.</p>
-        <p><strong>Tổng giá trị:</strong> ${Number(totalAmount).toLocaleString("vi-VN")}đ</p>
-        <p>Vui lòng đăng nhập vào <a href="${process.env.NEXTAUTH_URL}/admin/orders">Trang Quản Trị</a> để xem chi tiết và xử lý đơn hàng.</p>
-      </div>
-    `,
-  };
+      <div style="font-family:Arial,sans-serif">
+        <h2 style="color:#2e7d32">Có đơn đặt hàng mới</h2>
+        <p>Đơn hàng <strong>#${escapeHtml(orderId)}</strong> có tổng giá trị <strong>${totalAmount.toLocaleString("vi-VN")}đ</strong>.</p>
+        <p><a href="${appUrl()}/admin/orders">Mở trang quản trị đơn hàng</a></p>
+      </div>`,
+  });
+}
 
-  try {
-    await transporter.sendMail(mailOptions);
-    return { success: true };
-  } catch (error) {
-    console.error("Error sending admin notification:", error);
-    return { success: false, error };
+export async function sendSupportRequestNotification(request: {
+  id: string;
+  name: string;
+  phone: string;
+  email: string | null;
+  message: string;
+}) {
+  const adminEmail = process.env.ADMIN_EMAIL?.trim();
+  if (!adminEmail) {
+    logger.warn("email.skipped", {
+      kind: "support_request",
+      requestId: request.id,
+      reason: "admin_email_not_configured",
+    });
+    return { success: false as const, skipped: true as const };
   }
+
+  return deliverEmail("support_request", request.id, {
+    to: adminEmail,
+    replyTo: request.email || undefined,
+    subject: `[Hỗ trợ] Yêu cầu mới #${request.id}`,
+    html: `
+      <div style="font-family:Arial,sans-serif">
+        <h2>Yêu cầu hỗ trợ mới</h2>
+        <p><strong>Khách hàng:</strong> ${escapeHtml(request.name)}</p>
+        <p><strong>Điện thoại:</strong> ${escapeHtml(request.phone)}</p>
+        ${request.email ? `<p><strong>Email:</strong> ${escapeHtml(request.email)}</p>` : ""}
+        <p><strong>Nội dung:</strong></p>
+        <p style="white-space:pre-wrap">${escapeHtml(request.message)}</p>
+        <p><a href="${appUrl()}/admin/support">Mở hàng đợi hỗ trợ</a></p>
+      </div>`,
+  });
 }

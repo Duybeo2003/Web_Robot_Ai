@@ -34,7 +34,7 @@ function hasExpectedSignature(type: string, buffer: Buffer) {
 
 export async function POST(request: Request) {
   try {
-    await requireRole("ADMIN", "STORE_MANAGER", "EDITOR");
+    await requireRole("ADMIN", "EDITOR");
     const data = await request.formData();
     const candidate = data.get("file");
     const file = candidate instanceof File ? candidate : null;
@@ -126,7 +126,8 @@ export async function POST(request: Request) {
           },
           (error, result) => {
             if (error) reject(error);
-            else resolve(result);
+            else if (result) resolve(result);
+            else reject(new Error("Cloudinary returned no upload result"));
           },
         )
         .end(buffer);

@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
-import { Lora, Manrope } from "next/font/google";
 import "./globals.css";
 import { Providers } from "@/components/providers";
 import { Header } from "@/components/layout/Header";
@@ -12,18 +11,9 @@ import { StoreWrapper } from "@/components/layout/store-wrapper";
 import { AffiliateTracker } from "@/components/affiliate-tracker";
 import { FloatingSocialBar } from "@/components/layout/floating-social-bar";
 import dynamicImport from "next/dynamic";
+import { getBusinessIdentity } from "@/lib/commerce-policy";
 
 const AuthModal = dynamicImport(() => import("@/components/auth-modal").then((mod) => mod.AuthModal));
-
-const lora = Lora({
-  variable: "--font-heading",
-  subsets: ["latin"],
-});
-
-const manrope = Manrope({
-  variable: "--font-sans",
-  subsets: ["latin"],
-});
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
@@ -56,10 +46,12 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const business = getBusinessIdentity();
+
   return (
     <html
       lang="vi"
-      className={`${manrope.variable} ${lora.variable} h-full antialiased`}
+      className="h-full antialiased"
       suppressHydrationWarning
     >
       <body
@@ -68,7 +60,7 @@ export default function RootLayout({
       >
         <Providers>
           <StoreWrapper>
-            <Header />
+            <Header supportPhone={business.supportPhone} />
           </StoreWrapper>
           <main className="flex-1 flex flex-col">{children}</main>
           <StoreWrapper>

@@ -1,67 +1,84 @@
-export const metadata = {
+import type { Metadata } from "next";
+import Link from "next/link";
+import { PolicyShell } from "@/components/legal/policy-shell";
+import { getBusinessIdentity } from "@/lib/commerce-policy";
+
+export const metadata: Metadata = {
   title: "Chính sách vận chuyển - RoboEQ",
-  description: "Thông tin về chính sách giao hàng và vận chuyển.",
+  description: "Phí, phạm vi, thời gian và quy trình giao nhận đơn hàng RoboEQ.",
 };
 
+export const dynamic = "force-dynamic";
+
 export default function ShippingPolicyPage() {
+  const business = getBusinessIdentity();
+
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl bg-white my-8 rounded-sm shadow-sm border border-neutral-100">
-      <h1 className="text-3xl font-bold mb-8 text-[#FF5722] font-heading uppercase text-center border-b pb-4">
-        Chính sách vận chuyển
-      </h1>
-      <div className="prose prose-neutral max-w-none space-y-6 text-neutral-700 leading-relaxed">
-        <h3 className="text-xl font-bold text-foreground mt-6">
-          1. Phí giao hàng
-        </h3>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>
-            <strong>Miễn phí vận chuyển (Freeship):</strong> Áp dụng cho mọi đơn
-            hàng có tổng giá trị từ 500.000 VNĐ trở lên trên toàn quốc.
-          </li>
-          <li>
-            <strong>Đơn hàng dưới 500.000 VNĐ:</strong> Phí giao hàng sẽ được
-            tính theo bảng giá niêm yết của đơn vị vận chuyển (Giao Hàng Nhanh,
-            Viettel Post, GHTK), phí trung bình khoảng 25.000 - 35.000 VNĐ tùy
-            khu vực.
-          </li>
-        </ul>
+    <PolicyShell
+      title="Chính sách vận chuyển"
+      summary="Các đơn tạo trực tiếp trên website RoboEQ hiện được miễn phí giao hàng tiêu chuẩn trên toàn quốc."
+    >
+      <section>
+        <h2>1. Phí và phạm vi giao hàng</h2>
+        <p>
+          Phí vận chuyển tiêu chuẩn trên trang thanh toán là 0đ cho mọi đơn website đến địa chỉ hợp lệ tại Việt
+          Nam. Dịch vụ hỏa tốc, giao theo giờ hoặc yêu cầu đặc biệt chỉ phát sinh khi khách hàng chủ động đồng ý
+          mức phí riêng trước khi sử dụng.
+        </p>
+      </section>
 
-        <h3 className="text-xl font-bold text-foreground mt-6">
-          2. Thời gian giao hàng
-        </h3>
+      <section>
+        <h2>2. Xử lý và thời gian dự kiến</h2>
         <p>
-          Sau khi xác nhận đơn hàng thành công, chúng tôi sẽ tiến hành đóng gói
-          và bàn giao cho đơn vị vận chuyển. Thời gian giao hàng dự kiến:
+          Đơn chỉ được bàn giao cho đơn vị vận chuyển sau khi đáp ứng điều kiện thanh toán tương ứng. Thời gian
+          tham khảo, tính theo ngày làm việc kể từ khi đơn bắt đầu xử lý:
         </p>
-        <ul className="list-disc pl-6 space-y-2">
-          <li>
-            <strong>Khu vực Bắc Ninh / Hà Nội:</strong> Nhận hàng trong vòng 1-2
-            ngày làm việc. Có hỗ trợ giao hỏa tốc trong ngày.
-          </li>
-          <li>
-            <strong>Các tỉnh thành khác:</strong> Nhận hàng trong khoảng 3-5
-            ngày làm việc tùy thuộc vào khoảng cách địa lý.
-          </li>
+        <ul>
+          <li>Bắc Ninh và Hà Nội: khoảng 1–2 ngày làm việc.</li>
+          <li>Các tỉnh, thành khác: khoảng 3–5 ngày làm việc.</li>
+          <li>Vùng xa, thời tiết bất lợi hoặc cao điểm lễ, Tết có thể lâu hơn.</li>
         </ul>
-        <p className="text-sm italic text-neutral-500">
-          Lưu ý: Thời gian giao hàng có thể kéo dài hơn dự kiến do điều kiện
-          thời tiết, dịch bệnh hoặc vào các dịp lễ tết.
+        <p>
+          Sản phẩm đặt trước tuân theo ngày dự kiến ghi trên trang sản phẩm hoặc xác nhận riêng; mốc này có thể
+          khác thời gian giao hàng tiêu chuẩn.
         </p>
+      </section>
 
-        <h3 className="text-xl font-bold text-foreground mt-6">
-          3. Kiểm tra hàng khi nhận
-        </h3>
+      <section>
+        <h2>3. Theo dõi và thay đổi thông tin nhận hàng</h2>
         <p>
-          Quý khách hoàn toàn được phép <strong>đồng kiểm</strong> (mở gói hàng
-          và kiểm tra ngoại quan sản phẩm) trước khi thanh toán cho nhân viên
-          giao hàng.
+          Khi tạo vận đơn, mã theo dõi được cập nhật vào đơn hàng. Hãy liên hệ sớm nếu cần sửa người nhận, số điện
+          thoại hoặc địa chỉ. RoboEQ không bảo đảm thay đổi được thông tin sau khi kiện hàng đã bàn giao cho đơn vị
+          vận chuyển.
         </p>
+      </section>
+
+      <section>
+        <h2>4. Kiểm tra khi nhận</h2>
         <p>
-          Trường hợp sản phẩm bị móp méo, hư hỏng vật lý hoặc không đúng mẫu mã
-          đã đặt, quý khách vui lòng từ chối nhận hàng và liên hệ ngay với
-          Hotline 0385.333.111 để được hỗ trợ.
+          Khách hàng nên kiểm tra tình trạng bao bì, số kiện, mẫu sản phẩm và dấu hiệu hư hỏng bên ngoài trước khi
+          nhận. Việc mở kiện phụ thuộc quy định của đơn vị vận chuyển. Nếu kiện móp, rách, thiếu hoặc sai hàng,
+          hãy chụp ảnh/video, ghi nhận với nhân viên giao hàng và liên hệ RoboEQ ngay.
         </p>
-      </div>
-    </div>
+      </section>
+
+      <section>
+        <h2>5. Giao không thành công</h2>
+        <p>
+          Khách hàng chịu trách nhiệm cung cấp địa chỉ và số điện thoại chính xác, đồng thời phối hợp nhận hàng.
+          Sau các lần giao không thành công, kiện có thể được hoàn về và đơn được cập nhật theo kết quả thực tế.
+          RoboEQ sẽ liên hệ trước khi tạo lượt giao mới có chi phí phát sinh do thông tin sai hoặc khách từ chối
+          nhận không thuộc lỗi của RoboEQ.
+        </p>
+      </section>
+
+      <section>
+        <h2>6. Hư hỏng, thiếu hoặc thất lạc</h2>
+        <p>
+          Gửi mã đơn và minh chứng qua <Link href="/lien-he">trang liên hệ</Link> hoặc gọi {business.supportPhone}.
+          RoboEQ phối hợp với đơn vị vận chuyển và xử lý theo <Link href="/chinh-sach-doi-tra">chính sách đổi trả</Link>.
+        </p>
+      </section>
+    </PolicyShell>
   );
 }

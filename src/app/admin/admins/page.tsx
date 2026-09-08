@@ -34,8 +34,9 @@ export default async function AdminManagementPage() {
   const users = await prisma.user.findMany({
     where: {
       role: {
-        in: ["ADMIN", "STORE_MANAGER"],
+        in: ["ADMIN", "STORE_MANAGER", "EDITOR"],
       },
+      deletedAt: null,
     },
     orderBy: { createdAt: "desc" },
     include: {

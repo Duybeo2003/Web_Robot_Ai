@@ -9,6 +9,11 @@ export default async function WalletPage() {
     <WalletClientPage 
       wallet={wallet} 
       transactions={transactions} 
+      bankConfig={{
+        bankId: process.env.BANK_ID || "",
+        accountNo: process.env.BANK_ACCOUNT_NO || "",
+        accountName: process.env.BANK_ACCOUNT_NAME || "",
+      }}
     />
   );
 }

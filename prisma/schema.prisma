@@ -89,10 +89,24 @@ enum RmaStatus {
   COMPLETED
 }
 
+enum ReviewStatus {
+  PENDING
+  APPROVED
+  REJECTED
+}
+
 enum CommissionStatus {
   PENDING
   PAID
   CANCELLED
+  REVERSED
+}
+
+enum ContactRequestStatus {
+  NEW
+  IN_PROGRESS
+  RESOLVED
+  SPAM
 }
 
 // ------------------------------------------------------
@@ -122,9 +136,9 @@ model User {
   commissions           Commission[]
 
   // Gamification
-  wallet         UserWallet?
-  eventHistories UserEventHistory[]
-  inventory      UserInventory[]
+  wallet           UserWallet?
+  eventHistories   UserEventHistory[]
+  inventory        UserInventory[]
   deliveryRequests DeliveryRequest[]
 
   createdAt DateTime  @default(now())
@@ -289,23 +303,23 @@ model Cart {
 }
 
 model CartItem {
-  id        String          @id @default(cuid())
-  cartId    String
-  cart      Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
-  productId String
-  product   Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
-  variantId String?
-  variant   ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
-  selectionKey String @db.VarChar(383)
-  quantity  Int             @default(1)
+  id           String          @id @default(cuid())
+  cartId       String
+  cart         Cart            @relation(fields: [cartId], references: [id], onDelete: Cascade)
+  productId    String
+  product      Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  variantId    String?
+  variant      ProductVariant? @relation(fields: [variantId], references: [id], onDelete: Cascade)
+  selectionKey String          @db.VarChar(383)
+  quantity     Int             @default(1)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([cartId, selectionKey])
   @@index([cartId])
   @@index([productId])
   @@index([variantId])
-  @@unique([cartId, selectionKey])
 }
 
 model Order {
@@ -326,18 +340,21 @@ model Order {
   customerName   String?
 
   // Makes checkout retries safe and gives guest orders a scoped access token.
-  idempotencyKey      String? @unique
-  guestAccessTokenHash String?
+  idempotencyKey         String?   @unique
+  guestAccessTokenHash   String?
   inventoryReservedUntil DateTime?
+  termsVersion           String?
+  termsAcceptedAt        DateTime?
 
   // Logistics & Payment
-  shippingAddress String?
-  receiverPhone   String?
+  shippingAddress   String?
+  receiverPhone     String?
   logisticsProvider String?
   trackingCode      String?
   shippedAt         DateTime?
-  paymentMethod   PaymentMethod @default(COD)
-  paymentStatus   PaymentStatus @default(UNPAID)
+  completedAt       DateTime?
+  paymentMethod     PaymentMethod @default(COD)
+  paymentStatus     PaymentStatus @default(UNPAID)
 
   // State Machine for Kanban / Order processing
   pointsEarned   Int         @default(0) // Số điểm kiếm được từ đơn này
@@ -345,9 +362,9 @@ model Order {
   discountAmount Decimal     @default(0) @db.Decimal(10, 2) // Tiền giảm do coupon + points
   status         OrderStatus @default(PENDING)
 
-  items          OrderItem[]
-  returnRequests ReturnRequest[]
-  commissions    Commission[]
+  items               OrderItem[]
+  returnRequests      ReturnRequest[]
+  commissions         Commission[]
   paymentTransactions PaymentTransaction[]
 
   createdAt DateTime  @default(now())
@@ -357,6 +374,7 @@ model Order {
   @@index([userId])
   @@index([status])
   @@index([createdAt])
+  @@index([status, paymentStatus, inventoryReservedUntil])
 }
 
 model PaymentTransaction {
@@ -444,8 +462,8 @@ model ReturnRequest {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([orderId])
   @@index([userId])
-  @@index([orderId])
   @@index([status])
   @@index([createdAt])
 }
@@ -465,6 +483,9 @@ model Commission {
   affiliateUser   User             @relation(fields: [affiliateUserId], references: [id])
   amount          Decimal          @db.Decimal(10, 2)
   status          CommissionStatus @default(PENDING)
+  payoutReference String?          @unique
+  paidAt          DateTime?
+  reversedAt      DateTime?
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -494,9 +515,10 @@ model Coupon {
 }
 
 model Review {
-  id      String @id @default(cuid())
+  id      String       @id @default(cuid())
   rating  Int // 1-5
   comment String
+  status  ReviewStatus @default(APPROVED)
 
   userId    String
   user      User    @relation(fields: [userId], references: [id])
@@ -506,9 +528,10 @@ model Review {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
+  @@unique([userId, productId])
   @@index([userId])
   @@index([productId])
-  @@unique([userId, productId])
+  @@index([status, createdAt])
 }
 
 model Wishlist {
@@ -539,6 +562,20 @@ model AuditLog {
   @@index([model])
   @@index([action])
   @@index([timestamp])
+}
+
+model ContactRequest {
+  id        String               @id @default(cuid())
+  name      String
+  phone     String
+  email     String?
+  message   String               @db.Text
+  status    ContactRequestStatus @default(NEW)
+  createdAt DateTime             @default(now())
+  updatedAt DateTime             @updatedAt
+
+  @@index([status, createdAt])
+  @@index([phone])
 }
 
 // ------------------------------------------------------
@@ -673,12 +710,12 @@ model EventPrize {
   probability Float // e.g. 0.1 for 0.1%, 80 for 80%
   stock       Int? // null = unlimited
 
-  isJackpot    Boolean @default(false)
-  rewardPoints Int     @default(0) // If it's a point reward
+  isJackpot    Boolean  @default(false)
+  rewardPoints Int      @default(0) // If it's a point reward
   productId    String? // If it's a physical product reward
   product      Product? @relation(fields: [productId], references: [id])
-  pointCost    Int     @default(0) // Cost in Xu for POINT_EXCHANGE
-  sellPriceXu  Int?    // Admin configured sell-back price
+  pointCost    Int      @default(0) // Cost in Xu for POINT_EXCHANGE
+  sellPriceXu  Int? // Admin configured sell-back price
 
   createdAt DateTime @default(now())
 
@@ -717,12 +754,12 @@ model UserInventory {
   productId String
   product   Product @relation(fields: [productId], references: [id])
 
-  quantity  Int     @default(1)
-  isClaimed Boolean @default(false) // Deprecated, use status
+  quantity  Int                 @default(1)
+  isClaimed Boolean             @default(false) // Deprecated, use status
   status    UserInventoryStatus @default(AVAILABLE)
-  
-  source       String? // e.g. EVENT_PRIZE
-  sellPriceXu  Int?    // Snapshot of sell price from EventPrize
+
+  source      String? // e.g. EVENT_PRIZE
+  sellPriceXu Int? // Snapshot of sell price from EventPrize
 
   deliveryRequest DeliveryRequest?
 
@@ -741,20 +778,20 @@ enum DeliveryStatus {
 }
 
 model DeliveryRequest {
-  id              String @id @default(cuid())
-  userId          String
-  user            User   @relation(fields: [userId], references: [id], onDelete: Cascade)
-  
-  inventoryItemId String @unique
+  id     String @id @default(cuid())
+  userId String
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  inventoryItemId String        @unique
   inventoryItem   UserInventory @relation(fields: [inventoryItemId], references: [id], onDelete: Cascade)
-  
-  status          DeliveryStatus @default(PENDING)
-  recipientName   String
-  phoneNumber     String
-  address         String
-  notes           String?
-  trackingCode    String?
-  shippingFee     Int    @default(0)
+
+  status        DeliveryStatus @default(PENDING)
+  recipientName String
+  phoneNumber   String
+  address       String
+  notes         String?
+  trackingCode  String?
+  shippingFee   Int            @default(0)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt

@@ -13,8 +13,30 @@ jobs:
   quality:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    services:
+      mysql:
+        image: mysql:8.0
+        env:
+          MYSQL_ROOT_PASSWORD: ci-database-password
+          MYSQL_DATABASE: web_robot_ai_ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -pci-database-password"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
+      redis:
+        image: redis:7-alpine
+        ports:
+          - 6379:6379
+        options: >-
+          --health-cmd="redis-cli ping"
+          --health-interval=10s
+          --health-timeout=5s
+          --health-retries=10
     env:
-      DATABASE_URL: mysql://placeholder:placeholder@127.0.0.1:3306/placeholder
+      DATABASE_URL: mysql://root:ci-database-password@127.0.0.1:3306/web_robot_ai_ci
       AUTH_SECRET: ci-only-secret-at-least-32-characters
       AUTH_URL: http://localhost:3000
       REDIS_URL: redis://127.0.0.1:6379
@@ -25,10 +47,14 @@ jobs:
           node-version: 22
           cache: npm
       - run: npm ci
+      - run: npm audit --audit-level=high
       - run: npx prisma validate
+      - run: npx prisma migrate deploy
       - run: npm run lint
       - run: npm run typecheck
       - run: npm run build
+      - run: npx playwright install --with-deps chromium
+      - run: npm run test:e2e
 
   build:
     needs: quality

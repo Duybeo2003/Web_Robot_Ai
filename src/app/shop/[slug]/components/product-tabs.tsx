@@ -30,7 +30,7 @@ export function ProductTabs({ product }: { product: any }) {
     startTransition(async () => {
       const res = await submitReview(product.id, formData);
       if (res.success) {
-        toast.success("Cảm ơn bạn đã đánh giá!");
+        toast.success("Đã gửi đánh giá và đang chờ kiểm duyệt.");
         (e.target as HTMLFormElement).reset();
       } else {
         toast.error(res.error || "Có lỗi xảy ra");

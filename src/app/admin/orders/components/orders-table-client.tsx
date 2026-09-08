@@ -14,7 +14,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Checkbox } from "@/components/ui/checkbox";
-import { OrderDetailsModal } from "./order-details-modal";
+import { OrderDetailsModal, type AdminOrderDetails } from "./order-details-modal";
 import { Card } from "@/components/ui/card";
 import { Download, Truck, CheckCircle } from "lucide-react";
 import { toast } from "sonner";
@@ -32,9 +32,24 @@ const getOrderStatusBadge = (status: string) => {
       return <Badge className="bg-green-100 text-green-800 border-transparent">Đã giao thành công</Badge>;
     case "CANCELLED":
       return <Badge variant="destructive">Đã hủy</Badge>;
+    case "RETURNED":
+      return <Badge variant="outline" className="border-orange-200 bg-orange-50 text-orange-700">Đã trả hàng</Badge>;
     default:
       return <Badge variant="outline">{status}</Badge>;
   }
+};
+
+const getPaymentStatusBadge = (status: string) => {
+  if (status === "PAID") {
+    return <Badge className="border-transparent bg-emerald-100 text-emerald-700 shadow-none">Đã thanh toán</Badge>;
+  }
+  if (status === "PARTIALLY_PAID") {
+    return <Badge className="border-transparent bg-amber-100 text-amber-800 shadow-none">Đã thu một phần</Badge>;
+  }
+  if (status === "REFUNDED") {
+    return <Badge variant="outline" className="border-blue-200 bg-blue-50 text-blue-700">Đã hoàn tiền</Badge>;
+  }
+  return <Badge variant="secondary" className="border-transparent bg-stone-100 text-stone-600">Chưa thanh toán</Badge>;
 };
 
 export function OrdersTableClient({
@@ -42,12 +57,14 @@ export function OrdersTableClient({
   totalPages,
   totalCount,
   currentPage,
+  query,
 }: {
    
-  orders: any[];
+  orders: AdminOrderDetails[];
   totalPages: number;
   totalCount: number;
   currentPage: number;
+  query: string;
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -68,54 +85,77 @@ export function OrdersTableClient({
     }
   };
 
-  const exportToExcel = async () => {
+  const exportToCsv = async () => {
     if (orders.length === 0) return toast.error("Không có dữ liệu để xuất");
-    
-    // I6 Fix: Dynamic import to reduce initial bundle size
-    const xlsx = await import("xlsx");
     const { saveAs } = await import("file-saver");
 
     const data = orders.map((order) => ({
       "Mã đơn hàng": order.id,
-      "Tên khách hàng": order.user.name || "Khách",
+      "Tên khách hàng": order.customerName || order.user.name || "Khách",
       "Số điện thoại": order.receiverPhone || order.user.phoneNumber,
       "Địa chỉ": order.shippingAddress,
       "Tổng tiền": order.totalAmount,
-      "Trạng thái thanh toán": order.paymentStatus === "PAID" ? "Đã thanh toán" : "Chưa thanh toán",
+      "Trạng thái thanh toán": ({
+        UNPAID: "Chưa thanh toán",
+        PARTIALLY_PAID: "Đã thu một phần",
+        PAID: "Đã thanh toán",
+        REFUNDED: "Đã hoàn tiền",
+      } as Record<string, string>)[order.paymentStatus] || order.paymentStatus,
       "Trạng thái đơn hàng": order.status,
       "Phương thức": order.paymentMethod,
       "Ngày đặt": format(new Date(order.createdAt), "dd/MM/yyyy HH:mm:ss"),
     }));
 
-    const worksheet = xlsx.utils.json_to_sheet(data);
-    const workbook = xlsx.utils.book_new();
-    xlsx.utils.book_append_sheet(workbook, worksheet, "Orders");
-    const excelBuffer = xlsx.write(workbook, { bookType: "xlsx", type: "array" });
-    const blob = new Blob([excelBuffer], { type: "application/octet-stream" });
-    saveAs(blob, `DanhSachDonHang_${format(new Date(), "yyyyMMdd_HHmmss")}.xlsx`);
+    const escapeCsvCell = (value: unknown) => {
+      let text = String(value ?? "");
+      if (/^[=+\-@]/.test(text)) text = `'${text}`;
+      return `"${text.replaceAll('"', '""')}"`;
+    };
+    const headers = Object.keys(data[0]);
+    const rows = [
+      headers.map(escapeCsvCell).join(","),
+      ...data.map((row) =>
+        headers
+          .map((header) => escapeCsvCell(row[header as keyof typeof row]))
+          .join(","),
+      ),
+    ];
+    const blob = new Blob([`\uFEFF${rows.join("\r\n")}`], {
+      type: "text/csv;charset=utf-8",
+    });
+    saveAs(blob, `DanhSachDonHang_${format(new Date(), "yyyyMMdd_HHmmss")}.csv`);
   };
 
   const handleBulkAction = async (status: "PROCESSING" | "SHIPPED" | "COMPLETED") => {
     if (selectedIds.length === 0) return toast.error("Vui lòng chọn ít nhất 1 đơn hàng");
-    
+
     setIsActionLoading(true);
     let successCount = 0;
-    
-    for (const id of selectedIds) {
-      const order = orders.find(o => o.id === id);
-      if (order) {
-        const res = await updateOrderStatus(id, status, order.paymentStatus);
-        if (res.success) successCount++;
+    let requestFailed = false;
+    try {
+      for (const id of selectedIds) {
+        const order = orders.find((candidate) => candidate.id === id);
+        if (order) {
+          const result = await updateOrderStatus(id, status, order.paymentStatus);
+          if (result.success) successCount += 1;
+        }
       }
+    } catch {
+      requestFailed = true;
+      toast.error("Kết nối bị gián đoạn khi cập nhật đơn hàng.");
+    } finally {
+      setIsActionLoading(false);
+      setSelectedIds([]);
     }
-    
-    setIsActionLoading(false);
-    setSelectedIds([]);
-    
-    if (successCount > 0) {
-      toast.success(`Đã cập nhật trạng thái ${successCount} đơn hàng thành công`);
+
+    if (requestFailed) return;
+
+    if (successCount === selectedIds.length) {
+      toast.success(`Đã cập nhật ${successCount} đơn hàng.`);
+    } else if (successCount > 0) {
+      toast.warning(`Đã cập nhật ${successCount}/${selectedIds.length} đơn; các đơn còn lại không đủ điều kiện.`);
     } else {
-      toast.error("Cập nhật thất bại. Vui lòng thử lại.");
+      toast.error("Không có đơn nào đủ điều kiện chuyển trạng thái.");
     }
   };
 
@@ -151,8 +191,8 @@ export function OrdersTableClient({
             Hoàn thành
           </Button>
         </div>
-        <Button variant="outline" onClick={exportToExcel}>
-          <Download className="mr-2 h-4 w-4" /> Xuất Excel
+        <Button variant="outline" onClick={exportToCsv}>
+          <Download className="mr-2 h-4 w-4" /> Xuất CSV
         </Button>
       </div>
 
@@ -196,7 +236,7 @@ export function OrdersTableClient({
                   </TableCell>
                   <TableCell>
                     <div className="flex flex-col">
-                      <span className="font-medium">{order.user.name || "Khách"}</span>
+                      <span className="font-medium">{order.customerName || order.user.name || "Khách"}</span>
                       <span className="text-xs text-muted-foreground">
                         {order.receiverPhone || order.user.phoneNumber}
                       </span>
@@ -212,11 +252,7 @@ export function OrdersTableClient({
                     }).format(Number(order.totalAmount))}
                   </TableCell>
                   <TableCell>
-                    {order.paymentStatus === "PAID" ? (
-                      <Badge className="bg-emerald-100 text-emerald-700 border-transparent shadow-none">Đã thanh toán</Badge>
-                    ) : (
-                      <Badge variant="secondary" className="bg-stone-100 text-stone-600 border-transparent">Chưa thanh toán</Badge>
-                    )}
+                    {getPaymentStatusBadge(order.paymentStatus)}
                   </TableCell>
                   <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
                   <TableCell className="text-right">
@@ -234,12 +270,12 @@ export function OrdersTableClient({
             </p>
             <div className="flex gap-2">
               {currentPage > 1 && (
-                <Link href={`?page=${currentPage - 1}`}>
+                <Link href={`?${new URLSearchParams({ ...(query ? { q: query } : {}), page: String(currentPage - 1) })}`}>
                   <Button variant="outline" size="sm">← Trước</Button>
                 </Link>
               )}
               {currentPage < totalPages && (
-                <Link href={`?page=${currentPage + 1}`}>
+                <Link href={`?${new URLSearchParams({ ...(query ? { q: query } : {}), page: String(currentPage + 1) })}`}>
                   <Button variant="outline" size="sm">Sau →</Button>
                 </Link>
               )}

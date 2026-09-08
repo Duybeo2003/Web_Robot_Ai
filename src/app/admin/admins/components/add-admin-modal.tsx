@@ -32,7 +32,7 @@ export function AddAdminModal() {
     email: "",
     phoneNumber: "",
     password: "",
-    role: "STORE_MANAGER" as "ADMIN" | "STORE_MANAGER",
+    role: "STORE_MANAGER" as "ADMIN" | "STORE_MANAGER" | "EDITOR",
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -117,6 +117,8 @@ export function AddAdminModal() {
               <Input
                 id="password"
                 type="password"
+                minLength={12}
+                maxLength={128}
                 placeholder="Nhập mật khẩu..."
                 value={formData.password}
                 onChange={(e) => setFormData({ ...formData, password: e.target.value })}
@@ -126,12 +128,16 @@ export function AddAdminModal() {
               <Label htmlFor="role">Quyền hạn</Label>
               <Select 
                 value={formData.role} 
-                onValueChange={(val) => setFormData({ ...formData, role: (val as "ADMIN" | "STORE_MANAGER") || "STORE_MANAGER" })}
+                onValueChange={(val) => setFormData({
+                  ...formData,
+                  role: (val as "ADMIN" | "STORE_MANAGER" | "EDITOR") || "STORE_MANAGER",
+                })}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Chọn quyền" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="EDITOR">Biên tập viên</SelectItem>
                   <SelectItem value="STORE_MANAGER">Quản lý (Cấp 2)</SelectItem>
                   <SelectItem value="ADMIN">Admin (Cấp 1)</SelectItem>
                 </SelectContent>

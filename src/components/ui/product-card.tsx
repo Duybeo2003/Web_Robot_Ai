@@ -43,13 +43,12 @@ export function ProductCard({ product, action, isWished = false }: { product: Pr
             src={product.imageUrl}
             alt={product.title}
             fill
-            unoptimized
             className="object-cover group-hover:scale-105 transition-transform duration-500 p-2 md:p-4 text-transparent"
             sizes="(max-width: 768px) 100vw, 300px"
           />
         ) : (
           <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
-            <span className="text-neutral-400 text-sm font-medium">No image</span>
+            <span className="text-neutral-400 text-sm font-medium">Chưa có ảnh</span>
           </div>
         )}
       </Link>

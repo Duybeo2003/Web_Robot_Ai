@@ -10,13 +10,14 @@ import { auth } from "@/auth"
 import { WishlistButton } from "@/components/ui/wishlist-button"
 
 const getProduct = cache(async (slug: string) => {
-  return prisma.product.findUnique({
-    where: { slug },
+  return prisma.product.findFirst({
+    where: { slug, deletedAt: null },
     include: { 
       category: true,
       variants: true,
       reviews: {
-        include: { user: true },
+        where: { status: "APPROVED" },
+        include: { user: { select: { name: true, image: true } } },
         orderBy: { createdAt: "desc" }
       }
     },
@@ -64,7 +65,8 @@ export default async function ProductDetailPage({ params }: { params: Promise<{ 
   const relatedProducts = await prisma.product.findMany({
     where: {
       type: product.type,
-      id: { not: product.id }
+      id: { not: product.id },
+      deletedAt: null,
     },
     take: 4,
     include: { category: true }
@@ -152,9 +154,14 @@ const sanitizedProduct = {
               <ProductCard 
                 key={rp.id}
                 product={{
-                  ...rp,
-                  price: Number(rp.price)
-                } as unknown as { id: string; title: string; price: number; slug: string; imageUrl: string; supplyType?: string; inventoryCount: number; type: string; category: Record<string, unknown>; isCombo: boolean; flashSaleActive: boolean; flashSalePrice: number | null; flashSaleStock: number | null; variants?: Record<string, unknown>[] }}
+                  id: rp.id,
+                  title: rp.title,
+                  slug: rp.slug,
+                  price: Number(rp.price),
+                  originalPrice: rp.originalPrice ? Number(rp.originalPrice) : null,
+                  imageUrl: rp.imageUrl,
+                  supplyType: rp.supplyType,
+                }}
                 isWished={userWishlistIds.includes(rp.id)}
                 action={
                   <AddToCartButton 
@@ -164,6 +171,8 @@ const sanitizedProduct = {
                       price: Number(rp.price),
                       slug: rp.slug,
                       imageUrl: rp.imageUrl || "",
+                      supplyType: rp.supplyType,
+                      depositPercent: rp.depositPercent || undefined,
                     }}
                   />
                 }

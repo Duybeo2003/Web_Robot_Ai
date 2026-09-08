@@ -22,9 +22,8 @@ export default async function AdminUsersPage(props: { searchParams: Promise<{ pa
 
   const totalCount = await prisma.user.count({
     where: {
-      role: {
-        not: "ADMIN",
-      },
+      role: "USER",
+      deletedAt: null,
     },
   });
   const totalPages = Math.ceil(totalCount / itemsPerPage);
@@ -33,9 +32,8 @@ export default async function AdminUsersPage(props: { searchParams: Promise<{ pa
     skip: (currentPage - 1) * itemsPerPage,
     take: itemsPerPage,
     where: {
-      role: {
-        not: "ADMIN",
-      },
+      role: "USER",
+      deletedAt: null,
     },
     orderBy: { createdAt: "desc" },
     include: {

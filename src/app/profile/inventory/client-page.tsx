@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { UserInventory, Product } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { requestDelivery, sellItemForXu } from "@/actions/user-inventory";
@@ -16,9 +15,17 @@ import {
 } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { useRouter } from "next/navigation";
 
-interface InventoryItem extends UserInventory {
-  product: Product;
+interface InventoryItem {
+  id: string;
+  quantity: number;
+  sellPriceXu: number | null;
+  product: {
+    title: string;
+    description: string;
+    imageUrl: string | null;
+  };
 }
 
 interface InventoryClientPageProps {
@@ -26,6 +33,7 @@ interface InventoryClientPageProps {
 }
 
 export default function InventoryClientPage({ inventory: initialInventory }: InventoryClientPageProps) {
+  const router = useRouter();
   const [items, setItems] = useState(initialInventory);
   const [selectedItem, setSelectedItem] = useState<InventoryItem | null>(null);
   const [isSelling, setIsSelling] = useState(false);
@@ -92,7 +100,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
           <PackageOpen className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-neutral-700 mb-2">Túi đồ trống</h2>
           <p className="text-neutral-500 mb-6">Bạn chưa có vật phẩm nào hoặc tất cả đã được xử lý.</p>
-          <Button onClick={() => window.location.href = '/events'} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+          <Button onClick={() => router.push("/events")} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
             Đến Khu Sự Kiện
           </Button>
         </div>
@@ -152,7 +160,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
                 variant="outline" 
                 className="h-20 flex flex-col items-center justify-center gap-1 border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                 onClick={() => setShowDeliveryForm(true)}
-                disabled={isSelling}
+                disabled={isSelling || !selectedItem?.sellPriceXu || selectedItem.sellPriceXu <= 0}
               >
                 <Truck className="w-6 h-6" />
                 <span className="font-bold">Yêu cầu Giao hàng (Freeship)</span>
@@ -171,7 +179,9 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
                     <Coins className="w-6 h-6 text-yellow-500" />
                     <span className="font-bold">Bán lại lấy Xu</span>
                     <span className="text-xs text-neutral-500">
-                      Nhận ngay +{selectedItem ? (selectedItem.sellPriceXu !== null ? selectedItem.sellPriceXu : Math.floor(Number(selectedItem.product.price))).toLocaleString('vi-VN') : 0} Xu
+                      {selectedItem?.sellPriceXu && selectedItem.sellPriceXu > 0
+                        ? `Nhận ngay +${selectedItem.sellPriceXu.toLocaleString("vi-VN")} Xu`
+                        : "Vật phẩm này không hỗ trợ bán lại"}
                     </span>
                   </>
                 )}

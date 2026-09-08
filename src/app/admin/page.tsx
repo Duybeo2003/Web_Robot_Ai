@@ -12,24 +12,28 @@ export default async function AdminDashboardPage() {
   // Fix #3: Use aggregate + efficient queries instead of loading ALL orders into RAM
   const [totalOrders, totalUsers, totalProducts, revenueResult, recentOrders] = await Promise.all([
     prisma.order.count(),
-    prisma.user.count(),
-    prisma.product.count(),
+    prisma.user.count({ where: { deletedAt: null } }),
+    prisma.product.count({ where: { deletedAt: null } }),
     // Calculate total revenue directly in the database
     prisma.order.aggregate({
-      where: { status: { not: "CANCELLED" } },
-      _sum: { totalAmount: true },
+      where: {
+        status: { notIn: ["CANCELLED", "RETURNED"] },
+        paymentStatus: { not: "REFUNDED" },
+      },
+      _sum: { amountPaid: true },
     }),
     // Only fetch orders from the last 7 days for the chart
     prisma.order.findMany({
       where: {
-        status: { not: "CANCELLED" },
+        status: { notIn: ["CANCELLED", "RETURNED"] },
+        paymentStatus: { not: "REFUNDED" },
         createdAt: { gte: sevenDaysAgo },
       },
-      select: { totalAmount: true, createdAt: true },
+      select: { amountPaid: true, createdAt: true },
     }),
   ]);
 
-  const totalRevenue = Number(revenueResult._sum.totalAmount || 0);
+  const totalRevenue = Number(revenueResult._sum.amountPaid || 0);
 
   // Calculate revenue for the last 7 days
   const last7Days = Array.from({ length: 7 }).map((_, i) => {
@@ -46,7 +50,7 @@ export default async function AdminDashboardPage() {
     const orderDateStr = format(new Date(order.createdAt), "yyyy-MM-dd");
     const dayMatch = last7Days.find((d) => d.dateStr === orderDateStr);
     if (dayMatch) {
-      dayMatch.revenue += Number(order.totalAmount);
+      dayMatch.revenue += Number(order.amountPaid);
     }
   });
 
@@ -58,6 +62,12 @@ export default async function AdminDashboardPage() {
   // Fix N+1: Get top product IDs first, then fetch all products in ONE query
   const topProductsRaw = await prisma.orderItem.groupBy({
     by: ["productId"],
+    where: {
+      order: {
+        status: { notIn: ["CANCELLED", "RETURNED"] },
+        paymentStatus: { not: "REFUNDED" },
+      },
+    },
     _sum: { quantity: true },
     orderBy: { _sum: { quantity: "desc" } },
     take: 5,
@@ -65,7 +75,7 @@ export default async function AdminDashboardPage() {
 
   const topProductIds = topProductsRaw.map(p => p.productId);
   const topProductsFromDb = await prisma.product.findMany({
-    where: { id: { in: topProductIds } },
+    where: { id: { in: topProductIds }, deletedAt: null },
     select: { id: true, title: true, price: true, imageUrl: true },
   });
 

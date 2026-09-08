@@ -2,9 +2,10 @@
 
 import crypto from "crypto";
 import { prisma } from "@/lib/prisma";
-import { redis } from "@/lib/redis";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { hashOtp } from "@/lib/otp";
+import { getRequestFingerprint } from "@/lib/request-fingerprint";
+import { checkRateLimit } from "@/lib/rate-limit";
 
 async function sendOtp(phoneNumber: string, code: string) {
   const webhookUrl = process.env.SMS_WEBHOOK_URL;
@@ -14,6 +15,9 @@ async function sendOtp(phoneNumber: string, code: string) {
       return;
     }
     throw new Error("Dịch vụ SMS chưa được cấu hình.");
+  }
+  if (process.env.NODE_ENV === "production" && !webhookUrl.startsWith("https://")) {
+    throw new Error("Dịch vụ SMS phải sử dụng HTTPS.");
   }
 
   const response = await fetch(webhookUrl, {
@@ -39,11 +43,13 @@ export async function generateOtp(rawPhoneNumber: string) {
     return { success: false, error: "Số điện thoại không hợp lệ." };
   }
 
-  const rateLimitKey = `rate_limit:otp:${phoneNumber}`;
   try {
-    const requestsCount = await redis.incr(rateLimitKey);
-    if (requestsCount === 1) await redis.expire(rateLimitKey, 300);
-    if (requestsCount > 3) {
+    const fingerprint = await getRequestFingerprint();
+    const [phoneLimit, addressLimit] = await Promise.all([
+      checkRateLimit(`rl:otp:phone:${phoneNumber}`, 3, 300, { failClosed: true }),
+      checkRateLimit(`rl:otp:address:${fingerprint}`, 10, 300, { failClosed: true }),
+    ]);
+    if (!phoneLimit.success || !addressLimit.success) {
       return {
         success: false,
         error: "Bạn đã yêu cầu quá nhiều mã. Vui lòng thử lại sau 5 phút.",

@@ -35,8 +35,12 @@ export async function getEventBySlug(slug: string) {
 }
 
 export async function getRecentWinners(eventId: string) {
+  const now = new Date();
   return prisma.userEventHistory.findMany({
-    where: { eventId: idSchema.parse(eventId) },
+    where: {
+      eventId: idSchema.parse(eventId),
+      event: { isActive: true, startDate: { lte: now }, endDate: { gte: now } },
+    },
     orderBy: { createdAt: "desc" },
     take: 10,
     include: { user: { select: { name: true, image: true } } },

@@ -2,14 +2,20 @@
 
 import { prisma } from "@/lib/prisma";
 
-import { AgeRange, PrimarySkill } from "@prisma/client";
+import { z } from "zod";
+
+const recommendationSchema = z.object({
+  age: z.enum(["AGE_3_5", "AGE_6_8", "AGE_9_12", "AGE_12_PLUS"]),
+  skill: z.enum(["LOGIC", "LANGUAGE", "MOTOR_SKILLS", "EQ"]),
+});
 
 export async function getGiftRecommendations(age: string, skill: string) {
   try {
+    const input = recommendationSchema.parse({ age, skill });
     const products = await prisma.product.findMany({
       where: {
-        ageRange: age as AgeRange,
-        primarySkill: skill as PrimarySkill,
+        ageRange: input.age,
+        primarySkill: input.skill,
         deletedAt: null,
       },
       select: {

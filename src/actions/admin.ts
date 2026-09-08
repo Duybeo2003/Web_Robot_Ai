@@ -1,13 +1,15 @@
 "use server";
 
 import bcrypt from "bcryptjs";
-import type { Prisma, Role } from "@prisma/client";
+import { Prisma, type Role } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { requireRole } from "@/lib/authz";
+import { AuthorizationError, requireRole } from "@/lib/authz";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/utils";
+import { recordAudit } from "@/lib/audit";
+import { isAllowedImageUrl, isAllowedVideoUrl } from "@/lib/media-url";
 
 const idSchema = z.string().min(1).max(191);
 const optionalDate = z.preprocess(
@@ -23,6 +25,24 @@ const optionalHttpsUrl = z.preprocess(
   (value) => (value === "" || value === null ? undefined : value),
   z.string().url().startsWith("https://").max(2_000).optional(),
 );
+const imageUrlSchema = z
+  .string()
+  .trim()
+  .max(2_000)
+  .refine(isAllowedImageUrl, "Ảnh phải là tệp tải lên hoặc URL từ nguồn ảnh được hỗ trợ.");
+const optionalImageUrl = z.preprocess(
+  (value) => (value === "" || value === null ? undefined : value),
+  imageUrlSchema.optional(),
+);
+const optionalVideoUrl = z.preprocess(
+  (value) => (value === "" || value === null ? undefined : value),
+  z
+    .string()
+    .trim()
+    .max(2_000)
+    .refine(isAllowedVideoUrl, "Video phải là tệp tải lên, YouTube hoặc TikTok hợp lệ.")
+    .optional(),
+);
 const variantSchema = z.object({
   id: z.string().min(1).max(191).optional(),
   attributes: z.record(z.string(), z.string().max(100)),
@@ -30,7 +50,7 @@ const variantSchema = z.object({
   originalPrice: z.number().int().min(0).max(1_000_000_000).nullish(),
   inventoryCount: z.number().int().min(0).max(1_000_000),
   sku: optionalText(191),
-  imageUrl: optionalText(2_000),
+  imageUrl: optionalImageUrl,
 });
 const productSchema = z
   .object({
@@ -43,9 +63,9 @@ const productSchema = z
       .default("IN_HOUSE"),
     inventoryCount: z.number().int().min(0).max(1_000_000),
     sku: optionalText(191),
-    imageUrl: z.string().trim().max(2_000),
-    gallery: z.array(z.string().trim().max(2_000)).max(30).optional(),
-    videoUrl: optionalHttpsUrl,
+    imageUrl: z.union([z.literal(""), imageUrlSchema]),
+    gallery: z.array(imageUrlSchema).max(30).optional(),
+    videoUrl: optionalVideoUrl,
     originalPrice: z.number().int().min(0).max(1_000_000_000).nullish(),
     flashSaleActive: z.boolean().optional(),
     flashSaleEndDate: optionalDate,
@@ -77,6 +97,9 @@ const productSchema = z
     if (data.supplyType === "PRE_ORDER" && !data.estimatedArrivalDate) {
       context.addIssue({ code: "custom", path: ["estimatedArrivalDate"], message: "Sản phẩm đặt trước cần ngày dự kiến về hàng." });
     }
+    if (data.supplyType === "PRE_ORDER" && !data.depositPercent) {
+      context.addIssue({ code: "custom", path: ["depositPercent"], message: "Sản phẩm đặt trước cần tỷ lệ tiền cọc." });
+    }
     if (data.supplyType === "AFFILIATE_SELL" && !data.externalAffiliateLink) {
       context.addIssue({ code: "custom", path: ["externalAffiliateLink"], message: "Sản phẩm liên kết cần URL HTTPS." });
     }
@@ -86,6 +109,24 @@ export type ProductData = z.input<typeof productSchema>;
 
 function actionError(error: unknown, fallback: string) {
   console.error(`[ADMIN_ACTION_ERROR] ${fallback}`, error);
+  if (error instanceof AuthorizationError) {
+    return { success: false as const, error: "Bạn không có quyền thực hiện thao tác này." };
+  }
+  if (error instanceof z.ZodError) {
+    return { success: false as const, error: error.issues[0]?.message || "Dữ liệu không hợp lệ." };
+  }
+  if (error instanceof Prisma.PrismaClientKnownRequestError) {
+    return {
+      success: false as const,
+      error: error.code === "P2002" ? "Dữ liệu bị trùng với bản ghi hiện có." : fallback,
+    };
+  }
+  if (
+    error instanceof Prisma.PrismaClientValidationError ||
+    error instanceof Prisma.PrismaClientInitializationError
+  ) {
+    return { success: false as const, error: fallback };
+  }
   return {
     success: false as const,
     error: error instanceof Error ? error.message : fallback,
@@ -97,7 +138,7 @@ export async function pushOrderToLogistics(
   provider: "GHN" | "GHTK",
 ) {
   try {
-    await requireRole("ADMIN", "STORE_MANAGER");
+    const operator = await requireRole("ADMIN", "STORE_MANAGER");
     const id = idSchema.parse(orderId);
     const endpoint = process.env.LOGISTICS_API_URL;
     const apiKey = process.env.LOGISTICS_API_KEY;
@@ -146,6 +187,14 @@ export async function pushOrderToLogistics(
       },
     });
     if (updated.count === 0) throw new Error("Đơn hàng đã thay đổi trạng thái.");
+    await recordAudit({
+      actorId: operator.id,
+      action: "order.shipment_created",
+      model: "Order",
+      recordId: order.id,
+      before: { status: order.status },
+      after: { status: "SHIPPED", provider, trackingCode: result.trackingCode },
+    });
     revalidatePath("/admin/orders");
     revalidatePath("/profile/orders");
     return { success: true as const, trackingCode: result.trackingCode };
@@ -156,9 +205,10 @@ export async function pushOrderToLogistics(
 
 export async function upsertProduct(input: unknown, productId?: string) {
   try {
-    await requireRole("ADMIN");
+    const operator = await requireRole("ADMIN");
     const data = productSchema.parse(input);
     const id = productId ? idSchema.parse(productId) : undefined;
+    let savedProductId = id;
     const baseData = {
       title: data.title,
       description: data.description,
@@ -186,7 +236,7 @@ export async function upsertProduct(input: unknown, productId?: string) {
     } satisfies Prisma.ProductUncheckedUpdateInput;
 
     await prisma.$transaction(async (tx) => {
-      let savedId = id;
+      let savedId = savedProductId;
       if (savedId) {
         await tx.product.update({ where: { id: savedId }, data: baseData });
       } else {
@@ -195,6 +245,7 @@ export async function upsertProduct(input: unknown, productId?: string) {
           data: { ...baseData, slug: `${baseSlug}-${crypto.randomUUID().slice(0, 8)}` } as Prisma.ProductUncheckedCreateInput,
         });
         savedId = created.id;
+        savedProductId = created.id;
       }
 
       if (data.isCombo) {
@@ -260,6 +311,14 @@ export async function upsertProduct(input: unknown, productId?: string) {
       }
     });
 
+    await recordAudit({
+      actorId: operator.id,
+      action: id ? "product.update" : "product.create",
+      model: "Product",
+      recordId: savedProductId,
+      after: { title: data.title, price: data.price, supplyType: data.supplyType },
+    });
+
     revalidatePath("/admin/products");
     revalidatePath("/admin/combos");
     revalidatePath("/");
@@ -271,13 +330,26 @@ export async function upsertProduct(input: unknown, productId?: string) {
   }
 }
 
-export async function updateUserRole(userId: string, role: "USER" | "ADMIN" | "STORE_MANAGER") {
+export async function updateUserRole(
+  userId: string,
+  role: "USER" | "ADMIN" | "STORE_MANAGER" | "EDITOR",
+) {
   try {
     const currentUser = await requireRole("ADMIN");
     const id = idSchema.parse(userId);
-    const nextRole = z.enum(["USER", "ADMIN", "STORE_MANAGER"]).parse(role) as Role;
+    const nextRole = z.enum(["USER", "ADMIN", "STORE_MANAGER", "EDITOR"]).parse(role) as Role;
     if (currentUser.id === id) throw new Error("Bạn không thể tự thay đổi quyền của mình.");
+    const target = await prisma.user.findUnique({ where: { id }, select: { role: true } });
+    if (!target) throw new Error("Không tìm thấy người dùng.");
     await prisma.user.update({ where: { id }, data: { role: nextRole } });
+    await recordAudit({
+      actorId: currentUser.id,
+      action: "user.role_update",
+      model: "User",
+      recordId: id,
+      before: { role: target.role },
+      after: { role: nextRole },
+    });
     revalidatePath("/admin/users");
     return { success: true as const };
   } catch (error) {
@@ -296,6 +368,14 @@ export async function deleteUser(userId: string) {
       if (admins <= 1) throw new Error("Không thể xóa quản trị viên cuối cùng.");
     }
     await prisma.user.update({ where: { id }, data: { deletedAt: new Date() } });
+    await recordAudit({
+      actorId: currentUser.id,
+      action: "user.soft_delete",
+      model: "User",
+      recordId: id,
+      before: { role: target?.role || "UNKNOWN", deleted: false },
+      after: { deleted: true },
+    });
     revalidatePath("/admin/users");
     return { success: true as const };
   } catch (error) {
@@ -305,19 +385,29 @@ export async function deleteUser(userId: string) {
 
 export async function upsertCategory(input: unknown, categoryId?: string) {
   try {
-    await requireRole("ADMIN");
+    const operator = await requireRole("ADMIN");
     const data = z.object({
       name: z.string().trim().min(2).max(120),
       description: optionalText(2_000),
     }).parse(input);
+    let savedId: string;
     if (categoryId) {
-      await prisma.category.update({ where: { id: idSchema.parse(categoryId) }, data });
+      savedId = idSchema.parse(categoryId);
+      await prisma.category.update({ where: { id: savedId }, data });
     } else {
       const baseSlug = generateSlug(data.name) || "danh-muc";
-      await prisma.category.create({
+      const created = await prisma.category.create({
         data: { ...data, slug: `${baseSlug}-${crypto.randomUUID().slice(0, 8)}` },
       });
+      savedId = created.id;
     }
+    await recordAudit({
+      actorId: operator.id,
+      action: categoryId ? "category.update" : "category.create",
+      model: "Category",
+      recordId: savedId,
+      after: data,
+    });
     revalidatePath("/admin/categories");
     return { success: true as const };
   } catch (error) {
@@ -327,11 +417,17 @@ export async function upsertCategory(input: unknown, categoryId?: string) {
 
 export async function deleteCategory(id: string) {
   try {
-    await requireRole("ADMIN");
+    const operator = await requireRole("ADMIN");
     const categoryId = idSchema.parse(id);
     const products = await prisma.product.count({ where: { categoryId } });
     if (products > 0) throw new Error("Danh mục đang chứa sản phẩm nên không thể xóa.");
     await prisma.category.delete({ where: { id: categoryId } });
+    await recordAudit({
+      actorId: operator.id,
+      action: "category.delete",
+      model: "Category",
+      recordId: categoryId,
+    });
     revalidatePath("/admin/categories");
     return { success: true as const };
   } catch (error) {
@@ -348,13 +444,23 @@ const couponSchema = z.object({
 
 export async function upsertCoupon(input: unknown, couponId?: string) {
   try {
-    await requireRole("ADMIN");
+    const operator = await requireRole("ADMIN");
     const data = couponSchema.parse(input);
+    let savedId: string;
     if (couponId) {
-      await prisma.coupon.update({ where: { id: idSchema.parse(couponId) }, data });
+      savedId = idSchema.parse(couponId);
+      await prisma.coupon.update({ where: { id: savedId }, data });
     } else {
-      await prisma.coupon.create({ data });
+      const created = await prisma.coupon.create({ data });
+      savedId = created.id;
     }
+    await recordAudit({
+      actorId: operator.id,
+      action: couponId ? "coupon.update" : "coupon.create",
+      model: "Coupon",
+      recordId: savedId,
+      after: data,
+    });
     revalidatePath("/admin/coupons");
     return { success: true as const };
   } catch (error) {
@@ -364,8 +470,15 @@ export async function upsertCoupon(input: unknown, couponId?: string) {
 
 export async function deleteCoupon(id: string) {
   try {
-    await requireRole("ADMIN");
-    await prisma.coupon.delete({ where: { id: idSchema.parse(id) } });
+    const operator = await requireRole("ADMIN");
+    const couponId = idSchema.parse(id);
+    await prisma.coupon.delete({ where: { id: couponId } });
+    await recordAudit({
+      actorId: operator.id,
+      action: "coupon.delete",
+      model: "Coupon",
+      recordId: couponId,
+    });
     revalidatePath("/admin/coupons");
     return { success: true as const };
   } catch (error) {
@@ -375,12 +488,48 @@ export async function deleteCoupon(id: string) {
 
 export async function deleteReview(id: string) {
   try {
-    await requireRole("ADMIN");
-    await prisma.review.delete({ where: { id: idSchema.parse(id) } });
+    const operator = await requireRole("ADMIN");
+    const reviewId = idSchema.parse(id);
+    await prisma.review.delete({ where: { id: reviewId } });
+    await recordAudit({
+      actorId: operator.id,
+      action: "review.delete",
+      model: "Review",
+      recordId: reviewId,
+    });
     revalidatePath("/admin/reviews");
     return { success: true as const };
   } catch (error) {
     return actionError(error, "Không thể xóa đánh giá.");
+  }
+}
+
+export async function updateReviewStatus(id: string, rawStatus: unknown) {
+  try {
+    const operator = await requireRole("ADMIN");
+    const reviewId = idSchema.parse(id);
+    const status = z.enum(["PENDING", "APPROVED", "REJECTED"]).parse(rawStatus);
+    const current = await prisma.review.findUnique({
+      where: { id: reviewId },
+      select: { status: true },
+    });
+    if (!current) throw new Error("Không tìm thấy đánh giá.");
+    if (current.status === status) return { success: true as const };
+
+    await prisma.review.update({ where: { id: reviewId }, data: { status } });
+    await recordAudit({
+      actorId: operator.id,
+      action: "review.status_update",
+      model: "Review",
+      recordId: reviewId,
+      before: { status: current.status },
+      after: { status },
+    });
+    revalidatePath("/admin/reviews");
+    revalidatePath("/shop/[slug]", "page");
+    return { success: true as const };
+  } catch (error) {
+    return actionError(error, "Không thể cập nhật trạng thái đánh giá.");
   }
 }
 
@@ -408,13 +557,19 @@ export async function getSettings() {
 
 export async function updateSettings(input: unknown) {
   try {
-    await requireRole("ADMIN");
+    const operator = await requireRole("ADMIN");
     const data = z.record(z.enum(SETTING_KEYS), z.string().trim().max(2_000)).parse(input);
     await prisma.$transaction(
       Object.entries(data).map(([key, value]) =>
         prisma.setting.upsert({ where: { key }, update: { value }, create: { key, value } }),
       ),
     );
+    await recordAudit({
+      actorId: operator.id,
+      action: "settings.update",
+      model: "Setting",
+      after: { keys: Object.keys(data) },
+    });
     revalidatePath("/admin/settings");
     revalidatePath("/");
     return { success: true as const };
@@ -425,7 +580,7 @@ export async function updateSettings(input: unknown) {
 
 export async function createAdminAccount(input: unknown) {
   try {
-    await requireRole("ADMIN");
+    const operator = await requireRole("ADMIN");
     const data = z.object({
       name: z.string().trim().min(2).max(100),
       email: z.string().trim().email().max(254).transform((value) => value.toLowerCase()),
@@ -435,22 +590,32 @@ export async function createAdminAccount(input: unknown) {
         return phone || "";
       }),
       password: z.string().min(12).max(128).optional(),
-      role: z.enum(["ADMIN", "STORE_MANAGER"]),
+      role: z.enum(["ADMIN", "STORE_MANAGER", "EDITOR"]),
     }).parse(input);
 
     const existing = await prisma.user.findFirst({
       where: { OR: [{ email: data.email }, { phoneNumber: data.phoneNumber }] },
     });
     const password = data.password ? await bcrypt.hash(data.password, 12) : undefined;
+    let accountId: string;
     if (existing) {
       await prisma.user.update({
         where: { id: existing.id },
         data: { name: data.name, role: data.role, password, deletedAt: null },
       });
+      accountId = existing.id;
     } else {
       if (!password) throw new Error("Mật khẩu tối thiểu 12 ký tự là bắt buộc.");
-      await prisma.user.create({ data: { ...data, password } });
+      const created = await prisma.user.create({ data: { ...data, password } });
+      accountId = created.id;
     }
+    await recordAudit({
+      actorId: operator.id,
+      action: existing ? "staff.reactivate_or_update" : "staff.create",
+      model: "User",
+      recordId: accountId,
+      after: { role: data.role, email: data.email },
+    });
     revalidatePath("/admin/admins");
     return { success: true as const };
   } catch (error) {

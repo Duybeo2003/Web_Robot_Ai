@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import {  Users, Flame } from "lucide-react";
+import { Flame } from "lucide-react";
 
 export function PromotionalBanner({
   isActive,
@@ -13,7 +13,6 @@ export function PromotionalBanner({
   stock: number | null;
 }) {
   const [timeLeft, setTimeLeft] = useState(0);
-  const [viewers, setViewers] = useState(12);
   const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
@@ -32,16 +31,8 @@ export function PromotionalBanner({
       setTimeLeft(calculateTimeLeft());
     }, 1000);
 
-    const viewersTimer = setInterval(() => {
-      setViewers((prev) => {
-        const change = Math.floor(Math.random() * 5) - 2; // -2 to +2
-        return Math.max(5, Math.min(35, prev + change));
-      });
-    }, 5000);
-
     return () => {
       clearInterval(timer);
-      clearInterval(viewersTimer);
     };
   }, [isActive, endDate]);
 
@@ -80,31 +71,15 @@ export function PromotionalBanner({
         </div>
       </div>
 
-      {/* FOMO Indicators */}
-      <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs font-medium text-neutral-600 bg-orange-50/50 p-3 rounded-sm border border-orange-100">
-        <div className="flex items-center gap-1.5 text-orange-600">
-          <Users className="w-4 h-4" />
+      {stock !== null && stock > 0 && stock <= 10 && (
+        <div className="flex items-center gap-1.5 rounded-sm border border-orange-100 bg-orange-50/50 p-3 text-xs font-medium text-red-600">
+          <Flame className="w-4 h-4" aria-hidden="true" />
           <span>
-            Đang có{" "}
-            <strong className="text-orange-700 text-sm">{viewers}</strong> người
-            cùng xem
+            Còn <strong className="text-sm text-red-700">{stock}</strong> sản phẩm
+            trong suất Flash Sale
           </span>
         </div>
-
-        {stock !== null && stock > 0 && (
-          <>
-            <div className="w-1 h-1 rounded-full bg-orange-300 hidden sm:block"></div>
-            <div className="flex items-center gap-1.5 text-red-600">
-              <Flame className="w-4 h-4" />
-              <span>
-                Sắp hết hàng! Chỉ còn{" "}
-                <strong className="text-red-700 text-sm">{stock}</strong> sản
-                phẩm giá này
-              </span>
-            </div>
-          </>
-        )}
-      </div>
+      )}
     </div>
   );
 }

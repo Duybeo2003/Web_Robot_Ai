@@ -1,0 +1,3 @@
+ALTER TABLE `Order`
+  ADD COLUMN `termsVersion` VARCHAR(191) NULL,
+  ADD COLUMN `termsAcceptedAt` DATETIME(3) NULL;

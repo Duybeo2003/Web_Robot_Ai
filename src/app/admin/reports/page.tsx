@@ -31,12 +31,13 @@ export default async function AdminReportsPage() {
   const revenueResult = await prisma.order.aggregate({
     where: {
       status: "COMPLETED",
+      paymentStatus: { not: "REFUNDED" },
       deletedAt: null,
     },
-    _sum: { totalAmount: true },
+    _sum: { amountPaid: true },
   });
 
-  const totalRevenue = Number(revenueResult._sum.totalAmount || 0);
+  const totalRevenue = Number(revenueResult._sum.amountPaid || 0);
 
   // Only fetch orders from the last 6 months for chart grouping
   const sixMonthsAgo = new Date();
@@ -45,11 +46,12 @@ export default async function AdminReportsPage() {
   const recentOrders = await prisma.order.findMany({
     where: {
       status: "COMPLETED",
+      paymentStatus: { not: "REFUNDED" },
       deletedAt: null,
       createdAt: { gte: sixMonthsAgo },
     },
     select: {
-      totalAmount: true,
+      amountPaid: true,
       createdAt: true,
     },
     orderBy: { createdAt: "asc" },
@@ -63,7 +65,7 @@ export default async function AdminReportsPage() {
     if (!groupedData[month]) {
       groupedData[month] = 0;
     }
-    groupedData[month] += Number(order.totalAmount);
+    groupedData[month] += Number(order.amountPaid);
   });
 
   const chartData = Object.keys(groupedData).map((key) => ({

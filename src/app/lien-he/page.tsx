@@ -1,111 +1,73 @@
-import { Phone, Mail, MapPin, Clock } from "lucide-react";
+import { Clock, Mail, MapPin, Phone } from "lucide-react";
+import { ContactForm } from "./contact-form";
+import { getBusinessIdentity } from "@/lib/commerce-policy";
 
 export const metadata = {
   title: "Liên hệ - RoboEQ",
-  description: "Thông tin liên hệ RoboEQ.",
+  description: "Liên hệ RoboEQ để được tư vấn sản phẩm và hỗ trợ đơn hàng.",
 };
 
 export default function ContactPage() {
+  const business = getBusinessIdentity();
+  const phoneHref = business.supportPhone.replace(/[^\d+]/g, "");
+  const contactItems = [
+    {
+      title: "Địa chỉ",
+      icon: MapPin,
+      content: (
+        <>
+          {business.legalName}
+          <br />
+          {business.address}
+        </>
+      ),
+    },
+    {
+      title: "Điện thoại / Zalo",
+      icon: Phone,
+      content: <a href={`tel:${phoneHref}`} className="hover:text-primary">{business.supportPhone}</a>,
+    },
+    ...(business.supportEmail
+      ? [{
+          title: "Email",
+          icon: Mail,
+          content: <a href={`mailto:${business.supportEmail}`} className="break-all hover:text-primary">{business.supportEmail}</a>,
+        }]
+      : []),
+    { title: "Giờ làm việc", icon: Clock, content: "Thứ 2 - Thứ 7: 08:00 - 17:30" },
+  ];
+
   return (
-    <div className="container mx-auto px-4 py-12 max-w-6xl bg-white my-8 rounded-sm shadow-sm border border-neutral-100">
-      <h1 className="text-3xl font-bold mb-8 text-[#FF5722] font-heading uppercase text-center border-b pb-4">
+    <main className="container mx-auto my-8 max-w-6xl rounded-sm border border-neutral-100 bg-white px-4 py-12 shadow-sm">
+      <h1 className="mb-8 border-b pb-4 text-center font-heading text-3xl font-bold uppercase text-[#FF5722]">
         Liên hệ với chúng tôi
       </h1>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-12 mt-8">
-        <div>
-          <h2 className="text-2xl font-bold mb-6 text-foreground">
+      <div className="mt-8 grid grid-cols-1 gap-12 md:grid-cols-2">
+        <section aria-labelledby="contact-information">
+          <h2 id="contact-information" className="mb-6 text-2xl font-bold">
             Thông tin liên hệ
           </h2>
           <div className="space-y-6">
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#FF5722]/10 flex items-center justify-center shrink-0">
-                <MapPin className="w-6 h-6 text-[#FF5722]" />
+            {contactItems.map(({ title, icon: Icon, content }) => (
+              <div key={title} className="flex items-start gap-4">
+                <div className="flex size-12 shrink-0 items-center justify-center rounded-full bg-[#FF5722]/10">
+                  <Icon className="size-6 text-[#FF5722]" aria-hidden="true" />
+                </div>
+                <div>
+                  <h3 className="text-lg font-bold">{title}</h3>
+                  <div className="mt-1 text-neutral-600">{content}</div>
+                </div>
               </div>
-              <div>
-                <h3 className="font-bold text-lg">Địa chỉ</h3>
-                <p className="text-neutral-600 mt-1">
-                  CÔNG TY TNHH CÔNG NGHỆ GIÁO DỤC ROBOEQ
-                  <br />
-                 Yên Việt, Đông Cứu, Bắc Ninh, Việt Nam
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#FF5722]/10 flex items-center justify-center shrink-0">
-                <Phone className="w-6 h-6 text-[#FF5722]" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Điện thoại / Zalo</h3>
-                <p className="text-neutral-600 mt-1">0385.333.111</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#FF5722]/10 flex items-center justify-center shrink-0">
-                <Mail className="w-6 h-6 text-[#FF5722]" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Email</h3>
-                <p className="text-neutral-600 mt-1">Nguyenquocduyth03@gmail.com</p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-12 h-12 rounded-full bg-[#FF5722]/10 flex items-center justify-center shrink-0">
-                <Clock className="w-6 h-6 text-[#FF5722]" />
-              </div>
-              <div>
-                <h3 className="font-bold text-lg">Giờ làm việc</h3>
-                <p className="text-neutral-600 mt-1">
-                  Thứ 2 - Thứ 7: 08:00 - 17:30
-                </p>
-              </div>
-            </div>
+            ))}
           </div>
-        </div>
-
-        <div className="bg-neutral-50 p-6 rounded-sm border border-neutral-200">
-          <h2 className="text-xl font-bold mb-4 text-foreground">
-            Gửi tin nhắn
+        </section>
+        <section className="rounded-sm border border-neutral-200 bg-neutral-50 p-6" aria-labelledby="contact-form-title">
+          <h2 id="contact-form-title" className="mb-4 text-xl font-bold">
+            Gửi yêu cầu hỗ trợ
           </h2>
-          <form className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-1">Họ tên</label>
-              <input
-                type="text"
-                className="w-full p-2 border border-neutral-300 rounded-sm focus:outline-none focus:border-[#FF5722]"
-                placeholder="Nhập họ tên của bạn"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">
-                Số điện thoại
-              </label>
-              <input
-                type="text"
-                className="w-full p-2 border border-neutral-300 rounded-sm focus:outline-none focus:border-[#FF5722]"
-                placeholder="Nhập số điện thoại"
-              />
-            </div>
-            <div>
-              <label className="block text-sm font-medium mb-1">Nội dung</label>
-              <textarea
-                rows={4}
-                className="w-full p-2 border border-neutral-300 rounded-sm focus:outline-none focus:border-[#FF5722]"
-                placeholder="Nội dung cần hỗ trợ..."
-              ></textarea>
-            </div>
-            <button
-              type="button"
-              className="w-full bg-[#FF5722] text-white font-bold py-3 rounded-sm hover:bg-[#E64A19] transition-colors"
-            >
-              Gửi yêu cầu
-            </button>
-          </form>
-        </div>
+          <ContactForm />
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

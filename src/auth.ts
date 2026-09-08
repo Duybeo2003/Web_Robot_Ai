@@ -8,6 +8,18 @@ import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { hashOtp } from "@/lib/otp";
+import crypto from "node:crypto";
+
+const DUMMY_PASSWORD_HASH =
+  "$2b$12$xbAK/AbrEZF182UB6/JuluJeJMPXbK2VJ0KviQKDzgMMiWTjgjNNa";
+
+function requestFingerprint(request: Request) {
+  const address =
+    request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
+    request.headers.get("x-real-ip")?.trim() ||
+    "unknown";
+  return crypto.createHash("sha256").update(address).digest("hex").slice(0, 24);
+}
 
 const googleEnabled = Boolean(
   process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
@@ -44,7 +56,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         identifier: { label: "Email hoặc số điện thoại", type: "text" },
         password: { label: "Mật khẩu", type: "password" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (
           typeof credentials?.identifier !== "string" ||
           typeof credentials?.password !== "string"
@@ -55,10 +67,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const identifier = credentials.identifier.trim();
         const phone = normalizeVietnamPhone(identifier);
         const loginKey = phone || identifier.toLowerCase();
-        const rateLimit = await checkRateLimit(`rl:login:${loginKey}`, 5, 60, {
-          failClosed: true,
-        });
-        if (!rateLimit.success) return null;
+        const fingerprint = requestFingerprint(request);
+        const [accountLimit, addressLimit] = await Promise.all([
+          checkRateLimit(`rl:login:account:${loginKey}`, 5, 60, { failClosed: true }),
+          checkRateLimit(`rl:login:address:${fingerprint}`, 30, 60, { failClosed: true }),
+        ]);
+        if (!accountLimit.success || !addressLimit.success) return null;
 
         const user = await prisma.user.findFirst({
           where: {
@@ -69,15 +83,20 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
             ],
           },
         });
-        if (!user?.password) return null;
-        if (!(await bcrypt.compare(credentials.password, user.password))) return null;
+        const passwordMatches = await bcrypt.compare(
+          credentials.password,
+          user?.password || DUMMY_PASSWORD_HASH,
+        );
+        if (!user?.password || !passwordMatches) return null;
 
         return {
           id: user.id,
           name: user.name,
           email: user.email,
           image: user.image,
+          phoneNumber: user.phoneNumber,
           role: user.role,
+          points: user.points,
         };
       },
     }),
@@ -88,7 +107,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         phone: { label: "Số điện thoại", type: "text" },
         otp: { label: "OTP", type: "text" },
       },
-      async authorize(credentials) {
+      async authorize(credentials, request) {
         if (
           typeof credentials?.phone !== "string" ||
           typeof credentials?.otp !== "string" ||
@@ -99,10 +118,14 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         const phone = normalizeVietnamPhone(credentials.phone);
         if (!phone) return null;
 
-        const rateLimit = await checkRateLimit(`rl:otp-verify:${phone}`, 8, 300, {
-          failClosed: true,
-        });
-        if (!rateLimit.success) return null;
+        const fingerprint = requestFingerprint(request);
+        const [phoneLimit, addressLimit] = await Promise.all([
+          checkRateLimit(`rl:otp-verify:phone:${phone}`, 8, 300, { failClosed: true }),
+          checkRateLimit(`rl:otp-verify:address:${fingerprint}`, 30, 300, {
+            failClosed: true,
+          }),
+        ]);
+        if (!phoneLimit.success || !addressLimit.success) return null;
 
         const consumed = await prisma.otpCode.deleteMany({
           where: {
@@ -126,7 +149,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
           name: user.name,
           email: user.email,
           image: user.image,
+          phoneNumber: user.phoneNumber,
           role: user.role,
+          points: user.points,
         };
       },
     }),
@@ -135,13 +160,17 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
-        token.role = user.role;
-      } else if (token.id) {
+      }
+      if (token.id) {
         const currentUser = await prisma.user.findFirst({
           where: { id: token.id as string, deletedAt: null },
-          select: { role: true },
+          select: { role: true, points: true, phoneNumber: true },
         });
-        if (currentUser) token.role = currentUser.role;
+        if (currentUser) {
+          token.role = currentUser.role;
+          token.points = currentUser.points;
+          token.phoneNumber = currentUser.phoneNumber;
+        }
         else token.id = "";
       }
       return token;
@@ -149,7 +178,9 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     async session({ session, token }) {
       if (session.user && token.id) {
         session.user.id = token.id as string;
-        session.user.role = token.role as "USER" | "ADMIN";
+        session.user.role = token.role as string;
+        session.user.points = token.points as number;
+        session.user.phoneNumber = token.phoneNumber || null;
       }
       return session;
     },

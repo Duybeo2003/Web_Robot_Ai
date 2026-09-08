@@ -33,6 +33,9 @@ import {
   Zap,
   Wallet,
   Trophy,
+  Mail,
+  ScrollText,
+  DollarSign,
 } from "lucide-react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
@@ -45,6 +48,7 @@ const overviewGroup = [{ title: "Tổng quan", url: "/admin", icon: BarChart3 }]
 const salesGroup = [
   { title: "Đơn hàng", url: "/admin/orders", icon: ShoppingCart },
   { title: "Duyệt Nạp Xu", url: "/admin/wallet", icon: Wallet },
+  { title: "Đối soát hoa hồng", url: "/admin/commissions", icon: DollarSign },
   { title: "Trả thưởng & Giao hàng", url: "/admin/deliveries", icon: Package },
   { title: "Bảo hành", url: "/admin/warranties", icon: ShieldAlert },
   { title: "Đổi/Trả (RMA)", url: "/admin/returns", icon: Package },
@@ -70,6 +74,8 @@ const reportGroup = [
 ];
 
 const systemGroup = [
+  { title: "Yêu cầu hỗ trợ", url: "/admin/support", icon: Mail },
+  { title: "Nhật ký kiểm toán", url: "/admin/audit", icon: ScrollText },
   { title: "Khách hàng", url: "/admin/users", icon: Users },
   { title: "Quản trị Admin", url: "/admin/admins", icon: ShieldCheck },
   { title: "Cài đặt", url: "/admin/settings", icon: Settings },

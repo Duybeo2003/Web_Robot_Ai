@@ -13,33 +13,65 @@ import {
 } from "@/components/ui/dialog";
 import { AlertCircle, Loader2 } from "lucide-react";
 import { createReturnRequest } from "@/actions/rma";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { toast } from "sonner";
 
 export function RmaButton({ orderId }: { orderId: string }) {
   const [open, setOpen] = useState(false);
   const [reason, setReason] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [evidence, setEvidence] = useState<File | null>(null);
 
   const handleSubmit = async () => {
-    if (reason.length < 10) {
+    const normalizedReason = reason.trim();
+    if (normalizedReason.length < 10) {
       setError("Lý do đổi trả quá ngắn.");
+      return;
+    }
+    if (evidence && evidence.size > 5 * 1024 * 1024) {
+      setError("Ảnh minh chứng không được vượt quá 5 MB.");
       return;
     }
 
     setLoading(true);
     setError("");
-    const res = await createReturnRequest({ orderId, reason });
+    try {
+      let imageUrl: string | undefined;
+      if (evidence) {
+        const upload = new FormData();
+        upload.set("file", evidence);
+        const response = await fetch("/api/uploads/rma", { method: "POST", body: upload });
+        const result = (await response.json().catch(() => ({}))) as {
+          url?: string;
+          error?: string;
+        };
+        if (!response.ok || !result.url) {
+          setError(result.error || "Không thể tải ảnh minh chứng.");
+          return;
+        }
+        imageUrl = result.url;
+      }
+      const res = await createReturnRequest({
+        orderId,
+        reason: normalizedReason,
+        imageUrl,
+      });
 
-    if (res.error) {
-      setError(res.error);
-      setLoading(false);
-    } else {
+      if (res.error) {
+        setError(res.error);
+        return;
+      }
+
       setOpen(false);
       setReason("");
+      setEvidence(null);
+      toast.success("Đã gửi yêu cầu đổi trả. RoboEQ sẽ liên hệ sớm.");
+    } catch {
+      setError("Không thể gửi yêu cầu lúc này. Vui lòng thử lại.");
+    } finally {
       setLoading(false);
-      alert(
-        "Đã gửi yêu cầu đổi trả thành công. Chúng tôi sẽ liên hệ lại sớm nhất.",
-      );
     }
   };
 
@@ -74,6 +106,16 @@ export function RmaButton({ orderId }: { orderId: string }) {
             onChange={(e) => setReason(e.target.value)}
             className="min-h-[100px]"
           />
+          <div className="space-y-2">
+            <Label htmlFor={`rma-evidence-${orderId}`}>Ảnh minh chứng (không bắt buộc)</Label>
+            <Input
+              id={`rma-evidence-${orderId}`}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={(event) => setEvidence(event.target.files?.[0] || null)}
+            />
+            <p className="text-xs text-neutral-500">JPEG, PNG hoặc WebP; tối đa 5 MB.</p>
+          </div>
           {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
         </div>
 

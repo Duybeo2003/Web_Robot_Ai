@@ -1,7 +1,43 @@
 "use client";
+
 import { useState } from "react";
 import Image from "next/image";
 import { PlayCircle } from "lucide-react";
+
+type EmbeddedVideo =
+  | { kind: "youtube"; id: string }
+  | { kind: "tiktok"; id: string }
+  | { kind: "direct"; url: string; mimeType: string };
+
+function parseVideoUrl(rawUrl: string): EmbeddedVideo | null {
+  try {
+    const url = new URL(rawUrl);
+    const hostname = url.hostname.toLowerCase();
+    if (hostname === "youtu.be") {
+      const id = url.pathname.split("/").filter(Boolean)[0] || "";
+      return /^[\w-]{6,20}$/.test(id) ? { kind: "youtube", id } : null;
+    }
+    if (["youtube.com", "www.youtube.com", "www.youtube-nocookie.com"].includes(hostname)) {
+      const pathParts = url.pathname.split("/").filter(Boolean);
+      const id =
+        url.searchParams.get("v") ||
+        (["embed", "shorts"].includes(pathParts[0] || "") ? pathParts[1] : "") ||
+        "";
+      return /^[\w-]{6,20}$/.test(id) ? { kind: "youtube", id } : null;
+    }
+    if (hostname === "tiktok.com" || hostname.endsWith(".tiktok.com")) {
+      const match = url.pathname.match(/\/video\/(\d+)/);
+      return match?.[1] ? { kind: "tiktok", id: match[1] } : null;
+    }
+    return {
+      kind: "direct",
+      url: rawUrl,
+      mimeType: url.pathname.toLowerCase().endsWith(".webm") ? "video/webm" : "video/mp4",
+    };
+  } catch {
+    return null;
+  }
+}
 
 export function ProductGallery({
   images,
@@ -14,9 +50,10 @@ export function ProductGallery({
   selectedImage?: string | null;
   videoUrl?: string | null;
 }) {
+  const parsedVideo = videoUrl ? parseVideoUrl(videoUrl) : null;
   const [mediaSelection, setMediaSelection] = useState(() => ({
     sourceImage: selectedImage,
-    media: videoUrl ? "video" : selectedImage || images[0] || "",
+    media: parsedVideo ? "video" : selectedImage || images[0] || "",
   }));
   const activeMedia =
     mediaSelection.sourceImage === selectedImage
@@ -24,69 +61,43 @@ export function ProductGallery({
       : selectedImage || images[0] || "";
   const selectMedia = (media: string) =>
     setMediaSelection({ sourceImage: selectedImage, media });
-
-  let displayImages = Array.from(new Set(images.filter(Boolean)));
-  // No longer faking 3 thumbnails if they have video or real gallery
-  if (displayImages.length === 1 && !videoUrl) {
-    displayImages = [displayImages[0], displayImages[0], displayImages[0]];
-  } else if (displayImages.length === 2 && !videoUrl) {
-    displayImages = [...displayImages, displayImages[0]];
-  }
-
-  const isYouTube = videoUrl?.includes("youtube.com") || videoUrl?.includes("youtu.be");
-  const isTikTok = videoUrl?.includes("tiktok.com");
+  const displayImages = Array.from(new Set(images.filter(Boolean)));
 
   const renderVideoPlayer = () => {
-    if (!videoUrl) return null;
-    
-    if (isYouTube) {
-      let videoId = "";
-      if (videoUrl.includes("youtu.be/")) {
-        videoId = videoUrl.split("youtu.be/")[1]?.split("?")[0];
-      } else if (videoUrl.includes("watch?v=")) {
-        videoId = videoUrl.split("watch?v=")[1]?.split("&")[0];
-      }
+    if (!parsedVideo) return null;
+    if (parsedVideo.kind === "youtube") {
       return (
         <iframe
-          className="w-full h-full object-cover"
-          src={`https://www.youtube.com/embed/${videoId}?autoplay=1&mute=0`}
-          title="YouTube video player"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+          className="h-full w-full"
+          src={`https://www.youtube-nocookie.com/embed/${parsedVideo.id}`}
+          title={`Video sản phẩm ${title}`}
+          allow="accelerometer; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           allowFullScreen
-        ></iframe>
+        />
       );
     }
-    
-    if (isTikTok) {
-      // Basic tiktok embed (might need official embed script for full support, but iframe works for some formats)
-      const videoId = videoUrl.split("/video/")[1]?.split("?")[0];
+    if (parsedVideo.kind === "tiktok") {
       return (
         <iframe
-          className="w-full h-full object-cover"
-          src={`https://www.tiktok.com/embed/v2/${videoId}`}
+          className="h-full w-full"
+          src={`https://www.tiktok.com/embed/v2/${parsedVideo.id}`}
+          title={`Video TikTok sản phẩm ${title}`}
           allowFullScreen
-        ></iframe>
+        />
       );
     }
-
-    // Direct MP4 / WebM
     return (
-      <video
-        className="w-full h-full object-cover bg-black"
-        controls
-        autoPlay
-        playsInline
-      >
-        <source src={videoUrl} type="video/mp4" />
-        Trình duyệt của bạn không hỗ trợ thẻ video.
+      <video className="h-full w-full bg-black object-contain" controls playsInline preload="metadata">
+        <source src={parsedVideo.url} type={parsedVideo.mimeType} />
+        Trình duyệt của bạn không hỗ trợ phát video.
       </video>
     );
   };
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="relative w-full max-w-[400px] md:max-w-[500px] aspect-square bg-white rounded-md shadow-sm border border-neutral-100 group overflow-hidden p-0 mx-auto flex items-center justify-center bg-black/5">
-        {activeMedia === "video" ? (
+      <div className="group relative mx-auto flex aspect-square w-full max-w-[500px] items-center justify-center overflow-hidden rounded-md border border-neutral-100 bg-black/5 shadow-sm">
+        {activeMedia === "video" && parsedVideo ? (
           renderVideoPlayer()
         ) : activeMedia ? (
           <Image
@@ -94,52 +105,58 @@ export function ProductGallery({
             alt={title}
             fill
             priority
-            unoptimized
             className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         ) : (
-          <div className="w-full h-full flex items-center justify-center text-muted-foreground font-medium text-lg font-heading">
+          <div className="flex h-full w-full items-center justify-center font-heading text-lg font-medium text-muted-foreground">
             Đang cập nhật hình ảnh
           </div>
         )}
       </div>
 
-      {/* Thumbnails */}
-      <div className="flex gap-4 flex-wrap">
-        {videoUrl && (
-          <div
-            onClick={() => selectMedia("video")}
-            className={`w-20 h-20 bg-neutral-900 flex flex-col items-center justify-center rounded-sm border overflow-hidden relative cursor-pointer group ${
-              activeMedia === "video" ? 'border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20' : 'border-border'
-            }`}
-          >
-            <PlayCircle className={`w-8 h-8 transition-colors ${activeMedia === "video" ? "text-[#FF5722]" : "text-white group-hover:text-[#FF5722]"}`} />
-            <span className="text-[10px] text-white font-medium mt-1 uppercase">Video</span>
-          </div>
-        )}
-        
-        {displayImages.map((imgUrl, i) => (
-          <div
-            key={i}
-            onClick={() => selectMedia(imgUrl)}
-            className={`w-20 h-20 bg-muted rounded-sm border overflow-hidden relative cursor-pointer ${
-              activeMedia === imgUrl ? 'border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20' : 'border-border'
-            }`}
-          >
-            <Image
-              src={imgUrl}
-              alt={`${title} - thumbnail ${i + 1}`}
-              fill
-              sizes="80px"
-              unoptimized
-              className={`object-cover transition-opacity ${
-                activeMedia === imgUrl ? 'opacity-100' : 'opacity-60 hover:opacity-100'
+      {(parsedVideo || displayImages.length > 1) && (
+        <div className="flex flex-wrap gap-4" aria-label="Thư viện sản phẩm">
+          {parsedVideo && (
+            <button
+              type="button"
+              onClick={() => selectMedia("video")}
+              aria-pressed={activeMedia === "video"}
+              className={`group relative flex size-20 flex-col items-center justify-center overflow-hidden rounded-sm border bg-neutral-900 ${
+                activeMedia === "video"
+                  ? "border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20"
+                  : "border-border"
               }`}
-            />
-          </div>
-        ))}
-      </div>
+            >
+              <PlayCircle className={`size-8 transition-colors ${activeMedia === "video" ? "text-[#FF5722]" : "text-white group-hover:text-[#FF5722]"}`} />
+              <span className="mt-1 text-[10px] font-medium uppercase text-white">Video</span>
+            </button>
+          )}
+
+          {displayImages.map((imageUrl, index) => (
+            <button
+              type="button"
+              key={imageUrl}
+              onClick={() => selectMedia(imageUrl)}
+              aria-label={`Xem ảnh ${index + 1} của ${title}`}
+              aria-pressed={activeMedia === imageUrl}
+              className={`relative size-20 overflow-hidden rounded-sm border bg-muted ${
+                activeMedia === imageUrl
+                  ? "border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20"
+                  : "border-border"
+              }`}
+            >
+              <Image
+                src={imageUrl}
+                alt=""
+                fill
+                sizes="80px"
+                className={`object-cover transition-opacity ${activeMedia === imageUrl ? "opacity-100" : "opacity-60 hover:opacity-100"}`}
+              />
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 }

@@ -11,13 +11,13 @@ import {
 } from "@/components/ui/carousel";
 import { ProductCard } from "@/components/ui/product-card";
 import Autoplay from "embla-carousel-autoplay";
+import type { Product } from "@/types/product";
 
 interface ProductCarouselProps {
   title: string;
   categoryLink: string;
   subLinkText: string;
-   
-  products: any[];
+  products: Product[];
   badgeColor?: string; // e.g., "bg-[#FF3300]"
   userWishlistIds?: string[];
 }
