@@ -8,6 +8,20 @@ import { SortForm } from "./components/sort-form";
 import { ShopSidebarFilters } from "./components/shop-sidebar-filters";
 import { auth } from "@/auth";
 
+function firstSearchValue(value: string | string[] | undefined) {
+  return Array.isArray(value) ? value[0] : value;
+}
+
+function boundedNumber(
+  value: string | string[] | undefined,
+  minimum: number,
+  maximum: number,
+) {
+  const parsed = Number(firstSearchValue(value));
+  return Number.isFinite(parsed) && parsed >= minimum && parsed <= maximum
+    ? parsed
+    : undefined;
+}
 
 export const metadata = {
   title: "Cửa hàng - RoboEQ",
@@ -19,31 +33,41 @@ export default async function ShopPage({
   searchParams,
 }: {
   searchParams: Promise<{
-    q?: string;
-    type?: string;
-    page?: string;
-    minPrice?: string;
-    maxPrice?: string;
-    minAge?: string;
-    maxAge?: string;
-    skill?: string;
-    sort?: string;
+    q?: string | string[];
+    type?: string | string[];
+    page?: string | string[];
+    minPrice?: string | string[];
+    maxPrice?: string | string[];
+    minAge?: string | string[];
+    maxAge?: string | string[];
+    skill?: string | string[];
+    sort?: string | string[];
   }>;
 }) {
   const resolvedParams = await searchParams;
-  const query = resolvedParams.q || "";
-  const typeFilter = resolvedParams.type || "";
-  const currentPage = Math.max(1, Number(resolvedParams.page) || 1);
-  const minPrice = resolvedParams.minPrice
-    ? Number(resolvedParams.minPrice)
-    : undefined;
-  const maxPrice = resolvedParams.maxPrice
-    ? Number(resolvedParams.maxPrice)
-    : undefined;
-  const sortOption = resolvedParams.sort || "newest";
-  const skillFilter = resolvedParams.skill || "";
-  const minAge = resolvedParams.minAge ? Number(resolvedParams.minAge) : undefined;
-  const maxAge = resolvedParams.maxAge ? Number(resolvedParams.maxAge) : undefined;
+  const query = (firstSearchValue(resolvedParams.q) || "").trim().slice(0, 100);
+  const requestedType = firstSearchValue(resolvedParams.type) || "";
+  const typeFilter = ["ROBOT_STEM", "KIT_ARDUINO", "DO_CHOI_LOGIC", "COMBO"].includes(
+    requestedType,
+  )
+    ? requestedType
+    : "";
+  const requestedPage = boundedNumber(resolvedParams.page, 1, 1_000);
+  const currentPage = requestedPage ? Math.floor(requestedPage) : 1;
+  const minPrice = boundedNumber(resolvedParams.minPrice, 0, 1_000_000_000);
+  const maxPrice = boundedNumber(resolvedParams.maxPrice, 0, 1_000_000_000);
+  const requestedSort = firstSearchValue(resolvedParams.sort) || "newest";
+  const sortOption = ["newest", "price_asc", "price_desc"].includes(requestedSort)
+    ? requestedSort
+    : "newest";
+  const requestedSkill = firstSearchValue(resolvedParams.skill) || "";
+  const skillFilter = ["LOGIC", "LANGUAGE", "MOTOR_SKILLS", "EQ"].includes(
+    requestedSkill,
+  )
+    ? requestedSkill
+    : "";
+  const minAge = boundedNumber(resolvedParams.minAge, 0, 100);
+  const maxAge = boundedNumber(resolvedParams.maxAge, 0, 100);
   const itemsPerPage = 12;
 
   const session = await auth();

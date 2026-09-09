@@ -7,6 +7,7 @@ import { readJsonBody, RequestBodyError } from "@/lib/read-json-body";
 import { getRequestFingerprint } from "@/lib/request-fingerprint";
 
 const cartSyncSchema = z.object({
+  mode: z.enum(["merge", "replace"]).default("replace"),
   items: z
     .array(
       z.object({
@@ -44,7 +45,35 @@ export async function POST(request: Request) {
     if (!parsed.success) {
       return NextResponse.json({ error: "Invalid cart" }, { status: 400 });
     }
-    const items = parsed.data.items;
+    let items = parsed.data.items;
+    if (session?.user?.id && parsed.data.mode === "merge") {
+      const storedCart = await prisma.cart.findUnique({
+        where: { userId: session.user.id },
+        select: {
+          items: {
+            select: { productId: true, variantId: true, quantity: true },
+          },
+        },
+      });
+      const merged = new Map(
+        items.map((item) => [
+          `${item.id}:${item.variantId || "base"}`,
+          item,
+        ]),
+      );
+      for (const stored of storedCart?.items || []) {
+        const key = `${stored.productId}:${stored.variantId || "base"}`;
+        const local = merged.get(key);
+        if (!local && merged.size >= 100) continue;
+        merged.set(key, {
+          id: stored.productId,
+          variantId: stored.variantId || undefined,
+          quantity: Math.max(local?.quantity || 0, stored.quantity),
+          price: local?.price || 0,
+        });
+      }
+      items = [...merged.values()];
+    }
     const productIds = [...new Set(items.map((item) => item.id))];
     const products = await prisma.product.findMany({
       where: { id: { in: productIds }, deletedAt: null },

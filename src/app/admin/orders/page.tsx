@@ -4,12 +4,14 @@ import { Prisma } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Search } from "lucide-react";
+import { requireRole } from "@/lib/authz";
 
 export default async function AdminOrdersPage({
   searchParams,
 }: {
   searchParams: Promise<{ page?: string; q?: string }>;
 }) {
+  const operator = await requireRole("ADMIN", "STORE_MANAGER");
   const itemsPerPage = 20;
   const resolvedSearchParams = await searchParams;
   const requestedPage = Number.parseInt(resolvedSearchParams.page || "1", 10);
@@ -113,6 +115,7 @@ export default async function AdminOrdersPage({
         totalPages={totalPages}
         currentPage={currentPage}
         query={query}
+        canManageRefunds={operator.role === "ADMIN"}
       />
     </div>
   );

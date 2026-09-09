@@ -19,24 +19,31 @@ export function OrderStatusUpdater({
   currentStatus,
   paymentStatus,
   pendingPaymentProvider,
+  canCancelPaidOrders,
 }: {
   orderId: string;
   currentStatus: OrderStatus;
   paymentStatus: PaymentStatus;
   pendingPaymentProvider?: string;
+  canCancelPaidOrders: boolean;
 }) {
   const [status, setStatus] = useState(currentStatus);
   const [payStatus, setPayStatus] = useState(paymentStatus);
   const [loading, setLoading] = useState(false);
   const [paymentReference, setPaymentReference] = useState("");
-  const statusOptions = {
+  const statusOptions = ({
     PENDING: ["PENDING", "PROCESSING", "CANCELLED"],
     PROCESSING: ["PROCESSING", "SHIPPED", "CANCELLED"],
     SHIPPED: ["SHIPPED", "COMPLETED"],
     COMPLETED: ["COMPLETED"],
     CANCELLED: ["CANCELLED"],
     RETURNED: ["RETURNED"],
-  }[status] || [status];
+  }[status] || [status]).filter(
+    (option) =>
+      option !== "CANCELLED" ||
+      payStatus === "UNPAID" ||
+      canCancelPaidOrders,
+  );
   const statusLabels: Record<string, string> = {
     PENDING: "Chờ xử lý",
     PROCESSING: "Đang chuẩn bị",

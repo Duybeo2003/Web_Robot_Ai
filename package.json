@@ -8,6 +8,7 @@
     "start": "next start",
     "lint": "eslint",
     "typecheck": "tsc --noEmit",
+    "test:migrations": "node scripts/verify-migrations.mjs",
     "check": "npm run lint && npm run typecheck && npm run build",
     "test:e2e": "playwright test",
     "postinstall": "prisma generate"

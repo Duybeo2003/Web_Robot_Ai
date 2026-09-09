@@ -61,7 +61,10 @@ export default function RootLayout({
       >
         <Providers>
           <StoreWrapper>
-            <Header supportPhone={business.supportPhone} />
+            <Header
+              supportPhone={business.supportPhone}
+              zaloUrl={business.socialLinks.zalo}
+            />
           </StoreWrapper>
           <main className="flex-1 flex flex-col">{children}</main>
           <StoreWrapper>
@@ -78,7 +81,7 @@ export default function RootLayout({
             <CartSyncer />
           </StoreWrapper>
           <Toaster />
-          <FloatingSocialBar />
+          <FloatingSocialBar links={business.socialLinks} />
           <Suspense fallback={null}>
             <AuthModalLauncher />
             <AffiliateTracker />

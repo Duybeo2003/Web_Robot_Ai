@@ -49,7 +49,13 @@ function CartBadge() {
   );
 }
 
-export function Header({ supportPhone }: { supportPhone: string }) {
+export function Header({
+  supportPhone,
+  zaloUrl,
+}: {
+  supportPhone: string;
+  zaloUrl: string;
+}) {
   const { data: session } = useSession();
   const { theme, setTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
@@ -59,7 +65,6 @@ export function Header({ supportPhone }: { supportPhone: string }) {
   const [searchQuery, setSearchQuery] = useState("");
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const phoneHref = supportPhone.replace(/[^\d+]/g, "");
-  const zaloPhone = phoneHref.replace(/^\+84/, "0");
 
   useEffect(() => {
     setMounted(true);
@@ -113,8 +118,8 @@ export function Header({ supportPhone }: { supportPhone: string }) {
               <Phone className="w-4 h-4 text-primary" />
               <span>{supportPhone}</span>
             </a>
-            <Link
-              href={`https://zalo.me/${zaloPhone}`}
+            {zaloUrl && <Link
+              href={zaloUrl}
               target="_blank"
               rel="noopener noreferrer"
               className="flex items-center gap-1.5 hover:text-primary cursor-pointer transition-colors text-[#0068FF]"
@@ -128,7 +133,7 @@ export function Header({ supportPhone }: { supportPhone: string }) {
                 <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
               </svg>
               <span>Zalo Tư Vấn</span>
-            </Link>
+            </Link>}
           </div>
 
           {/* Theme Toggle */}

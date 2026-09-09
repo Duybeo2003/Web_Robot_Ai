@@ -59,12 +59,15 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
       async authorize(credentials, request) {
         if (
           typeof credentials?.identifier !== "string" ||
-          typeof credentials?.password !== "string"
+          typeof credentials?.password !== "string" ||
+          credentials.identifier.length > 254 ||
+          credentials.password.length > 128
         ) {
           return null;
         }
 
         const identifier = credentials.identifier.trim();
+        if (!identifier || !credentials.password) return null;
         const phone = normalizeVietnamPhone(identifier);
         const loginKey = phone || identifier.toLowerCase();
         const fingerprint = requestFingerprint(request);
@@ -111,6 +114,7 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         if (
           typeof credentials?.phone !== "string" ||
           typeof credentials?.otp !== "string" ||
+          credentials.phone.length > 32 ||
           !/^\d{6}$/.test(credentials.otp)
         ) {
           return null;

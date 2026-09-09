@@ -3,18 +3,25 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 
-export function FloatingSocialBar() {
+type SocialLinks = {
+  facebook: string;
+  shopee: string;
+  tiktok: string;
+  zalo: string;
+};
+
+export function FloatingSocialBar({ links }: { links: SocialLinks }) {
   const pathname = usePathname();
 
-  if (pathname?.startsWith("/admin")) {
+  if (pathname?.startsWith("/admin") || !Object.values(links).some(Boolean)) {
     return null;
   }
 
   return (
     <div className="fixed right-2 bottom-4 md:right-4 md:bottom-24 z-50 flex flex-col gap-2 md:gap-4">
       {/* Shopee */}
-      <Link
-        href="https://vn.shp.ee/jYvqVEMj"
+      {links.shopee && <Link
+        href={links.shopee}
         target="_blank"
         rel="noopener noreferrer"
         className="group relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#EE4D2D] text-white shadow-lg shadow-orange-500/30 hover:scale-110 transition-transform duration-300"
@@ -24,11 +31,11 @@ export function FloatingSocialBar() {
         <svg viewBox="0 0 24 24" width="20" height="20" className="fill-current z-10 md:w-6 md:h-6">
           <path d="M19 6h-2c0-2.8-2.2-5-5-5S7 3.2 7 6H5c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V8c0-1.1-.9-2-2-2zm-7-3c1.7 0 3 1.3 3 3H9c0-1.7 1.3-3 3-3zm7 17H5V8h14v12zm-7-8c-1.7 0-3-1.3-3-3H7c0 2.8 2.2 5 5 5s5-2.2 5-5h-2c0 1.7-1.3 3-3 3z" />
         </svg>
-      </Link>
+      </Link>}
 
       {/* Facebook */}
-      <Link
-        href="https://www.facebook.com/share/1PSifhd4HB/?mibextid=wwXIfr"
+      {links.facebook && <Link
+        href={links.facebook}
         target="_blank"
         rel="noopener noreferrer"
         className="group relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#1877F2] text-white shadow-lg shadow-blue-500/30 hover:scale-110 transition-transform duration-300"
@@ -38,12 +45,12 @@ export function FloatingSocialBar() {
         <svg viewBox="0 0 24 24" width="20" height="20" className="fill-current z-10 md:w-6 md:h-6">
           <path d="M18 2h-3a5 5 0 0 0-5 5v3H7v4h3v8h4v-8h3.62l.38-4h-4V7a1 1 0 0 1 1-1h3z" />
         </svg>
-      </Link>
+      </Link>}
 
       {/* Tiktok */}
-      {process.env.NEXT_PUBLIC_TIKTOK_URL && (
+      {links.tiktok && (
       <Link
-        href={process.env.NEXT_PUBLIC_TIKTOK_URL}
+        href={links.tiktok}
         target="_blank"
         rel="noopener noreferrer"
         className="group relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#000000] text-white shadow-lg shadow-neutral-500/30 hover:scale-110 transition-transform duration-300"
@@ -57,8 +64,8 @@ export function FloatingSocialBar() {
       )}
 
       {/* Zalo */}
-      <Link
-        href="https://zalo.me/0385333111"
+      {links.zalo && <Link
+        href={links.zalo}
         target="_blank"
         rel="noopener noreferrer"
         className="group relative flex items-center justify-center w-10 h-10 md:w-12 md:h-12 rounded-full bg-[#0068FF] text-white shadow-lg shadow-blue-500/30 hover:scale-110 transition-transform duration-300"
@@ -68,7 +75,7 @@ export function FloatingSocialBar() {
         <svg viewBox="0 0 24 24" width="20" height="20" className="fill-current z-10 md:w-6 md:h-6">
           <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
         </svg>
-      </Link>
+      </Link>}
     </div>
   );
 }

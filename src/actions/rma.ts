@@ -107,7 +107,18 @@ export async function updateReturnRequestStatus(
           id: returnRequest.order.id,
           status: { notIn: ["CANCELLED", "RETURNED"] },
         },
-        data: { status: "RETURNED" },
+        data: {
+          status: "RETURNED",
+          ...(returnRequest.order.pointsUsed > 0 &&
+          !returnRequest.order.pointsRestoredAt
+            ? { pointsRestoredAt: new Date() }
+            : {}),
+          ...(Number(returnRequest.order.amountPaid) === 0 &&
+          returnRequest.order.paymentStatus === "PAID" &&
+          returnRequest.order.pointsUsed > 0
+            ? { paymentStatus: "REFUNDED" }
+            : {}),
+        },
       });
       if (claimed.count === 0) {
         return { previousStatus: returnRequest.status, orderId: returnRequest.orderId };
@@ -129,10 +140,15 @@ export async function updateReturnRequestStatus(
         }
       }
 
-      if (returnRequest.order.pointsEarned > 0) {
+      const loyaltyDelta =
+        (returnRequest.order.pointsUsed > 0 &&
+        !returnRequest.order.pointsRestoredAt
+          ? returnRequest.order.pointsUsed
+          : 0) - returnRequest.order.pointsEarned;
+      if (loyaltyDelta !== 0) {
         await tx.user.update({
           where: { id: returnRequest.order.userId },
-          data: { points: { decrement: returnRequest.order.pointsEarned } },
+          data: { points: { increment: loyaltyDelta } },
         });
       }
       await tx.commission.updateMany({

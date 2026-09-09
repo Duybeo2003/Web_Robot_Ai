@@ -7,6 +7,7 @@ export async function cancelOrderAndRestoreInventory(
   tx: Prisma.TransactionClient,
   orderId: string,
   allowedStatuses: OrderStatus[] = ["PENDING"],
+  options: { allowPaid?: boolean } = {},
 ) {
   await lockOrderRow(tx, orderId);
   const order = await tx.order.findUnique({
@@ -19,9 +20,17 @@ export async function cancelOrderAndRestoreInventory(
     where: {
       id: orderId,
       status: { in: allowedStatuses },
-      paymentStatus: "UNPAID",
+      paymentStatus: options.allowPaid
+        ? { in: ["UNPAID", "PARTIALLY_PAID", "PAID"] }
+        : "UNPAID",
     },
-    data: { status: "CANCELLED", inventoryReservedUntil: null },
+    data: {
+      status: "CANCELLED",
+      inventoryReservedUntil: null,
+      ...(order.pointsUsed > 0 && !order.pointsRestoredAt
+        ? { pointsRestoredAt: new Date() }
+        : {}),
+    },
   });
   if (claimed.count === 0) return false;
 
@@ -57,7 +66,7 @@ export async function cancelOrderAndRestoreInventory(
     }
   }
 
-  if (order.pointsUsed > 0) {
+  if (order.pointsUsed > 0 && !order.pointsRestoredAt) {
     await tx.user.update({
       where: { id: order.userId },
       data: { points: { increment: order.pointsUsed } },

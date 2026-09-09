@@ -63,13 +63,17 @@ export async function updateOrderStatus(
       if (!order) throw new Error("Không tìm thấy đơn hàng.");
 
       if (status === "CANCELLED" && order.status !== "CANCELLED") {
+        if (order.paymentStatus !== "UNPAID" && operator.role !== "ADMIN") {
+          throw new Error("Chỉ quản trị viên được hủy đơn đã ghi nhận thanh toán.");
+        }
         const cancelled = await cancelOrderAndRestoreInventory(
           tx,
           order.id,
           ["PENDING", "PROCESSING"],
+          { allowPaid: operator.role === "ADMIN" },
         );
         if (!cancelled) {
-          throw new Error("Đơn đã thanh toán cần được hoàn tiền trước khi hủy.");
+          throw new Error("Không thể hủy đơn ở trạng thái hiện tại.");
         }
         return {
           status: "CANCELLED" as const,
@@ -275,52 +279,72 @@ export async function confirmOrderRefund(rawOrderId: string, rawReference: strin
       if (!["RETURNED", "CANCELLED"].includes(order.status)) {
         throw new Error("Chỉ xác nhận hoàn tiền cho đơn đã trả hàng hoặc đã hủy.");
       }
+      const pointsNeedRestore = order.pointsUsed > 0 && !order.pointsRestoredAt;
       if (order.paymentStatus === "REFUNDED") {
+        if (pointsNeedRestore) {
+          await tx.user.update({
+            where: { id: order.userId },
+            data: { points: { increment: order.pointsUsed } },
+          });
+          await tx.order.update({
+            where: { id: order.id },
+            data: { pointsRestoredAt: new Date() },
+          });
+        }
         const existingRefund = await tx.paymentTransaction.findUnique({
           where: { idempotencyKey: `refund:${order.id}` },
           select: { amount: true },
         });
-        return { amount: Number(existingRefund?.amount || 0), changed: false };
+        return {
+          amount: Number(existingRefund?.amount || 0),
+          changed: pointsNeedRestore,
+        };
       }
-      if (
-        !["PAID", "PARTIALLY_PAID"].includes(order.paymentStatus) ||
-        Number(order.amountPaid) <= 0
-      ) {
-        throw new Error("Đơn hàng không có khoản đã thanh toán để hoàn.");
+      const amount = Number(order.amountPaid);
+      const hasCashToRefund =
+        ["PAID", "PARTIALLY_PAID"].includes(order.paymentStatus) && amount > 0;
+      if (!hasCashToRefund && !pointsNeedRestore) {
+        throw new Error("Đơn hàng không có tiền hoặc điểm cần hoàn.");
       }
 
-      const amount = Number(order.amountPaid);
-      await tx.paymentTransaction.create({
-        data: {
-          orderId: order.id,
-          provider: order.paymentMethod,
-          status: "REFUNDED",
-          amount,
-          idempotencyKey: `refund:${order.id}`,
-          providerTransactionId: input.reference,
-          rawResponse: {
-            kind: "manual_refund_confirmation",
-            reference: input.reference,
-            confirmedBy: operator.id,
+      if (hasCashToRefund) {
+        await tx.paymentTransaction.create({
+          data: {
+            orderId: order.id,
+            provider: order.paymentMethod,
+            status: "REFUNDED",
+            amount,
+            idempotencyKey: `refund:${order.id}`,
+            providerTransactionId: input.reference,
+            rawResponse: {
+              kind: "manual_refund_confirmation",
+              reference: input.reference,
+              confirmedBy: operator.id,
+            },
+            processedAt: new Date(),
           },
-          processedAt: new Date(),
-        },
-      });
+        });
+      }
+      if (pointsNeedRestore) {
+        await tx.user.update({
+          where: { id: order.userId },
+          data: { points: { increment: order.pointsUsed } },
+        });
+      }
       const claimed = await tx.order.updateMany({
         where: {
           id: order.id,
           status: { in: ["RETURNED", "CANCELLED"] },
           paymentStatus: { in: ["PAID", "PARTIALLY_PAID"] },
         },
-        data: { paymentStatus: "REFUNDED", amountPaid: 0, amountDue: 0 },
+        data: {
+          paymentStatus: "REFUNDED",
+          amountPaid: 0,
+          amountDue: 0,
+          ...(pointsNeedRestore ? { pointsRestoredAt: new Date() } : {}),
+        },
       });
       if (claimed.count === 0) throw new Error("Trạng thái đơn hàng vừa thay đổi. Vui lòng tải lại.");
-      if (order.status === "RETURNED" && order.pointsUsed > 0) {
-        await tx.user.update({
-          where: { id: order.userId },
-          data: { points: { increment: order.pointsUsed } },
-        });
-      }
       return { amount, changed: true };
     });
 

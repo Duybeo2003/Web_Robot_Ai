@@ -58,6 +58,7 @@ export function OrdersTableClient({
   totalCount,
   currentPage,
   query,
+  canManageRefunds,
 }: {
    
   orders: AdminOrderDetails[];
@@ -65,6 +66,7 @@ export function OrdersTableClient({
   totalCount: number;
   currentPage: number;
   query: string;
+  canManageRefunds: boolean;
 }) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [isActionLoading, setIsActionLoading] = useState(false);
@@ -256,7 +258,10 @@ export function OrdersTableClient({
                   </TableCell>
                   <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
                   <TableCell className="text-right">
-                    <OrderDetailsModal order={order} />
+                    <OrderDetailsModal
+                      order={order}
+                      canManageRefunds={canManageRefunds}
+                    />
                   </TableCell>
                 </TableRow>
               ))

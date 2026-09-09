@@ -67,7 +67,13 @@ function variantLabel(attributes: unknown) {
     .join(" - ");
 }
 
-export function OrderDetailsModal({ order }: { order: AdminOrderDetails }) {
+export function OrderDetailsModal({
+  order,
+  canManageRefunds,
+}: {
+  order: AdminOrderDetails;
+  canManageRefunds: boolean;
+}) {
   const [isPushing, setIsPushing] = useState(false);
   const [refundReference, setRefundReference] = useState("");
   const [isRefunding, setIsRefunding] = useState(false);
@@ -100,6 +106,7 @@ export function OrderDetailsModal({ order }: { order: AdminOrderDetails }) {
               orderId={order.id}
               currentStatus={order.status}
               paymentStatus={order.paymentStatus}
+              canCancelPaidOrders={canManageRefunds}
               pendingPaymentProvider={
                 order.paymentTransactions.find((payment) => payment.status === "PENDING")?.provider
               }
@@ -137,7 +144,8 @@ export function OrderDetailsModal({ order }: { order: AdminOrderDetails }) {
               )}
           </div>
 
-          {["RETURNED", "CANCELLED"].includes(order.status) &&
+          {canManageRefunds &&
+            ["RETURNED", "CANCELLED"].includes(order.status) &&
             ["PAID", "PARTIALLY_PAID"].includes(order.paymentStatus) && (
             <div className="rounded-lg border border-red-200 bg-red-50 p-4">
               <h4 className="text-sm font-semibold text-red-900">Xác nhận đã hoàn tiền</h4>

@@ -44,6 +44,10 @@ export function register() {
     "VNP_URL",
     "VNP_RETURN_URL",
     "LOGISTICS_API_URL",
+    "SOCIAL_FACEBOOK_URL",
+    "SOCIAL_SHOPEE_URL",
+    "SOCIAL_TIKTOK_URL",
+    "SOCIAL_ZALO_URL",
   ] as const;
   for (const name of httpsVariables) {
     const value = process.env[name];

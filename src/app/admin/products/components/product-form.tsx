@@ -607,7 +607,13 @@ export function ProductForm({
 
         <div className="grid grid-cols-2 gap-4">
           <div className="flex flex-col justify-end gap-2">
-            <Label htmlFor="inventoryCount">Tồn kho chung (Nếu không có biến thể)</Label>
+            <Label htmlFor="inventoryCount">
+              {formData.isCombo
+                ? "Tồn kho combo đã đóng gói"
+                : formData.supplyType === "PRE_ORDER"
+                  ? "Số suất đặt trước còn lại"
+                  : "Tồn kho chung (nếu không có biến thể)"}
+            </Label>
             <Input
               id="inventoryCount"
               type="number"

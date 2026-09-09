@@ -4,7 +4,19 @@ export const VNPAY_RESERVATION_MINUTES = 30;
 export const POLICY_EFFECTIVE_DATE = "08/09/2026";
 export const POLICY_VERSION = "2026-09-08";
 
+function optionalHttpsUrl(value: string | undefined) {
+  if (!value?.trim()) return "";
+  try {
+    const parsed = new URL(value.trim());
+    return parsed.protocol === "https:" ? parsed.toString() : "";
+  } catch {
+    return "";
+  }
+}
+
 export function getBusinessIdentity() {
+  const supportPhone = process.env.SUPPORT_PHONE?.trim() || "0385.333.111";
+  const zaloPhone = supportPhone.replace(/[^\d+]/g, "").replace(/^\+84/, "0");
   return {
     legalName:
       process.env.LEGAL_COMPANY_NAME?.trim() ||
@@ -14,7 +26,15 @@ export function getBusinessIdentity() {
     address:
       process.env.LEGAL_ADDRESS?.trim() ||
       "Yên Việt, Đông Cứu, Bắc Ninh, Việt Nam",
-    supportPhone: process.env.SUPPORT_PHONE?.trim() || "0385.333.111",
+    supportPhone,
     supportEmail: process.env.SUPPORT_EMAIL?.trim() || "",
+    socialLinks: {
+      facebook: optionalHttpsUrl(process.env.SOCIAL_FACEBOOK_URL),
+      shopee: optionalHttpsUrl(process.env.SOCIAL_SHOPEE_URL),
+      tiktok: optionalHttpsUrl(process.env.SOCIAL_TIKTOK_URL),
+      zalo:
+        optionalHttpsUrl(process.env.SOCIAL_ZALO_URL) ||
+        (zaloPhone.length >= 9 ? `https://zalo.me/${zaloPhone}` : ""),
+    },
   };
 }

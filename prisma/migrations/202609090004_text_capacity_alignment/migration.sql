@@ -1,0 +1,50 @@
+ALTER TABLE `User`
+  MODIFY COLUMN `email` VARCHAR(254) NULL,
+  MODIFY COLUMN `image` TEXT NULL;
+
+ALTER TABLE `Category`
+  MODIFY COLUMN `description` TEXT NULL;
+
+ALTER TABLE `Product`
+  MODIFY COLUMN `title` VARCHAR(255) NOT NULL,
+  MODIFY COLUMN `description` LONGTEXT NOT NULL,
+  MODIFY COLUMN `imageUrl` TEXT NULL,
+  MODIFY COLUMN `videoUrl` TEXT NULL,
+  MODIFY COLUMN `externalAffiliateLink` TEXT NULL;
+
+ALTER TABLE `ProductVariant`
+  MODIFY COLUMN `imageUrl` TEXT NULL;
+
+ALTER TABLE `Order`
+  MODIFY COLUMN `shippingAddress` TEXT NULL;
+
+ALTER TABLE `ReturnRequest`
+  MODIFY COLUMN `reason` TEXT NOT NULL,
+  MODIFY COLUMN `imageUrl` TEXT NULL;
+
+ALTER TABLE `Review`
+  MODIFY COLUMN `comment` TEXT NOT NULL;
+
+ALTER TABLE `ContactRequest`
+  MODIFY COLUMN `email` VARCHAR(254) NULL;
+
+ALTER TABLE `InventoryTransaction`
+  MODIFY COLUMN `note` TEXT NULL;
+
+ALTER TABLE `Article`
+  MODIFY COLUMN `title` VARCHAR(255) NOT NULL,
+  MODIFY COLUMN `thumbnail` TEXT NULL,
+  MODIFY COLUMN `tags` TEXT NULL;
+
+ALTER TABLE `WalletTransaction`
+  MODIFY COLUMN `description` TEXT NULL;
+
+ALTER TABLE `Event`
+  MODIFY COLUMN `bannerUrl` TEXT NULL;
+
+ALTER TABLE `EventPrize`
+  MODIFY COLUMN `imageUrl` TEXT NULL;
+
+ALTER TABLE `DeliveryRequest`
+  MODIFY COLUMN `address` TEXT NOT NULL,
+  MODIFY COLUMN `notes` TEXT NULL;

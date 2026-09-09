@@ -53,6 +53,7 @@ jobs:
       - run: npm ci
       - run: npm audit --audit-level=moderate
       - run: npx prisma validate
+      - run: npm run test:migrations
       - run: npx prisma migrate deploy
       - run: npm run lint
       - run: npm run typecheck

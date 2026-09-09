@@ -19,10 +19,16 @@ Các lệnh kiểm tra bắt buộc trước khi tạo pull request:
 ```bash
 npm run lint
 npm run typecheck
-npm audit --audit-level=high
+npm audit --audit-level=moderate
+npx prisma validate
+npm run test:migrations
 npm run build
 npm run test:e2e
 ```
+
+`test:migrations` tạo một database MySQL tạm, áp dụng toàn bộ migration, so sánh với `prisma/schema.prisma` rồi tự xóa database. Chỉ chạy lệnh này với tài khoản MySQL dành cho phát triển/CI có quyền tạo database; không dùng tài khoản ứng dụng production.
+
+`test:e2e` cần MySQL đã áp schema và Redis đang hoạt động. Bộ test tự tạo rồi xóa dữ liệu giao dịch riêng; chỉ chạy với database phát triển/CI, tuyệt đối không trỏ vào production.
 
 ## Cấu trúc chính
 
@@ -41,5 +47,7 @@ Image Docker chạy bằng user không đặc quyền, ứng dụng dùng tài k
 Email giao dịch được gửi qua API HTTPS tương thích Resend. Khai báo `EMAIL_API_KEY`, `EMAIL_FROM` và `ADMIN_EMAIL`; có thể đổi `EMAIL_API_URL` nếu dùng cổng tương thích khác.
 
 Thông tin pháp nhân và kênh hỗ trợ hiển thị trong điều khoản được lấy từ nhóm biến `LEGAL_*`, `SUPPORT_PHONE` và `SUPPORT_EMAIL`. Production sẽ từ chối khởi động nếu thiếu các trường pháp nhân bắt buộc để tránh xuất bản website với thông tin người bán chưa hoàn chỉnh.
+
+Các liên kết Facebook, Shopee, TikTok và Zalo là cấu hình server qua nhóm biến `SOCIAL_*`. Chỉ liên kết HTTPS hợp lệ mới được hiển thị; có thể để trống kênh chưa sử dụng.
 
 Ảnh sản phẩm và ảnh minh chứng production được lưu trên Cloudinary. Cấu hình đủ `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET`; production sẽ không ghi upload vào filesystem tạm của container.
