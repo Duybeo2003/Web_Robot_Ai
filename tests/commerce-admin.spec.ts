@@ -137,12 +137,11 @@ test("an admin cancels a paid order and records one refund without restoring poi
     await page.getByRole("button", { name: "Đăng nhập", exact: true }).click();
     await expect
       .poll(
-        () =>
-          page.evaluate(async () => {
-            const response = await fetch("/api/auth/session");
-            const session = await response.json();
-            return session?.user?.role;
-          }),
+        async () => {
+          const response = await page.request.get("/api/auth/session");
+          const session = await response.json();
+          return session?.user?.role;
+        },
         { timeout: 15_000 },
       )
       .toBe("ADMIN");

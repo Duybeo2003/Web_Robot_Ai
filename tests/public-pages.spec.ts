@@ -54,26 +54,51 @@ test.describe("Public commercial pages", () => {
   });
 
   test("requires policy acceptance and guest phone verification before checkout", async ({ page }) => {
-    await page.goto("/shop");
-    await page.getByRole("button", { name: "Thêm vào giỏ hàng" }).first().click();
-    await page.goto("/cart");
-    const checkoutLink = page.getByRole("link", { name: /Tiến hành Thanh toán/ });
-    await expect(checkoutLink).toHaveAttribute("href", "/checkout");
-    await checkoutLink.click();
+    const prisma = new PrismaClient();
+    const unique = `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+    const productId = `e2e-policy-product-${unique}`;
+    const title = `RoboEQ E2E Policy ${unique}`;
 
-    const submit = page.getByRole("button", { name: "ĐẶT HÀNG NGAY" });
-    const consent = page.getByRole("checkbox");
-    await expect(
-      page.getByRole("heading", { name: "Thanh toán", exact: true }),
-    ).toBeVisible();
-    await expect(submit).toBeDisabled();
-    await expect(page.getByRole("link", { name: "điều khoản mua bán" })).toHaveAttribute(
-      "href",
-      "/dieu-khoan-su-dung",
-    );
-    await consent.check();
-    await expect(submit).toBeDisabled();
-    await expect(page.getByRole("button", { name: /OTP$/ })).toBeVisible();
+    try {
+      await prisma.product.create({
+        data: {
+          id: productId,
+          title,
+          slug: `e2e-policy-${unique}`,
+          sku: `E2E-POLICY-${unique}`,
+          description: "Sản phẩm tạm để kiểm chứng điều kiện đặt hàng.",
+          price: 1_250_000,
+          inventoryCount: 2,
+        },
+      });
+
+      await page.goto(`/shop?q=${encodeURIComponent(title)}`);
+      await page.getByRole("button", { name: "Thêm vào giỏ hàng" }).click();
+      await page.goto("/cart");
+      const checkoutLink = page.getByRole("link", { name: /Tiến hành Thanh toán/ });
+      await expect(checkoutLink).toHaveAttribute("href", "/checkout");
+      await checkoutLink.click();
+
+      const submit = page.getByRole("button", { name: "ĐẶT HÀNG NGAY" });
+      const consent = page.getByRole("checkbox");
+      await expect(
+        page.getByRole("heading", { name: "Thanh toán", exact: true }),
+      ).toBeVisible();
+      await expect(submit).toBeDisabled();
+      await expect(page.getByRole("link", { name: "điều khoản mua bán" })).toHaveAttribute(
+        "href",
+        "/dieu-khoan-su-dung",
+      );
+      await consent.check();
+      await expect(submit).toBeDisabled();
+      await expect(page.getByRole("button", { name: /OTP$/ })).toBeVisible();
+    } finally {
+      await prisma.order.deleteMany({
+        where: { items: { some: { productId } } },
+      });
+      await prisma.product.deleteMany({ where: { id: productId } });
+      await prisma.$disconnect();
+    }
   });
 
   test("creates a guest COD order with a single-use OTP and canonical totals", async ({

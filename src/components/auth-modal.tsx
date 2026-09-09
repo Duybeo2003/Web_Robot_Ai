@@ -20,6 +20,7 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Loader2, ArrowLeft } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export function AuthModal({
   googleEnabled,
@@ -28,6 +29,7 @@ export function AuthModal({
   googleEnabled: boolean;
   facebookEnabled: boolean;
 }) {
+  const router = useRouter();
   const { isOpen, closeModal } = useAuthModal();
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -117,7 +119,7 @@ export function AuthModal({
     } else {
       await update();
       closeModal();
-      window.location.reload();
+      router.refresh();
     }
   };
 
@@ -158,7 +160,7 @@ export function AuthModal({
     } else {
       await update();
       closeModal();
-      window.location.reload();
+      router.refresh();
     }
   };
 
