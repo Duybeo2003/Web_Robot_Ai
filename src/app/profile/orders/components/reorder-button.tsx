@@ -53,7 +53,7 @@ export function ReorderButton({ orderItems }: { orderItems: OrderItemType[] }) {
     <Button 
       onClick={handleReorder} 
       disabled={loading}
-      className="px-4 py-2 text-sm font-medium bg-[#FF5722] hover:bg-[#E64A19] text-white rounded-sm shadow-sm flex items-center gap-2"
+      className="flex items-center gap-2 rounded-lg bg-[#FF5722] px-4 py-2 text-sm font-medium text-white shadow-sm transition-colors hover:bg-[#E64A19]"
     >
       {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <ShoppingCart className="w-4 h-4" />}
       Mua lại

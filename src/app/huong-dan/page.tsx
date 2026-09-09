@@ -3,11 +3,12 @@ import {
   PlayCircle,
   Code2,
   Download,
-  ChevronRight,
   Search,
   Zap,
   LifeBuoy,
 } from "lucide-react";
+import Link from "next/link";
+import { getBusinessIdentity } from "@/lib/commerce-policy";
 
 export const metadata = {
   title: "Hướng dẫn sử dụng & Tài liệu - RoboEQ",
@@ -18,7 +19,7 @@ export const metadata = {
 const guides = [
   {
     id: 1,
-    title: "Hướng dẫn lắp ráp Robot STEM Education V2",
+    title: "Hướng dẫn lắp ráp Robot STEM phiên bản V2",
     description:
       "Video chi tiết các bước lắp ráp khung gầm, đấu nối dây điện và cài đặt pin cho phiên bản V2 mới nhất.",
     type: "video",
@@ -29,7 +30,7 @@ const guides = [
   },
   {
     id: 2,
-    title: "Source Code Mẫu: Dò line & Tránh vật cản",
+    title: "Mã nguồn mẫu: Dò line và tránh vật cản",
     description:
       "Bộ thư viện và code mẫu Arduino (C++) đã được tinh chỉnh, giúp Robot có thể chạy dò line mượt mà.",
     type: "code",
@@ -62,11 +63,40 @@ const guides = [
   },
 ];
 
-export default function GuidesPage() {
+const categories = [
+  { value: "all", label: "Tất cả tài liệu" },
+  { value: "video", label: "Video hướng dẫn" },
+  { value: "code", label: "Mã nguồn mẫu" },
+  { value: "document", label: "Tài liệu PDF" },
+  { value: "download", label: "Phần mềm" },
+];
+
+export default async function GuidesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ q?: string; type?: string }>;
+}) {
+  const params = await searchParams;
+  const query = params.q?.trim() || "";
+  const activeType = categories.some((category) => category.value === params.type)
+    ? params.type || "all"
+    : "all";
+  const normalizedQuery = query.toLocaleLowerCase("vi-VN");
+  const filteredGuides = guides.filter(
+    (guide) =>
+      (activeType === "all" || guide.type === activeType) &&
+      (!normalizedQuery ||
+        `${guide.title} ${guide.description}`
+          .toLocaleLowerCase("vi-VN")
+          .includes(normalizedQuery)),
+  );
+  const business = getBusinessIdentity();
+  const supportHref = business.socialLinks.zalo || "/lien-he";
+
   return (
-    <div className="bg-[#FAFAFA] min-h-screen pb-20 font-sans selection:bg-[#FF5722]/20">
+    <main className="min-h-screen bg-neutral-50 pb-16 selection:bg-primary/20">
       {/* Hero Section with Premium Gradient */}
-      <div className="relative overflow-hidden bg-gradient-to-br from-[#004A8B] via-[#005BAA] to-[#0073D1] py-24 text-center text-white border-b-4 border-[#FF5722]">
+      <section className="relative overflow-hidden border-b-4 border-primary bg-gradient-to-br from-[#004A8B] via-[#005BAA] to-[#0073D1] py-16 text-center text-white sm:py-20">
         {/* Decorative elements */}
         <div className="absolute top-0 left-0 w-full h-full overflow-hidden opacity-20 pointer-events-none">
           <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[150%] bg-white/10 rotate-12 blur-3xl rounded-full"></div>
@@ -74,11 +104,11 @@ export default function GuidesPage() {
         </div>
 
         <div className="container mx-auto px-4 relative z-10 animate-in slide-in-from-bottom-4 duration-700 ease-out">
-          <div className="inline-flex items-center justify-center p-4 bg-white/10 backdrop-blur-md rounded-2xl mb-6 shadow-[0_0_40px_rgba(255,255,255,0.1)] border border-white/20">
-            <BookOpen className="w-12 h-12 text-white" />
+          <div className="mb-5 inline-flex items-center justify-center rounded-2xl border border-white/20 bg-white/10 p-3 shadow-[0_0_40px_rgba(255,255,255,0.1)] backdrop-blur-md">
+            <BookOpen className="size-10 text-white" />
           </div>
-          <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-6 drop-shadow-sm">
-            TRUNG TÂM HƯỚNG DẪN
+          <h1 className="mb-5 text-4xl font-extrabold tracking-tight drop-shadow-sm md:text-6xl">
+            Trung tâm hướng dẫn
           </h1>
           <p className="text-blue-100 max-w-2xl mx-auto text-lg md:text-xl font-medium leading-relaxed mb-10">
             Khám phá tài liệu kỹ thuật, video lắp ráp và mã nguồn lập trình
@@ -86,55 +116,53 @@ export default function GuidesPage() {
           </p>
 
           {/* Glassmorphism Search Bar */}
-          <div className="max-w-2xl mx-auto relative group">
-            <div className="absolute -inset-1 bg-gradient-to-r from-[#FF5722] to-orange-400 rounded-full blur opacity-25 group-hover:opacity-40 transition duration-500"></div>
-            <div className="relative flex items-center bg-white/10 backdrop-blur-xl border border-white/30 rounded-full p-2 shadow-2xl transition-all duration-300 hover:bg-white/20 focus-within:bg-white/20 focus-within:border-white/50">
-              <Search className="w-6 h-6 text-white/70 ml-4 shrink-0" />
+          <form action="/huong-dan" className="group relative mx-auto max-w-2xl">
+            <input type="hidden" name="type" value={activeType} />
+            <div className="absolute -inset-1 rounded-2xl bg-gradient-to-r from-primary to-orange-400 opacity-25 blur transition duration-500 group-focus-within:opacity-50"></div>
+            <div className="relative flex flex-col items-stretch gap-2 rounded-2xl border border-white/30 bg-white/10 p-2 shadow-2xl backdrop-blur-xl transition-all duration-300 focus-within:border-white/60 focus-within:bg-white/20 sm:flex-row sm:items-center">
+              <Search className="ml-4 hidden size-6 shrink-0 text-white/70 sm:block" />
               <input
+                name="q"
                 type="text"
+                defaultValue={query}
                 placeholder="Nhập mã sản phẩm hoặc tên linh kiện..."
-                className="w-full px-4 py-3 bg-transparent text-white placeholder-blue-200/70 focus:outline-none text-lg"
+                className="min-w-0 flex-1 bg-transparent px-4 py-3 text-base text-white placeholder-blue-200/70 focus:outline-none sm:text-lg"
               />
-              <button className="shrink-0 bg-[#FF5722] hover:bg-[#E64A19] text-white px-8 py-3 rounded-full font-bold shadow-lg transition-transform hover:scale-105 active:scale-95 flex items-center gap-2">
+              <button type="submit" className="flex h-12 shrink-0 items-center justify-center gap-2 rounded-xl bg-primary px-7 font-bold text-white shadow-lg transition-colors hover:bg-orange-600">
                 <Zap className="w-4 h-4 hidden sm:block" />
                 Tìm kiếm
               </button>
             </div>
-          </div>
+          </form>
         </div>
-      </div>
+      </section>
 
       <div className="container mx-auto px-4 -mt-8 relative z-20">
         {/* Categories Pills */}
-        <div className="flex flex-wrap justify-center gap-3 mb-16 animate-in zoom-in-95 duration-500 delay-100 fill-mode-both">
-          {[
-            "Tất cả tài liệu",
-            "Video Hướng dẫn",
-            "Code Mẫu",
-            "Tài liệu PDF",
-            "Phần mềm",
-          ].map((cat, i) => (
-            <button
-              key={i}
-              className={`px-6 py-3 rounded-full font-bold text-sm shadow-sm transition-all duration-300 hover:-translate-y-1 ${
-                i === 0
-                  ? "bg-[#FF5722] text-white shadow-[#FF5722]/30 shadow-lg"
+        <nav className="animate-in -mx-4 mb-12 flex gap-2 overflow-x-auto px-4 pb-2 pt-1 zoom-in-95 duration-500 fill-mode-both sm:mx-0 sm:justify-center sm:px-0" aria-label="Loại tài liệu">
+          {categories.map((category) => (
+            <Link
+              key={category.value}
+              href={{ pathname: "/huong-dan", query: { ...(query ? { q: query } : {}), type: category.value } }}
+              className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-bold shadow-sm transition-all duration-300 ${
+                activeType === category.value
+                  ? "bg-primary text-white shadow-lg shadow-primary/20"
                   : "bg-white text-neutral-600 hover:text-[#005BAA] hover:shadow-md border border-neutral-100"
               }`}
             >
-              {cat}
-            </button>
+              {category.label}
+            </Link>
           ))}
-        </div>
+        </nav>
 
         {/* Guides Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 max-w-5xl mx-auto">
-          {guides.map((guide, i) => {
+        <div className="mx-auto grid max-w-5xl grid-cols-1 items-stretch gap-6 md:grid-cols-2">
+          {filteredGuides.map((guide, i) => {
             const Icon = guide.icon;
             return (
               <div
                 key={guide.id}
-                className={`group bg-white rounded-2xl p-8 shadow-sm border border-neutral-100 hover:shadow-2xl hover:shadow-blue-900/5 transition-all duration-500 cursor-pointer flex flex-col h-full animate-in slide-in-from-bottom-8 fill-mode-both ${guide.border}`}
+                className={`group animate-in flex h-full flex-col rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm transition-all duration-500 slide-in-from-bottom-8 fill-mode-both hover:-translate-y-0.5 hover:shadow-xl hover:shadow-blue-900/5 sm:p-8 ${guide.border}`}
                 style={{ animationDelay: `${(i + 1) * 100}ms` }}
               >
                 <div className="flex items-start gap-6 mb-6">
@@ -143,9 +171,9 @@ export default function GuidesPage() {
                   >
                     <Icon className="w-8 h-8" />
                   </div>
-                  <h3 className="font-bold text-xl text-neutral-800 leading-tight group-hover:text-[#005BAA] transition-colors">
+                  <h2 className="text-xl font-bold leading-tight text-neutral-800 transition-colors group-hover:text-[#005BAA]">
                     {guide.title}
-                  </h3>
+                  </h2>
                 </div>
 
                 <p className="text-neutral-500 text-base leading-relaxed mb-8 flex-1">
@@ -155,30 +183,36 @@ export default function GuidesPage() {
                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-neutral-50">
                   <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 group-hover:text-[#FF5722] transition-colors">
                     {guide.type === "video"
-                      ? "Video (15:20)"
+                      ? "Video · 15:20"
                       : guide.type === "document"
-                        ? "PDF - 4.2MB"
+                        ? "PDF · 4,2 MB"
                         : guide.type === "code"
-                          ? "ZIP - 1.2MB"
-                          : "Windows/Mac"}
+                          ? "Tệp ZIP · 1,2 MB"
+                          : "Windows / macOS"}
                   </span>
-                  <div className="w-10 h-10 rounded-full bg-neutral-50 flex items-center justify-center group-hover:bg-[#005BAA] transition-colors duration-300">
-                    <ChevronRight className="w-5 h-5 text-neutral-400 group-hover:text-white transition-colors" />
-                  </div>
+                  <span className="rounded-full bg-neutral-100 px-3 py-1.5 text-xs font-semibold text-neutral-500">Sắp cập nhật</span>
                 </div>
               </div>
             );
           })}
         </div>
 
+        {filteredGuides.length === 0 && (
+          <div className="mx-auto max-w-xl rounded-2xl border border-neutral-200 bg-white p-10 text-center shadow-sm">
+            <Search className="mx-auto mb-4 size-10 text-neutral-300" aria-hidden="true" />
+            <h2 className="text-xl font-bold text-foreground">Chưa tìm thấy tài liệu phù hợp</h2>
+            <p className="mt-2 text-sm text-neutral-500">Thử từ khóa ngắn hơn hoặc chọn một loại tài liệu khác.</p>
+          </div>
+        )}
+
         {/* Premium Need Help Section */}
-        <div className="mt-24 relative overflow-hidden bg-gradient-to-br from-neutral-900 to-neutral-800 rounded-[2.5rem] p-10 md:p-16 border border-neutral-700 text-center max-w-4xl mx-auto shadow-2xl animate-in fade-in duration-1000 delay-500 fill-mode-both">
+        <section className="animate-in relative mx-auto mt-16 max-w-4xl overflow-hidden rounded-3xl border border-neutral-700 bg-gradient-to-br from-neutral-900 to-neutral-800 p-7 text-center shadow-2xl fade-in duration-1000 fill-mode-both sm:p-12 md:p-14">
           {/* Subtle glowing effect */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[#FF5722]/20 blur-[100px] rounded-full pointer-events-none"></div>
 
           <div className="relative z-10">
-            <div className="w-20 h-20 bg-neutral-800 border border-neutral-700 rounded-full flex items-center justify-center mx-auto mb-6 shadow-inner">
-              <LifeBuoy className="w-10 h-10 text-[#FF5722]" />
+            <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800 shadow-inner">
+              <LifeBuoy className="size-8 text-primary" />
             </div>
             <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4">
               Bạn vẫn cần hỗ trợ?
@@ -188,7 +222,7 @@ export default function GuidesPage() {
               quyết mọi vấn đề kỹ thuật trong thời gian sớm nhất.
             </p>
             <div className="flex flex-col sm:flex-row justify-center gap-4">
-              <button className="bg-[#FF5722] text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-[#E64A19] transition-all duration-300 hover:shadow-[0_0_20px_rgba(255,87,34,0.4)] hover:-translate-y-1 flex items-center justify-center gap-2">
+              <a href={supportHref} target={business.socialLinks.zalo ? "_blank" : undefined} rel={business.socialLinks.zalo ? "noopener noreferrer" : undefined} className="flex h-12 items-center justify-center gap-2 rounded-xl bg-primary px-8 text-base font-bold text-white transition-colors hover:bg-orange-600">
                 <svg
                   viewBox="0 0 24 24"
                   width="20"
@@ -197,15 +231,15 @@ export default function GuidesPage() {
                 >
                   <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
                 </svg>
-                Chat Zalo Ngay
-              </button>
-              <button className="bg-white/10 text-white backdrop-blur-sm border border-white/20 px-8 py-4 rounded-full font-bold text-lg hover:bg-white/20 transition-all duration-300 hover:-translate-y-1">
-                Gửi Ticket Hỗ Trợ
-              </button>
+                Chat Zalo ngay
+              </a>
+              <Link href="/lien-he" className="flex h-12 items-center justify-center rounded-xl border border-white/20 bg-white/10 px-8 text-base font-bold text-white backdrop-blur-sm transition-colors hover:bg-white/20">
+                Gửi yêu cầu hỗ trợ
+              </Link>
             </div>
           </div>
-        </div>
+        </section>
       </div>
-    </div>
+    </main>
   );
 }

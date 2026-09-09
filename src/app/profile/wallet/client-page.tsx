@@ -37,7 +37,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
       }
       const parsedAmount = parseInt(amount);
       if (isNaN(parsedAmount) || parsedAmount < 10000) {
-        toast.error("Số tiền tối thiểu là 10,000đ");
+        toast.error("Số tiền tối thiểu là 10.000đ");
         return;
       }
 
@@ -70,11 +70,11 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
   const getStatusBadge = (status: string) => {
     switch (status) {
       case "COMPLETED":
-        return <span className="px-2 py-1 bg-green-100 text-green-700 rounded-sm text-xs font-bold">Thành công</span>;
+        return <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-bold text-green-700">Thành công</span>;
       case "PENDING":
-        return <span className="px-2 py-1 bg-amber-100 text-amber-700 rounded-sm text-xs font-bold">Đang chờ duyệt</span>;
+        return <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Đang chờ duyệt</span>;
       case "REJECTED":
-        return <span className="px-2 py-1 bg-red-100 text-red-700 rounded-sm text-xs font-bold">Thất bại</span>;
+        return <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">Thất bại</span>;
       default:
         return null;
     }
@@ -83,7 +83,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-bold text-foreground">Ví RoboCoin</h1>
+        <h1 className="text-2xl font-bold text-foreground">Ví RoboCoin</h1>
       </div>
 
       {/* Balance Card */}
@@ -99,7 +99,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
             </p>
             <div className="flex items-baseline gap-2">
               <span className="text-5xl font-black">{wallet.balance.toLocaleString('vi-VN')}</span>
-              <span className="text-xl font-bold text-orange-200">Xu</span>
+            <span className="text-xl font-bold text-orange-100">xu</span>
             </div>
             <p className="text-sm text-orange-100">1 Xu = 1 VNĐ. Dùng để tham gia sự kiện và vòng quay may mắn.</p>
           </div>
@@ -110,13 +110,13 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
             className="bg-white text-[#FF5722] hover:bg-orange-50 font-bold h-14 px-8 rounded-full shadow-md shrink-0"
           >
             <Plus className="w-5 h-5 mr-2" />
-            Nạp Xu Ngay
+            Nạp xu ngay
           </Button>
         </div>
       </div>
 
       {/* Transactions List */}
-      <div className="bg-white rounded-sm border border-neutral-100 shadow-sm">
+      <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <div className="p-6 border-b border-neutral-100">
           <h2 className="text-lg font-bold">Lịch sử giao dịch</h2>
         </div>
@@ -128,15 +128,15 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
             </div>
           ) : (
             transactions.map((tx) => (
-              <div key={tx.id} className="p-4 sm:p-6 flex items-center justify-between hover:bg-neutral-50 transition-colors">
-                <div className="flex items-center gap-4">
+              <div key={tx.id} className="flex flex-col gap-4 p-4 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+                <div className="flex min-w-0 items-center gap-4">
                   <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
                     tx.type === 'SPEND' ? 'bg-red-100' : 'bg-green-100'
                   }`}>
                     {getTransactionIcon(tx.type)}
                   </div>
-                  <div>
-                    <p className="font-bold text-neutral-800">{tx.description || tx.type}</p>
+                  <div className="min-w-0">
+                    <p className="break-words font-bold text-neutral-800">{tx.description || tx.type}</p>
                     <p className="text-sm text-neutral-500">
                       {new Date(tx.createdAt).toLocaleString('vi-VN')}
                     </p>
@@ -150,7 +150,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
                     </div>
                   </div>
                 </div>
-                <div className="text-right flex items-center gap-4">
+                <div className="flex items-center justify-between gap-3 text-right sm:justify-end">
                   <div className="hidden sm:block">
                     {getStatusBadge(tx.status)}
                   </div>
@@ -174,7 +174,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
             ))
           )}
         </div>
-      </div>
+      </section>
 
       {/* Topup Dialog */}
       <Dialog open={isTopupOpen} onOpenChange={setIsTopupOpen}>
@@ -182,7 +182,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
           <DialogHeader>
             <DialogTitle>Nạp Robo Xu</DialogTitle>
             <DialogDescription>
-              Nhập số Xu bạn muốn nạp (1 Xu = 1 VNĐ). Tối thiểu 10,000 Xu.
+              Nhập số xu bạn muốn nạp (1 xu = 1 VNĐ). Tối thiểu 10.000 xu.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -198,7 +198,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
               />
             </div>
             
-            <div className="grid grid-cols-3 gap-2 mt-2">
+            <div className="mt-2 grid grid-cols-2 gap-2">
               {[50000, 100000, 200000, 500000].map((val) => (
                 <Button
                   key={val}
@@ -238,11 +238,11 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`https://img.vietqr.io/image/${encodeURIComponent(bankConfig.bankId)}-${encodeURIComponent(bankConfig.accountNo)}-compact2.png?amount=${encodeURIComponent(activeTransaction.amount)}&addInfo=${encodeURIComponent(`NAPXU ${activeTransaction.id.slice(-6).toUpperCase()}`)}&accountName=${encodeURIComponent(bankConfig.accountName)}`}
-                    alt="VietQR Payment"
+                    alt="Mã VietQR để thanh toán"
                     className="w-48 h-48 object-contain"
                   />
                 </div>
-                <p className="text-center text-xs text-gray-500 mt-2 font-medium">Mở App Ngân hàng quét mã</p>
+                <p className="mt-2 text-center text-xs font-medium text-gray-500">Mở ứng dụng ngân hàng để quét mã</p>
               </div>
 
               <div className="w-full flex flex-col space-y-3">

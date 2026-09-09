@@ -48,7 +48,7 @@ export default async function AdminManagementPage() {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">Quản trị viên</h2>
           <p className="text-muted-foreground">
@@ -58,15 +58,15 @@ export default async function AdminManagementPage() {
         <AddAdminModal />
       </div>
 
-      <div className="rounded-md border bg-white">
-        <Table>
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+        <Table className="table-fixed md:table-auto">
           <TableHeader>
             <TableRow>
-              <TableHead>Khách hàng</TableHead>
-              <TableHead>Số điện thoại</TableHead>
-              <TableHead>Ngày tham gia</TableHead>
-              <TableHead>Vai trò</TableHead>
-              <TableHead className="text-right">Hành động</TableHead>
+              <TableHead>Tài khoản</TableHead>
+              <TableHead className="hidden md:table-cell">Số điện thoại</TableHead>
+              <TableHead className="hidden lg:table-cell">Ngày tham gia</TableHead>
+              <TableHead className="hidden sm:table-cell">Vai trò</TableHead>
+              <TableHead className="w-20 text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -79,21 +79,40 @@ export default async function AdminManagementPage() {
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    {user.name || "Khách hàng"}
+                  <TableCell className="min-w-0 font-medium">
+                    <span className="block truncate">{user.name || "Quản trị viên"}</span>
+                    <span className="mt-1 block max-w-52 truncate text-xs font-normal text-muted-foreground md:hidden">
+                      {user.phoneNumber || user.email || "Chưa cập nhật liên hệ"}
+                    </span>
+                    <span className="mt-1 block text-xs font-normal text-muted-foreground lg:hidden">
+                      Tham gia {format(new Date(user.createdAt), "dd/MM/yyyy")}
+                    </span>
+                    <span className="mt-2 inline-flex sm:hidden">
+                      <Badge variant={user.role === "ADMIN" ? "default" : "secondary"}>
+                        {user.role === "STORE_MANAGER"
+                          ? "Quản lý cửa hàng"
+                          : user.role === "EDITOR"
+                            ? "Biên tập viên"
+                            : "Quản trị viên"}
+                      </Badge>
+                    </span>
                   </TableCell>
-                  <TableCell>{user.phoneNumber}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">{user.phoneNumber || "—"}</TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     {format(new Date(user.createdAt), "dd/MM/yyyy")}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <Badge
                       variant={user.role === "ADMIN" ? "default" : "secondary"}
                     >
-                      {user.role === "STORE_MANAGER" ? "Quản lý (Cấp 2)" : user.role}
+                      {user.role === "STORE_MANAGER"
+                        ? "Quản lý cửa hàng"
+                        : user.role === "EDITOR"
+                          ? "Biên tập viên"
+                          : "Quản trị viên"}
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="w-20 text-right">
                     <UserActions userId={user.id} currentRole={user.role} />
                   </TableCell>
                 </TableRow>

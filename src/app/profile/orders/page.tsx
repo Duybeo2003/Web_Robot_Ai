@@ -158,9 +158,9 @@ export default async function OrdersPage() {
   };
 
   return (
-    <div className="min-h-[500px] rounded-sm border border-neutral-100 bg-white p-6 shadow-sm md:p-8">
+    <section className="min-h-[500px] rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm sm:p-6 md:p-8">
       <div className="mb-6 border-b border-neutral-100 pb-4">
-        <h1 className="text-xl font-bold text-foreground">Đơn hàng của tôi</h1>
+        <h1 className="text-2xl font-bold text-foreground">Đơn hàng của tôi</h1>
         <p className="mt-1 text-sm text-neutral-500">Quản lý thanh toán, giao nhận, đánh giá và đổi trả.</p>
       </div>
 
@@ -186,10 +186,10 @@ export default async function OrdersPage() {
               returnDeadline.getTime() >= currentTime;
 
             return (
-              <article key={order.id} className="overflow-hidden rounded-sm border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-md">
+              <article key={order.id} className="overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition-shadow hover:shadow-md">
                 <header className="flex flex-col gap-3 border-b border-neutral-200 bg-neutral-50 px-4 py-3 text-sm sm:flex-row sm:items-center sm:justify-between">
                   <div className="flex flex-wrap items-center gap-3 text-neutral-600">
-                    <span className="rounded-sm border border-neutral-200 bg-white px-2 py-1 text-xs font-bold uppercase tracking-wider text-foreground">
+                    <span className="rounded-md border border-neutral-200 bg-white px-2 py-1 text-xs font-bold text-foreground">
                       Mã ĐH: {order.id.slice(0, 8)}
                     </span>
                     <span>Ngày đặt: {order.createdAt.toLocaleDateString("vi-VN")}</span>
@@ -197,7 +197,7 @@ export default async function OrdersPage() {
                       {paymentLabels[order.paymentStatus]}
                     </span>
                   </div>
-                  <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-wider text-[#FF5722]">
+                  <div className="flex items-center gap-2 text-xs font-bold text-primary">
                     {getStatusIcon(order.status)} {getStatusText(order.status)}
                   </div>
                 </header>
@@ -223,7 +223,7 @@ export default async function OrdersPage() {
                     const attributes = formatVariantAttributes(item.variant?.attributes);
                     return (
                       <div key={item.id} className="flex gap-4">
-                        <div className="relative size-20 shrink-0 overflow-hidden rounded-sm border border-neutral-100 bg-white p-1">
+                        <div className="relative size-20 shrink-0 overflow-hidden rounded-lg border border-neutral-100 bg-white p-1">
                           {item.product.imageUrl ? (
                             <Image src={item.product.imageUrl} alt={item.product.title} fill className="object-contain p-1" sizes="80px" />
                           ) : (
@@ -279,6 +279,6 @@ export default async function OrdersPage() {
           })}
         </div>
       )}
-    </div>
+    </section>
   );
 }

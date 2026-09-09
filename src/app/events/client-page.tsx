@@ -12,29 +12,29 @@ interface EventsClientPageProps {
 
 export default function EventsClientPage({ events }: EventsClientPageProps) {
   return (
-    <div className="min-h-screen bg-[#F5F5F5]">
+    <main className="min-h-screen bg-neutral-50">
       {/* Hero Section */}
-      <div className="bg-gradient-to-br from-orange-600 via-[#FF5722] to-orange-500 py-10 px-4 relative overflow-hidden">
+      <section className="relative overflow-hidden bg-gradient-to-br from-orange-700 via-primary to-orange-500 px-4 py-12 sm:py-16">
         {/* Dynamic Background Elements */}
         <div className="absolute top-0 right-0 -mr-20 -mt-20 w-96 h-96 bg-white opacity-10 rounded-full blur-3xl"></div>
         <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-80 h-80 bg-orange-900 opacity-20 rounded-full blur-3xl"></div>
         
         <div className="container mx-auto text-center relative z-10">
-          <div className="inline-flex items-center gap-2 px-4 py-2 bg-white/20 backdrop-blur-md rounded-full text-white mb-6 border border-white/30">
+          <div className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/30 bg-white/15 px-4 py-2 text-white backdrop-blur-md">
             <Flame className="w-5 h-5 text-yellow-300" />
-            <span className="font-bold text-sm tracking-wide">SỰ KIỆN ĐANG DIỄN RA</span>
+            <span className="text-sm font-bold">Sự kiện đang diễn ra</span>
           </div>
-          <h1 className="text-4xl md:text-6xl font-heading font-black text-white mb-6 tracking-tight drop-shadow-md">
-            THỬ VẬN MAY - NHẬN QUÀ NGAY
+          <h1 className="mb-5 text-balance text-4xl font-black tracking-tight text-white drop-shadow-md md:text-6xl">
+            Thử vận may, nhận quà ngay
           </h1>
-          <p className="text-orange-100 max-w-2xl mx-auto text-lg md:text-xl font-medium mb-10">
-            Tham gia các vòng quay và sự kiện giới hạn để sở hữu các phần quà công nghệ xịn sò với chi phí cực thấp!
+          <p className="mx-auto max-w-2xl text-lg font-medium leading-8 text-orange-50 md:text-xl">
+            Tham gia các vòng quay và sự kiện giới hạn để nhận những phần quà công nghệ hấp dẫn từ RoboEQ.
           </p>
         </div>
-      </div>
+      </section>
 
       {/* Events Grid */}
-      <div className="container mx-auto px-4 py-12 -mt-8 relative z-20">
+      <section className="container relative z-20 mx-auto -mt-6 px-4 py-12">
         {events.length === 0 ? (
           <div className="bg-white p-12 rounded-xl shadow-sm text-center border border-neutral-100">
             <Trophy className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
@@ -42,11 +42,11 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
             <p className="text-neutral-500">Các sự kiện hấp dẫn đang được chuẩn bị. Bạn vui lòng quay lại sau nhé!</p>
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+          <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 xl:grid-cols-4">
             {events.map((event) => (
               <div 
                 key={event.id} 
-                className="bg-white rounded-xl overflow-hidden shadow-lg border border-orange-100 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 group mx-auto w-full max-w-sm"
+                className="group mx-auto flex h-full w-full max-w-sm flex-col overflow-hidden rounded-2xl border border-orange-100 bg-white shadow-md transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
               >
                 {/* Banner */}
                 <div className="relative aspect-video bg-neutral-100 overflow-hidden">
@@ -55,6 +55,7 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
                       src={event.bannerUrl} 
                       alt={event.name} 
                       fill 
+                      sizes="(max-width: 767px) calc(100vw - 32px), 50vw"
                       className="object-cover group-hover:scale-105 transition-transform duration-500" 
                     />
                   ) : (
@@ -63,29 +64,29 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
                     </div>
                   )}
                   {/* Badge */}
-                  <div className="absolute top-4 left-4 bg-[#E30019] text-white text-xs font-black px-3 py-1.5 rounded-sm uppercase tracking-wider shadow-lg flex items-center gap-1">
+                  <div className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-[#E30019] px-3 py-1.5 text-xs font-black text-white shadow-lg">
                     <Zap className="w-3 h-3 fill-current" />
-                    HOT
+                    Nổi bật
                   </div>
                 </div>
 
                 {/* Content */}
-                <div className="p-6 relative">
+                <div className="relative flex flex-1 flex-col p-6">
                   {/* Floating Price Badge */}
                   <div className="absolute -top-6 right-6 bg-white p-2 rounded-lg shadow-xl border border-neutral-100 flex flex-col items-center justify-center min-w-[4rem]">
-                    <span className="text-xs font-bold text-neutral-500">1 LƯỢT</span>
+                    <span className="text-xs font-bold text-neutral-500">1 lượt</span>
                     <span className="text-lg font-black text-[#FF5722] leading-none">{event.pricePerPlay}</span>
-                    <span className="text-[10px] font-bold text-orange-400">XU</span>
+                    <span className="text-[10px] font-bold text-orange-500">xu</span>
                   </div>
 
-                  <h2 className="text-xl font-heading font-black text-neutral-800 mb-2 group-hover:text-[#FF5722] transition-colors line-clamp-1">
-                    {event.name.toUpperCase()}
+                  <h2 className="mb-2 min-h-14 pr-16 text-xl font-extrabold text-neutral-800 transition-colors line-clamp-2 group-hover:text-primary">
+                    {event.name}
                   </h2>
                   <p className="text-sm text-neutral-600 mb-6 line-clamp-2 min-h-[2.5rem]">
                     {event.description || "Tham gia ngay để nhận hàng ngàn phần quà hấp dẫn!"}
                   </p>
 
-                  <div className="space-y-4">
+                  <div className="mt-auto space-y-4">
                     <div className="flex items-center justify-between text-sm">
                       <span className="flex items-center text-neutral-500 font-medium bg-neutral-100 px-3 py-1.5 rounded-full">
                         <Timer className="w-4 h-4 mr-2 text-orange-500" />
@@ -104,8 +105,8 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
                       }/${event.slug}`} 
                       className="block"
                     >
-                      <Button className="w-full h-12 bg-gradient-to-r from-orange-500 to-[#FF5722] hover:from-orange-600 hover:to-orange-700 text-white font-bold text-lg rounded-sm shadow-md transition-all group-hover:shadow-orange-500/25">
-                        CHƠI NGAY
+                      <Button className="h-12 w-full rounded-xl bg-gradient-to-r from-orange-500 to-primary text-base font-bold text-white shadow-md transition-all hover:from-orange-600 hover:to-orange-700 group-hover:shadow-orange-500/25">
+                        Chơi ngay
                       </Button>
                     </Link>
                   </div>
@@ -114,7 +115,7 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }

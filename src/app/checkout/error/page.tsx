@@ -17,25 +17,27 @@ export default async function CheckoutErrorPage({
     : "/profile/orders";
 
   return (
-    <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center min-h-[60vh] justify-center">
-      <XCircle className="w-20 h-20 text-red-500 mb-6" />
-      <h1 className="text-3xl font-bold mb-4 font-heading text-red-600">
+    <main className="container mx-auto flex min-h-[60vh] flex-col items-center justify-center px-4 py-20 text-center">
+      <div className="mb-6 flex size-20 items-center justify-center rounded-2xl bg-red-50">
+        <XCircle className="size-11 text-red-500" />
+      </div>
+      <h1 className="mb-4 text-3xl font-bold text-red-600">
         Thanh toán không thành công
       </h1>
       <p className="text-neutral-600 mb-8 max-w-md">{errorMsg}</p>
 
-      <div className="flex gap-4">
+      <div className="flex w-full max-w-md flex-col gap-3 sm:flex-row sm:justify-center">
         <Link href="/profile/orders">
-          <Button variant="outline" className="h-12 px-6">
+          <Button variant="outline" className="h-12 w-full px-6 sm:w-auto">
             Xem đơn hàng
           </Button>
         </Link>
         <Link href={retryUrl}>
-          <Button className="h-12 px-6 bg-[#FF5722] hover:bg-[#E64A19] text-white">
+          <Button className="h-12 w-full px-6 sm:w-auto">
             Thử thanh toán lại
           </Button>
         </Link>
       </div>
-    </div>
+    </main>
   );
 }

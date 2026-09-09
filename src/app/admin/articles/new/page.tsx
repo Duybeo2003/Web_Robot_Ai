@@ -24,18 +24,19 @@ export default async function NewArticlePage() {
       <div className="flex items-center gap-4">
         <Link
           href="/admin/articles"
-          className="p-2 bg-white border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors"
+          className="rounded-lg border border-neutral-200 bg-white p-2 transition-colors hover:bg-neutral-50"
+          aria-label="Quay lại danh sách bài viết"
         >
           <ArrowLeft className="w-5 h-5 text-neutral-600" />
         </Link>
         <div>
-          <h2 className="text-3xl font-heading font-bold tracking-tight">
+          <h2 className="text-2xl font-heading font-bold tracking-tight sm:text-3xl">
             Viết bài mới
           </h2>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-sm border border-neutral-200 shadow-sm">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
         <ArticleForm />
       </div>
     </div>

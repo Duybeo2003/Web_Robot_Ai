@@ -40,10 +40,10 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
-            Khuyến mãi & Mã giảm giá
+            Khuyến mãi và mã giảm giá
           </h2>
           <p className="text-muted-foreground">
             Tạo và quản lý các chiến dịch mã giảm giá.
@@ -51,29 +51,29 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
         </div>
 
         <Dialog>
-          <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-[#FF5722] hover:bg-[#E64A19] text-white shadow">
+          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-[#FF5722] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E64A19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5722]/30">
             <Plus className="mr-2 h-4 w-4" />
             Thêm khuyến mãi
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Thêm Mã giảm giá mới</DialogTitle>
+              <DialogTitle>Thêm mã giảm giá mới</DialogTitle>
             </DialogHeader>
             <CouponForm />
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Mã (Code)</TableHead>
-              <TableHead>Mức giảm</TableHead>
-              <TableHead>Đã dùng</TableHead>
-              <TableHead>Tối đa</TableHead>
-              <TableHead>Hết hạn</TableHead>
-              <TableHead>Trạng thái</TableHead>
+              <TableHead>Mã giảm giá</TableHead>
+              <TableHead className="hidden md:table-cell">Mức giảm</TableHead>
+              <TableHead className="hidden md:table-cell">Đã dùng</TableHead>
+              <TableHead className="hidden md:table-cell">Tối đa</TableHead>
+              <TableHead className="hidden lg:table-cell">Hết hạn</TableHead>
+              <TableHead className="hidden sm:table-cell">Trạng thái</TableHead>
               <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
@@ -94,20 +94,31 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
 
                 return (
                   <TableRow key={coupon.id}>
-                    <TableCell className="font-bold font-mono">
-                      {coupon.code}
+                    <TableCell className="min-w-0 font-bold font-mono">
+                      <span className="block truncate">{coupon.code}</span>
+                      <span className="mt-1 block font-sans text-sm font-bold text-[#E30019] md:hidden">
+                        Giảm {coupon.discountPercent}%
+                      </span>
+                      <span className="mt-1 block font-sans text-xs font-normal text-muted-foreground md:hidden">
+                        Đã dùng {coupon.usageCount}/{coupon.usageLimit || "∞"}
+                      </span>
+                      <span className="mt-2 inline-flex sm:hidden">
+                        <Badge variant={isActive ? "default" : "destructive"}>
+                          {isActive ? "Đang mở" : isExpired ? "Hết hạn" : "Hết lượt"}
+                        </Badge>
+                      </span>
                     </TableCell>
-                    <TableCell className="text-[#E30019] font-bold">
+                    <TableCell className="hidden text-[#E30019] font-bold md:table-cell">
                       {coupon.discountPercent}%
                     </TableCell>
-                    <TableCell>{coupon.usageCount}</TableCell>
-                    <TableCell>{coupon.usageLimit || "∞"}</TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">{coupon.usageCount}</TableCell>
+                    <TableCell className="hidden md:table-cell">{coupon.usageLimit || "∞"}</TableCell>
+                    <TableCell className="hidden lg:table-cell">
                       {coupon.expiresAt
                         ? format(new Date(coupon.expiresAt), "dd/MM/yyyy HH:mm")
                         : "Không thời hạn"}
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden sm:table-cell">
                       <Badge variant={isActive ? "default" : "destructive"}>
                         {isActive
                           ? "Đang mở"
@@ -128,7 +139,7 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
           </TableBody>
         </Table>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} (Tổng: {totalCount})
             </p>

@@ -51,16 +51,16 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
         </p>
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Khách hàng</TableHead>
-              <TableHead>Sản phẩm</TableHead>
-              <TableHead>Đánh giá</TableHead>
-              <TableHead>Nội dung</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Ngày đăng</TableHead>
+              <TableHead className="hidden md:table-cell">Sản phẩm</TableHead>
+              <TableHead className="hidden sm:table-cell">Đánh giá</TableHead>
+              <TableHead className="hidden lg:table-cell">Nội dung</TableHead>
+              <TableHead className="hidden md:table-cell">Trạng thái</TableHead>
+              <TableHead className="hidden xl:table-cell">Ngày đăng</TableHead>
               <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
@@ -74,10 +74,25 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
             ) : (
               reviews.map((review) => (
                 <TableRow key={review.id}>
-                  <TableCell className="font-medium">
-                    {review.user?.name || "Người dùng ẩn danh"}
+                  <TableCell className="min-w-0 font-medium">
+                    <span className="block truncate">{review.user?.name || "Người dùng ẩn danh"}</span>
+                    <span className="mt-1 block line-clamp-2 text-sm font-normal text-neutral-700 md:hidden">
+                      {review.product?.title || "Sản phẩm không còn tồn tại"}
+                    </span>
+                    <span className="mt-1 flex items-center gap-1 sm:hidden">
+                      <strong>{review.rating}</strong>
+                      <Star className="h-4 w-4 fill-[#FACC15] text-[#FACC15]" />
+                    </span>
+                    <span className="mt-1 block line-clamp-2 text-xs font-normal text-muted-foreground lg:hidden">
+                      {review.comment || "Không có bình luận"}
+                    </span>
+                    <span className="mt-2 inline-flex md:hidden">
+                      <span className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${review.status === "APPROVED" ? "bg-green-100 text-green-700" : review.status === "REJECTED" ? "bg-red-100 text-red-700" : "bg-amber-100 text-amber-700"}`}>
+                        {{ APPROVED: "Đã duyệt", REJECTED: "Từ chối", PENDING: "Chờ duyệt" }[review.status]}
+                      </span>
+                    </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <Link
                       href={`/shop/${review.product?.slug}`}
                       target="_blank"
@@ -90,6 +105,7 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
                             src={review.product.imageUrl}
                             alt={review.product.title}
                             fill
+                            sizes="32px"
                             className="object-cover"
                           />
                         </div>
@@ -102,13 +118,13 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
                       </span>
                     </Link>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     <div className="flex items-center">
                       <span className="font-bold mr-1">{review.rating}</span>
                       <Star className="w-4 h-4 fill-[#FACC15] text-[#FACC15]" />
                     </div>
                   </TableCell>
-                  <TableCell className="max-w-[300px]">
+                  <TableCell className="hidden max-w-[300px] lg:table-cell">
                     <p
                       className="line-clamp-2 text-sm"
                       title={review.comment || ""}
@@ -120,7 +136,7 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
                       )}
                     </p>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <span
                       className={`inline-flex rounded-full px-2 py-1 text-xs font-semibold ${
                         review.status === "APPROVED"
@@ -133,7 +149,7 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
                       {{ APPROVED: "Đã duyệt", REJECTED: "Từ chối", PENDING: "Chờ duyệt" }[review.status]}
                     </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     {format(new Date(review.createdAt), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell className="text-right">
@@ -145,7 +161,7 @@ export default async function AdminReviewsPage(props: { searchParams: Promise<{ 
           </TableBody>
         </Table>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} (Tổng: {totalCount})
             </p>

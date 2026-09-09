@@ -35,7 +35,7 @@ export function ProductDetailsClient({
     : 0;
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-12 lg:gap-16">
+    <section className="grid grid-cols-1 items-start gap-7 lg:grid-cols-2 lg:gap-12 xl:gap-16">
       {/* Gallery */}
       <ProductGallery
         images={[
@@ -49,12 +49,12 @@ export function ProductDetailsClient({
       />
 
       {/* Product Info */}
-      <div className="flex flex-col">
-        <div className="text-sm font-bold text-[#FF5722] mb-3 uppercase tracking-widest bg-[#FF5722]/10 inline-block px-3 py-1 rounded-sm self-start">
-          {product.category?.name || "Sản phẩm Mới"}
+      <div className="flex flex-col rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-7">
+        <div className="mb-3 inline-block self-start rounded-md bg-primary/10 px-3 py-1 text-xs font-bold uppercase tracking-wider text-primary sm:text-sm">
+          {product.category?.name || "Sản phẩm mới"}
         </div>
         <div className="flex items-center justify-between mb-2">
-          <h1 className="text-3xl md:text-4xl font-heading font-bold tracking-tight text-foreground leading-tight">
+          <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-foreground sm:text-3xl xl:text-4xl">
             {product.title}
           </h1>
           <div className="shrink-0 flex items-center justify-center p-2 rounded-full border border-neutral-200 ml-4 relative hover:border-[#FF5722] transition-colors">
@@ -108,8 +108,8 @@ export function ProductDetailsClient({
           stock={product.flashSaleStock}
         />
 
-        <div className="flex flex-wrap items-end gap-2 md:gap-3 mb-3">
-          <div className="text-3xl font-bold text-[#E30019]">
+        <div className="mb-4 flex flex-wrap items-end gap-2 md:gap-3">
+          <div className="text-3xl font-extrabold text-[#d92d20]">
             {formatPrice(currentPrice)}
           </div>
           {currentOriginalPrice && currentOriginalPrice > currentPrice && (
@@ -117,16 +117,16 @@ export function ProductDetailsClient({
               <div className="text-base md:text-lg text-neutral-400 line-through mb-1 font-medium">
                 {formatPrice(currentOriginalPrice)}
               </div>
-              <div className="bg-[#E30019] text-white text-xs font-bold px-2 py-1 rounded-sm mb-1.5 uppercase shadow-sm">
+              <div className="mb-1.5 rounded-md bg-[#d92d20] px-2 py-1 text-xs font-bold text-white shadow-sm">
                 Giảm {discountPercent}%
               </div>
             </>
           )}
         </div>
 
-        <div className="mb-6 space-y-2 text-sm">
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground w-24">Tình trạng:</span>
+        <div className="mb-6 space-y-2.5 rounded-xl bg-neutral-50 p-4 text-sm">
+          <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-2">
+            <span className="text-muted-foreground">Tình trạng:</span>
             {product.supplyType === "AFFILIATE_SELL" ? (
               <span className="font-medium text-blue-600">Bán qua đối tác</span>
             ) : product.supplyType === "PRE_ORDER" ? (
@@ -145,8 +145,8 @@ export function ProductDetailsClient({
               </span>
             )}
           </div>
-          <div className="flex items-center gap-2">
-            <span className="text-muted-foreground w-24">Vận chuyển:</span>
+          <div className="grid grid-cols-[5.5rem_minmax(0,1fr)] items-start gap-2">
+            <span className="text-muted-foreground">Vận chuyển:</span>
             <span className="font-medium text-foreground">
               {product.supplyType === "AFFILIATE_SELL"
                 ? "Theo chính sách của đối tác bán hàng"
@@ -164,7 +164,7 @@ export function ProductDetailsClient({
           )}
         </div>
 
-        <div className="prose prose-sm text-muted-foreground mb-8 line-clamp-3">
+        <div className="prose prose-sm mb-6 line-clamp-3 text-muted-foreground">
           {product.description}
         </div>
 
@@ -183,22 +183,22 @@ export function ProductDetailsClient({
             Giá, giao hàng, đổi trả và bảo hành được xác nhận tại website của đối tác trước khi thanh toán.
           </div>
         ) : (
-          <div className="mt-8 pt-8 border-t border-border/50 grid grid-cols-3 gap-2">
+          <div className="mt-7 grid grid-cols-3 gap-2 rounded-xl border border-neutral-100 bg-neutral-50 p-4 sm:p-5">
             <div className="flex flex-col items-center text-center space-y-2">
               <ShieldCheck className="w-6 h-6 text-[#FF5722]" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Bảo hành theo sản phẩm</span>
+              <span className="text-[11px] font-semibold leading-4 text-muted-foreground sm:text-xs">Bảo hành theo sản phẩm</span>
             </div>
             <div className="flex flex-col items-center text-center space-y-2 border-l border-r border-border/50 px-2">
               <RefreshCcw className="w-6 h-6 text-[#FF5722]" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Đổi trả theo điều kiện</span>
+              <span className="text-[11px] font-semibold leading-4 text-muted-foreground sm:text-xs">Đổi trả theo điều kiện</span>
             </div>
             <div className="flex flex-col items-center text-center space-y-2">
               <Wrench className="w-6 h-6 text-[#FF5722]" />
-              <span className="text-xs text-muted-foreground uppercase tracking-wider font-semibold">Hỗ trợ kỹ thuật</span>
+              <span className="text-[11px] font-semibold leading-4 text-muted-foreground sm:text-xs">Hỗ trợ kỹ thuật</span>
             </div>
           </div>
         )}
       </div>
-    </div>
+    </section>
   );
 }

@@ -242,8 +242,8 @@ export default function CheckoutClient({
 
   if (items.length === 0) {
     return (
-      <div className="container mx-auto px-4 py-24 flex flex-col items-center text-center">
-        <div className="w-24 h-24 bg-gray-100 rounded-full flex items-center justify-center text-gray-400 mb-6">
+      <main className="container mx-auto flex flex-col items-center px-4 py-20 text-center">
+        <div className="mb-6 flex size-24 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
           <ShoppingBag className="w-12 h-12" />
         </div>
         <h1 className="text-3xl font-bold mb-4">Giỏ hàng trống</h1>
@@ -253,13 +253,14 @@ export default function CheckoutClient({
         <Button size="lg" onClick={() => router.push("/shop")}>
           Quay lại cửa hàng
         </Button>
-      </div>
+      </main>
     );
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 bg-[#F5F5F5] min-h-screen">
-      <h1 className="text-3xl font-heading font-bold mb-8 text-foreground tracking-tight uppercase text-[#FF5722]">
+    <main className="min-h-screen bg-neutral-50">
+      <div className="container mx-auto px-4 py-8 sm:py-10">
+      <h1 className="mb-8 text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
         Thanh toán
       </h1>
 
@@ -268,10 +269,10 @@ export default function CheckoutClient({
         <div className="lg:col-span-7">
           <form
             onSubmit={handleSubmit}
-            className="space-y-8 bg-white p-6 md:p-8 rounded-sm shadow-sm border border-neutral-100"
+            className="space-y-8 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8"
           >
             <div className="space-y-6">
-              <h2 className="text-xl font-heading font-bold border-b border-neutral-100 pb-3 flex items-center gap-2">
+              <h2 className="flex items-center gap-2 border-b border-neutral-100 pb-3 text-xl font-bold">
                 Thông tin giao hàng
               </h2>
 
@@ -322,11 +323,11 @@ export default function CheckoutClient({
                   className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
                 />
                 {!customer && (
-                  <div className="space-y-2 rounded-sm border border-blue-100 bg-blue-50/60 p-3">
+                  <div className="space-y-2 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
                     <Label htmlFor="guestOtp" className="text-sm font-medium text-neutral-700">
                       Xác thực số điện thoại để đặt hàng
                     </Label>
-                    <div className="flex gap-2">
+                    <div className="flex flex-col gap-2 sm:flex-row">
                       <Input
                         id="guestOtp"
                         inputMode="numeric"
@@ -343,7 +344,7 @@ export default function CheckoutClient({
                       <Button
                         type="button"
                         variant="outline"
-                        className="h-11 min-w-32 bg-white"
+                        className="h-11 w-full bg-white sm:w-auto sm:min-w-32"
                         disabled={otpSending || loading || otpCountdown > 0}
                         onClick={handleSendGuestOtp}
                       >
@@ -389,7 +390,7 @@ export default function CheckoutClient({
             </div>
 
             <div className="space-y-6 pt-4 border-t border-neutral-100">
-              <h2 className="text-xl font-heading font-bold border-b border-neutral-100 pb-3 flex items-center gap-2">
+              <h2 className="flex items-center gap-2 border-b border-neutral-100 pb-3 text-xl font-bold">
                 Phương thức thanh toán
               </h2>
               <RadioGroup
@@ -403,7 +404,7 @@ export default function CheckoutClient({
                 }
                 className="space-y-3"
               >
-                <div className={`flex items-center space-x-4 border p-4 rounded-sm transition-colors ${hasPreOrder ? 'opacity-50 bg-gray-50 border-gray-200 cursor-not-allowed' : 'border-neutral-200 cursor-pointer hover:border-[#FF5722] bg-neutral-50/50'}`}>
+                <div className={`flex items-center space-x-4 rounded-xl border p-4 transition-colors ${hasPreOrder ? 'cursor-not-allowed border-gray-200 bg-gray-50 opacity-50' : 'cursor-pointer border-neutral-200 bg-neutral-50/50 hover:border-primary'}`}>
                   <RadioGroupItem value="COD" id="cod" disabled={hasPreOrder} />
                   <div className="flex-1">
                     <Label
@@ -414,12 +415,12 @@ export default function CheckoutClient({
                     </Label>
                     {hasPreOrder && (
                       <p className="text-[11px] text-amber-600 mt-1">
-                        Không hỗ trợ COD do đơn hàng có chứa sản phẩm Pre-order. Vui lòng chọn thanh toán trước.
+                        Không hỗ trợ COD vì đơn hàng có sản phẩm đặt trước. Vui lòng chọn thanh toán trước.
                       </p>
                     )}
                   </div>
                 </div>
-                <div className={`flex items-center space-x-4 rounded-sm border p-4 transition-colors ${bankTransferAvailable ? "cursor-pointer border-neutral-200 bg-neutral-50/50 hover:border-[#FF5722]" : "cursor-not-allowed border-neutral-200 bg-neutral-50 opacity-50"}`}>
+                <div className={`flex items-center space-x-4 rounded-xl border p-4 transition-colors ${bankTransferAvailable ? "cursor-pointer border-neutral-200 bg-neutral-50/50 hover:border-primary" : "cursor-not-allowed border-neutral-200 bg-neutral-50 opacity-50"}`}>
                   <RadioGroupItem value="BANK_TRANSFER" id="bank" disabled={!bankTransferAvailable} />
                   <Label
                     htmlFor="bank"
@@ -429,7 +430,7 @@ export default function CheckoutClient({
                     {!bankTransferAvailable && <span className="mt-1 block text-xs font-normal text-neutral-500">Tạm không khả dụng</span>}
                   </Label>
                 </div>
-                <div className={`flex items-center space-x-4 rounded-sm border p-4 transition-colors ${vnpayAvailable ? "cursor-pointer border-neutral-200 bg-neutral-50/50 hover:border-[#FF5722]" : "cursor-not-allowed border-neutral-200 bg-neutral-50 opacity-50"}`}>
+                <div className={`flex items-center space-x-4 rounded-xl border p-4 transition-colors ${vnpayAvailable ? "cursor-pointer border-neutral-200 bg-neutral-50/50 hover:border-primary" : "cursor-not-allowed border-neutral-200 bg-neutral-50 opacity-50"}`}>
                   <RadioGroupItem value="VNPAY" id="vnpay" disabled={!vnpayAvailable} />
                   <Label
                     htmlFor="vnpay"
@@ -441,19 +442,19 @@ export default function CheckoutClient({
                 </div>
               </RadioGroup>
               {hasPreOrder && !prepaymentAvailable && (
-                <p className="rounded-sm border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
+                <p className="rounded-xl border border-amber-200 bg-amber-50 p-3 text-sm text-amber-800">
                   Chưa thể đặt sản phẩm đặt trước vì cả chuyển khoản và VNPay đều chưa sẵn sàng.
                 </p>
               )}
             </div>
 
             {error && (
-              <div className="p-4 bg-red-50 text-[#E30019] rounded-sm font-medium text-sm border border-red-100">
+              <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-[#E30019]">
                 {error}
               </div>
             )}
 
-            <label className="flex items-start gap-3 rounded-sm border border-neutral-200 bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">
+            <label className="flex items-start gap-3 rounded-xl border border-neutral-200 bg-neutral-50 p-4 text-sm leading-6 text-neutral-700">
               <input
                 type="checkbox"
                 required
@@ -486,16 +487,16 @@ export default function CheckoutClient({
                   !guestVerificationReady ||
                   (hasPreOrder && !prepaymentAvailable)
                 }
-                className="w-full h-14 text-lg font-bold rounded-sm flex items-center justify-center bg-[#FF5722] hover:bg-[#E64A19] text-white transition-colors"
+                className="flex h-14 w-full items-center justify-center rounded-xl text-lg font-bold"
               >
                 {loading ? (
                   <Loader2 className="w-5 h-5 animate-spin mr-2" />
                 ) : (
                   <CreditCard className="w-5 h-5 text-white mr-2" />
                 )}
-                {loading ? "Đang xử lý..." : "ĐẶT HÀNG NGAY"}
+                {loading ? "Đang xử lý..." : "Đặt hàng ngay"}
               </Button>
-              <div className="flex items-center justify-center mt-4 text-xs font-medium text-neutral-500 uppercase tracking-wider">
+              <div className="mt-4 flex items-center justify-center text-center text-xs font-medium text-neutral-500">
                 <ShieldCheck className="w-4 h-4 mr-1 text-green-600" />
                 <span>Kết nối thanh toán được bảo vệ bằng HTTPS</span>
               </div>
@@ -505,8 +506,8 @@ export default function CheckoutClient({
 
         {/* Order Summary */}
         <div className="lg:col-span-5">
-          <div className="bg-white p-6 rounded-sm border border-neutral-100 sticky top-24 shadow-sm">
-            <h2 className="text-xl font-heading font-bold mb-6 border-b border-neutral-100 pb-3">
+          <div className="sticky top-24 rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
+            <h2 className="mb-6 border-b border-neutral-100 pb-3 text-xl font-bold">
               Tóm tắt đơn hàng
             </h2>
 
@@ -514,9 +515,9 @@ export default function CheckoutClient({
               {items.map((item) => (
                 <div
                   key={`${item.id}:${item.variantId || "base"}`}
-                  className="flex gap-4 p-3 border border-neutral-100 rounded-sm hover:border-neutral-200 transition-colors"
+                  className="flex gap-3 rounded-xl border border-neutral-100 p-3 transition-colors hover:border-neutral-200 sm:gap-4"
                 >
-                  <div className="w-20 h-20 bg-white rounded-sm overflow-hidden border border-neutral-100 shrink-0 p-1">
+                  <div className="size-20 shrink-0 overflow-hidden rounded-lg border border-neutral-100 bg-white p-1">
                     {item.imageUrl && (
                       <div className="relative w-full h-full">
                         <Image
@@ -529,7 +530,7 @@ export default function CheckoutClient({
                       </div>
                     )}
                   </div>
-                  <div className="flex-1 text-sm flex flex-col justify-center">
+                  <div className="flex min-w-0 flex-1 flex-col justify-center text-sm">
                     <p className="font-medium line-clamp-2 text-foreground mb-1">
                       {item.title}
                     </p>
@@ -543,7 +544,7 @@ export default function CheckoutClient({
                       <span className="text-foreground">{item.quantity}</span>
                     </p>
                   </div>
-                  <div className="font-bold text-[#E30019] text-sm flex items-center">
+                  <div className="flex items-center whitespace-nowrap text-sm font-bold text-[#E30019]">
                     {formatPrice(item.price * item.quantity)}
                   </div>
                 </div>
@@ -649,8 +650,8 @@ export default function CheckoutClient({
                 <span>Phí vận chuyển</span>
                 <span className="text-green-600">Miễn phí</span>
               </div>
-              <div className="flex justify-between font-bold text-xl pt-4 border-t border-neutral-100">
-                <span className="font-heading uppercase">Tổng giá trị đơn hàng</span>
+              <div className="flex justify-between gap-4 border-t border-neutral-100 pt-4 text-xl font-bold">
+                <span>Tổng giá trị đơn hàng</span>
                 <span className="text-[#E30019]">
                   {formatPrice(payableTotal)}
                 </span>
@@ -676,6 +677,7 @@ export default function CheckoutClient({
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </main>
   );
 }

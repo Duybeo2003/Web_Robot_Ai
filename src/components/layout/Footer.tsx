@@ -9,11 +9,11 @@ export function Footer() {
   const phoneHref = business.supportPhone.replace(/[^\d+]/g, "");
 
   return (
-    <footer className="mt-4 w-full bg-[#1A1A1A] pb-6 pt-12 text-white">
-      <div className="container mx-auto px-4">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-4">
+    <footer className="mt-4 w-full bg-[#111827] pb-6 pt-12 text-white sm:pt-14">
+      <div className="container mx-auto px-4 sm:px-6">
+        <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">
-            <h2 className="text-lg font-bold text-primary">RoboEQ</h2>
+            <h2 className="text-xl font-extrabold text-primary">RoboEQ</h2>
             <p className="text-sm font-medium leading-relaxed text-neutral-300">
               {business.legalName}
             </p>
@@ -35,7 +35,7 @@ export function Footer() {
                 {business.address}
               </li>
               <li>
-                <strong className="text-white">Hotline:</strong>{" "}
+                <strong className="text-white">Điện thoại hỗ trợ:</strong>{" "}
                 <a className="hover:text-primary" href={`tel:${phoneHref}`}>
                   {business.supportPhone}
                 </a>
@@ -93,7 +93,7 @@ export function Footer() {
           </div>
 
           <nav aria-label="Về RoboEQ">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider">Về chúng tôi</h2>
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Về chúng tôi</h2>
             <ul className="space-y-3 text-sm text-neutral-300">
               <li><Link href="/gioi-thieu" className={linkClass}><span aria-hidden="true">›</span> Giới thiệu</Link></li>
               <li><Link href="/lien-he" className={linkClass}><span aria-hidden="true">›</span> Liên hệ</Link></li>
@@ -102,7 +102,7 @@ export function Footer() {
           </nav>
 
           <nav aria-label="Tài khoản khách hàng">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider">Tài khoản</h2>
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Tài khoản</h2>
             <ul className="space-y-3 text-sm text-neutral-300">
               <li><Link href="/profile/orders" className={linkClass}><span aria-hidden="true">›</span> Đơn hàng</Link></li>
               <li><Link href="/cart" className={linkClass}><span aria-hidden="true">›</span> Giỏ hàng</Link></li>
@@ -111,7 +111,7 @@ export function Footer() {
           </nav>
 
           <nav aria-label="Điều khoản và chính sách">
-            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider">Điều khoản & chính sách</h2>
+            <h2 className="mb-4 text-sm font-bold uppercase tracking-wider text-white">Điều khoản & chính sách</h2>
             <ul className="space-y-3 text-sm text-neutral-300">
               <li><Link href="/dieu-khoan-su-dung" className={linkClass}><span aria-hidden="true">›</span> Điều khoản sử dụng</Link></li>
               <li><Link href="/chinh-sach-bao-mat" className={linkClass}><span aria-hidden="true">›</span> Bảo mật thông tin</Link></li>
@@ -123,7 +123,7 @@ export function Footer() {
           </nav>
         </div>
 
-        <div className="mt-12 flex flex-col items-center justify-between border-t border-neutral-800 pt-6 text-xs text-neutral-500 md:flex-row">
+        <div className="mt-12 flex flex-col items-center justify-between border-t border-white/10 pt-6 text-xs text-neutral-400 md:flex-row">
           <p>© 2026 RoboEQ. Bảo lưu mọi quyền.</p>
         </div>
       </div>

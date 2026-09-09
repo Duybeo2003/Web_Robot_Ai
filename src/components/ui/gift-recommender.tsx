@@ -45,21 +45,21 @@ export function GiftRecommender() {
   };
 
   return (
-    <div className="bg-gradient-to-br from-white via-white to-orange-50/50 backdrop-blur-xl rounded-2xl shadow-[0_8px_30px_rgb(0,0,0,0.08)] overflow-hidden border border-orange-100 p-6 md:p-8 w-full h-full flex flex-col justify-center relative">
+    <div data-ui="gift-recommender" className="relative flex h-full min-h-[300px] w-full flex-col overflow-hidden rounded-2xl border border-orange-100 bg-gradient-to-br from-white via-white to-orange-50/60 p-5 shadow-[0_10px_35px_rgb(15,23,42,0.08)] sm:p-6 lg:min-h-0 lg:p-5 xl:p-6">
       {/* Decorative blobs */}
       <div className="absolute top-0 right-0 w-32 h-32 bg-orange-100 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
       <div className="absolute bottom-0 left-0 w-32 h-32 bg-blue-100 rounded-full blur-3xl opacity-50 translate-y-1/2 -translate-x-1/2"></div>
 
-      <div className="text-center mb-6 relative z-10">
-        <h2 className="text-xl md:text-2xl font-extrabold text-neutral-800 tracking-tight flex items-center justify-center gap-2">
-          <Smile className="text-[#FF5722]" size={24} /> Trợ Lý Chọn Quà
+      <div className="relative z-10 mb-4 text-center">
+        <h2 className="flex items-center justify-center gap-2 text-lg font-extrabold tracking-tight text-neutral-900 xl:text-xl">
+          <Smile className="text-[#FF5722]" size={22} /> Trợ lý chọn quà
         </h2>
-        <p className="text-neutral-500 text-xs md:text-sm mt-1">
+        <p className="mt-1 text-sm text-neutral-500">
           Tìm quà giáo dục phù hợp cho bé.
         </p>
       </div>
 
-      <div className="relative min-h-[200px]">
+      <div className="relative z-10 flex min-h-[190px] flex-1 items-center">
         <LazyMotion features={domAnimation}>
           <AnimatePresence mode="wait">
             {/* STEP 1: CHỌN TUỔI */}
@@ -69,43 +69,46 @@ export function GiftRecommender() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="flex flex-col items-center gap-4"
+              className="flex w-full flex-col items-center gap-3"
             >
-              <h3 className="text-sm font-bold text-neutral-700 bg-white/80 px-4 py-1 rounded-full shadow-sm border border-neutral-100">
+              <h3 className="text-sm font-semibold text-neutral-700">
                 Bé nhà bạn mấy tuổi?
               </h3>
-              <div className="grid grid-cols-3 gap-3 w-full mt-2">
+              <div className="grid w-full grid-cols-3 gap-2">
                 <button
+                  type="button"
                   onClick={() => handleAgeSelect("AGE_3_5")}
-                  className="group flex flex-col items-center gap-3 p-4 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-[#FF5722] hover:bg-gradient-to-b hover:from-white hover:to-orange-50 transition-all text-center transform hover:-translate-y-1"
+                  className="group flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white p-2.5 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#FF5722] hover:bg-orange-50/50 hover:shadow-md"
                 >
-                  <div className="w-12 h-12 rounded-full bg-orange-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Baby className="text-[#FF5722]" size={26} />
+                  <div className="flex size-10 items-center justify-center rounded-full bg-orange-50 transition-transform group-hover:scale-105">
+                    <Baby className="text-[#FF5722]" size={22} />
                   </div>
-                  <span className="font-bold text-neutral-700 text-xs">
-                    3 - 5 tuổi
+                  <span className="whitespace-nowrap text-[13px] font-semibold leading-5 text-neutral-700">
+                    3–5 tuổi
                   </span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleAgeSelect("AGE_6_8")}
-                  className="group flex flex-col items-center gap-3 p-4 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-[#2196F3] hover:bg-gradient-to-b hover:from-white hover:to-blue-50 transition-all text-center transform hover:-translate-y-1"
+                  className="group flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white p-2.5 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:border-blue-400 hover:bg-blue-50/50 hover:shadow-md"
                 >
-                  <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <Smile className="text-[#2196F3]" size={26} />
+                  <div className="flex size-10 items-center justify-center rounded-full bg-blue-50 transition-transform group-hover:scale-105">
+                    <Smile className="text-[#2196F3]" size={22} />
                   </div>
-                  <span className="font-bold text-neutral-700 text-xs">
-                    6 - 8 tuổi
+                  <span className="whitespace-nowrap text-[13px] font-semibold leading-5 text-neutral-700">
+                    6–8 tuổi
                   </span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleAgeSelect("AGE_9_12")}
-                  className="group flex flex-col items-center gap-3 p-4 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-[#4CAF50] hover:bg-gradient-to-b hover:from-white hover:to-green-50 transition-all text-center transform hover:-translate-y-1"
+                  className="group flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white p-2.5 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-400 hover:bg-emerald-50/50 hover:shadow-md"
                 >
-                  <div className="w-12 h-12 rounded-full bg-green-50 flex items-center justify-center group-hover:scale-110 transition-transform">
-                    <GraduationCap className="text-[#4CAF50]" size={26} />
+                  <div className="flex size-10 items-center justify-center rounded-full bg-green-50 transition-transform group-hover:scale-105">
+                    <GraduationCap className="text-[#4CAF50]" size={22} />
                   </div>
-                  <span className="font-bold text-neutral-700 text-xs">
-                    9 - 12+ tuổi
+                  <span className="whitespace-nowrap text-[13px] font-semibold leading-5 text-neutral-700">
+                    Từ 9 tuổi
                   </span>
                 </button>
               </div>
@@ -119,26 +122,28 @@ export function GiftRecommender() {
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, x: -20 }}
-              className="flex flex-col items-center gap-4"
+              className="flex w-full flex-col items-center gap-3"
             >
-              <h3 className="text-sm font-bold text-neutral-700 bg-white/80 px-4 py-1 rounded-full shadow-sm border border-neutral-100">
-                Kỹ năng ưu tiên?
+              <h3 className="text-sm font-semibold text-neutral-700">
+                Bạn muốn bé phát triển kỹ năng nào?
               </h3>
-              <div className="grid grid-cols-2 gap-3 w-full mt-2">
+              <div className="grid w-full grid-cols-2 gap-2">
                 <button
+                  type="button"
                   onClick={() => handleSkillSelect("LOGIC")}
-                  className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-indigo-400 hover:bg-gradient-to-br hover:from-white hover:to-indigo-50 transition-all transform hover:-translate-y-1"
+                  className="group flex min-h-[82px] flex-col items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:border-indigo-400 hover:bg-indigo-50/50 hover:shadow-md"
                 >
                   <div className="w-10 h-10 rounded-full bg-indigo-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Puzzle className="text-indigo-500 shrink-0" size={22} />
                   </div>
                   <span className="font-bold text-neutral-700 text-xs">
-                    Tư duy Logic
+                    Tư duy logic
                   </span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSkillSelect("LANGUAGE")}
-                  className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-pink-400 hover:bg-gradient-to-br hover:from-white hover:to-pink-50 transition-all transform hover:-translate-y-1"
+                  className="group flex min-h-[82px] flex-col items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:border-pink-400 hover:bg-pink-50/50 hover:shadow-md"
                 >
                   <div className="w-10 h-10 rounded-full bg-pink-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Languages className="text-pink-500 shrink-0" size={22} />
@@ -148,8 +153,9 @@ export function GiftRecommender() {
                   </span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSkillSelect("MOTOR_SKILLS")}
-                  className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-emerald-400 hover:bg-gradient-to-br hover:from-white hover:to-emerald-50 transition-all transform hover:-translate-y-1"
+                  className="group flex min-h-[82px] flex-col items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:border-emerald-400 hover:bg-emerald-50/50 hover:shadow-md"
                 >
                   <div className="w-10 h-10 rounded-full bg-emerald-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Activity className="text-emerald-500 shrink-0" size={22} />
@@ -159,8 +165,9 @@ export function GiftRecommender() {
                   </span>
                 </button>
                 <button
+                  type="button"
                   onClick={() => handleSkillSelect("EQ")}
-                  className="group flex flex-col items-center justify-center gap-2 p-4 rounded-2xl bg-white border border-neutral-100 shadow-sm hover:shadow-md hover:border-rose-400 hover:bg-gradient-to-br hover:from-white hover:to-rose-50 transition-all transform hover:-translate-y-1"
+                  className="group flex min-h-[82px] flex-col items-center justify-center gap-1.5 rounded-xl border border-neutral-200 bg-white p-2 shadow-sm transition-all hover:-translate-y-0.5 hover:border-rose-400 hover:bg-rose-50/50 hover:shadow-md"
                 >
                   <div className="w-10 h-10 rounded-full bg-rose-50 flex items-center justify-center group-hover:scale-110 transition-transform">
                     <Heart className="text-rose-500 shrink-0" size={22} />
@@ -174,7 +181,7 @@ export function GiftRecommender() {
                 variant="ghost"
                 size="sm"
                 onClick={reset}
-                className="mt-2 text-neutral-400 hover:text-neutral-800 text-xs hover:bg-white/50 rounded-full"
+                className="mt-1 rounded-full text-xs text-neutral-500 hover:bg-white/70 hover:text-neutral-900"
               >
                 Quay lại
               </Button>
@@ -197,7 +204,7 @@ export function GiftRecommender() {
                   variant="ghost"
                   size="sm"
                   onClick={reset}
-                  className="rounded-full gap-1 text-[10px] h-6 px-2 text-neutral-500 hover:text-neutral-800"
+                  className="h-8 gap-1 rounded-full px-2.5 text-xs text-neutral-500 hover:text-neutral-800"
                 >
                   <RefreshCcw size={12} /> Làm lại
                 </Button>
@@ -221,6 +228,7 @@ export function GiftRecommender() {
                             src={product.image}
                             alt={product.name}
                             fill
+                            sizes="64px"
                             className="object-cover group-hover:scale-110 transition-transform duration-500"
                           />
                         </div>
@@ -232,12 +240,9 @@ export function GiftRecommender() {
                             <span className="text-[#FF5722] font-black text-sm">
                               {product.price.toLocaleString("vi-VN")}đ
                             </span>
-                            <Button
-                              size="sm"
-                              className="h-7 px-3 text-[10px] font-bold rounded-full bg-neutral-900 hover:bg-[#FF5722] text-white shadow-sm transition-colors"
-                            >
+                            <span className="inline-flex h-8 items-center rounded-full bg-neutral-900 px-3 text-xs font-bold text-white shadow-sm transition-colors group-hover:bg-primary">
                               Xem
-                            </Button>
+                            </span>
                           </div>
                         </div>
                       </Link>

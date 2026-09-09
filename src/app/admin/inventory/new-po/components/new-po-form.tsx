@@ -103,7 +103,7 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 rounded-sm text-sm border border-red-200">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
           {error}
         </div>
       )}
@@ -114,12 +114,12 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
           value={formData.type}
           onValueChange={(val) => setFormData({ ...formData, type: (val as "IN" | "OUT") || "IN" })}
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Chọn loại giao dịch" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="IN">Nhập Kho (IN)</SelectItem>
-            <SelectItem value="OUT">Xuất Kho (OUT)</SelectItem>
+            <SelectItem value="IN">Nhập kho</SelectItem>
+            <SelectItem value="OUT">Xuất kho</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -136,7 +136,7 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
             })
           }
         >
-          <SelectTrigger>
+          <SelectTrigger className="w-full">
             <SelectValue placeholder="Chọn sản phẩm" />
           </SelectTrigger>
           <SelectContent>
@@ -163,7 +163,7 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
               setFormData({ ...formData, variantId: value || "" })
             }
           >
-            <SelectTrigger>
+            <SelectTrigger className="w-full">
               <SelectValue placeholder="Chọn phân loại" />
             </SelectTrigger>
             <SelectContent>
@@ -178,7 +178,7 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
         </div>
       )}
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="space-y-3">
           <Label>Số lượng {formData.type === "IN" ? "nhập" : "xuất"}</Label>
           <Input
@@ -198,7 +198,7 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
 
         {formData.type === "IN" && (
           <div className="space-y-3">
-            <Label>Giá vốn / Đơn vị (Tùy chọn)</Label>
+            <Label>Giá vốn mỗi đơn vị (không bắt buộc)</Label>
             <Input
               type="number"
               min="0"
@@ -214,9 +214,9 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
       </div>
 
       <div className="space-y-3">
-        <Label>Mã tham chiếu (Tùy chọn)</Label>
+        <Label>Mã tham chiếu (không bắt buộc)</Label>
         <Input
-          placeholder="Số PO, Mã Đơn hàng..."
+          placeholder="Số phiếu nhập, mã đơn hàng..."
           value={formData.reference}
           onChange={(e) =>
             setFormData({ ...formData, reference: e.target.value })
@@ -235,7 +235,7 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
 
       <Button type="submit" className="w-full" disabled={loading}>
         {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
-        Xác nhận {formData.type === "IN" ? "Nhập kho" : "Xuất kho"}
+        Xác nhận {formData.type === "IN" ? "nhập kho" : "xuất kho"}
       </Button>
     </form>
   );

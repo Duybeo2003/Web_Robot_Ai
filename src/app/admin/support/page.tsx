@@ -7,7 +7,7 @@ const statusLabels = {
   NEW: "Mới",
   IN_PROGRESS: "Đang xử lý",
   RESOLVED: "Đã hoàn tất",
-  SPAM: "Spam",
+  SPAM: "Thư rác",
 } as const;
 
 export default async function AdminSupportPage() {
@@ -24,12 +24,12 @@ export default async function AdminSupportPage() {
       </div>
       <div className="space-y-4">
         {requests.length === 0 ? (
-          <div className="rounded-lg border bg-white p-10 text-center text-muted-foreground">
+          <div className="rounded-2xl border bg-white p-10 text-center text-muted-foreground shadow-sm">
             Chưa có yêu cầu hỗ trợ.
           </div>
         ) : (
           requests.map((request) => (
-            <article key={request.id} className="rounded-lg border bg-white p-5 shadow-sm">
+            <article key={request.id} className="rounded-2xl border bg-white p-5 shadow-sm">
               <div className="flex flex-wrap items-start justify-between gap-4">
                 <div>
                   <div className="flex flex-wrap items-center gap-2">

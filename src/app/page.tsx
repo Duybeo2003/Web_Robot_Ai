@@ -88,15 +88,15 @@ export default async function Home() {
         userWishlistIds={userWishlistIds}
       />
       <ProductCarousel
-        title="COMBO PHÁT TRIỂN KỸ NĂNG"
+        title="Combo phát triển kỹ năng"
         categoryLink="/shop?type=COMBO"
-        subLinkText="Khám phá Gói Combo"
+        subLinkText="Khám phá gói combo"
         products={catalog.comboProducts}
         badgeColor="bg-[#E91E63]"
         userWishlistIds={userWishlistIds}
       />
       <ProductCarousel
-        title="ROBOT AI GIÁO DỤC"
+        title="Robot AI giáo dục"
         categoryLink="/shop?type=ROBOT_STEM"
         subLinkText="Robot mBot"
         products={catalog.robotProducts}
@@ -104,9 +104,9 @@ export default async function Home() {
         userWishlistIds={userWishlistIds}
       />
       <ProductCarousel
-        title="ĐỒ CHƠI TƯ DUY LOGIC"
+        title="Đồ chơi tư duy logic"
         categoryLink="/shop?type=DO_CHOI_LOGIC"
-        subLinkText="Rubik & Xếp Hình"
+        subLinkText="Rubik và xếp hình"
         products={catalog.logicProducts}
         badgeColor="bg-[#F44336]"
         userWishlistIds={userWishlistIds}

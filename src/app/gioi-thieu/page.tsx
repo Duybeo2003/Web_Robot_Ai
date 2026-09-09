@@ -6,11 +6,11 @@ export const metadata = {
 
 export default function AboutPage() {
   return (
-    <div className="container mx-auto px-8 py-8 max-w-4xl bg-white my-8 rounded-sm shadow-sm border border-neutral-100">
-      <h1 className="text-3xl font-bold mb-8 text-[#FF5722] font-heading uppercase text-center border-b pb-4">
+    <main className="container mx-auto my-6 max-w-4xl rounded-2xl border border-neutral-200 bg-white px-5 py-8 shadow-sm sm:my-10 sm:px-10 sm:py-12">
+      <h1 className="mb-8 border-b border-neutral-200 pb-7 text-center text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
         Giới thiệu về RoboEQ
       </h1>
-      <div className="prose prose-neutral max-w-none space-y-6 text-neutral-700 leading-relaxed">
+      <div className="prose prose-neutral max-w-none space-y-6 leading-7 text-neutral-700 prose-headings:font-bold prose-headings:text-foreground">
         <p>
           Chào mừng bạn đến với <strong>RoboEQ (Robot Thông Minh)</strong> - Nền
           tảng chuyên cung cấp các sản phẩm đồ chơi giáo dục STEM, kit tự học
@@ -46,6 +46,6 @@ export default function AboutPage() {
           trải nghiệm tốt nhất.
         </p>
       </div>
-    </div>
+    </main>
   );
 }

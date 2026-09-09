@@ -38,13 +38,13 @@ export function ProductCarousel({
   if (!products || products.length === 0) return null;
 
   return (
-    <section className="w-full py-8 bg-white mt-4 relative">
+    <section className="relative mt-3 w-full bg-white py-8 sm:py-10">
       <div className="container mx-auto px-4">
-        {/* Header Block exactly like the reference */}
-        <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-6 gap-4">
-          <div className="flex items-center">
+        <div className="mb-6 flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-end">
+          <div className="flex min-w-0 items-center gap-3">
+            <span className={`h-8 w-1.5 shrink-0 rounded-full ${badgeColor}`} aria-hidden="true" />
             <h2
-              className={`text-sm md:text-lg font-bold text-white ${badgeColor} px-4 md:px-6 py-2 rounded-r-full relative -left-4 shadow-sm uppercase tracking-wide`}
+              className="text-xl font-extrabold tracking-tight text-neutral-900 sm:text-2xl"
             >
               {title}
             </h2>
@@ -52,13 +52,13 @@ export function ProductCarousel({
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={categoryLink}
-              className="text-[10px] md:text-sm border border-neutral-300 bg-white text-neutral-700 px-2 md:px-4 py-1 md:py-1.5 rounded-sm hover:border-primary hover:text-primary transition-colors font-medium whitespace-nowrap"
+              className="inline-flex h-9 items-center whitespace-nowrap rounded-lg border border-neutral-200 bg-white px-3 text-xs font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary sm:text-sm"
             >
               {subLinkText}
             </Link>
             <Link
               href={categoryLink}
-              className="text-[10px] md:text-sm bg-[#1A1A1A] text-white px-2 md:px-4 py-1 md:py-1.5 rounded-sm hover:bg-black transition-colors font-medium whitespace-nowrap"
+              className="inline-flex h-9 items-center whitespace-nowrap rounded-lg bg-neutral-900 px-3 text-xs font-semibold text-white transition-colors hover:bg-neutral-700 sm:text-sm"
             >
               Xem tất cả
             </Link>
@@ -66,22 +66,22 @@ export function ProductCarousel({
         </div>
 
         {/* Carousel Block */}
-        <div className="relative px-2 md:px-10">
+        <div className="relative sm:px-8">
           <Carousel
-            plugins={[autoplayPlugin]}
+            plugins={products.length > 4 ? [autoplayPlugin] : []}
             opts={{
               align: "start",
-              loop: true,
+              loop: products.length > 4,
             }}
             className="w-full"
           >
-            <CarouselContent className="-ml-2 md:-ml-4">
+            <CarouselContent className={`-ml-3 sm:-ml-4 ${products.length < 4 ? "lg:justify-center" : ""}`}>
               {products.map((product) => (
                 <CarouselItem
                   key={product.id}
-                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 flex"
+                  className="flex basis-1/2 pl-3 sm:basis-1/3 sm:pl-4 lg:basis-1/4"
                 >
-                  <div className="p-1 w-full flex">
+                  <div className="flex w-full py-1">
                     <ProductCard
                       product={product}
                       isWished={userWishlistIds.includes(product.id)}
@@ -90,9 +90,9 @@ export function ProductCarousel({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="block">
-              <CarouselPrevious className="left-1 md:-left-12 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
-              <CarouselNext className="right-1 md:-right-12 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
+            <div className="hidden sm:block">
+              <CarouselPrevious className="left-0 z-10 size-10 border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50" />
+              <CarouselNext className="right-0 z-10 size-10 border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50" />
             </div>
           </Carousel>
         </div>

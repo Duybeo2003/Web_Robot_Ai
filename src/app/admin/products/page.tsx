@@ -63,7 +63,7 @@ export default async function AdminProductsPage({
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg border shadow-sm">
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <div className="p-4 border-b flex items-center gap-4">
           <form className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -82,9 +82,9 @@ export default async function AdminProductsPage({
             <thead className="bg-gray-50 text-gray-600 font-medium border-b">
               <tr>
                 <th className="px-4 py-3">Sản phẩm</th>
-                <th className="px-4 py-3">Loại</th>
-                <th className="px-4 py-3">Giá bán</th>
-                <th className="px-4 py-3">Kho</th>
+                <th className="hidden px-4 py-3 md:table-cell">Loại</th>
+                <th className="hidden px-4 py-3 md:table-cell">Giá bán</th>
+                <th className="hidden px-4 py-3 md:table-cell">Kho</th>
                 <th className="px-4 py-3 text-right">Thao tác</th>
               </tr>
             </thead>
@@ -124,12 +124,30 @@ export default async function AdminProductsPage({
                             <Package className="w-5 h-5 m-2.5 text-gray-400" />
                           )}
                         </div>
-                        <div className="font-medium text-gray-900 line-clamp-2">
-                          {product.title}
+                        <div className="min-w-0">
+                          <div className="line-clamp-2 font-medium text-gray-900">
+                            {product.title}
+                          </div>
+                          <div className="mt-1 flex flex-wrap items-center gap-2 md:hidden">
+                            <span className="font-semibold text-primary">
+                              {formatPrice(Number(product.price))}
+                            </span>
+                            <span
+                              className={`inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium ${
+                                product.inventoryCount > 10
+                                  ? "bg-green-50 text-green-700"
+                                  : product.inventoryCount > 0
+                                    ? "bg-yellow-50 text-yellow-700"
+                                    : "bg-red-50 text-red-700"
+                              }`}
+                            >
+                              Kho: {product.inventoryCount}
+                            </span>
+                          </div>
                         </div>
                       </div>
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="hidden px-4 py-3 md:table-cell">
                       <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium bg-blue-50 text-blue-700">
                         {product.category?.name ||
                           (product.type === "ROBOT_STEM"
@@ -141,10 +159,10 @@ export default async function AdminProductsPage({
                                 : product.type)}
                       </span>
                     </td>
-                    <td className="px-4 py-3 font-medium text-gray-900">
+                    <td className="hidden px-4 py-3 font-medium text-gray-900 md:table-cell">
                       {formatPrice(Number(product.price))}
                     </td>
-                    <td className="px-4 py-3">
+                    <td className="hidden px-4 py-3 md:table-cell">
                       <span
                         className={`inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ${
                           product.inventoryCount > 10
@@ -161,7 +179,7 @@ export default async function AdminProductsPage({
                       <div className="flex items-center justify-end gap-2">
                         <Link
                           href={`/admin/products/${product.id}`}
-                          className="p-1.5 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
+                          className="flex size-9 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-blue-50 hover:text-blue-600"
                           title="Sửa"
                         >
                           <Edit className="w-4 h-4" />
@@ -174,7 +192,7 @@ export default async function AdminProductsPage({
                         >
                           <button
                             type="submit"
-                            className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors"
+                            className="flex size-9 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-600"
                             title="Xóa"
                           >
                             <Trash2 className="w-4 h-4" />
@@ -191,7 +209,7 @@ export default async function AdminProductsPage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t flex items-center justify-between">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-muted-foreground">
               Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
               {Math.min(currentPage * itemsPerPage, totalCount)} trên{" "}

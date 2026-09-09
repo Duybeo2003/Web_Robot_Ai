@@ -69,18 +69,16 @@ export function AddAdminModal() {
 
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
-      <DialogTrigger>
-        <Button>
-          <UserPlus className="mr-2 h-4 w-4" />
-          Thêm Quản trị viên
-        </Button>
+      <DialogTrigger render={<Button />}>
+        <UserPlus className="mr-2 h-4 w-4" />
+        Thêm quản trị viên
       </DialogTrigger>
       <DialogContent className="sm:max-w-[425px]">
         <form onSubmit={handleSubmit}>
           <DialogHeader>
-            <DialogTitle>Thêm Quản trị viên</DialogTitle>
+            <DialogTitle>Thêm quản trị viên</DialogTitle>
             <DialogDescription>
-              Tạo mới một tài khoản Quản trị viên hoặc Quản lý cấp 2. Họ có thể dùng Email & Mật khẩu này để đăng nhập.
+              Tạo tài khoản quản trị và chọn quyền phù hợp. Người dùng có thể đăng nhập bằng email và mật khẩu này.
             </DialogDescription>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -88,7 +86,7 @@ export function AddAdminModal() {
               <Label htmlFor="name">Tên hiển thị</Label>
               <Input
                 id="name"
-                placeholder="VD: Nguyễn Văn A"
+                placeholder="Ví dụ: Nguyễn Văn A"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
               />
@@ -98,7 +96,7 @@ export function AddAdminModal() {
               <Input
                 id="email"
                 type="email"
-                placeholder="VD: admin@roboeq.com"
+                placeholder="Ví dụ: admin@roboeq.com"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
               />
@@ -107,7 +105,7 @@ export function AddAdminModal() {
               <Label htmlFor="phone">Số điện thoại</Label>
               <Input
                 id="phone"
-                placeholder="VD: 0987654321"
+                placeholder="Ví dụ: 0987654321"
                 value={formData.phoneNumber}
                 onChange={(e) => setFormData({ ...formData, phoneNumber: e.target.value })}
               />
@@ -138,8 +136,8 @@ export function AddAdminModal() {
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="EDITOR">Biên tập viên</SelectItem>
-                  <SelectItem value="STORE_MANAGER">Quản lý (Cấp 2)</SelectItem>
-                  <SelectItem value="ADMIN">Admin (Cấp 1)</SelectItem>
+                  <SelectItem value="STORE_MANAGER">Quản lý cửa hàng</SelectItem>
+                  <SelectItem value="ADMIN">Quản trị viên</SelectItem>
                 </SelectContent>
               </Select>
             </div>

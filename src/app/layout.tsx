@@ -53,6 +53,7 @@ export default function RootLayout({
     <html
       lang="vi"
       className="h-full antialiased"
+      data-scroll-behavior="smooth"
       suppressHydrationWarning
     >
       <body

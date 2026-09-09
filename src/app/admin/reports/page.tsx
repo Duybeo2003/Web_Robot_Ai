@@ -13,7 +13,7 @@ import { ReportsChart } from "./components/reports-chart";
 import { format } from "date-fns";
 
 export const metadata: Metadata = {
-  title: "Báo cáo Doanh thu - Admin",
+  title: "Báo cáo doanh thu - Admin",
   description: "Báo cáo thống kê kinh doanh",
 };
 
@@ -77,7 +77,7 @@ export default async function AdminReportsPage() {
     <div className="flex-1 space-y-6">
       <div>
         <h2 className="text-3xl font-heading font-bold tracking-tight">
-          Báo cáo Doanh thu
+          Báo cáo doanh thu
         </h2>
         <p className="text-muted-foreground mt-1">
           Tổng quan tình hình kinh doanh và doanh thu theo tháng.
@@ -88,7 +88,7 @@ export default async function AdminReportsPage() {
         <Card className="border-neutral-200/60 shadow-sm">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-600">
-              Tổng doanh thu (All time)
+              Tổng doanh thu (toàn thời gian)
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -107,7 +107,7 @@ export default async function AdminReportsPage() {
 
       <Card className="border-neutral-200/60 shadow-sm">
         <CardHeader>
-          <CardTitle>Biểu đồ Doanh thu theo tháng</CardTitle>
+          <CardTitle>Biểu đồ doanh thu theo tháng</CardTitle>
           <CardDescription>Xu hướng tăng trưởng qua các tháng</CardDescription>
         </CardHeader>
         <CardContent>

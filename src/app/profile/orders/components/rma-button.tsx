@@ -11,9 +11,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { AlertCircle, Loader2 } from "lucide-react";
+import { AlertCircle, Loader2, Upload } from "lucide-react";
 import { createReturnRequest } from "@/actions/rma";
-import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { toast } from "sonner";
 
@@ -86,13 +85,13 @@ export function RmaButton({ orderId }: { orderId: string }) {
           />
         }
       >
-        Yêu cầu Đổi/Trả
+        Yêu cầu đổi/trả
       </DialogTrigger>
-      <DialogContent>
+      <DialogContent className="rounded-2xl">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2 text-orange-600">
             <AlertCircle className="w-5 h-5" />
-            Yêu cầu Đổi/Trả hàng
+            Yêu cầu đổi/trả hàng
           </DialogTitle>
           <DialogDescription>
             Vui lòng nhập lý do bạn muốn đổi/trả đơn hàng này. Nếu có sản phẩm
@@ -109,12 +108,17 @@ export function RmaButton({ orderId }: { orderId: string }) {
           />
           <div className="space-y-2">
             <Label htmlFor={`rma-evidence-${orderId}`}>Ảnh minh chứng (không bắt buộc)</Label>
-            <Input
-              id={`rma-evidence-${orderId}`}
-              type="file"
-              accept="image/jpeg,image/png,image/webp"
-              onChange={(event) => setEvidence(event.target.files?.[0] || null)}
-            />
+            <label htmlFor={`rma-evidence-${orderId}`} className="flex min-h-11 cursor-pointer items-center gap-2 rounded-lg border border-dashed border-neutral-300 bg-neutral-50 px-3 py-2 text-sm font-medium transition-colors hover:border-primary/40 hover:bg-primary/5">
+              <Upload className="h-4 w-4 shrink-0 text-primary" />
+              <span className="min-w-0 truncate">{evidence?.name || "Chọn ảnh từ thiết bị"}</span>
+              <input
+                id={`rma-evidence-${orderId}`}
+                type="file"
+                accept="image/jpeg,image/png,image/webp"
+                className="sr-only"
+                onChange={(event) => setEvidence(event.target.files?.[0] || null)}
+              />
+            </label>
             <p className="text-xs text-neutral-500">JPEG, PNG hoặc WebP; tối đa 5 MB.</p>
           </div>
           {error && <p className="text-sm text-red-500 font-medium">{error}</p>}
@@ -134,7 +138,7 @@ export function RmaButton({ orderId }: { orderId: string }) {
             className="bg-orange-600 hover:bg-orange-700 text-white"
           >
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
-            Gửi Yêu Cầu
+            Gửi yêu cầu
           </Button>
         </div>
       </DialogContent>

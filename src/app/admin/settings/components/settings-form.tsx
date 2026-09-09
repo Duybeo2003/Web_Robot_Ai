@@ -29,7 +29,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: Record<stri
   };
 
   return (
-    <form onSubmit={handleSave} className="space-y-6 max-w-2xl bg-white p-6 rounded-md border">
+    <form onSubmit={handleSave} className="max-w-2xl space-y-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <div className="space-y-2">
           <Label>Tên cửa hàng</Label>
@@ -40,7 +40,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: Record<stri
           />
         </div>
         <div className="space-y-2">
-          <Label>Số điện thoại Hotline</Label>
+          <Label>Số điện thoại hỗ trợ</Label>
           <Input 
             value={settings["hotline"] || ""}
             onChange={(e) => handleChange("hotline", e.target.value)}
@@ -65,7 +65,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: Record<stri
           />
         </div>
         <div className="space-y-2">
-          <Label>Link Fanpage Facebook</Label>
+          <Label>Liên kết trang Facebook</Label>
           <Input 
             value={settings["facebook_url"] || ""}
             onChange={(e) => handleChange("facebook_url", e.target.value)}
@@ -73,7 +73,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: Record<stri
           />
         </div>
         <div className="space-y-2">
-          <Label>Link Zalo</Label>
+          <Label>Liên kết Zalo</Label>
           <Input 
             value={settings["zalo_url"] || ""}
             onChange={(e) => handleChange("zalo_url", e.target.value)}
@@ -81,11 +81,11 @@ export function SettingsForm({ initialSettings }: { initialSettings: Record<stri
           />
         </div>
         <div className="space-y-2 md:col-span-2">
-          <Label>Dòng thông báo chạy chữ (Marquee Banner)</Label>
+          <Label>Dòng thông báo nổi bật</Label>
           <Input 
             value={settings["marquee_text"] || ""}
             onChange={(e) => handleChange("marquee_text", e.target.value)}
-            placeholder="Sale 50% toàn bộ sản phẩm..."
+            placeholder="Giảm 50% cho các sản phẩm được chọn..."
           />
         </div>
       </div>

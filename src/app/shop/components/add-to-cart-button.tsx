@@ -30,13 +30,14 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
       <Link
         href={`/shop/${product.slug}`}
         aria-label={isAffiliate ? "Xem nơi bán" : "Chọn phân loại sản phẩm"}
-        className="inline-flex size-8 items-center justify-center rounded-full bg-[#FF5722] text-white shadow-md transition-all hover:-translate-y-1 hover:bg-[#E64A19] hover:shadow-xl"
+        className="inline-flex h-10 w-full items-center justify-center gap-2 rounded-lg bg-primary px-3 text-xs font-semibold text-white shadow-sm transition-all hover:bg-secondary hover:shadow-md sm:text-sm"
       >
         {isAffiliate ? (
           <ExternalLink className="w-4 h-4" />
         ) : (
           <ListFilter className="w-4 h-4" />
         )}
+        <span>{isAffiliate ? "Xem nơi bán" : "Chọn phân loại"}</span>
       </Link>
     );
   }
@@ -57,13 +58,14 @@ export function AddToCartButton({ product }: AddToCartButtonProps) {
 
   return (
     <Button
-      size="icon"
+      size="sm"
       onClick={handleAddToCart}
       disabled={isOutOfStock}
       aria-label={isOutOfStock ? "Sản phẩm đã hết hàng" : "Thêm vào giỏ hàng"}
-      className="rounded-full shadow-md hover:shadow-xl transition-all bg-[#FF5722] hover:bg-[#E64A19] text-white hover:-translate-y-1"
+      className="h-10 w-full rounded-lg bg-primary text-xs text-white shadow-sm transition-all hover:bg-secondary hover:shadow-md sm:text-sm"
     >
       <ShoppingCart className="w-4 h-4" />
+      <span>{isOutOfStock ? "Hết hàng" : "Thêm vào giỏ"}</span>
     </Button>
   );
 }

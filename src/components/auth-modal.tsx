@@ -166,21 +166,21 @@ export function AuthModal({
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && closeModal()}>
-      <DialogContent className="sm:max-w-[400px] rounded-sm p-6 sm:p-8 bg-[#F9F8F6] border-stone-200 shadow-none">
+      <DialogContent className="rounded-2xl border-neutral-200 bg-white p-6 shadow-xl sm:max-w-[420px] sm:p-8">
         <DialogHeader className="mb-4">
-          <DialogTitle className="text-2xl font-heading font-semibold text-center text-[#2C2C2C]">
+          <DialogTitle className="text-center text-2xl font-bold text-foreground">
             {step === 1 ? "Đăng nhập" : "Xác thực OTP"}
           </DialogTitle>
-          <DialogDescription className="text-center text-[#2C2C2C]/70 mt-2 font-sans text-sm">
+          <DialogDescription className="mt-2 text-center text-sm leading-6 text-neutral-600">
             {step === 1
               ? "Chào mừng bạn đến với robot giáo dục."
               : `Mã 6 số đã được gửi đến ${phone}`}
           </DialogDescription>
         </DialogHeader>
 
-        <div className="py-2 font-sans">
+        <div className="py-2">
           {error && (
-            <div className="mb-6 p-3 bg-red-50 text-red-600 text-sm rounded-sm text-center border border-red-100 animate-in fade-in duration-300">
+            <div className="animate-in mb-6 rounded-xl border border-red-100 bg-red-50 p-3 text-center text-sm text-red-600 fade-in duration-300">
               {error}
             </div>
           )}
@@ -202,20 +202,20 @@ export function AuthModal({
                       placeholder="+84..."
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
-                      className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+                      className="h-12 rounded-xl border-neutral-200 bg-white text-base"
                       autoComplete="tel"
                       disabled={isLoading}
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full h-12 rounded-sm text-base font-medium bg-[#C86B5A] hover:bg-[#C86B5A]/90 text-white transition-colors"
+                    className="h-12 w-full rounded-xl text-base font-bold"
                     disabled={isLoading}
                   >
                     {isLoading ? (
                       <Loader2 className="mr-2 h-5 w-5 animate-spin" />
                     ) : null}
-                    Tiếp tục bằng SĐT
+                    Tiếp tục bằng số điện thoại
                   </Button>
                 </form>
               ) : (
@@ -225,7 +225,7 @@ export function AuthModal({
                       htmlFor="email"
                       className="text-sm font-medium text-[#2C2C2C]"
                     >
-                      Email hoặc Số điện thoại
+                      Email hoặc số điện thoại
                     </Label>
                     <Input
                       id="email"
@@ -233,7 +233,7 @@ export function AuthModal({
                       placeholder="email@domain.com hoặc 0912345678"
                       value={email}
                       onChange={(e) => setEmail(e.target.value)}
-                      className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+                      className="h-12 rounded-xl border-neutral-200 bg-white text-base"
                       disabled={isLoading}
                     />
                   </div>
@@ -250,13 +250,13 @@ export function AuthModal({
                       placeholder="••••••••"
                       value={password}
                       onChange={(e) => setPassword(e.target.value)}
-                      className="h-12 text-base rounded-sm border-stone-200 bg-white focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+                      className="h-12 rounded-xl border-neutral-200 bg-white text-base"
                       disabled={isLoading}
                     />
                   </div>
                   <Button
                     type="submit"
-                    className="w-full h-12 rounded-sm text-base font-medium bg-[#C86B5A] hover:bg-[#C86B5A]/90 text-white transition-colors"
+                    className="h-12 w-full rounded-xl text-base font-bold"
                     disabled={isLoading}
                   >
                     {isLoading ? (
@@ -270,15 +270,15 @@ export function AuthModal({
               <div className="mt-4 flex justify-center">
                 <button
                   type="button"
-                  className="text-sm font-medium text-[#C86B5A] hover:underline"
+                  className="rounded-md px-2 py-1 text-sm font-semibold text-primary hover:underline"
                   onClick={() => {
                     setError("");
                     setLoginMethod(loginMethod === "otp" ? "password" : "otp");
                   }}
                 >
                   {loginMethod === "otp"
-                    ? "Đăng nhập bằng Mật Khẩu"
-                    : "Đăng nhập bằng OTP (SĐT)"}
+                    ? "Đăng nhập bằng mật khẩu"
+                    : "Đăng nhập bằng OTP"}
                 </button>
               </div>
 
@@ -288,8 +288,8 @@ export function AuthModal({
                     <div className="absolute inset-0 flex items-center">
                       <span className="w-full border-t border-stone-200" />
                     </div>
-                    <div className="relative flex justify-center text-xs uppercase font-medium">
-                      <span className="bg-[#F9F8F6] px-4 text-[#2C2C2C]/60">
+                    <div className="relative flex justify-center text-xs font-medium">
+                      <span className="bg-white px-4 text-neutral-500">
                         Hoặc đăng nhập với
                       </span>
                     </div>
@@ -298,7 +298,7 @@ export function AuthModal({
                   {googleEnabled && <Button
                     type="button"
                     variant="outline"
-                    className="h-12 rounded-sm border border-stone-200 bg-white hover:bg-stone-50 text-[#2C2C2C] transition-colors font-medium"
+                    className="h-12 rounded-xl border border-neutral-200 bg-white font-medium text-foreground transition-colors hover:bg-neutral-50"
                     onClick={() => handleSocialLogin("google")}
                     disabled={isLoading}
                   >
@@ -325,7 +325,7 @@ export function AuthModal({
                   {facebookEnabled && <Button
                     type="button"
                     variant="outline"
-                    className="h-12 rounded-sm border border-stone-200 bg-white hover:bg-[#1877F2]/5 hover:border-[#1877F2]/20 hover:text-[#1877F2] transition-colors font-medium"
+                    className="h-12 rounded-xl border border-neutral-200 bg-white font-medium text-foreground transition-colors hover:border-[#1877F2]/20 hover:bg-[#1877F2]/5 hover:text-[#1877F2]"
                     onClick={() => handleSocialLogin("facebook")}
                     disabled={isLoading}
                   >
@@ -360,7 +360,7 @@ export function AuthModal({
                         <InputOTPSlot
                           key={i}
                           index={i}
-                          className="w-10 h-12 sm:w-11 sm:h-14 text-xl font-medium rounded-sm border border-stone-200 bg-white transition-all focus-visible:ring-1 focus-visible:ring-primary/50 focus-visible:border-primary"
+                          className="h-12 w-9 rounded-lg border border-neutral-200 bg-white text-xl font-medium transition-all focus-visible:border-primary focus-visible:ring-2 focus-visible:ring-primary/20 sm:h-14 sm:w-11"
                         />
                       ))}
                     </InputOTPGroup>
@@ -369,7 +369,7 @@ export function AuthModal({
 
                 <Button
                   type="submit"
-                  className="w-full h-12 rounded-sm text-base font-medium bg-[#C86B5A] hover:bg-[#C86B5A]/90 text-white transition-colors"
+                  className="h-12 w-full rounded-xl text-base font-bold"
                   disabled={isLoading || otp.length < 6}
                 >
                   {isLoading ? (

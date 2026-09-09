@@ -48,23 +48,23 @@ export function PromotionalBanner({
   return (
     <div className="flex flex-col gap-3 mb-3 w-full">
       {/* Flash Sale Header */}
-      <div className="bg-gradient-to-r from-[#E30019] to-[#FF5722] rounded-sm p-3 flex flex-col sm:flex-row sm:items-center justify-between text-white shadow-sm gap-2">
-        <div className="flex items-center gap-2 font-bold uppercase tracking-wider text-sm">
-          <Flame className="w-5 h-5 animate-pulse text-yellow-300" />
-          <span>Flash Sale Đang Diễn Ra</span>
+      <div className="flex flex-col justify-between gap-2 rounded-xl bg-gradient-to-r from-[#E30019] to-primary p-3 text-white shadow-sm sm:flex-row sm:items-center">
+        <div className="flex items-center gap-2 text-sm font-bold">
+          <Flame className="w-5 h-5 text-yellow-300" />
+          <span>Flash sale đang diễn ra</span>
         </div>
         <div className="flex items-center gap-2 text-sm font-medium">
           <span className="opacity-90">Kết thúc sau:</span>
           <div className="flex items-center gap-1 font-mono font-bold">
-            <span className="bg-white text-[#E30019] px-1.5 py-0.5 rounded-sm shadow-sm">
+            <span className="rounded-md bg-white px-1.5 py-0.5 text-[#E30019] shadow-sm">
               {hours.toString().padStart(2, "0")}
             </span>
             <span>:</span>
-            <span className="bg-white text-[#E30019] px-1.5 py-0.5 rounded-sm shadow-sm">
+            <span className="rounded-md bg-white px-1.5 py-0.5 text-[#E30019] shadow-sm">
               {minutes.toString().padStart(2, "0")}
             </span>
             <span>:</span>
-            <span className="bg-white text-[#E30019] px-1.5 py-0.5 rounded-sm shadow-sm">
+            <span className="rounded-md bg-white px-1.5 py-0.5 text-[#E30019] shadow-sm">
               {seconds.toString().padStart(2, "0")}
             </span>
           </div>
@@ -72,11 +72,11 @@ export function PromotionalBanner({
       </div>
 
       {stock !== null && stock > 0 && stock <= 10 && (
-        <div className="flex items-center gap-1.5 rounded-sm border border-orange-100 bg-orange-50/50 p-3 text-xs font-medium text-red-600">
+        <div className="flex items-center gap-1.5 rounded-xl border border-orange-100 bg-orange-50/50 p-3 text-xs font-medium text-red-600">
           <Flame className="w-4 h-4" aria-hidden="true" />
           <span>
             Còn <strong className="text-sm text-red-700">{stock}</strong> sản phẩm
-            trong suất Flash Sale
+            trong chương trình flash sale
           </span>
         </div>
       )}

@@ -20,7 +20,7 @@ import { cn } from "@/lib/utils";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Quản lý Kho hàng - Admin",
+  title: "Quản lý kho hàng - Admin",
   description: "Quản lý nhập xuất kho hàng",
 };
 
@@ -91,7 +91,7 @@ export default async function AdminInventoryPage() {
               "bg-blue-600 hover:bg-blue-700",
             )}
           >
-            Tạo Phiếu Nhập Kho
+            Tạo phiếu nhập kho
           </Link>
         </div>
       </div>
@@ -115,7 +115,7 @@ export default async function AdminInventoryPage() {
         <Card className="border-neutral-200/60 shadow-sm border-l-4 border-l-orange-500">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-sm font-medium text-neutral-600">
-              Sắp hết hàng (Low Stock)
+              Sắp hết hàng
             </CardTitle>
             <AlertTriangle className="h-4 w-4 text-orange-500" />
           </CardHeader>
@@ -124,7 +124,7 @@ export default async function AdminInventoryPage() {
               {lowStockCount}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Vị trí kho có tồn kho &lt;= 10
+              Vị trí kho còn từ 10 sản phẩm trở xuống
             </p>
           </CardContent>
         </Card>
@@ -134,7 +134,7 @@ export default async function AdminInventoryPage() {
         <div className="lg:col-span-2">
           <Card className="border-neutral-200/60 shadow-sm h-full">
             <CardHeader>
-              <CardTitle>Lịch sử Nhập/Xuất kho</CardTitle>
+              <CardTitle>Lịch sử nhập/xuất kho</CardTitle>
               <CardDescription>50 giao dịch gần nhất</CardDescription>
             </CardHeader>
             <CardContent>

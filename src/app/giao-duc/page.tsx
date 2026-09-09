@@ -5,10 +5,10 @@ import Image from "next/image";
 import { format } from "date-fns";
 
 export const metadata: Metadata = {
-  title: "Góc Giáo Dục STEM - RoboEQ",
+  title: "Góc giáo dục STEM - RoboEQ",
   description: "Các bài viết hướng dẫn, kiến thức về Arduino, Robot và STEM",
   openGraph: {
-    title: "Góc Giáo Dục STEM - RoboEQ",
+    title: "Góc giáo dục STEM - RoboEQ",
     description: "Các bài viết hướng dẫn, kiến thức về Arduino, Robot và STEM",
   },
 };
@@ -23,10 +23,10 @@ export default async function EducationBlogPage() {
   });
 
   return (
-    <div className="container mx-auto px-4 py-12 min-h-screen">
-      <div className="text-center mb-12">
-        <h1 className="text-4xl font-heading font-bold text-neutral-900 mb-4 tracking-tight">
-          Góc Giáo Dục STEM
+    <main className="container mx-auto min-h-screen px-4 py-10 sm:py-14">
+      <div className="mb-10 text-center sm:mb-12">
+        <h1 className="mb-4 text-3xl font-extrabold tracking-tight text-neutral-900 sm:text-4xl">
+          Góc giáo dục STEM
         </h1>
         <p className="text-lg text-neutral-600 max-w-2xl mx-auto">
           Tổng hợp các bài viết hướng dẫn, thủ thuật và kiến thức bổ ích về lập
@@ -34,7 +34,7 @@ export default async function EducationBlogPage() {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+      <div className="grid grid-cols-1 items-stretch gap-6 md:grid-cols-2 lg:grid-cols-3">
         {articles.length === 0 ? (
           <div className="col-span-full text-center py-20 text-neutral-500">
             Chưa có bài viết nào được xuất bản.
@@ -44,7 +44,7 @@ export default async function EducationBlogPage() {
             <Link
               key={article.id}
               href={`/giao-duc/${article.slug}`}
-              className="group flex flex-col bg-white rounded-lg border border-neutral-200 overflow-hidden hover:shadow-lg transition-all duration-300"
+              className="group flex h-full flex-col overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-lg"
             >
               <div className="relative h-48 w-full bg-neutral-100 overflow-hidden">
                 {article.thumbnail ? (
@@ -52,6 +52,7 @@ export default async function EducationBlogPage() {
                     src={article.thumbnail}
                     alt={article.title}
                     fill
+                    sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) 50vw, 33vw"
                     className="object-cover group-hover:scale-105 transition-transform duration-500"
                   />
                 ) : (
@@ -60,18 +61,18 @@ export default async function EducationBlogPage() {
                   </div>
                 )}
               </div>
-              <div className="p-6 flex flex-col flex-1">
+              <div className="flex flex-1 flex-col p-5 sm:p-6">
                 <div className="flex items-center gap-2 mb-3">
-                  <span className="text-xs font-bold uppercase tracking-wider text-[#FF5722] bg-orange-50 px-2 py-1 rounded-sm">
+                  <span className="rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">
                     Kiến thức
                   </span>
                   <span className="text-xs text-neutral-500">
                     {format(new Date(article.createdAt), "dd/MM/yyyy")}
                   </span>
                 </div>
-                <h3 className="text-xl font-bold font-heading text-neutral-900 mb-3 group-hover:text-[#FF5722] transition-colors line-clamp-2">
+                <h2 className="mb-3 min-h-[3.5rem] text-xl font-bold text-neutral-900 transition-colors line-clamp-2 group-hover:text-primary">
                   {article.title}
-                </h3>
+                </h2>
                 <p className="text-neutral-600 text-sm line-clamp-3 mb-4 flex-1">
                   {article.content.replace(/<[^>]*>?/gm, "").substring(0, 150)}
                   ...
@@ -81,7 +82,7 @@ export default async function EducationBlogPage() {
                     {article.author.name}
                   </span>
                   <span className="text-sm font-bold text-[#FF5722] group-hover:underline">
-                    Đọc tiếp &rarr;
+                    Đọc tiếp <span aria-hidden="true">→</span>
                   </span>
                 </div>
               </div>
@@ -89,7 +90,7 @@ export default async function EducationBlogPage() {
           ))
         )}
       </div>
-    </div>
+    </main>
   );
 }
 
@@ -100,4 +101,3 @@ export default async function EducationBlogPage() {
 
 
 export const dynamic = 'force-dynamic';
-

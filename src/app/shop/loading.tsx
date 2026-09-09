@@ -11,7 +11,7 @@ export default function ShopLoading() {
         {[1, 2, 3, 4].map((i) => (
           <div
             key={i}
-            className="glass-card rounded-sm overflow-hidden flex flex-col h-[400px] animate-pulse"
+            className="glass-card flex h-[400px] flex-col overflow-hidden rounded-2xl animate-pulse"
           >
             <div className="h-60 bg-muted w-full" />
             <div className="p-6 flex flex-col flex-1">

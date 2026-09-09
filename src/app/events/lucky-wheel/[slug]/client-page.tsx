@@ -67,7 +67,7 @@ export default function LuckyWheelClientPage({
     }
 
     if (userBalance < event.pricePerPlay) {
-      toast.error("Không đủ Xu! Vui lòng nạp thêm để quay.");
+      toast.error("Không đủ xu. Vui lòng nạp thêm để quay.");
       router.push("/profile/wallet");
       return;
     }
@@ -126,15 +126,15 @@ export default function LuckyWheelClientPage({
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-orange-600/10 rounded-full blur-[120px] pointer-events-none"></div>
       
       <div className="container mx-auto px-4 pt-6 relative z-10">
-        <div className="flex items-center justify-between mb-8">
-          <Link href="/events" className="flex items-center text-orange-200 hover:text-white transition-colors">
-            <ArrowLeft className="w-5 h-5 mr-2" /> Quay lại Hub
+        <div className="mb-8 flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+          <Link href="/events" className="flex items-center text-orange-200 transition-colors hover:text-white">
+            <ArrowLeft className="w-5 h-5 mr-2" /> Quay lại sự kiện
           </Link>
           
           <div className="bg-neutral-800/80 backdrop-blur-md border border-neutral-700 px-4 py-2 rounded-full flex items-center gap-3 shadow-lg">
             <Wallet className="w-5 h-5 text-orange-400" />
             <div className="font-bold">
-              Số dư: <span className="text-orange-400">{userBalance.toLocaleString('vi-VN')} Xu</span>
+              Số dư: <span className="text-orange-400">{userBalance.toLocaleString('vi-VN')} xu</span>
             </div>
             <Link href="/profile/wallet">
               <Button size="sm" className="h-7 px-3 bg-white text-neutral-900 hover:bg-orange-100 text-xs font-bold rounded-full ml-2">
@@ -145,7 +145,7 @@ export default function LuckyWheelClientPage({
         </div>
 
         <div className="text-center mb-12">
-          <h1 className="text-4xl md:text-6xl font-heading font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 via-[#FF5722] to-yellow-400 uppercase drop-shadow-sm mb-4">
+          <h1 className="mb-4 bg-gradient-to-r from-orange-400 via-primary to-yellow-400 bg-clip-text text-4xl font-black text-transparent drop-shadow-sm md:text-6xl">
             {event.name}
           </h1>
           <p className="text-orange-100/80 text-lg max-w-2xl mx-auto">{event.description}</p>
@@ -159,7 +159,7 @@ export default function LuckyWheelClientPage({
             <div className="absolute -inset-4 bg-gradient-to-r from-orange-500 to-yellow-500 rounded-full blur-xl opacity-30 animate-pulse"></div>
             
             {/* Wheel Border */}
-            <div className="relative w-[340px] h-[340px] md:w-[480px] md:h-[480px] rounded-full border-[12px] border-neutral-800 shadow-[0_0_50px_rgba(255,87,34,0.3)] flex items-center justify-center overflow-hidden">
+            <div className="relative flex aspect-square w-[calc(100vw-2rem)] max-w-[340px] items-center justify-center overflow-hidden rounded-full border-[12px] border-neutral-800 shadow-[0_0_50px_rgba(255,87,34,0.3)] md:w-[480px] md:max-w-none">
               
               {/* Pointer */}
               <div className="absolute top-0 left-1/2 -translate-x-1/2 -mt-4 z-20 flex flex-col items-center">
@@ -205,9 +205,9 @@ export default function LuckyWheelClientPage({
               <Button 
                 onClick={handleSpin}
                 disabled={isSpinning}
-                className="w-full max-w-[280px] h-16 text-xl font-black uppercase tracking-wider bg-gradient-to-r from-orange-500 to-[#FF5722] hover:from-orange-400 hover:to-orange-600 rounded-full shadow-[0_0_30px_rgba(255,87,34,0.5)] hover:shadow-[0_0_50px_rgba(255,87,34,0.8)] transition-all hover:scale-105"
+                className="h-16 w-full max-w-[280px] rounded-full bg-gradient-to-r from-orange-500 to-primary text-xl font-black shadow-[0_0_30px_rgba(255,87,34,0.5)] transition-all hover:scale-105 hover:from-orange-400 hover:to-orange-600 hover:shadow-[0_0_50px_rgba(255,87,34,0.8)]"
               >
-                {isSpinning ? "Đang quay..." : `Quay ngay (${event.pricePerPlay} Xu)`}
+                {isSpinning ? "Đang quay..." : `Quay ngay (${event.pricePerPlay} xu)`}
               </Button>
             </div>
           </div>
@@ -217,7 +217,7 @@ export default function LuckyWheelClientPage({
             <div className="bg-neutral-800/50 backdrop-blur-md border border-neutral-700 rounded-xl p-6 shadow-xl">
               <h3 className="text-xl font-bold text-orange-400 mb-4 flex items-center gap-2 border-b border-neutral-700 pb-3">
                 <Trophy className="w-5 h-5" />
-                BẢNG VÀNG
+                Bảng vàng
               </h3>
               
               <div className="space-y-4 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
@@ -247,7 +247,7 @@ export default function LuckyWheelClientPage({
             <div className="bg-neutral-800/30 border border-neutral-700/50 rounded-xl p-4 flex items-start gap-3">
               <Info className="w-5 h-5 text-neutral-400 shrink-0 mt-0.5" />
               <p className="text-sm text-neutral-400 leading-relaxed">
-                Chi phí mỗi lượt quay là <strong className="text-orange-400">{event.pricePerPlay} Xu</strong>. Phần thưởng vật phẩm sẽ được chuyển vào <strong>Túi đồ sự kiện</strong> của bạn.
+                Chi phí mỗi lượt quay là <strong className="text-orange-400">{event.pricePerPlay} xu</strong>. Phần thưởng vật phẩm sẽ được chuyển vào <strong>túi đồ sự kiện</strong> của bạn.
               </p>
             </div>
 
@@ -255,7 +255,7 @@ export default function LuckyWheelClientPage({
             <div className="bg-neutral-800/50 border border-neutral-700 rounded-xl p-6 shadow-xl mt-6">
               <h3 className="text-lg font-bold text-orange-400 mb-4 flex items-center gap-2 border-b border-neutral-700 pb-3">
                 <Sparkles className="w-5 h-5" />
-                CƠ CẤU GIẢI THƯỞNG
+                Cơ cấu giải thưởng
               </h3>
               <div className="space-y-3 max-h-[300px] overflow-y-auto pr-2 custom-scrollbar">
                 {prizes.length === 0 ? (
@@ -266,10 +266,10 @@ export default function LuckyWheelClientPage({
                       <div className="flex-1 min-w-0 pr-4">
                         <p className="font-bold text-sm text-neutral-200 truncate flex items-center gap-2">
                           {prize.name}
-                          {prize.isJackpot && <span className="text-[10px] bg-yellow-500 text-black px-1.5 py-0.5 rounded font-black uppercase">JACKPOT</span>}
+                          {prize.isJackpot && <span className="rounded bg-yellow-500 px-1.5 py-0.5 text-[10px] font-black text-black">Giải đặc biệt</span>}
                         </p>
                         <p className="text-xs text-neutral-500 mt-1">
-                          {prize.productId ? "Vật phẩm thực" : `Cộng ${prize.rewardPoints} Xu`}
+                          {prize.productId ? "Vật phẩm thực" : `Cộng ${prize.rewardPoints} xu`}
                           {prize.stock !== null && ` • Còn: ${prize.stock}`}
                         </p>
                       </div>
@@ -298,7 +298,7 @@ export default function LuckyWheelClientPage({
         <DialogContent className="sm:max-w-[425px] bg-neutral-900 border-neutral-700 text-white">
           <DialogHeader>
             <DialogTitle className="text-center text-2xl font-black text-transparent bg-clip-text bg-gradient-to-r from-orange-400 to-yellow-400">
-              CHÚC MỪNG BẠN!
+              Chúc mừng bạn!
             </DialogTitle>
           </DialogHeader>
           
@@ -306,7 +306,7 @@ export default function LuckyWheelClientPage({
             {wonPrize?.isJackpot && (
               <div className="mb-4">
                 <span className="bg-yellow-500 text-neutral-900 text-xs font-black px-3 py-1 rounded-full uppercase tracking-widest animate-bounce inline-block">
-                  Jackpot
+                  Giải đặc biệt
                 </span>
               </div>
             )}
@@ -324,7 +324,7 @@ export default function LuckyWheelClientPage({
               </p>
             ) : (
               <p className="text-neutral-400 mt-4 text-sm">
-                Bạn đã được cộng <strong className="text-orange-400">{wonPrize?.rewardPoints} Xu</strong> trực tiếp vào Ví RoboCoin!
+                Bạn đã được cộng <strong className="text-orange-400">{wonPrize?.rewardPoints} xu</strong> trực tiếp vào ví RoboCoin!
               </p>
             )}
           </div>
@@ -335,7 +335,7 @@ export default function LuckyWheelClientPage({
             </Button>
             <Link href="/profile/inventory" className="w-full">
               <Button className="w-full bg-[#FF5722] hover:bg-[#E64A19] text-white font-bold">
-                Vào Túi Đồ
+                Vào túi đồ
               </Button>
             </Link>
           </DialogFooter>

@@ -40,8 +40,8 @@ export default async function WishlistPage() {
   });
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-sm shadow-sm border border-neutral-100 min-h-[500px]">
-      <h1 className="text-xl font-bold uppercase mb-6 pb-4 border-b border-neutral-100">
+    <section className="min-h-[500px] rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
+      <h1 className="mb-6 border-b border-neutral-100 pb-4 text-2xl font-bold">
         Sản phẩm yêu thích
       </h1>
 
@@ -58,13 +58,13 @@ export default async function WishlistPage() {
           </p>
           <Link
             href="/shop"
-            className="px-6 py-2 bg-[#FF5722] text-white rounded-sm font-medium hover:bg-[#E64A19] transition-colors"
+            className="inline-flex h-11 items-center rounded-xl bg-primary px-6 font-bold text-white transition-colors hover:bg-primary/90"
           >
-            Khám phá Cửa hàng
+            Khám phá cửa hàng
           </Link>
         </div>
       ) : (
-        <div className="grid grid-cols-2 md:grid-cols-3 xl:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 items-stretch gap-5 sm:grid-cols-2 xl:grid-cols-3">
           {wishlists.map((w) => (
             <ProductCard
               key={w.productId}
@@ -93,6 +93,6 @@ export default async function WishlistPage() {
           ))}
         </div>
       )}
-    </div>
+    </section>
   );
 }

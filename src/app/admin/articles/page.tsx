@@ -18,7 +18,7 @@ import {
 } from "@/components/ui/table";
 
 export const metadata: Metadata = {
-  title: "Quản lý Bài viết - Admin",
+  title: "Quản lý bài viết - Admin",
 };
 
 export default async function AdminArticlesPage(props: { searchParams: Promise<{ page?: string }> }) {
@@ -52,7 +52,7 @@ export default async function AdminArticlesPage(props: { searchParams: Promise<{
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
           <h2 className="text-3xl font-heading font-bold tracking-tight">
-            Bài viết & Blog
+            Bài viết và blog
           </h2>
           <p className="text-muted-foreground mt-1">
             Quản lý nội dung giáo dục STEM, tin tức và tối ưu SEO.
@@ -71,14 +71,14 @@ export default async function AdminArticlesPage(props: { searchParams: Promise<{
         </div>
       </div>
 
-      <div className="bg-white rounded-md border border-neutral-200 overflow-hidden shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-neutral-50">
             <TableRow>
               <TableHead>Tiêu đề</TableHead>
-              <TableHead>Tác giả</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Ngày tạo</TableHead>
+              <TableHead className="hidden md:table-cell">Tác giả</TableHead>
+              <TableHead className="hidden sm:table-cell">Trạng thái</TableHead>
+              <TableHead className="hidden lg:table-cell">Ngày tạo</TableHead>
               <TableHead className="text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
@@ -95,14 +95,20 @@ export default async function AdminArticlesPage(props: { searchParams: Promise<{
             ) : (
               articles.map((article) => (
                 <TableRow key={article.id}>
-                  <TableCell className="font-medium max-w-[300px]">
+                  <TableCell className="min-w-0 max-w-[300px] font-medium">
                     <div className="truncate">{article.title}</div>
                     <div className="text-xs text-muted-foreground font-normal mt-1">
                       {article.slug}
                     </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 text-xs font-normal text-muted-foreground md:hidden">
+                      <span>{article.author.name}</span>
+                      <Badge variant="outline" className={article.published ? "border-green-200 bg-green-50 text-green-700" : "border-neutral-200 bg-neutral-50 text-neutral-700"}>
+                        {article.published ? "Đã xuất bản" : "Bản nháp"}
+                      </Badge>
+                    </div>
                   </TableCell>
-                  <TableCell>{article.author.name}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">{article.author.name}</TableCell>
+                  <TableCell className="hidden sm:table-cell">
                     {article.published ? (
                       <Badge
                         variant="outline"
@@ -119,7 +125,7 @@ export default async function AdminArticlesPage(props: { searchParams: Promise<{
                       </Badge>
                     )}
                   </TableCell>
-                  <TableCell className="whitespace-nowrap">
+                  <TableCell className="hidden whitespace-nowrap lg:table-cell">
                     {format(new Date(article.createdAt), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell className="text-right space-x-2">
@@ -131,7 +137,7 @@ export default async function AdminArticlesPage(props: { searchParams: Promise<{
           </TableBody>
         </Table>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} (Tổng: {totalCount})
             </p>

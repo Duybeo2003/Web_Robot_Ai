@@ -96,7 +96,7 @@ export function ProductGallery({
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="group relative mx-auto flex aspect-square w-full max-w-[500px] items-center justify-center overflow-hidden rounded-md border border-neutral-100 bg-black/5 shadow-sm">
+      <div className="group relative mx-auto flex aspect-square w-full max-w-[540px] items-center justify-center overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         {activeMedia === "video" && parsedVideo ? (
           renderVideoPlayer()
         ) : activeMedia ? (
@@ -122,7 +122,7 @@ export function ProductGallery({
               type="button"
               onClick={() => selectMedia("video")}
               aria-pressed={activeMedia === "video"}
-              className={`group relative flex size-20 flex-col items-center justify-center overflow-hidden rounded-sm border bg-neutral-900 ${
+              className={`group relative flex size-20 flex-col items-center justify-center overflow-hidden rounded-lg border bg-neutral-900 ${
                 activeMedia === "video"
                   ? "border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20"
                   : "border-border"
@@ -140,7 +140,7 @@ export function ProductGallery({
               onClick={() => selectMedia(imageUrl)}
               aria-label={`Xem ảnh ${index + 1} của ${title}`}
               aria-pressed={activeMedia === imageUrl}
-              className={`relative size-20 overflow-hidden rounded-sm border bg-muted ${
+              className={`relative size-20 overflow-hidden rounded-lg border bg-muted ${
                 activeMedia === imageUrl
                   ? "border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20"
                   : "border-border"

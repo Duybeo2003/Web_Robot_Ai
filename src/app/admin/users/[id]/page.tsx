@@ -137,7 +137,7 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
 
         {/* Stats & Activity */}
         <div className="md:col-span-2 space-y-6">
-          <div className="grid gap-4 grid-cols-3">
+          <div className="grid gap-4 sm:grid-cols-3">
             <Card className="shadow-sm border-neutral-200/60">
               <CardContent className="p-6 flex flex-col items-center justify-center text-center">
                 <ShoppingBag className="h-8 w-8 text-blue-500 mb-2" />
@@ -171,7 +171,7 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
                 <TabsList className="grid w-full grid-cols-3 mb-4">
                   <TabsTrigger value="orders">Đơn hàng</TabsTrigger>
                   <TabsTrigger value="reviews">Đánh giá</TabsTrigger>
-                  <TabsTrigger value="returns">Yêu cầu hoàn trả</TabsTrigger>
+                  <TabsTrigger value="returns">Đổi/trả</TabsTrigger>
                 </TabsList>
                 
                 <TabsContent value="orders">

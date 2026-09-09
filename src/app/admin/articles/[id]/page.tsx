@@ -50,7 +50,7 @@ export default async function EditArticlePage({
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-sm border border-neutral-200 shadow-sm">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-6 shadow-sm">
         <ArticleForm initialData={article} articleId={article.id} />
       </div>
     </div>

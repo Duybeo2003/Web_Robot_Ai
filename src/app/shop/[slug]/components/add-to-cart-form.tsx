@@ -72,7 +72,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
     // Here we just let them pick a specific variant directly
     return (
       <div className="space-y-4 mb-6">
-        <h3 className="font-semibold text-sm uppercase text-neutral-500 tracking-wider">Chọn Phân loại</h3>
+        <h3 className="text-sm font-semibold text-neutral-700">Chọn phân loại</h3>
         <div className="flex flex-wrap gap-2">
           {product.variants!.map((variant) => {
             const isSelected = selectedVariant?.id === variant.id;
@@ -81,6 +81,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
             
             return (
               <button
+                type="button"
                 key={variant.id}
                 onClick={() => {
                   setSelectedVariant?.(variant);
@@ -88,7 +89,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
                 }}
                 disabled={isVariantOutOfStock}
                 className={cn(
-                  "px-4 py-2 text-sm border rounded-sm font-medium transition-colors",
+                  "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
                   isSelected 
                     ? "border-[#FF5722] bg-orange-50 text-[#FF5722]" 
                     : "border-neutral-200 hover:border-[#FF5722]",
@@ -155,13 +156,13 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
             href={product.externalAffiliateLink}
             target="_blank"
             rel="noopener noreferrer sponsored"
-            className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-sm bg-[#FF5722] text-base font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-[#E64A19]"
+            className="inline-flex h-14 w-full items-center justify-center gap-2 rounded-xl bg-primary text-base font-bold text-white shadow-md transition-all hover:-translate-y-0.5 hover:bg-secondary"
           >
               <ShoppingBag className="w-5 h-5" />
               Mua tại website đối tác
           </a>
         ) : (
-          <Button disabled className="h-14 w-full rounded-sm text-base font-bold">
+          <Button disabled className="h-14 w-full rounded-xl text-base font-bold">
             Liên kết đối tác chưa khả dụng
           </Button>
         )
@@ -174,6 +175,8 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
               !canAddToCart ? "opacity-50 pointer-events-none" : ""
             )}>
               <button
+                type="button"
+                aria-label="Giảm số lượng"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
                 className="p-3 hover:bg-gray-100 rounded-xl transition-colors text-gray-600"
                 disabled={!canAddToCart}
@@ -182,6 +185,8 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
               </button>
               <span className="font-bold text-lg w-8 text-center">{quantity}</span>
               <button
+                type="button"
+                aria-label="Tăng số lượng"
                 onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
                 className="p-3 hover:bg-gray-100 rounded-xl transition-colors text-gray-600"
                 disabled={!canAddToCart || quantity >= maxQuantity}
@@ -195,7 +200,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
               onClick={handleAddToCart}
               disabled={!canAddToCart}
               className={cn(
-                "flex-1 h-14 rounded-sm text-base font-bold shadow-md transition-all gap-2 text-white",
+                "h-14 flex-1 rounded-xl text-base font-bold text-white shadow-md transition-all gap-2",
                 !canAddToCart && hasVariants && !selectedVariant ? "bg-neutral-800" :
                 isOutOfStock ? "bg-gray-400 cursor-not-allowed" :
                 isPreOrder ? "bg-amber-500 hover:bg-amber-600 hover:-translate-y-0.5" :
@@ -203,9 +208,9 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
               )}
             >
               <ShoppingCart className="w-5 h-5" />
-              {!canAddToCart && hasVariants && !selectedVariant ? "Chọn Phân loại" :
-               isOutOfStock ? "Hết Hàng" : 
-               isPreOrder ? "Thêm vào giỏ (Order)" : "Thêm vào giỏ"}
+              {!canAddToCart && hasVariants && !selectedVariant ? "Chọn phân loại" :
+               isOutOfStock ? "Hết hàng" :
+               isPreOrder ? "Thêm hàng đặt trước" : "Thêm vào giỏ"}
             </Button>
 
             <Button
@@ -213,7 +218,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
               disabled={!canAddToCart}
               onClick={handleBuyNow}
               className={cn(
-                "flex-1 h-14 rounded-sm text-base font-bold shadow-sm transition-all gap-2 text-white",
+                "h-14 flex-1 rounded-xl text-base font-bold text-white shadow-sm transition-all gap-2",
                 !canAddToCart ? "bg-gray-300 cursor-not-allowed text-gray-500" :
                 "bg-neutral-900 hover:bg-neutral-800 hover:-translate-y-0.5"
               )}

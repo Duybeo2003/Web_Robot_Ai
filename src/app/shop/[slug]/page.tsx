@@ -131,15 +131,15 @@ const sanitizedProduct = {
           __html: JSON.stringify(schemaMarkup).replace(/</g, "\\u003c"),
         }}
       />
-      <div className="container mx-auto px-4 py-12 bg-background min-h-screen">
+      <div className="container mx-auto min-h-screen px-4 py-6 sm:px-6 sm:py-10">
         {/* Breadcrumbs */}
-      <div className="mb-8 text-sm text-muted-foreground flex items-center gap-2">
+      <nav aria-label="Đường dẫn" className="mb-6 flex min-w-0 items-center gap-2 overflow-hidden text-sm text-muted-foreground sm:mb-8">
         <Link href="/" className="hover:text-[#FF5722] transition-colors">Trang chủ</Link>
         <span>/</span>
         <Link href="/shop" className="hover:text-[#FF5722] transition-colors">Cửa hàng</Link>
         <span>/</span>
         <span className="text-foreground font-medium truncate">{product.title}</span>
-      </div>
+      </nav>
 
       <ProductDetailsClient product={sanitizedProduct} isWished={isWished} />
 
@@ -147,14 +147,14 @@ const sanitizedProduct = {
 
       {/* Related Products */}
       {relatedProducts.length > 0 && (
-        <div className="mt-20">
-          <h2 className="text-2xl font-bold font-heading mb-8 border-b pb-4 flex items-center justify-between">
-            <span className="uppercase tracking-tight text-foreground">Sản phẩm liên quan</span>
+        <section className="mt-14 sm:mt-20">
+          <h2 className="mb-6 flex items-center justify-between border-b pb-4 text-xl font-extrabold sm:mb-8 sm:text-2xl">
+            <span className="tracking-tight text-foreground">Sản phẩm liên quan</span>
             <Link href={`/shop?type=${product.type}`} className="text-sm font-medium text-[#FF5722] hover:underline">
               Xem tất cả
             </Link>
           </h2>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-5 md:grid-cols-4">
             {relatedProducts.map(rp => (
               <ProductCard 
                 key={rp.id}
@@ -186,7 +186,7 @@ const sanitizedProduct = {
               />
             ))}
           </div>
-        </div>
+        </section>
       )}
     </div>
     </>

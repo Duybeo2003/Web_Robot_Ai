@@ -50,30 +50,31 @@ export default async function ArticleDetailPage({
   }
 
   return (
-    <div className="container mx-auto px-4 py-12 max-w-4xl min-h-screen">
+    <main className="container mx-auto min-h-screen max-w-4xl px-4 py-10 sm:py-12">
       <Link
         href="/giao-duc"
         className="inline-flex items-center text-[#FF5722] hover:underline mb-8 font-medium"
       >
-        <ArrowLeft className="w-4 h-4 mr-2" /> Quay lại Góc Giáo Dục
+        <ArrowLeft className="w-4 h-4 mr-2" /> Quay lại góc giáo dục
       </Link>
 
-      <article className="bg-white rounded-xl shadow-sm border border-neutral-200 overflow-hidden">
+      <article className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         {article.thumbnail && (
-          <div className="relative w-full h-[400px] bg-neutral-100">
+          <div className="relative h-60 w-full bg-neutral-100 sm:h-80 md:h-[400px]">
             <Image
               src={article.thumbnail}
               alt={article.title}
               fill
+              sizes="(max-width: 1023px) 100vw, 960px"
               className="object-cover"
               preload
             />
           </div>
         )}
 
-        <div className="p-8 md:p-12">
+        <div className="p-5 sm:p-8 md:p-12">
           <div className="flex flex-wrap items-center gap-4 mb-6 text-sm text-neutral-500">
-            <span className="font-bold text-[#FF5722] uppercase tracking-wider bg-orange-50 px-3 py-1 rounded-sm">
+            <span className="rounded-full bg-primary/10 px-3 py-1 font-bold text-primary">
               Kiến thức STEM
             </span>
             <span>
@@ -87,7 +88,7 @@ export default async function ArticleDetailPage({
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-heading font-bold text-neutral-900 mb-8 leading-tight">
+          <h1 className="mb-8 text-3xl font-bold leading-tight text-neutral-900 sm:text-4xl md:text-5xl">
             {article.title}
           </h1>
 
@@ -98,7 +99,7 @@ export default async function ArticleDetailPage({
           {article.tags && (
             <div className="mt-12 pt-8 border-t border-neutral-100 flex flex-wrap gap-2">
               <span className="text-sm font-medium text-neutral-500 mr-2 flex items-center">
-                Tags:
+                Chủ đề:
               </span>
               {article.tags.split(",").map((tag) => (
                 <span
@@ -112,11 +113,11 @@ export default async function ArticleDetailPage({
           )}
         </div>
       </article>
-    </div>
+    </main>
   );
 }
 
 
 
 
-export const dynamic = 'force-dynamic';
+export const dynamic = "force-dynamic";

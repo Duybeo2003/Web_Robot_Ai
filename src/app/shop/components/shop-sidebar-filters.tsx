@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { Search } from "lucide-react";
+import { ChevronDown, Search, SlidersHorizontal } from "lucide-react";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { Slider } from "@/components/ui/slider";
 
@@ -32,6 +32,7 @@ export function ShopSidebarFilters() {
 
   const [priceRange, setPriceRange] = useState(initialPriceRange);
   const [ageRange, setAgeRange] = useState(initialAgeRange);
+  const [mobileOpen, setMobileOpen] = useState(false);
 
   // Debounced push to router
   useEffect(() => {
@@ -85,23 +86,51 @@ export function ShopSidebarFilters() {
 
   const categories = [
     { label: "Tất cả sản phẩm", value: "" },
-    { label: "Robot Giáo Dục", value: "ROBOT_STEM" },
-    { label: "Đồ Chơi Logic", value: "DO_CHOI_LOGIC" },
-    { label: "Combo Tiết Kiệm", value: "COMBO" },
+    { label: "Robot giáo dục", value: "ROBOT_STEM" },
+    { label: "Đồ chơi logic", value: "DO_CHOI_LOGIC" },
+    { label: "Combo tiết kiệm", value: "COMBO" },
   ];
 
   const skills = [
     { label: "Tất cả kỹ năng", value: "" },
-    { label: "Tư duy Logic", value: "LOGIC" },
+    { label: "Tư duy logic", value: "LOGIC" },
     { label: "Phát triển EQ", value: "EQ" },
     { label: "Ngoại ngữ", value: "LANGUAGE" },
-    { label: "Toán học & Lập trình", value: "MATH_CODING" },
+    { label: "Vận động tinh", value: "MOTOR_SKILLS" },
   ];
 
+  const activeFilterCount = [
+    currentQ,
+    currentType,
+    currentSkill,
+    minPriceParam || maxPriceParam,
+    minAgeParam || maxAgeParam,
+  ].filter(Boolean).length;
+
   return (
-    <div className="bg-white p-6 rounded-sm shadow-sm border border-neutral-100">
-      <h2 className="font-heading font-bold text-lg mb-4 text-foreground uppercase border-b border-neutral-100 pb-3">
-        Tìm kiếm
+    <>
+      <button
+        type="button"
+        aria-expanded={mobileOpen}
+        aria-controls="shop-filter-panel"
+        onClick={() => setMobileOpen((open) => !open)}
+        className="flex h-12 w-full items-center justify-between rounded-xl border border-neutral-200 bg-white px-4 text-sm font-semibold text-neutral-800 shadow-sm lg:hidden"
+      >
+        <span className="flex items-center gap-2">
+          <SlidersHorizontal className="size-4 text-primary" />
+          Bộ lọc sản phẩm
+          {activeFilterCount > 0 && (
+            <span className="flex size-5 items-center justify-center rounded-full bg-primary text-[11px] text-white">
+              {activeFilterCount}
+            </span>
+          )}
+        </span>
+        <ChevronDown className={`size-4 transition-transform ${mobileOpen ? "rotate-180" : ""}`} />
+      </button>
+      <div id="shop-filter-panel" className={`${mobileOpen ? "block" : "hidden"} lg:block`}>
+      <div className="rounded-xl border border-neutral-200 bg-white p-5 shadow-sm lg:sticky lg:top-32">
+      <h2 className="mb-4 border-b border-neutral-100 pb-3 text-base font-bold text-foreground">
+        Tìm kiếm sản phẩm
       </h2>
       <form action="/shop" method="GET" className="relative mb-6">
         <input
@@ -109,7 +138,7 @@ export function ShopSidebarFilters() {
           name="q"
           defaultValue={currentQ}
           placeholder="Nhập tên sản phẩm..."
-          className="w-full h-10 pl-10 pr-4 text-sm border border-neutral-200 rounded-sm focus:outline-none focus:border-[#FF5722]"
+          className="h-10 w-full rounded-lg border border-neutral-200 bg-neutral-50/50 pl-10 pr-4 text-sm outline-none transition-colors focus:border-primary focus:bg-white focus:ring-3 focus:ring-primary/10"
         />
         <Search className="w-4 h-4 text-neutral-400 absolute left-3 top-3" />
         {currentType && <input type="hidden" name="type" value={currentType} />}
@@ -117,7 +146,7 @@ export function ShopSidebarFilters() {
 
       <Accordion className="w-full">
         <AccordionItem value="categories" className="border-b-0">
-          <AccordionTrigger className="font-heading font-bold text-lg text-foreground uppercase hover:no-underline py-3">
+          <AccordionTrigger className="py-3 text-base font-semibold text-foreground hover:no-underline">
             Danh mục
           </AccordionTrigger>
           <AccordionContent>
@@ -126,7 +155,7 @@ export function ShopSidebarFilters() {
                 <button
                   key={cat.value}
                   onClick={() => updateParam("type", cat.value)}
-                  className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors text-left ${
+                  className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
                     currentType === cat.value
                       ? "bg-[#FF5722]/10 text-[#FF5722]"
                       : "text-neutral-600 hover:bg-neutral-50"
@@ -139,8 +168,8 @@ export function ShopSidebarFilters() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="price" className="border-b-0 mt-4">
-          <AccordionTrigger className="font-heading font-bold text-lg text-foreground uppercase hover:no-underline py-3">
+        <AccordionItem value="price" className="mt-2 border-b-0">
+          <AccordionTrigger className="py-3 text-base font-semibold text-foreground hover:no-underline">
             Mức giá
           </AccordionTrigger>
           <AccordionContent>
@@ -154,11 +183,11 @@ export function ShopSidebarFilters() {
                 className="mt-2"
               />
               <div className="flex items-center justify-between mt-4">
-                <div className="border border-neutral-200 rounded-sm px-3 py-1.5 text-xs font-medium w-24 text-center">
+                <div className="w-24 rounded-md border border-neutral-200 px-3 py-1.5 text-center text-xs font-medium">
                   {priceRange[0].toLocaleString("vi-VN")}đ
                 </div>
                 <span className="text-neutral-400">-</span>
-                <div className="border border-neutral-200 rounded-sm px-3 py-1.5 text-xs font-medium w-24 text-center">
+                <div className="w-24 rounded-md border border-neutral-200 px-3 py-1.5 text-center text-xs font-medium">
                   {priceRange[1].toLocaleString("vi-VN")}đ
                 </div>
               </div>
@@ -166,8 +195,8 @@ export function ShopSidebarFilters() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="age" className="border-b-0 mt-4">
-          <AccordionTrigger className="font-heading font-bold text-lg text-foreground uppercase hover:no-underline py-3">
+        <AccordionItem value="age" className="mt-2 border-b-0">
+          <AccordionTrigger className="py-3 text-base font-semibold text-foreground hover:no-underline">
             Độ tuổi
           </AccordionTrigger>
           <AccordionContent>
@@ -181,11 +210,11 @@ export function ShopSidebarFilters() {
                 className="mt-2"
               />
               <div className="flex items-center justify-between mt-4">
-                <div className="border border-neutral-200 rounded-sm px-3 py-1.5 text-xs font-medium w-24 text-center">
+                <div className="w-24 rounded-md border border-neutral-200 px-3 py-1.5 text-center text-xs font-medium">
                   {ageRange[0]} tuổi
                 </div>
                 <span className="text-neutral-400">-</span>
-                <div className="border border-neutral-200 rounded-sm px-3 py-1.5 text-xs font-medium w-24 text-center">
+                <div className="w-24 rounded-md border border-neutral-200 px-3 py-1.5 text-center text-xs font-medium">
                   {ageRange[1] === 18 ? "18+ tuổi" : `${ageRange[1]} tuổi`}
                 </div>
               </div>
@@ -193,8 +222,8 @@ export function ShopSidebarFilters() {
           </AccordionContent>
         </AccordionItem>
 
-        <AccordionItem value="skills" className="border-b-0 mt-4">
-          <AccordionTrigger className="font-heading font-bold text-lg text-foreground uppercase hover:no-underline py-3">
+        <AccordionItem value="skills" className="mt-2 border-b-0">
+          <AccordionTrigger className="py-3 text-base font-semibold text-foreground hover:no-underline">
             Kỹ năng
           </AccordionTrigger>
           <AccordionContent>
@@ -203,7 +232,7 @@ export function ShopSidebarFilters() {
                 <button
                   key={skill.value}
                   onClick={() => updateParam("skill", skill.value)}
-                  className={`px-3 py-2 text-sm font-medium rounded-sm transition-colors text-left ${
+                  className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
                     currentSkill === skill.value
                       ? "bg-[#FF5722]/10 text-[#FF5722]"
                       : "text-neutral-600 hover:bg-neutral-50"
@@ -216,6 +245,8 @@ export function ShopSidebarFilters() {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-    </div>
+      </div>
+      </div>
+    </>
   );
 }

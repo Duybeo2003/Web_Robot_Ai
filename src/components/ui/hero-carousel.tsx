@@ -2,9 +2,6 @@
 
 import * as React from "react";
 import Image from "next/image";
-import Link from "next/link";
-import { Button } from "@/components/ui/button";
-import { theme } from "@/components/ui/theme";
 import {
   Carousel,
   CarouselContent,
@@ -22,11 +19,11 @@ export function HeroCarousel() {
   );
 
   return (
-    <section className="w-full bg-white pt-4 pb-4">
+    <section className="w-full bg-white py-4 sm:py-5">
       <div className="container mx-auto px-4">
-        <div className="flex flex-col lg:flex-row gap-4">
+        <div className="flex flex-col items-stretch gap-4 lg:flex-row">
           {/* 70% Width for Carousel on Desktop */}
-          <div className="w-full lg:w-[70%]">
+          <div className="w-full lg:flex-[7]">
             <Carousel
               plugins={[plugin]}
               onMouseEnter={plugin.stop}
@@ -103,7 +100,7 @@ export function HeroCarousel() {
           </div>
 
           {/* 30% Width for Gift Recommender on Desktop */}
-          <div className="w-full lg:w-[30%]">
+          <div className="w-full lg:flex-[3]">
             <GiftRecommender />
           </div>
         </div>

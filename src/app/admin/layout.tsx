@@ -35,19 +35,17 @@ export default async function AdminLayout({
   return (
     <SidebarProvider>
       <AppSidebar role={user.role} />
-      <div className="flex flex-1 flex-col overflow-hidden min-h-screen bg-[#F8F9FA]">
-        <header className="flex h-16 items-center gap-4 border-b bg-white px-6 shadow-sm z-10 sticky top-0">
-          <SidebarTrigger className="text-[#FF5722]" />
-          <div className="flex items-center gap-2 text-sm text-neutral-500 font-medium">
-            <span className="text-neutral-400">Admin</span>
-            <span className="text-neutral-300">/</span>
-            <span className="text-[#0066FF]">Bảng điều khiển</span>
+      <div className="flex min-h-screen min-w-0 flex-1 flex-col overflow-hidden bg-neutral-50">
+        <header className="sticky top-0 z-10 flex h-16 shrink-0 items-center gap-3 border-b border-neutral-200 bg-white px-4 shadow-sm sm:px-6">
+          <SidebarTrigger className="text-primary" />
+          <div className="min-w-0">
+            <p className="truncate text-sm font-bold text-foreground">Quản trị RoboEQ</p>
+            <p className="hidden text-xs text-neutral-500 sm:block">Vận hành cửa hàng và chăm sóc khách hàng</p>
           </div>
         </header>
-        {/* Breadcrumb navigation */}
         <Breadcrumbs />
-        <main className="flex-1 overflow-auto p-4 md:p-6 lg:p-8">
-          <div className="max-w-7xl mx-auto w-full">{children}</div>
+        <main className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
+          <div className="mx-auto w-full max-w-7xl">{children}</div>
         </main>
       </div>
     </SidebarProvider>

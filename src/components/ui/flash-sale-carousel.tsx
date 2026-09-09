@@ -29,11 +29,11 @@ export function FlashSaleCarousel({
   if (!products || products.length === 0) return null;
 
   return (
-    <section id="flash-sale-section" className="w-full mt-4 scroll-mt-24">
+    <section id="flash-sale-section" className="mt-3 w-full scroll-mt-24 py-3">
       <div className="container mx-auto px-4">
-        <div className="bg-[#FF3300] rounded-t-lg p-4 md:p-6 text-white flex flex-col md:flex-row items-center justify-between gap-4">
+        <div className="flex flex-col gap-3 rounded-t-2xl bg-gradient-to-r from-[#e63212] to-[#ff5722] p-5 text-white sm:flex-row sm:items-center sm:justify-between sm:p-6">
           <div className="flex items-center gap-3">
-            <h2 className="text-2xl md:text-3xl font-bold italic tracking-wider flex items-center">
+            <h2 className="flex items-center text-2xl font-black tracking-tight sm:text-3xl">
               <span className="text-yellow-300 mr-2">⚡</span> FLASH SALE
             </h2>
             <div className="hidden md:flex items-center text-sm ml-4 border-l border-white/30 pl-4 gap-2">
@@ -45,12 +45,12 @@ export function FlashSaleCarousel({
           </div>
         </div>
 
-        <div className="bg-[#FF3300] pb-6 px-4 md:px-8 rounded-b-lg relative shadow-lg">
+        <div className="relative rounded-b-2xl bg-gradient-to-r from-[#e63212] to-[#ff5722] px-3 pb-5 shadow-lg sm:px-8 sm:pb-7">
           <Carousel
-            plugins={[autoplayPlugin]}
+            plugins={products.length > 4 ? [autoplayPlugin] : []}
             opts={{
               align: "start",
-              loop: true,
+              loop: products.length > 4,
             }}
             className="w-full"
           >
@@ -58,9 +58,9 @@ export function FlashSaleCarousel({
               {products.map((product) => (
                 <CarouselItem
                   key={`flash-${product.id}`}
-                  className="pl-2 md:pl-4 basis-1/2 md:basis-1/3 lg:basis-1/4 flex"
+                  className="flex basis-1/2 pl-3 sm:basis-1/3 sm:pl-4 lg:basis-1/4"
                 >
-                  <div className="p-1 w-full flex">
+                  <div className="flex w-full py-1">
                     <ProductCard
                       product={product}
                       isWished={userWishlistIds.includes(product.id)}
@@ -69,9 +69,9 @@ export function FlashSaleCarousel({
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="block">
-              <CarouselPrevious className="left-1 md:-left-4 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
-              <CarouselNext className="right-1 md:-right-4 bg-white hover:bg-neutral-100 text-black border-none z-10 w-8 h-8 md:w-10 md:h-10 shadow-md transition-all" />
+            <div className="hidden sm:block">
+              <CarouselPrevious className="left-0 z-10 size-10 border-0 bg-white text-neutral-800 shadow-md hover:bg-neutral-50 sm:-left-5" />
+              <CarouselNext className="right-0 z-10 size-10 border-0 bg-white text-neutral-800 shadow-md hover:bg-neutral-50 sm:-right-5" />
             </div>
           </Carousel>
         </div>

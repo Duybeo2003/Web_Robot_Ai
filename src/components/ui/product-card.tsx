@@ -2,8 +2,12 @@ import Link from "next/link";
 import Image from "next/image";
 import { ExternalLink, Truck } from "lucide-react";
 import { Product } from "@/types/product";
-import { theme } from "@/components/ui/theme";
 import { WishlistButton } from "@/components/ui/wishlist-button";
+
+const currency = new Intl.NumberFormat("vi-VN", {
+  style: "currency",
+  currency: "VND",
+});
 
 export function ProductCard({
   product,
@@ -22,44 +26,48 @@ export function ProductCard({
   const discountPercent = hasDiscount ? Math.round(((originalPrice - currentPrice) / originalPrice) * 100) : 0;
   
   return (
-    <div className="group relative bg-white h-full w-full flex flex-col shadow-sm hover:shadow-xl transition-all duration-300 rounded-lg border border-neutral-200 hover:border-primary/50 overflow-hidden">
-      
-      {/* Badges */}
-      <div className="flex flex-row flex-wrap items-start gap-1 p-2 pb-0">
+    <article
+      data-ui="product-card"
+      className="group relative flex h-full w-full flex-col overflow-hidden rounded-xl border border-neutral-200 bg-white shadow-sm transition-all duration-300 hover:-translate-y-0.5 hover:border-primary/35 hover:shadow-lg"
+    >
+      <div className="absolute left-2 top-2 z-10 flex max-w-[calc(100%-3.5rem)] flex-col items-start gap-1 sm:flex-row sm:flex-wrap">
         {product.supplyType === "AFFILIATE_SELL" ? (
-          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm bg-blue-600">
+          <span className="rounded-md bg-blue-600 px-2 py-1 text-[10px] font-bold leading-none text-white shadow-sm sm:text-xs">
             Mua qua đối tác
-          </div>
+          </span>
         ) : product.supplyType === "PRE_ORDER" ? (
-          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm bg-amber-500">
+          <span className="rounded-md bg-amber-500 px-2 py-1 text-[10px] font-bold leading-none text-white shadow-sm sm:text-xs">
             Hàng đặt trước
-          </div>
+          </span>
         ) : (
-          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm bg-emerald-500">
+          <span className="rounded-md bg-emerald-600 px-2 py-1 text-[10px] font-bold leading-none text-white shadow-sm sm:text-xs">
             Hàng tại RoboEQ
-          </div>
+          </span>
         )}
         {hasDiscount && (
-          <div className="text-white text-[9px] md:text-xs font-bold px-1.5 py-0.5 rounded-sm shadow-sm" style={{ backgroundColor: theme.primary }}>
+          <span className="rounded-md bg-primary px-2 py-1 text-[10px] font-bold leading-none text-white shadow-sm sm:text-xs">
             Giảm {discountPercent}%
-          </div>
+          </span>
         )}
       </div>
 
-      <div className="absolute top-2 right-2 z-10">
+      <div className="absolute right-2 top-2 z-20">
         <WishlistButton productId={product.id} initiallyWished={isWished} />
       </div>
 
-      {/* Image Container */}
-      <Link href={`/shop/${product.slug}`} className="relative aspect-square w-full block bg-white p-1 md:p-3 overflow-hidden shrink-0">
+      <Link
+        href={`/shop/${product.slug}`}
+        className="relative block aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-b from-neutral-50 to-white"
+        aria-label={`Xem ${product.title}`}
+      >
         {product.imageUrl ? (
           <Image
             src={product.imageUrl}
             alt={product.title}
             fill
             loading={eager ? "eager" : "lazy"}
-            className="object-cover group-hover:scale-105 transition-transform duration-500 p-2 md:p-4 text-transparent"
-            sizes="(max-width: 768px) 100vw, 300px"
+            className="object-contain p-3 text-transparent transition-transform duration-500 group-hover:scale-[1.035] sm:p-4"
+            sizes="(max-width: 639px) 50vw, (max-width: 1023px) 33vw, 300px"
           />
         ) : (
           <div className="w-full h-full bg-neutral-50 flex items-center justify-center">
@@ -68,31 +76,28 @@ export function ProductCard({
         )}
       </Link>
       
-      <div className="px-2 py-1.5 md:px-2 md:py-2 flex flex-col flex-grow border-t border-neutral-100">
-        <Link href={`/shop/${product.slug}`}>
-          <h3 className="font-medium text-[12px] md:text-sm line-clamp-2 transition-colors text-neutral-800 leading-tight" style={{ color: theme.primary }}>
+      <div className="flex flex-grow flex-col border-t border-neutral-100 p-3 sm:p-4">
+        <Link href={`/shop/${product.slug}`} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
+          <h3 className="line-clamp-2 min-h-10 text-[13px] font-semibold leading-5 text-neutral-800 transition-colors group-hover:text-primary sm:min-h-11 sm:text-sm sm:leading-[1.375rem]">
             {product.title}
           </h3>
         </Link>
-        <div className="mt-auto pt-1 md:pt-1.5 pb-0.5">
-          <div className="flex flex-col sm:flex-row sm:items-center gap-0 sm:gap-2">
-            <p className={`text-[10px] md:text-xs text-neutral-400 line-through ${hasDiscount ? '' : 'invisible'}`}>
-              {hasDiscount ? new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(originalPrice) : '0đ'}
-            </p>
-            <p className="text-sm md:text-lg font-bold text-[#E30019] leading-tight sm:leading-normal">
-              {new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(currentPrice)}
-            </p>
-          </div>
+        <div className="mt-auto pt-3">
+          <p className={`h-4 text-[11px] leading-4 text-neutral-400 line-through sm:text-xs ${hasDiscount ? "" : "invisible"}`}>
+            {hasDiscount ? currency.format(originalPrice) : "0 ₫"}
+          </p>
+          <p className="mt-0.5 whitespace-nowrap text-base font-extrabold leading-6 text-[#d92d20] sm:text-lg">
+            {currency.format(currentPrice)}
+          </p>
         </div>
       </div>
 
-      {/* Action Area or Free Shipping Bar */}
       {action ? (
-        <div className="px-2 md:px-2 pb-1.5 md:pb-2 shrink-0">
+        <div className="shrink-0 px-3 pb-3 sm:px-4 sm:pb-4">
           {action}
         </div>
       ) : (
-        <Link href={`/shop/${product.slug}`} className="w-full text-white py-1 text-center text-[10px] md:text-xs font-semibold flex items-center justify-center gap-1 md:gap-1.5 cursor-pointer hover:bg-[#E64A19] transition-colors tracking-wide shrink-0 block" style={{ backgroundColor: theme.primary }}>
+        <Link href={`/shop/${product.slug}`} className="flex h-10 w-full shrink-0 items-center justify-center gap-1.5 bg-primary px-2 text-center text-xs font-semibold text-white transition-colors hover:bg-secondary">
           {product.supplyType === "AFFILIATE_SELL" ? (
             <>
               <ExternalLink className="w-3.5 h-3.5" />
@@ -101,11 +106,11 @@ export function ProductCard({
           ) : (
             <>
               <Truck className="w-3.5 h-3.5" />
-              Xem chi tiết giao hàng
+              Chi tiết giao hàng
             </>
           )}
         </Link>
       )}
-    </div>
+    </article>
   );
 }

@@ -141,7 +141,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-3xl font-bold text-stone-800 tracking-tight">
-              +{totalOrders}
+              {totalOrders}
             </div>
             <p className="text-xs text-muted-foreground mt-2 font-medium">
               Đơn hàng mới trong hệ thống
@@ -163,7 +163,7 @@ export default async function AdminDashboardPage() {
           </CardHeader>
           <CardContent className="relative z-10">
             <div className="text-3xl font-bold text-stone-800 tracking-tight">
-              +{totalUsers}
+              {totalUsers}
             </div>
             <p className="text-xs text-muted-foreground mt-2 font-medium">
               Người dùng đã đăng ký
@@ -202,7 +202,7 @@ export default async function AdminDashboardPage() {
         <Card className="border-none shadow-sm">
           <CardHeader>
             <CardTitle className="text-lg font-bold">
-              Top Sản Phẩm Bán Chạy
+              Top sản phẩm bán chạy
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -214,12 +214,12 @@ export default async function AdminDashboardPage() {
               ) : (
                 topProducts.map((product) => (
                   <div key={product.id} className="flex items-center gap-4">
-                    <div className="w-12 h-12 bg-neutral-100 rounded-sm p-1 shrink-0">
+                    <div className="h-12 w-12 shrink-0 rounded-lg bg-neutral-100 p-1">
                       {product.imageUrl && (
                         <div className="relative w-full h-full">
                           <Image
                             src={product.imageUrl}
-                            alt=""
+                            alt={product.title || "Sản phẩm"}
                             fill
                             className="object-contain"
                             sizes="40px"

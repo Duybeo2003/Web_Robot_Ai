@@ -163,37 +163,42 @@ export function OrdersTableClient({
 
   return (
     <div className="space-y-4">
-      <div className="flex flex-wrap items-center justify-between gap-4 p-4 bg-muted/30 rounded-xl border">
-        <div className="flex gap-2 items-center">
-          <span className="text-sm font-medium">Đã chọn: {selectedIds.length}</span>
+      <div className="flex flex-col gap-3 rounded-xl border bg-muted/30 p-4 xl:flex-row xl:items-center xl:justify-between">
+        <div className="min-w-0">
+          <span className="mb-2 block whitespace-nowrap text-sm font-medium">Đã chọn: {selectedIds.length}</span>
+          <div className="grid gap-2 sm:grid-cols-3">
           <Button 
             variant="outline" 
             size="sm" 
+            className="w-full justify-center"
             disabled={selectedIds.length === 0 || isActionLoading}
             onClick={() => handleBulkAction("PROCESSING")}
           >
-            Chuyển &quot;Đang chuẩn bị&quot;
+            Đang chuẩn bị
           </Button>
           <Button 
             variant="outline" 
             size="sm" 
+            className="w-full justify-center"
             disabled={selectedIds.length === 0 || isActionLoading}
             onClick={() => handleBulkAction("SHIPPED")}
           >
             <Truck className="h-4 w-4 mr-2 text-purple-600" />
-            Chuyển &quot;Đang giao&quot;
+            Đang giao
           </Button>
           <Button 
             variant="outline" 
             size="sm" 
+            className="w-full justify-center"
             disabled={selectedIds.length === 0 || isActionLoading}
             onClick={() => handleBulkAction("COMPLETED")}
           >
             <CheckCircle className="h-4 w-4 mr-2 text-green-600" />
             Hoàn thành
           </Button>
+          </div>
         </div>
-        <Button variant="outline" onClick={exportToCsv}>
+        <Button variant="outline" onClick={exportToCsv} className="w-full sm:w-auto xl:self-auto">
           <Download className="mr-2 h-4 w-4" /> Xuất CSV
         </Button>
       </div>
@@ -208,12 +213,12 @@ export function OrdersTableClient({
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead className="w-[100px]">Mã ĐH</TableHead>
-              <TableHead>Khách hàng</TableHead>
-              <TableHead>Ngày đặt</TableHead>
-              <TableHead>Tổng tiền</TableHead>
-              <TableHead>Thanh toán</TableHead>
-              <TableHead>Trạng thái</TableHead>
+              <TableHead>Đơn hàng</TableHead>
+              <TableHead className="hidden md:table-cell">Khách hàng</TableHead>
+              <TableHead className="hidden lg:table-cell">Ngày đặt</TableHead>
+              <TableHead className="hidden md:table-cell">Tổng tiền</TableHead>
+              <TableHead className="hidden xl:table-cell">Thanh toán</TableHead>
+              <TableHead className="hidden sm:table-cell">Trạng thái</TableHead>
               <TableHead className="text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
@@ -233,10 +238,23 @@ export function OrdersTableClient({
                       onCheckedChange={(checked) => handleSelect(order.id, checked as boolean)}
                     />
                   </TableCell>
-                  <TableCell className="font-mono text-xs font-medium">
-                    {order.id.slice(0, 8).toUpperCase()}
+                  <TableCell className="min-w-36 text-xs font-medium">
+                    <span className="font-mono">{order.id.slice(0, 8).toUpperCase()}</span>
+                    <span className="mt-1 block max-w-40 truncate text-sm font-semibold md:hidden">
+                      {order.customerName || order.user.name || "Khách"}
+                    </span>
+                    <span className="mt-1 block font-bold text-primary md:hidden">
+                      {new Intl.NumberFormat("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }).format(Number(order.totalAmount))}
+                    </span>
+                    <span className="mt-2 flex flex-wrap gap-1 sm:hidden">
+                      {getPaymentStatusBadge(order.paymentStatus)}
+                      {getOrderStatusBadge(order.status)}
+                    </span>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div className="flex flex-col">
                       <span className="font-medium">{order.customerName || order.user.name || "Khách"}</span>
                       <span className="text-xs text-muted-foreground">
@@ -244,19 +262,19 @@ export function OrdersTableClient({
                       </span>
                     </div>
                   </TableCell>
-                  <TableCell className="text-sm">
+                  <TableCell className="hidden text-sm lg:table-cell">
                     {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                   </TableCell>
-                  <TableCell className="font-semibold text-[#FF5722]">
+                  <TableCell className="hidden font-semibold text-[#FF5722] md:table-cell">
                     {new Intl.NumberFormat("vi-VN", {
                       style: "currency",
                       currency: "VND",
                     }).format(Number(order.totalAmount))}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     {getPaymentStatusBadge(order.paymentStatus)}
                   </TableCell>
-                  <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
+                  <TableCell className="hidden sm:table-cell">{getOrderStatusBadge(order.status)}</TableCell>
                   <TableCell className="text-right">
                     <OrderDetailsModal
                       order={order}

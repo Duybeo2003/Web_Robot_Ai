@@ -16,9 +16,9 @@ export default async function ProfilePage() {
   });
 
   return (
-    <div className="bg-white p-6 md:p-8 rounded-sm shadow-sm border border-neutral-100">
+    <section className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
       <div className="border-b border-neutral-100 pb-4 mb-6">
-        <h1 className="text-xl font-bold text-foreground">Hồ Sơ Của Tôi</h1>
+        <h1 className="text-2xl font-bold text-foreground">Hồ sơ của tôi</h1>
         <p className="text-sm text-neutral-500 mt-1">
           Quản lý thông tin hồ sơ để bảo mật tài khoản
         </p>
@@ -27,6 +27,6 @@ export default async function ProfilePage() {
       <div className="max-w-xl">
         <ProfileForm initialData={user} />
       </div>
-    </div>
+    </section>
   );
 }

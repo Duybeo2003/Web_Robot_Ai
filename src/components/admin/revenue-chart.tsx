@@ -34,14 +34,14 @@ export function RevenueChart({ data }: { data: RevenueData[] }) {
       <Card className="col-span-1 lg:col-span-3">
         <CardHeader>
           <CardTitle className="text-xl font-bold">
-            Doanh Thu 7 Ngày Gần Nhất
+            Doanh thu 7 ngày gần nhất
           </CardTitle>
           <CardDescription>
             Tổng hợp doanh thu từ các đơn hàng thành công.
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="h-[350px] w-full bg-neutral-100 animate-pulse rounded-md"></div>
+          <div className="h-[350px] w-full animate-pulse rounded-xl bg-neutral-100"></div>
         </CardContent>
       </Card>
     );
@@ -51,7 +51,7 @@ export function RevenueChart({ data }: { data: RevenueData[] }) {
     <Card className="col-span-1 lg:col-span-3">
       <CardHeader>
         <CardTitle className="text-xl font-bold">
-          Doanh Thu 7 Ngày Gần Nhất
+          Doanh thu 7 ngày gần nhất
         </CardTitle>
         <CardDescription>
           Tổng hợp doanh thu từ các đơn hàng thành công.
@@ -76,7 +76,7 @@ export function RevenueChart({ data }: { data: RevenueData[] }) {
                 fontSize={12}
                 tickLine={false}
                 axisLine={false}
-                tickFormatter={(value) => `${(value / 1000000).toFixed(1)}tr`}
+                tickFormatter={(value) => `${(Number(value) / 1_000_000).toLocaleString("vi-VN", { maximumFractionDigits: 1 })} tr`}
               />
               <Tooltip
                  
@@ -89,7 +89,7 @@ export function RevenueChart({ data }: { data: RevenueData[] }) {
                 labelStyle={{ color: "black" }}
                 cursor={{ fill: "#f5f5f5" }}
               />
-              <Bar dataKey="revenue" fill="#FF5722" radius={[4, 4, 0, 0]} />
+              <Bar name="Doanh thu" dataKey="revenue" fill="#FF5722" radius={[4, 4, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
         </div>

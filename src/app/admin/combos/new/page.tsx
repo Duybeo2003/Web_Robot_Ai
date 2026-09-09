@@ -2,7 +2,7 @@ import { ProductForm } from "@/app/admin/products/components/product-form";
 import { prisma } from "@/lib/prisma";
 
 export const metadata = {
-  title: "Tạo Gói Combo - Admin",
+  title: "Tạo gói combo - Admin",
 };
 
 export default async function NewComboPage() {
@@ -25,7 +25,7 @@ export default async function NewComboPage() {
     <div className="space-y-6">
       <div>
         <h2 className="text-2xl font-bold tracking-tight text-indigo-700">
-          Tạo Gói Combo Mới
+          Tạo gói combo mới
         </h2>
         <p className="text-muted-foreground">
           Thêm một gói bán gộp các đồ chơi lại với nhau.

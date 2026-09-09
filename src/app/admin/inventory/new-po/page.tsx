@@ -7,7 +7,7 @@ import { ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Tạo Phiếu Nhập/Xuất Kho - Admin",
+  title: "Tạo phiếu nhập/xuất kho - Admin",
 };
 
 export default async function NewInventoryTransactionPage() {
@@ -46,21 +46,22 @@ export default async function NewInventoryTransactionPage() {
       <div className="flex items-center gap-4">
         <Link
           href="/admin/inventory"
-          className="p-2 bg-white border border-neutral-200 rounded-md hover:bg-neutral-50 transition-colors"
+          className="rounded-lg border border-neutral-200 bg-white p-2 transition-colors hover:bg-neutral-50"
+          aria-label="Quay lại kho hàng"
         >
           <ArrowLeft className="w-5 h-5 text-neutral-600" />
         </Link>
         <div>
-          <h2 className="text-3xl font-heading font-bold tracking-tight">
-            Tạo Phiếu Kho
+          <h2 className="text-2xl font-heading font-bold tracking-tight sm:text-3xl">
+            Tạo phiếu kho
           </h2>
           <p className="text-muted-foreground mt-1">
-            Ghi nhận giao dịch nhập hàng (PO) hoặc xuất kho.
+            Ghi nhận giao dịch nhập hoặc xuất kho.
           </p>
         </div>
       </div>
 
-      <div className="bg-white p-6 rounded-sm border border-neutral-200 shadow-sm">
+      <div className="rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-6">
         <NewPoForm products={products} />
       </div>
     </div>

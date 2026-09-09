@@ -1,74 +1,68 @@
-export const dynamic = 'force-dynamic';
-import { auth } from "@/auth"
-import { redirect } from "next/navigation"
-import Link from "next/link"
-import { User, Package, Heart, Wallet, Gift } from "lucide-react"
-import Image from "next/image"
+export const dynamic = "force-dynamic";
+import { auth } from "@/auth";
+import { redirect } from "next/navigation";
+import Link from "next/link";
+import { User, Package, Heart, Wallet, Gift } from "lucide-react";
+import Image from "next/image";
 
 export default async function ProfileLayout({ children }: { children: React.ReactNode }) {
-  const session = await auth()
+  const session = await auth();
   
   if (!session?.user) {
-    redirect("/?login=true")
+    redirect("/?login=true");
   }
 
+  const navigation = [
+    { href: "/profile", label: "Tài khoản của tôi", icon: User },
+    { href: "/profile/orders", label: "Đơn mua", icon: Package },
+    { href: "/profile/wishlist", label: "Sản phẩm yêu thích", icon: Heart },
+    { href: "/profile/wallet", label: "Ví RoboCoin", icon: Wallet },
+    { href: "/profile/inventory", label: "Túi đồ sự kiện", icon: Gift },
+    { href: "/profile/affiliate", label: "Tiếp thị liên kết", icon: User },
+  ];
+
   return (
-    <div className="container mx-auto px-4 py-8 bg-[#F5F5F5] min-h-screen">
-      <div className="flex flex-col md:flex-row gap-6">
-        {/* Sidebar */}
-        <aside className="w-full md:w-64 shrink-0">
-          <div className="bg-white p-6 rounded-sm border border-neutral-100 shadow-sm sticky top-24">
-            <div className="flex items-center gap-3 mb-6 pb-6 border-b border-neutral-100">
-              <div className="w-12 h-12 bg-neutral-100 rounded-full flex items-center justify-center overflow-hidden">
+    <div className="min-h-screen bg-neutral-50">
+      <div className="container mx-auto px-4 py-6 sm:py-8">
+        <div className="grid grid-cols-1 gap-6 lg:grid-cols-[260px_minmax(0,1fr)]">
+          <aside className="min-w-0">
+            <div className="rounded-2xl border border-neutral-200 bg-white p-4 shadow-sm lg:sticky lg:top-24 lg:p-5">
+            <div className="mb-4 flex items-center gap-3 border-b border-neutral-100 pb-4 lg:mb-5 lg:pb-5">
+              <div className="flex size-12 shrink-0 items-center justify-center overflow-hidden rounded-xl bg-neutral-100">
                 {session.user.image ? (
                   <div className="relative w-full h-full">
-                    <Image src={session.user.image} alt="Avatar" fill className="object-cover" sizes="48px" />
+                    <Image src={session.user.image} alt="Ảnh đại diện" fill className="object-cover" sizes="48px" />
                   </div>
                 ) : (
                   <User className="w-6 h-6 text-neutral-400" />
                 )}
               </div>
-              <div className="overflow-hidden">
+              <div className="min-w-0 overflow-hidden">
                 <p className="font-semibold text-foreground truncate">{session.user.name || "Khách hàng"}</p>
                 <p className="truncate text-xs text-neutral-500">{session.user.email || session.user.phoneNumber}</p>
               </div>
             </div>
 
-            <nav className="space-y-2">
-              <Link href="/profile" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
-                <User className="w-5 h-5 text-neutral-400" />
-                Tài khoản của tôi
-              </Link>
-              <Link href="/profile/orders" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
-                <Package className="w-5 h-5 text-neutral-400" />
-                Đơn mua
-              </Link>
-              <Link href="/profile/wishlist" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
-                <Heart className="w-5 h-5 text-neutral-400" />
-                Sản phẩm yêu thích
-              </Link>
-              <Link href="/profile/wallet" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-orange-50 text-[#FF5722] font-bold transition-colors border border-transparent hover:border-orange-100">
-                <Wallet className="w-5 h-5" />
-                Ví RoboCoin
-              </Link>
-              <Link href="/profile/inventory" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-orange-50 text-[#FF5722] font-bold transition-colors border border-transparent hover:border-orange-100">
-                <Gift className="w-5 h-5" />
-                Túi đồ sự kiện
-              </Link>
-              <Link href="/profile/affiliate" className="flex items-center gap-3 px-3 py-2 rounded-sm hover:bg-neutral-50 text-neutral-700 font-medium transition-colors">
-                <User className="w-5 h-5 text-neutral-400" />
-                Tiếp thị liên kết
-              </Link>
-              {/* Optional Logout Link - Note: Should ideally be a client component button for signOut() */}
+            <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:mx-0 lg:block lg:space-y-1 lg:overflow-visible lg:px-0" aria-label="Điều hướng tài khoản">
+              {navigation.map(({ href, label, icon: Icon }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className="flex h-11 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl px-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-primary/10 hover:text-primary lg:w-full"
+                >
+                  <Icon className="size-5 shrink-0 text-neutral-400" aria-hidden="true" />
+                  {label}
+                </Link>
+              ))}
             </nav>
           </div>
         </aside>
 
-        {/* Main Content */}
-        <main className="flex-1">
+        <main className="min-w-0">
           {children}
         </main>
       </div>
     </div>
-  )
+    </div>
+  );
 }

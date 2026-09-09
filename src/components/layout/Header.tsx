@@ -1,13 +1,9 @@
-/* eslint-disable react-hooks/set-state-in-effect */
 "use client";
 
 import Link from "next/link";
 import { useSession, signOut } from "next-auth/react";
 import { Button } from "@/components/ui/button";
-import { useTheme } from "next-themes";
 import {
-  Moon,
-  Sun,
   ShoppingCart,
   User as UserIcon,
   LogOut,
@@ -18,7 +14,7 @@ import {
   Phone,
   Trophy,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useAuthModal } from "@/store/use-auth-modal";
 import { useCartUI } from "@/store/use-cart-ui";
 import { useCartStore } from "@/lib/store/cart";
@@ -57,18 +53,12 @@ export function Header({
   zaloUrl: string;
 }) {
   const { data: session } = useSession();
-  const { theme, setTheme } = useTheme();
-  const [mounted, setMounted] = useState(false);
   const { openModal } = useAuthModal();
   const { openCart } = useCartUI();
   const router = useRouter();
   const [searchQuery, setSearchQuery] = useState("");
   const [openMobileMenu, setOpenMobileMenu] = useState(false);
   const phoneHref = supportPhone.replace(/[^\d+]/g, "");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
@@ -78,33 +68,33 @@ export function Header({
   };
 
   return (
-    <header className="w-full bg-white border-b border-border sticky top-0 z-50 shadow-sm">
+    <header className="sticky top-0 z-50 w-full border-b border-border/80 bg-white/95 shadow-sm backdrop-blur-lg">
       {/* Top Bar - Logo, Search, Actions */}
-      <div className="container mx-auto px-4 py-4 flex flex-wrap lg:flex-nowrap items-center justify-between gap-4">
+      <div className="container mx-auto flex h-16 items-center justify-between gap-3 px-4 sm:h-[72px] sm:px-6">
         {/* Logo */}
-        <Link href="/" className="flex items-center gap-2 group shrink-0">
-          <div className="bg-primary text-white p-2 rounded-lg">
-            <Cpu className="w-6 h-6" />
+        <Link href="/" className="group flex shrink-0 items-center gap-2" aria-label="RoboEQ - Trang chủ">
+          <div className="flex size-10 items-center justify-center rounded-xl bg-primary text-white shadow-sm transition-transform group-hover:scale-105">
+            <Cpu className="size-5" />
           </div>
-          <span className="font-bold text-2xl tracking-tight text-primary">
+          <span className="text-xl font-extrabold tracking-tight text-primary sm:text-2xl">
             RoboEQ
           </span>
         </Link>
 
         {/* Search Bar */}
-        <div className="flex-1 max-w-2xl hidden md:flex items-center">
+        <div className="hidden max-w-2xl flex-1 items-center md:flex">
           <form onSubmit={handleSearch} className="relative w-full">
             <input
               type="text"
               placeholder="Tìm kiếm robot, kit STEM, đồ chơi logic..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full h-10 pl-4 pr-10 border border-primary/50 rounded-full focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent text-sm"
+              className="h-11 w-full rounded-full border border-neutral-300 bg-neutral-50/70 pl-5 pr-12 text-sm outline-none transition-all placeholder:text-neutral-400 hover:border-neutral-400 focus:border-primary focus:bg-white focus:ring-4 focus:ring-primary/10"
             />
             <button
               type="submit"
               aria-label="Tìm kiếm"
-              className="absolute right-0 top-0 h-10 w-12 flex items-center justify-center text-muted-foreground hover:text-primary transition-colors"
+              className="absolute right-0 top-0 flex h-11 w-12 items-center justify-center text-muted-foreground transition-colors hover:text-primary"
             >
               <Search className="h-5 w-5" />
             </button>
@@ -112,8 +102,8 @@ export function Header({
         </div>
 
         {/* Contact & Actions */}
-        <div className="flex items-center gap-4 shrink-0">
-          <div className="hidden lg:flex items-center gap-4 mr-4 text-sm font-medium">
+        <div className="flex shrink-0 items-center gap-1 sm:gap-2">
+          <div className="mr-2 hidden items-center gap-4 text-sm font-semibold xl:flex">
             <a href={`tel:${phoneHref}`} className="flex items-center gap-1.5 hover:text-primary transition-colors">
               <Phone className="w-4 h-4 text-primary" />
               <span>{supportPhone}</span>
@@ -132,26 +122,9 @@ export function Header({
               >
                 <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
               </svg>
-              <span>Zalo Tư Vấn</span>
+              <span>Zalo tư vấn</span>
             </Link>}
           </div>
-
-          {/* Theme Toggle */}
-          {mounted && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="hidden sm:flex hover:text-primary"
-              onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              aria-label="Đổi giao diện sáng tối"
-            >
-              {theme === "dark" ? (
-                <Sun className="h-5 w-5" />
-              ) : (
-                <Moon className="h-5 w-5" />
-              )}
-            </Button>
-          )}
 
           {/* User / Login */}
           {session ? (
@@ -214,6 +187,7 @@ export function Header({
               onClick={openModal}
               className="hover:text-primary"
               title="Đăng nhập"
+              aria-label="Đăng nhập"
             >
               <UserIcon className="h-5 w-5" />
             </Button>
@@ -226,6 +200,7 @@ export function Header({
             className="relative hover:text-primary"
             onClick={openCart}
             title="Giỏ hàng"
+            aria-label="Mở giỏ hàng"
           >
             <ShoppingCart className="h-5 w-5" />
             <CartBadge />
@@ -233,13 +208,13 @@ export function Header({
 
           {/* Mobile Menu Toggle */}
           <Sheet open={openMobileMenu} onOpenChange={setOpenMobileMenu}>
-            <SheetTrigger aria-label="Mở menu" className="lg:hidden flex h-10 w-10 items-center justify-center hover:text-primary">
+            <SheetTrigger aria-label="Mở menu" className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors hover:bg-accent hover:text-primary xl:hidden">
               <Menu className="h-6 w-6" />
             </SheetTrigger>
             <SheetContent side="left" className="w-[300px] p-0">
               <div className="p-4 bg-primary text-white flex items-center gap-2">
                 <Menu className="h-5 w-5" />
-                <span className="font-bold">Danh mục sản phẩm</span>
+                <span className="font-bold">Khám phá RoboEQ</span>
               </div>
               <div className="p-4 border-b border-border bg-neutral-50">
                 <form onSubmit={(e) => { handleSearch(e); setOpenMobileMenu(false); }} className="relative w-full">
@@ -261,42 +236,42 @@ export function Header({
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
                 >
-                  Robot Giáo Dục
+                  Robot giáo dục
                 </Link>
                 <Link
                   href="/shop?type=DO_CHOI_LOGIC"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
                 >
-                  Đồ Chơi Tư Duy Logic
+                  Đồ chơi tư duy logic
                 </Link>
                 <Link
                   href="/shop?type=COMBO"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 bg-red-50 hover:bg-red-100 font-bold text-sm text-red-600 border-b border-border"
                 >
-                  Combo Tiết Kiệm
+                  Combo tiết kiệm
                 </Link>
                 <Link
                   href="/huong-dan"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
                 >
-                  Hướng Dẫn Sử Dụng
+                  Hướng dẫn sử dụng
                 </Link>
                 <Link
                   href="/bao-hanh"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
                 >
-                  Tra Cứu Bảo Hành
+                  Tra cứu bảo hành
                 </Link>
                 <Link
                   href="/giao-duc"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-medium text-sm border-b border-border"
                 >
-                  Blog & Kiến Thức
+                  Kiến thức STEM
                 </Link>
                 <Link
                   href="/events"
@@ -304,14 +279,14 @@ export function Header({
                   className="px-4 py-3 hover:bg-muted font-bold text-sm text-orange-600 border-b border-border flex items-center gap-2"
                 >
                   <Trophy className="w-4 h-4" />
-                  Sự Kiện & Vòng Quay
+                  Sự kiện & vòng quay
                 </Link>
                 <Link
                   href="/shop?flashsale=true"
                   onClick={() => setOpenMobileMenu(false)}
                   className="px-4 py-3 hover:bg-muted font-bold text-sm text-[#FF5722]"
                 >
-                  🔥 KHUYẾN MÃI HOT
+                  🔥 Khuyến mại nổi bật
                 </Link>
               </div>
             </SheetContent>
@@ -320,12 +295,12 @@ export function Header({
       </div>
 
       {/* Bottom Nav - Orange Background */}
-      <div className="w-full bg-primary text-primary-foreground hidden lg:block">
-        <div className="container mx-auto px-4 h-12 flex items-center gap-8">
+      <div className="hidden w-full bg-primary text-primary-foreground xl:block">
+        <div className="container mx-auto flex h-12 items-center gap-4 px-6">
           {/* Category Dropdown */}
-          <div className="relative group h-full flex items-center cursor-pointer bg-secondary px-4 min-w-[200px]">
+          <div className="group relative flex h-full min-w-[220px] cursor-pointer items-center bg-secondary px-5">
             <Menu className="h-5 w-5 mr-2" />
-            <span className="font-bold text-sm">SẢN PHẨM GIÁO DỤC</span>
+            <span className="text-sm font-bold">Sản phẩm giáo dục</span>
 
             {/* Dropdown Menu */}
             <div className="absolute top-full left-0 w-[400px] bg-white text-foreground shadow-lg border border-border hidden group-hover:grid grid-cols-2 gap-2 p-4 z-50 rounded-b-xl">
@@ -333,7 +308,7 @@ export function Header({
                 href="/shop?type=ROBOT_STEM"
                 className="p-3 hover:bg-neutral-50 rounded-lg flex flex-col"
               >
-                <h4 className="font-bold text-neutral-800">Robot Giáo Dục</h4>
+                <h4 className="font-bold text-neutral-800">Robot giáo dục</h4>
                 <p className="text-xs text-neutral-500">
                   Phát triển tư duy & EQ
                 </p>
@@ -342,14 +317,14 @@ export function Header({
                 href="/shop?type=DO_CHOI_LOGIC"
                 className="p-3 hover:bg-neutral-50 rounded-lg flex flex-col"
               >
-                <h4 className="font-bold text-neutral-800">Đồ Chơi Logic</h4>
+                <h4 className="font-bold text-neutral-800">Đồ chơi logic</h4>
                 <p className="text-xs text-neutral-500">Rèn luyện trí tuệ</p>
               </Link>
               <Link
                 href="/shop?type=COMBO"
                 className="col-span-2 p-3 bg-red-50 hover:bg-red-100 rounded-lg flex flex-col border border-red-100"
               >
-                <h4 className="font-bold text-red-600">Combo Tiết Kiệm</h4>
+                <h4 className="font-bold text-red-600">Combo tiết kiệm</h4>
                 <p className="text-xs text-red-500">
                   Giải pháp toàn diện - Mua nhiều giảm sâu
                 </p>
@@ -358,43 +333,43 @@ export function Header({
           </div>
 
           {/* Quick Links */}
-          <nav className="flex items-center gap-6">
+          <nav className="flex flex-1 items-center justify-between gap-3">
             <Link
               href="/shop?type=ROBOT_STEM"
               className="text-sm font-medium hover:text-white/80 transition-colors"
             >
-              Robot Giáo Dục
+              Robot giáo dục
             </Link>
             <Link
               href="/shop?type=DO_CHOI_LOGIC"
               className="text-sm font-medium hover:text-white/80 transition-colors"
             >
-              Đồ Chơi Tư Duy Logic
+              Đồ chơi tư duy logic
             </Link>
             <Link
               href="/giao-duc"
               className="text-sm font-medium hover:text-white/80 transition-colors"
             >
-              Blog & Kiến Thức
+              Kiến thức STEM
             </Link>
             <Link
               href="/huong-dan"
               className="text-sm font-medium hover:text-white/80 transition-colors"
             >
-              Hướng Dẫn Sử Dụng
+              Hướng dẫn sử dụng
             </Link>
             <Link
               href="/bao-hanh"
               className="text-sm font-medium hover:text-white/80 transition-colors"
             >
-              Tra Cứu Bảo Hành
+              Tra cứu bảo hành
             </Link>
             <Link
               href="/events"
               className="text-sm font-bold text-orange-200 hover:text-white transition-colors flex items-center gap-1"
             >
               <Trophy className="w-4 h-4" />
-              Sự Kiện
+              Sự kiện
             </Link>
             <Link
               href="/shop?flashsale=true"

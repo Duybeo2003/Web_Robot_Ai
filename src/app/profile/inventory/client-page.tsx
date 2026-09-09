@@ -48,7 +48,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
       const xu = await sellItemForXu(selectedItem.id);
       setItems(items.filter(i => i.id !== selectedItem.id));
       setSelectedItem(null);
-      toast.success(`Đã bán vật phẩm và nhận lại ${xu.toLocaleString('vi-VN')} Xu!`);
+      toast.success(`Đã bán vật phẩm và nhận lại ${xu.toLocaleString('vi-VN')} xu!`);
     } catch (error: unknown) {
       toast.error((error as Error).message || "Có lỗi xảy ra khi bán vật phẩm");
     } finally {
@@ -70,7 +70,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
       setItems(items.filter(i => i.id !== selectedItem.id));
       setSelectedItem(null);
       setShowDeliveryForm(false);
-      toast.success("Yêu cầu giao hàng thành công! Vui lòng chờ admin xử lý.");
+      toast.success("Đã gửi yêu cầu giao hàng. Bộ phận vận hành sẽ sớm xử lý.");
     } catch (error: unknown) {
       toast.error((error as Error).message || "Có lỗi xảy ra");
     } finally {
@@ -81,16 +81,16 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
   return (
     <div className="space-y-6">
       <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-heading font-bold text-foreground">Túi Đồ Sự Kiện</h1>
+        <h1 className="text-2xl font-bold text-foreground">Túi đồ sự kiện</h1>
       </div>
 
       <div className="bg-orange-50 border border-orange-200 p-4 rounded-xl flex items-start gap-3">
         <AlertCircle className="w-5 h-5 text-orange-500 shrink-0 mt-0.5" />
         <div className="text-sm text-orange-800">
-          <p className="font-bold mb-1">Quyền lợi Túi Đồ:</p>
+          <p className="font-bold mb-1">Quyền lợi túi đồ:</p>
           <ul className="list-disc pl-5 space-y-1">
-            <li>Bạn có thể yêu cầu <strong>Giao hàng (Miễn phí)</strong> các vật phẩm đã trúng thưởng.</li>
-            <li>Hoặc bạn có thể <strong>Bán lại ra Xu</strong> để tiếp tục mua sắm hoặc chơi sự kiện. Giá bán lại do cửa hàng quy định (hoặc 100% giá gốc).</li>
+            <li>Bạn có thể yêu cầu <strong>giao hàng miễn phí</strong> các vật phẩm đã trúng thưởng.</li>
+            <li>Hoặc bạn có thể <strong>bán lại lấy xu</strong> để tiếp tục mua sắm hoặc chơi sự kiện. Giá bán lại do cửa hàng quy định.</li>
           </ul>
         </div>
       </div>
@@ -101,7 +101,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
           <h2 className="text-xl font-bold text-neutral-700 mb-2">Túi đồ trống</h2>
           <p className="text-neutral-500 mb-6">Bạn chưa có vật phẩm nào hoặc tất cả đã được xử lý.</p>
           <Button onClick={() => router.push("/events")} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
-            Đến Khu Sự Kiện
+            Đến khu sự kiện
           </Button>
         </div>
       ) : (
@@ -115,13 +115,14 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
                       src={item.product.imageUrl} 
                       alt={item.product.title}
                       fill
+                      sizes="(max-width: 639px) calc(100vw - 32px), (max-width: 1023px) 50vw, 33vw"
                       className="object-contain p-4 group-hover:scale-105 transition-transform"
                     />
                   ) : (
                     <PackageOpen className="w-16 h-16 text-neutral-300" />
                   )}
                   {item.quantity > 1 && (
-                    <div className="absolute top-2 right-2 bg-neutral-900 text-white text-xs font-bold px-2 py-1 rounded-sm shadow-md">
+                    <div className="absolute right-2 top-2 rounded-full bg-neutral-900 px-2.5 py-1 text-xs font-bold text-white shadow-md">
                       x{item.quantity}
                     </div>
                   )}
@@ -150,7 +151,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
           <DialogHeader>
             <DialogTitle>{showDeliveryForm ? "Yêu cầu giao hàng" : "Xử lý phần thưởng"}</DialogTitle>
             <DialogDescription>
-              {showDeliveryForm ? "Điền thông tin để chúng tôi giao quà tận nơi (Freeship)." : `Bạn muốn làm gì với vật phẩm ${selectedItem?.product.title}?`}
+              {showDeliveryForm ? "Điền thông tin để chúng tôi giao quà miễn phí đến bạn." : `Bạn muốn làm gì với vật phẩm ${selectedItem?.product.title}?`}
             </DialogDescription>
           </DialogHeader>
           
@@ -160,10 +161,10 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
                 variant="outline" 
                 className="h-20 flex flex-col items-center justify-center gap-1 border-orange-200 hover:bg-orange-50 hover:text-orange-600"
                 onClick={() => setShowDeliveryForm(true)}
-                disabled={isSelling || !selectedItem?.sellPriceXu || selectedItem.sellPriceXu <= 0}
+                disabled={isSelling}
               >
                 <Truck className="w-6 h-6" />
-                <span className="font-bold">Yêu cầu Giao hàng (Freeship)</span>
+                <span className="font-bold">Yêu cầu giao hàng miễn phí</span>
               </Button>
 
               <Button 
@@ -198,14 +199,14 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
                 <Input required placeholder="Ví dụ: 0987654321" value={deliveryData.phone} onChange={e => setDeliveryData({...deliveryData, phone: e.target.value})} />
               </div>
               <div className="grid gap-2">
-                <Label>Địa chỉ nhận hàng (Chi tiết)</Label>
+                <Label>Địa chỉ nhận hàng chi tiết</Label>
                 <Input required placeholder="Số nhà, đường, phường/xã, quận/huyện, tỉnh/TP" value={deliveryData.address} onChange={e => setDeliveryData({...deliveryData, address: e.target.value})} />
               </div>
               <div className="grid gap-2">
-                <Label>Ghi chú (Tùy chọn)</Label>
+                <Label>Ghi chú (tùy chọn)</Label>
                 <Input placeholder="Giao giờ hành chính..." value={deliveryData.notes} onChange={e => setDeliveryData({...deliveryData, notes: e.target.value})} />
               </div>
-              <div className="flex justify-end gap-2 mt-4">
+              <div className="mt-4 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
                 <Button type="button" variant="ghost" onClick={() => setShowDeliveryForm(false)}>Quay lại</Button>
                 <Button type="submit" disabled={isDelivering} className="bg-orange-500 hover:bg-orange-600 text-white">
                   {isDelivering ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}

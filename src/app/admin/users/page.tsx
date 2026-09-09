@@ -52,44 +52,54 @@ export default async function AdminUsersPage(props: { searchParams: Promise<{ pa
         </p>
       </div>
 
-      <div className="rounded-md border bg-white">
-        <Table>
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
+        <Table className="table-fixed md:table-auto">
           <TableHeader>
             <TableRow>
               <TableHead>Khách hàng</TableHead>
-              <TableHead>Số điện thoại</TableHead>
-              <TableHead>Ngày tham gia</TableHead>
-              <TableHead>Số đơn hàng</TableHead>
-              <TableHead>Vai trò</TableHead>
-              <TableHead className="text-right">Hành động</TableHead>
+              <TableHead className="hidden md:table-cell">Số điện thoại</TableHead>
+              <TableHead className="hidden lg:table-cell">Ngày tham gia</TableHead>
+              <TableHead className="hidden sm:table-cell">Số đơn hàng</TableHead>
+              <TableHead className="hidden xl:table-cell">Vai trò</TableHead>
+              <TableHead className="w-20 text-right">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {users.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={5} className="h-24 text-center">
+                <TableCell colSpan={6} className="h-28 text-center text-muted-foreground">
                   Không có người dùng nào.
                 </TableCell>
               </TableRow>
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">
-                    {user.name || "Khách hàng"}
+                  <TableCell className="min-w-0 font-medium">
+                    <span className="block truncate">{user.name || "Khách hàng"}</span>
+                    <span className="mt-1 block text-xs font-normal text-muted-foreground md:hidden">
+                      {user.phoneNumber || "Chưa cập nhật số điện thoại"}
+                    </span>
+                    <span className="mt-1 block text-xs font-normal text-muted-foreground lg:hidden">
+                      Tham gia {format(new Date(user.createdAt), "dd/MM/yyyy")}
+                    </span>
+                    <span className="mt-2 flex flex-wrap items-center gap-2 text-xs font-normal sm:hidden">
+                      <span>{user._count.orders} đơn hàng</span>
+                      <Badge variant="secondary">Khách hàng</Badge>
+                    </span>
                   </TableCell>
-                  <TableCell>{user.phoneNumber}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">{user.phoneNumber || "—"}</TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     {format(new Date(user.createdAt), "dd/MM/yyyy")}
                   </TableCell>
-                  <TableCell>{user._count.orders}</TableCell>
-                  <TableCell>
+                  <TableCell className="hidden sm:table-cell">{user._count.orders}</TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     <Badge
                       variant={user.role === "ADMIN" ? "default" : "secondary"}
                     >
-                      {user.role}
+              Khách hàng
                     </Badge>
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="w-20 text-right">
                     <UserActions userId={user.id} currentRole={user.role} />
                   </TableCell>
                 </TableRow>
@@ -98,7 +108,7 @@ export default async function AdminUsersPage(props: { searchParams: Promise<{ pa
           </TableBody>
         </Table>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} (Tổng: {totalCount})
             </p>

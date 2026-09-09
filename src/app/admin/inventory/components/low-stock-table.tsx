@@ -11,7 +11,7 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
-import { Loader2 } from "lucide-react";
+import { Loader2, Package } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
@@ -37,7 +37,7 @@ export function LowStockTable() {
         if (res.success) {
           setProducts(res.data || []);
         } else {
-          setError("Failed to load low stock products");
+          setError("Không thể tải danh sách sản phẩm sắp hết hàng");
         }
       } catch (err) {
         console.error(err);
@@ -90,16 +90,19 @@ export function LowStockTable() {
                   href={`/admin/products/${p.productId}`}
                   className="flex items-center gap-2 group"
                 >
-                  <div className="w-10 h-10 relative bg-white border border-neutral-100 rounded-sm overflow-hidden shrink-0">
-                    {p.imageUrl ? (
+                  <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-neutral-100 bg-white">
+                    <Package className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 text-neutral-300" aria-hidden="true" />
+                    {p.imageUrl && (
                       <Image
                         src={p.imageUrl}
-                        alt=""
+                        alt={p.title}
                         fill
+                        sizes="40px"
                         className="object-cover"
+                        onError={(event) => {
+                          event.currentTarget.style.display = "none";
+                        }}
                       />
-                    ) : (
-                      <div className="w-full h-full bg-neutral-100" />
                     )}
                   </div>
                   <div className="flex flex-col">
@@ -107,7 +110,7 @@ export function LowStockTable() {
                       {p.title}
                     </span>
                     <span className="text-xs text-muted-foreground">
-                      SKU: {p.sku || "N/A"}
+                      SKU: {p.sku || "Chưa cập nhật"}
                     </span>
                     {p.variantLabel && (
                       <span className="text-xs text-blue-700">

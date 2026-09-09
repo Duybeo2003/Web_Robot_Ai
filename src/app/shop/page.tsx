@@ -191,36 +191,34 @@ export default async function ShopPage({
 
 
   return (
-    <div className="container mx-auto px-4 py-8 flex-1 bg-[#F5F5F5] min-h-screen">
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+    <div className="container mx-auto min-h-screen flex-1 px-4 py-6 sm:py-10">
+      <div className="grid grid-cols-1 gap-5 lg:grid-cols-[260px_minmax(0,1fr)] lg:gap-8">
         {/* Left Sidebar Filters */}
-        <div className="lg:col-span-1 space-y-6">
+        <aside className="space-y-6">
           <ShopSidebarFilters />
-
-
-        </div>
+        </aside>
 
         {/* Main Product Area */}
-        <div className="lg:col-span-3 space-y-6">
-          <div className="bg-white p-6 rounded-sm shadow-sm border border-neutral-100 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+        <div className="min-w-0 space-y-6">
+          <div className="flex flex-col items-start justify-between gap-4 rounded-xl border border-neutral-200 bg-white p-5 shadow-sm sm:flex-row sm:items-center sm:p-6">
             <div>
-              <h1 className="text-2xl font-bold tracking-tight text-foreground uppercase text-[#FF5722]">
+              <h1 className="text-2xl font-extrabold tracking-tight text-neutral-900">
                 {typeFilter === "ROBOT_STEM"
-                  ? "Robot Thông Minh"
+                  ? "Robot thông minh"
                   : typeFilter === "KIT_ARDUINO"
                     ? "Kit Arduino"
                     : typeFilter === "DO_CHOI_LOGIC"
-                      ? "Đồ Chơi Logic"
+                      ? "Đồ chơi logic"
                       : typeFilter === "COMBO"
-                        ? "Combo Tiết Kiệm"
-                        : "Tất Cả Sản Phẩm"}
+                        ? "Combo tiết kiệm"
+                        : "Tất cả sản phẩm"}
               </h1>
               <p className="text-muted-foreground text-sm mt-1">
-                Hiển thị {products.length} sản phẩm
+                Hiển thị {products.length} trên {totalCount} sản phẩm
               </p>
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex w-full items-center justify-between gap-3 sm:w-auto sm:justify-end">
               <span className="text-sm font-medium text-neutral-600 hidden md:inline-block">
                 Sắp xếp theo:
               </span>
@@ -235,7 +233,7 @@ export default async function ShopPage({
           </div>
 
           {products.length === 0 ? (
-            <div className="bg-white p-12 text-center rounded-sm border border-neutral-100 flex flex-col items-center justify-center">
+            <div className="flex flex-col items-center justify-center rounded-xl border border-neutral-200 bg-white p-10 text-center shadow-sm sm:p-12">
               <div className="w-16 h-16 bg-neutral-100 rounded-full flex items-center justify-center mb-4">
                 <Search className="w-8 h-8 text-neutral-400" />
               </div>
@@ -247,14 +245,14 @@ export default async function ShopPage({
               </p>
               <Link
                 href="/shop"
-                className="px-6 py-2 bg-[#FF5722] text-white rounded-sm font-medium hover:bg-[#E64A19] transition-colors"
+                className="inline-flex h-10 items-center rounded-lg bg-primary px-6 font-semibold text-white transition-colors hover:bg-secondary"
               >
                 Xóa bộ lọc
               </Link>
             </div>
           ) : (
             <div className="space-y-8">
-              <div className="grid grid-cols-2 lg:grid-cols-3 gap-2 md:gap-4">
+              <div className="grid grid-cols-2 items-stretch gap-3 sm:gap-5 lg:grid-cols-3">
                 {products.map((product, index) => {
                   return (
                     <ProductCard
@@ -284,11 +282,11 @@ export default async function ShopPage({
 
               {/* Pagination UI */}
               {totalPages > 1 && (
-                <div className="flex justify-center items-center gap-2 pt-8">
+                <nav aria-label="Phân trang sản phẩm" className="flex flex-wrap items-center justify-center gap-2 pt-6 sm:pt-8">
                   {currentPage > 1 && (
                     <Link
                       href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), page: (currentPage - 1).toString() }).toString()}`}
-                      className="px-4 py-2 border border-neutral-200 rounded-sm text-sm font-medium hover:bg-neutral-50 transition-colors"
+                      className="inline-flex h-10 items-center rounded-lg border border-neutral-200 bg-white px-4 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
                     >
                       Trang trước
                     </Link>
@@ -309,7 +307,7 @@ export default async function ShopPage({
                           <Link
                             key={pageNum}
                             href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), page: pageNum.toString() }).toString()}`}
-                            className={`w-10 h-10 flex items-center justify-center rounded-sm text-sm font-medium transition-colors ${
+                            className={`flex size-10 items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
                               isActive
                                 ? "bg-[#FF5722] text-white border border-[#FF5722]"
                                 : "bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-600"
@@ -325,7 +323,7 @@ export default async function ShopPage({
                         return (
                           <span
                             key={pageNum}
-                            className="w-10 h-10 flex items-center justify-center text-neutral-400"
+                            className="flex size-10 items-center justify-center text-neutral-400"
                           >
                             ...
                           </span>
@@ -338,12 +336,12 @@ export default async function ShopPage({
                   {currentPage < totalPages && (
                     <Link
                       href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), page: (currentPage + 1).toString() }).toString()}`}
-                      className="px-4 py-2 border border-neutral-200 rounded-sm text-sm font-medium hover:bg-neutral-50 transition-colors"
+                      className="inline-flex h-10 items-center rounded-lg border border-neutral-200 bg-white px-4 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
                     >
                       Trang sau
                     </Link>
                   )}
-                </div>
+                </nav>
               )}
             </div>
           )}

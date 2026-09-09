@@ -38,14 +38,15 @@ export function WarrantyClient() {
   };
 
   return (
-    <div className="container mx-auto px-4 py-16 min-h-[70vh]">
-      <div className="max-w-2xl mx-auto space-y-8">
+    <main className="container mx-auto min-h-[70vh] px-4 py-10 sm:py-14">
+      <div className="mx-auto max-w-2xl rounded-2xl border border-neutral-200 bg-white p-5 shadow-sm sm:p-8">
+        <div className="space-y-8">
         <div className="text-center space-y-4">
-          <div className="mx-auto w-16 h-16 bg-[#FF5722]/10 flex items-center justify-center rounded-full">
-            <ShieldCheck className="w-8 h-8 text-[#FF5722]" />
+          <div className="mx-auto flex size-16 items-center justify-center rounded-2xl bg-primary/10">
+            <ShieldCheck className="size-8 text-primary" />
           </div>
-          <h1 className="text-3xl font-heading font-bold uppercase text-[#FF5722]">
-            Tra cứu Bảo hành
+          <h1 className="text-3xl font-extrabold tracking-tight text-foreground sm:text-4xl">
+            Tra cứu bảo hành
           </h1>
           <p className="text-neutral-600">
             Nhập số Serial (SN) in trên vỏ hộp hoặc dưới đáy sản phẩm để kiểm
@@ -53,7 +54,7 @@ export function WarrantyClient() {
           </p>
         </div>
 
-        <form onSubmit={handleSearch} className="flex gap-2">
+        <form onSubmit={handleSearch} className="flex flex-col gap-3 sm:flex-row">
           <Input
             aria-label="Số serial sản phẩm"
             placeholder="Ví dụ: RB-123456789"
@@ -62,11 +63,11 @@ export function WarrantyClient() {
             minLength={5}
             maxLength={100}
             autoComplete="off"
-            className="h-14 text-lg"
+            className="h-12 text-base sm:h-14 sm:text-lg"
           />
           <Button
             type="submit"
-            className="h-14 px-8 bg-[#FF5722] hover:bg-[#E64A19] text-white font-bold"
+            className="h-12 shrink-0 px-8 font-bold sm:h-14"
             disabled={loading || !serial}
           >
             {loading ? (
@@ -85,7 +86,7 @@ export function WarrantyClient() {
         )}
 
         {result && (
-          <div className="bg-white p-6 md:p-8 rounded-lg shadow-sm border border-neutral-100 space-y-6 animate-in fade-in slide-in-from-bottom-4">
+          <div className="animate-in space-y-6 rounded-xl border border-neutral-200 bg-neutral-50/60 p-5 fade-in slide-in-from-bottom-4 sm:p-7">
             <div className="flex flex-col md:flex-row gap-6">
               {result.product.imageUrl && (
                 <div className="w-full md:w-32 h-32 relative bg-neutral-50 rounded-lg p-2 border border-neutral-100 shrink-0">
@@ -93,6 +94,7 @@ export function WarrantyClient() {
                     src={result.product.imageUrl}
                     alt={result.product.title}
                     fill
+                    sizes="(max-width: 767px) calc(100vw - 72px), 128px"
                     className="object-contain"
                   />
                 </div>
@@ -153,7 +155,7 @@ export function WarrantyClient() {
                   Khách hàng
                 </p>
                 <p className="font-medium text-foreground">
-                  {result.user.name || "N/A"}
+                    {result.user.name || "Chưa cập nhật"}
                 </p>
               </div>
               <div className="space-y-1">
@@ -161,13 +163,14 @@ export function WarrantyClient() {
                   Số điện thoại
                 </p>
                 <p className="font-medium text-foreground">
-                  {result.user.phoneNumber || "N/A"}
+                    {result.user.phoneNumber || "Chưa cập nhật"}
                 </p>
               </div>
             </div>
           </div>
         )}
+        </div>
       </div>
-    </div>
+    </main>
   );
 }

@@ -39,11 +39,11 @@ export function ProductTabs({ product }: { product: any }) {
   };
 
   return (
-    <div className="mt-12 bg-white rounded-sm border border-neutral-200 shadow-sm overflow-hidden">
-      <div className="flex border-b border-neutral-200">
+    <div className="mt-8 overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm sm:mt-12">
+      <div className="grid grid-cols-3 border-b border-neutral-200">
         <button
           onClick={() => setActiveTab("desc")}
-          className={`flex-1 py-4 flex items-center justify-center gap-2 font-medium text-sm transition-colors ${
+          className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-4 text-center text-xs font-semibold transition-colors sm:gap-2 sm:text-sm ${
             activeTab === "desc"
               ? "text-[#FF5722] border-b-2 border-[#FF5722] bg-orange-50/50"
               : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
@@ -54,18 +54,18 @@ export function ProductTabs({ product }: { product: any }) {
         </button>
         <button
           onClick={() => setActiveTab("specs")}
-          className={`flex-1 py-4 flex items-center justify-center gap-2 font-medium text-sm transition-colors ${
+          className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-4 text-center text-xs font-semibold transition-colors sm:gap-2 sm:text-sm ${
             activeTab === "specs"
               ? "text-[#FF5722] border-b-2 border-[#FF5722] bg-orange-50/50"
               : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
           }`}
         >
           <Settings className="w-4 h-4" />
-          Thông số Kỹ thuật
+          Thông số kỹ thuật
         </button>
         <button
           onClick={() => setActiveTab("reviews")}
-          className={`flex-1 py-4 flex items-center justify-center gap-2 font-medium text-sm transition-colors ${
+          className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-4 text-center text-xs font-semibold transition-colors sm:gap-2 sm:text-sm ${
             activeTab === "reviews"
               ? "text-[#FF5722] border-b-2 border-[#FF5722] bg-orange-50/50"
               : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
@@ -76,7 +76,7 @@ export function ProductTabs({ product }: { product: any }) {
         </button>
       </div>
 
-      <div className="p-6 md:p-8">
+      <div className="p-5 sm:p-7 md:p-8">
         {activeTab === "desc" && (
           <div className="prose prose-stone max-w-none text-neutral-600">
             <h3 className="text-xl font-bold text-foreground mb-4">
@@ -87,7 +87,7 @@ export function ProductTabs({ product }: { product: any }) {
             </p>
 
             {product.type === "ROBOT_STEM" && (
-              <div className="mt-8 bg-neutral-50 p-6 rounded-sm">
+              <div className="mt-8 rounded-xl border border-neutral-100 bg-neutral-50 p-5 sm:p-6">
                 <h4 className="font-bold text-foreground mb-2">
                   Ưu điểm nổi bật:
                 </h4>
@@ -108,7 +108,8 @@ export function ProductTabs({ product }: { product: any }) {
             <h3 className="text-xl font-bold text-foreground mb-6">
               Thông số kỹ thuật
             </h3>
-            <table className="w-full text-sm text-left border-collapse">
+            <div className="overflow-x-auto rounded-xl border border-neutral-200">
+            <table className="w-full min-w-[480px] border-collapse text-left text-sm">
               <tbody>
                 <tr className="border-b border-neutral-100">
                   <td className="py-3 px-4 bg-neutral-50 font-medium w-1/3 border-r border-neutral-100">
@@ -166,6 +167,7 @@ export function ProductTabs({ product }: { product: any }) {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         )}
 
@@ -233,7 +235,7 @@ export function ProductTabs({ product }: { product: any }) {
                 )}
               </div>
 
-              <div className="bg-neutral-50 p-6 rounded-sm h-fit border border-neutral-100">
+              <div className="h-fit rounded-xl border border-neutral-200 bg-neutral-50 p-5 sm:p-6">
                 <h4 className="font-bold text-lg mb-4">Viết đánh giá</h4>
                 <form onSubmit={handleReviewSubmit} className="space-y-4">
                   <div>
@@ -243,7 +245,7 @@ export function ProductTabs({ product }: { product: any }) {
                     <select
                       name="rating"
                       required
-                      className="w-full h-10 border rounded-sm px-3 text-sm focus:outline-none focus:border-[#FF5722]"
+                      className="h-10 w-full rounded-lg border px-3 text-sm focus:border-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF5722]/15"
                     >
                       <option value="5">5 Sao - Tuyệt vời</option>
                       <option value="4">4 Sao - Rất tốt</option>
@@ -261,13 +263,13 @@ export function ProductTabs({ product }: { product: any }) {
                       required
                       minLength={5}
                       placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
-                      className="w-full min-h-[100px] border rounded-sm p-3 text-sm focus:outline-none focus:border-[#FF5722]"
+                      className="min-h-[100px] w-full rounded-lg border p-3 text-sm focus:border-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF5722]/15"
                     ></textarea>
                   </div>
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="w-full h-10 bg-[#FF5722] text-white font-medium rounded-sm hover:bg-[#E64A19] transition-colors disabled:opacity-50"
+                    className="h-10 w-full rounded-lg bg-[#FF5722] font-medium text-white transition-colors hover:bg-[#E64A19] disabled:opacity-50"
                   >
                     {isPending ? "Đang gửi..." : "Gửi đánh giá"}
                   </button>

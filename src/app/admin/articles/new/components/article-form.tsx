@@ -34,7 +34,7 @@ export function ArticleForm({
     setError("");
 
     if (!formData.title || !formData.content) {
-      setError("Vui lòng nhập đủ Tiêu đề và Nội dung.");
+      setError("Vui lòng nhập đủ tiêu đề và nội dung.");
       return;
     }
 
@@ -58,7 +58,7 @@ export function ArticleForm({
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       {error && (
-        <div className="p-3 bg-red-50 text-red-600 rounded-sm text-sm border border-red-200">
+        <div className="rounded-xl border border-red-200 bg-red-50 p-3 text-sm text-red-600">
           {error}
         </div>
       )}
@@ -74,7 +74,7 @@ export function ArticleForm({
       </div>
 
       <div className="space-y-3">
-        <Label>Ảnh đại diện (URL)</Label>
+        <Label>Ảnh đại diện (đường dẫn)</Label>
         <Input
           placeholder="https://..."
           value={formData.thumbnail}
@@ -85,7 +85,7 @@ export function ArticleForm({
       </div>
 
       <div className="space-y-3">
-        <Label>Nội dung (Hỗ trợ Markdown / HTML cơ bản)</Label>
+        <Label>Nội dung (hỗ trợ Markdown/HTML cơ bản)</Label>
         <Textarea
           required
           rows={15}
@@ -99,7 +99,7 @@ export function ArticleForm({
       </div>
 
       <div className="space-y-3">
-        <Label>Thẻ (Tags)</Label>
+        <Label>Chủ đề</Label>
         <Input
           placeholder="arduino, stem, robot..."
           value={formData.tags}
@@ -117,7 +117,7 @@ export function ArticleForm({
           }
           className="w-4 h-4 text-[#FF5722] rounded border-neutral-300 focus:ring-[#FF5722]"
         />
-        <Label htmlFor="published">Xuất bản ngay (Hiển thị cho khách)</Label>
+        <Label htmlFor="published">Xuất bản ngay (hiển thị cho khách)</Label>
       </div>
 
       <div className="pt-4 border-t border-neutral-100">

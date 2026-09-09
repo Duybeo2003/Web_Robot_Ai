@@ -85,23 +85,23 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-neutral-800">
-          Yêu cầu Đổi/Trả (RMA)
+          Yêu cầu đổi/trả (RMA)
         </h1>
       </div>
 
-      <div className="bg-white rounded-sm shadow-sm border border-neutral-200 overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-neutral-50">
             <TableRow>
-              <TableHead>Mã Yêu cầu</TableHead>
-              <TableHead>Khách hàng</TableHead>
-              <TableHead>Mã Đơn hàng</TableHead>
-              <TableHead>Lý do</TableHead>
-              <TableHead>Minh chứng</TableHead>
-              <TableHead>Trạng thái</TableHead>
-              <TableHead>Ngày gửi</TableHead>
+              <TableHead>Yêu cầu đổi/trả</TableHead>
+              <TableHead className="hidden md:table-cell">Khách hàng</TableHead>
+              <TableHead className="hidden lg:table-cell">Mã đơn hàng</TableHead>
+              <TableHead className="hidden md:table-cell">Lý do</TableHead>
+              <TableHead className="hidden xl:table-cell">Minh chứng</TableHead>
+              <TableHead className="hidden sm:table-cell">Trạng thái</TableHead>
+              <TableHead className="hidden lg:table-cell">Ngày gửi</TableHead>
               <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
@@ -118,19 +118,28 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
             ) : (
               returns.map((req) => (
                 <TableRow key={req.id}>
-                  <TableCell className="font-mono text-xs">
-                    {req.id.slice(0, 8)}...
+                  <TableCell className="min-w-0 font-mono text-xs">
+                    <span>{req.id.slice(0, 8)}...</span>
+                    <div className="mt-2 space-y-1 font-sans md:hidden">
+                      <p className="truncate text-sm font-semibold">{req.user.name || "Khách hàng"}</p>
+                      <p className="truncate text-xs text-neutral-500">{req.user.phoneNumber || req.user.email}</p>
+                      <p className="line-clamp-2 text-sm text-neutral-700">{req.reason}</p>
+                    </div>
+                    <div className="mt-2 flex flex-wrap items-center gap-2 sm:hidden">
+                      {getStatusBadge(req.status)}
+                      {req.imageUrl && <a href={req.imageUrl} target="_blank" rel="noopener noreferrer" className="text-xs font-semibold text-blue-700 hover:underline">Xem ảnh</a>}
+                    </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <p className="font-medium">{req.user.name}</p>
                     <p className="text-xs text-neutral-500">
                       {req.user.phoneNumber || req.user.email}
                     </p>
                   </TableCell>
-                  <TableCell className="font-mono text-xs text-blue-600 font-medium">
+                  <TableCell className="hidden font-mono text-xs text-blue-600 font-medium lg:table-cell">
                     {req.orderId.slice(0, 8)}...
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div
                       className="max-w-[200px] truncate text-sm"
                       title={req.reason}
@@ -138,7 +147,7 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
                       {req.reason}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden xl:table-cell">
                     {req.imageUrl ? (
                       <a
                         href={req.imageUrl}
@@ -152,8 +161,8 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
                       <span className="text-neutral-400">—</span>
                     )}
                   </TableCell>
-                  <TableCell>{getStatusBadge(req.status)}</TableCell>
-                  <TableCell className="text-sm text-neutral-500">
+                  <TableCell className="hidden sm:table-cell">{getStatusBadge(req.status)}</TableCell>
+                  <TableCell className="hidden text-sm text-neutral-500 lg:table-cell">
                     {format(new Date(req.createdAt), "dd/MM/yyyy HH:mm")}
                   </TableCell>
                   <TableCell className="text-right">
@@ -168,7 +177,7 @@ export default async function AdminReturnsPage(props: { searchParams: Promise<{ 
           </TableBody>
         </Table>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} (Tổng: {totalCount})
             </p>

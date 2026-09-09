@@ -11,7 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { upsertProduct } from "@/actions/admin";
 import { toast } from "sonner";
-import { Loader2, Plus, Trash2 } from "lucide-react";
+import { Loader2, Plus, Trash2, Upload } from "lucide-react";
 import Image from "next/image";
 
 import { VariantManager, Variant } from "./variant-manager";
@@ -116,7 +116,7 @@ export function ProductForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="space-y-6 max-w-2xl bg-white p-6 rounded-md border shadow-sm"
+      className="max-w-2xl space-y-6 rounded-2xl border bg-white p-5 shadow-sm sm:p-6"
     >
       <div className="space-y-4">
         <div className="space-y-2">
@@ -125,7 +125,7 @@ export function ProductForm({
               htmlFor="title"
               className="text-base font-bold text-neutral-900"
             >
-              1. Tên Sản Phẩm / Tên Gói Combo
+              1. Tên sản phẩm / tên gói combo
             </Label>
           </div>
           <Input
@@ -187,7 +187,7 @@ export function ProductForm({
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="supplyType">Phân loại Nguồn hàng</Label>
+            <Label htmlFor="supplyType">Nguồn hàng</Label>
             <select
               id="supplyType"
               value={formData.supplyType}
@@ -197,13 +197,13 @@ export function ProductForm({
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:border-orange-500"
             >
               <option value="IN_HOUSE">Hàng tự sản xuất</option>
-              <option value="AFFILIATE_SELL">Bán hộ (Affiliate Out)</option>
-              <option value="PRE_ORDER">Hàng Order (Pre-order)</option>
-              <option value="AFFILIATE_HOST">Cho phép CTV khác bán (Affiliate In)</option>
+              <option value="AFFILIATE_SELL">Sản phẩm từ nhà cung cấp liên kết</option>
+              <option value="PRE_ORDER">Hàng đặt trước</option>
+              <option value="AFFILIATE_HOST">Cho phép đối tác giới thiệu</option>
             </select>
           </div>
           <div className="space-y-2">
-            <Label htmlFor="type">Loại cũ (Fallback)</Label>
+            <Label htmlFor="type">Loại sản phẩm</Label>
             <select
               id="type"
               value={formData.type}
@@ -212,15 +212,15 @@ export function ProductForm({
               }
               className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-orange-500 focus-visible:border-orange-500"
             >
-              <option value="ROBOT_STEM">Robot Thông Minh</option>
+              <option value="ROBOT_STEM">Robot thông minh</option>
               <option value="KIT_ARDUINO">Kit Arduino</option>
-              <option value="DO_CHOI_LOGIC">Đồ chơi Logic</option>
-              <option value="PHU_KIEN">Phụ Kiện</option>
+              <option value="DO_CHOI_LOGIC">Đồ chơi logic</option>
+              <option value="PHU_KIEN">Phụ kiện</option>
             </select>
           </div>
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col justify-start gap-2">
             <Label htmlFor="price">Giá bán hiện tại (VNĐ)</Label>
             <Input
@@ -235,7 +235,7 @@ export function ProductForm({
             />
           </div>
           <div className="flex flex-col justify-start gap-2">
-            <Label htmlFor="originalPrice">Giá gốc (VNĐ) - Tuỳ chọn</Label>
+            <Label htmlFor="originalPrice">Giá gốc (VNĐ, không bắt buộc)</Label>
             <Input
               id="originalPrice"
               type="number"
@@ -261,7 +261,7 @@ export function ProductForm({
         {/* Dynamic Fields Based on Supply Type */}
         {formData.supplyType === "AFFILIATE_SELL" && (
           <div className="space-y-2 border-l-4 border-orange-500 pl-4 py-2">
-            <Label htmlFor="externalAffiliateLink">Link Sàn Phụ (Shopee/Lazada)</Label>
+            <Label htmlFor="externalAffiliateLink">Liên kết gian hàng Shopee/Lazada</Label>
             <Input
               id="externalAffiliateLink"
               type="url"
@@ -276,7 +276,7 @@ export function ProductForm({
 
         {formData.supplyType === "AFFILIATE_HOST" && (
           <div className="space-y-2 border-l-4 border-green-500 pl-4 py-2">
-            <Label htmlFor="commissionRate">Tỷ lệ Hoa hồng CTV (%)</Label>
+            <Label htmlFor="commissionRate">Tỷ lệ hoa hồng đối tác (%)</Label>
             <Input
               id="commissionRate"
               type="number"
@@ -291,9 +291,9 @@ export function ProductForm({
         )}
 
         {formData.supplyType === "PRE_ORDER" && (
-          <div className="grid grid-cols-2 gap-4 border-l-4 border-blue-500 pl-4 py-2">
+          <div className="grid gap-4 border-l-4 border-blue-500 py-2 pl-4 sm:grid-cols-2">
             <div className="space-y-2">
-              <Label htmlFor="depositPercent">Tỷ lệ Cọc (%)</Label>
+              <Label htmlFor="depositPercent">Tỷ lệ cọc (%)</Label>
               <Input
                 id="depositPercent"
                 type="number"
@@ -306,7 +306,7 @@ export function ProductForm({
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="estimatedArrivalDate">Ngày Hàng Về (Dự kiến)</Label>
+              <Label htmlFor="estimatedArrivalDate">Ngày hàng về dự kiến</Label>
               <Input
                 id="estimatedArrivalDate"
                 type="datetime-local"
@@ -320,10 +320,10 @@ export function ProductForm({
         )}
 
         {/* Educational Metadata Section */}
-        <div className="border rounded-md p-4 bg-indigo-50/30 space-y-4">
+        <div className="space-y-4 rounded-xl border bg-indigo-50/30 p-4">
           <div>
             <Label className="text-base font-bold text-indigo-600">
-              Phân loại Giáo dục (RoboEQ)
+              Phân loại giáo dục
             </Label>
             <p className="text-xs text-muted-foreground">
               Các trường này giúp phân loại sản phẩm theo định hướng giáo dục
@@ -331,7 +331,7 @@ export function ProductForm({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4 pt-2">
+          <div className="grid gap-4 pt-2 sm:grid-cols-2">
             <div className="space-y-2">
               <Label htmlFor="ageRange">Độ tuổi phù hợp</Label>
               <select
@@ -360,7 +360,7 @@ export function ProductForm({
                 className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500"
               >
                 <option value="">-- Bỏ qua --</option>
-                <option value="LOGIC">Tư duy Logic</option>
+                <option value="LOGIC">Tư duy logic</option>
                 <option value="LANGUAGE">Ngoại ngữ</option>
                 <option value="MOTOR_SKILLS">Vận động</option>
                 <option value="EQ">Cảm xúc (EQ)</option>
@@ -372,7 +372,7 @@ export function ProductForm({
             <Label htmlFor="educationalGoal">Mục tiêu giáo dục cụ thể</Label>
             <Input
               id="educationalGoal"
-              placeholder="VD: Rèn luyện tính kiên nhẫn và khả năng giải quyết vấn đề"
+              placeholder="Ví dụ: Rèn luyện tính kiên nhẫn và khả năng giải quyết vấn đề"
               value={formData.educationalGoal}
               onChange={(e) =>
                 setFormData({ ...formData, educationalGoal: e.target.value })
@@ -383,7 +383,7 @@ export function ProductForm({
           <div className="flex items-center justify-between pt-2 border-t mt-4">
             <div>
               <Label className="text-base font-bold text-indigo-600">
-                Sản phẩm này là một Gói Combo?
+                Đây là gói combo?
               </Label>
               <p className="text-xs text-muted-foreground">
                 Đánh dấu nếu đây là một gói bán gộp nhiều đồ chơi lại với nhau.
@@ -409,7 +409,7 @@ export function ProductForm({
             <div className="mt-4 border-t-2 border-indigo-200 pt-4 space-y-4 bg-white p-4 rounded-md shadow-sm">
               <div>
                 <Label className="text-base font-bold text-indigo-700">
-                  2. Chọn các đồ chơi gộp vào Combo này
+                  2. Chọn sản phẩm trong combo
                 </Label>
                 <p className="text-xs text-muted-foreground mb-2">
                   Bấm vào hộp bên dưới để chọn những sản phẩm bạn muốn gộp chung
@@ -417,14 +417,14 @@ export function ProductForm({
                 </p>
               </div>
 
-              <div className="flex gap-2">
+              <div className="flex flex-col gap-2 sm:flex-row">
                 <select
-                  className="flex h-10 flex-1 rounded-md border border-input bg-background px-3 py-2 text-sm focus:ring-2 focus:ring-indigo-500 font-medium"
+                  className="flex h-10 w-full min-w-0 flex-1 rounded-lg border border-input bg-background px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-indigo-500"
                   value={selectedProductId}
                   onChange={(e) => setSelectedProductId(e.target.value)}
                 >
                   <option value="">
-                    👉 Bấm vào đây để chọn mặt hàng cần thêm...
+                    Chọn sản phẩm cần thêm...
                   </option>
                   {availableProducts
                     .filter(
@@ -463,7 +463,7 @@ export function ProductForm({
                       setSelectedProductId("");
                     }
                   }}
-                  className="bg-indigo-600 hover:bg-indigo-700 text-white"
+                  className="w-full bg-indigo-600 text-white hover:bg-indigo-700 sm:w-auto"
                 >
                   <Plus className="w-4 h-4 mr-1" /> Thêm
                 </Button>
@@ -482,6 +482,7 @@ export function ProductForm({
                             src={item.imageUrl}
                             alt={item.title}
                             fill
+                            sizes="40px"
                             className="object-cover"
                           />
                         </div>
@@ -528,10 +529,10 @@ export function ProductForm({
 
                   <div className="p-4 bg-indigo-50 rounded-md border border-indigo-100">
                     <h4 className="text-sm font-bold text-indigo-800 mb-3 uppercase tracking-wider">
-                      Phân tích giá trị Combo
+                      Phân tích giá trị combo
                     </h4>
                     <div className="space-y-2">
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-sm text-neutral-600">
                           1. Tổng giá bán rời (Giá trị thật):
                         </span>
@@ -546,15 +547,15 @@ export function ProductForm({
                           đ
                         </span>
                       </div>
-                      <div className="flex justify-between items-center">
+                      <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-sm text-neutral-600">
-                          2. Giá bán Combo (Giá bạn đang đặt):
+                          2. Giá bán combo:
                         </span>
                         <span className="text-base font-bold text-indigo-700">
                           {(formData.price || 0).toLocaleString("vi-VN")}đ
                         </span>
                       </div>
-                      <div className="flex justify-between items-center pt-2 mt-2 border-t border-indigo-200/60">
+                      <div className="mt-2 flex flex-col gap-1 border-t border-indigo-200/60 pt-2 sm:flex-row sm:items-center sm:justify-between">
                         <span className="text-sm font-bold text-neutral-800">
                           Khách hàng tiết kiệm được (Giảm giá):
                         </span>
@@ -587,7 +588,7 @@ export function ProductForm({
                           } else {
                             return (
                               <span className="text-sm font-medium text-red-500">
-                                Giá Combo đang đắt hơn mua rời!
+                                Giá combo đang cao hơn tổng giá mua rời.
                               </span>
                             );
                           }
@@ -605,7 +606,7 @@ export function ProductForm({
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-4">
+        <div className="grid gap-4 sm:grid-cols-2">
           <div className="flex flex-col justify-end gap-2">
             <Label htmlFor="inventoryCount">
               {formData.isCombo
@@ -653,10 +654,10 @@ export function ProductForm({
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
             <div>
               <Label className="text-base font-bold text-orange-600">
-                Flash Sale & Khuyến Mãi
+                Ưu đãi trong thời gian giới hạn
               </Label>
               <p className="text-xs text-muted-foreground">
-                Kích hoạt để hiển thị banner Flash Sale và bộ đếm ngược.
+                Kích hoạt để hiển thị giá ưu đãi và bộ đếm ngược.
               </p>
             </div>
             <label className="relative inline-flex items-center cursor-pointer">
@@ -693,7 +694,7 @@ export function ProductForm({
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="flashSaleStock">Số lượng Flash Sale</Label>
+                <Label htmlFor="flashSaleStock">Số lượng áp dụng ưu đãi</Label>
                 <Input
                   id="flashSaleStock"
                   type="number"
@@ -713,22 +714,27 @@ export function ProductForm({
         </div>
 
         <div className="space-y-2 border-t pt-4">
-          <Label htmlFor="imageUrl">Ảnh chính (Cover)</Label>
-          <div className="flex gap-4 items-center">
+          <Label htmlFor="imageUrl">Ảnh chính</Label>
+          <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-center">
             {formData.imageUrl && (
               <div className="relative w-16 h-16 shrink-0">
                 <Image
                   src={formData.imageUrl}
-                  alt="Preview"
+                  alt="Ảnh xem trước"
                   fill
                   className="object-cover rounded-md border bg-neutral-50"
                   sizes="64px"
                 />
               </div>
             )}
-            <Input
+            <label htmlFor="main-image-upload" className="inline-flex h-10 cursor-pointer items-center justify-center gap-2 rounded-lg border border-input bg-white px-4 text-sm font-semibold text-foreground shadow-xs transition-colors hover:bg-muted">
+              <Upload className="h-4 w-4" />
+              Chọn ảnh từ thiết bị
+            <input
+              id="main-image-upload"
               type="file"
               accept="image/*"
+              className="sr-only"
               onChange={async (e) => {
                 const file = e.target.files?.[0];
                 if (!file) return;
@@ -754,6 +760,7 @@ export function ProductForm({
                 }
               }}
             />
+            </label>
           </div>
           <Input
             id="imageUrl"
@@ -766,13 +773,13 @@ export function ProductForm({
         </div>
 
         <div className="space-y-2 border-t pt-4">
-          <Label>Thư viện Ảnh Phụ (Gallery)</Label>
+          <Label>Thư viện ảnh phụ</Label>
           <div className="flex flex-wrap gap-4 items-center">
             {formData.gallery?.map((imgUrl: string, idx: number) => (
               <div key={idx} className="relative w-16 h-16 shrink-0 group">
                 <Image
                   src={imgUrl}
-                  alt="Gallery Preview"
+                  alt="Ảnh phụ xem trước"
                   fill
                   className="object-cover rounded-md border bg-neutral-50"
                   sizes="64px"
@@ -833,8 +840,8 @@ export function ProductForm({
         </div>
 
         <div className="space-y-2 border-t pt-4">
-          <Label htmlFor="videoUrl">Video Sản Phẩm (Link YouTube / TikTok hoặc Tải Lên)</Label>
-          <div className="flex gap-4 items-start">
+          <Label htmlFor="videoUrl">Video sản phẩm (liên kết YouTube/TikTok hoặc tải lên)</Label>
+          <div className="flex flex-col items-stretch gap-4 sm:flex-row sm:items-start">
             <div className="flex-1 space-y-2">
               <Input
                 id="videoUrl"
@@ -849,9 +856,9 @@ export function ProductForm({
               </p>
             </div>
             
-            <div className="relative overflow-hidden group">
-              <Button type="button" variant="outline" className="w-32 relative">
-                Tải Video
+            <div className="group relative overflow-hidden">
+              <Button type="button" variant="outline" className="relative w-full sm:w-32">
+                Tải video
               </Button>
               <Input
                 type="file"
@@ -886,9 +893,9 @@ export function ProductForm({
           </div>
           {formData.videoUrl && (
             <div className="mt-2 text-sm">
-              <span className="text-green-600 font-medium">✓ Đã gắn Video</span>
+              <span className="text-green-600 font-medium">✓ Đã gắn video</span>
               {formData.videoUrl.startsWith("/") && (
-                <span className="ml-2 text-neutral-500 text-xs">(Video tải lên trực tiếp)</span>
+                <span className="ml-2 text-neutral-500 text-xs">(video tải lên trực tiếp)</span>
               )}
             </div>
           )}

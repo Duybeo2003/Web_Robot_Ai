@@ -82,21 +82,21 @@ export default async function AdminWarrantiesPage(props: { searchParams: Promise
 
   return (
     <div>
-      <div className="flex justify-between items-center mb-6">
+      <div className="mb-6">
         <h1 className="text-2xl font-bold text-neutral-800">
-          Quản lý Bảo hành
+          Quản lý bảo hành
         </h1>
       </div>
 
-      <div className="bg-white rounded-sm shadow-sm border border-neutral-200 overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <Table>
           <TableHeader className="bg-neutral-50">
             <TableRow>
-              <TableHead>Serial Number</TableHead>
-              <TableHead>Sản phẩm</TableHead>
-              <TableHead>Khách hàng</TableHead>
-              <TableHead>Ngày kích hoạt</TableHead>
-              <TableHead>Ngày hết hạn</TableHead>
+              <TableHead>Số sê-ri</TableHead>
+              <TableHead className="hidden md:table-cell">Sản phẩm</TableHead>
+              <TableHead className="hidden lg:table-cell">Khách hàng</TableHead>
+              <TableHead className="hidden xl:table-cell">Ngày kích hoạt</TableHead>
+              <TableHead className="hidden xl:table-cell">Ngày hết hạn</TableHead>
               <TableHead>Trạng thái</TableHead>
             </TableRow>
           </TableHeader>
@@ -113,24 +113,31 @@ export default async function AdminWarrantiesPage(props: { searchParams: Promise
             ) : (
               warranties.map((warranty) => (
                 <TableRow key={warranty.id}>
-                  <TableCell className="font-mono text-xs font-medium text-blue-600">
-                    {warranty.serialNumber}
+                  <TableCell className="min-w-0 font-mono text-xs font-medium text-blue-600">
+                    <span className="block truncate">{warranty.serialNumber}</span>
+                    <div className="mt-2 space-y-1 font-sans md:hidden">
+                      <p className="line-clamp-2 text-sm font-semibold text-neutral-900">{warranty.product.title}</p>
+                      <p className="truncate text-xs text-neutral-500">{warranty.user.name || warranty.user.phoneNumber || warranty.user.email}</p>
+                      <p className="text-xs text-neutral-500">
+                        {format(new Date(warranty.startDate), "dd/MM/yyyy")} – {format(new Date(warranty.endDate), "dd/MM/yyyy")}
+                      </p>
+                    </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden md:table-cell">
                     <div className="max-w-[200px] truncate font-medium text-sm" title={warranty.product.title}>
                       {warranty.product.title}
                     </div>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     <p className="font-medium text-sm">{warranty.user.name}</p>
                     <p className="text-xs text-neutral-500">
                       {warranty.user.phoneNumber || warranty.user.email}
                     </p>
                   </TableCell>
-                  <TableCell className="text-sm text-neutral-500">
+                  <TableCell className="hidden text-sm text-neutral-500 xl:table-cell">
                     {format(new Date(warranty.startDate), "dd/MM/yyyy")}
                   </TableCell>
-                  <TableCell className="text-sm text-neutral-500">
+                  <TableCell className="hidden text-sm text-neutral-500 xl:table-cell">
                     {format(new Date(warranty.endDate), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell>{getStatusBadge(warranty.status)}</TableCell>
@@ -140,7 +147,7 @@ export default async function AdminWarrantiesPage(props: { searchParams: Promise
           </TableBody>
         </Table>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} (Tổng: {totalCount})
             </p>

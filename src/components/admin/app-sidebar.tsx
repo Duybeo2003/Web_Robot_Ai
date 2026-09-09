@@ -47,26 +47,26 @@ const overviewGroup = [{ title: "Tổng quan", url: "/admin", icon: BarChart3 }]
 
 const salesGroup = [
   { title: "Đơn hàng", url: "/admin/orders", icon: ShoppingCart },
-  { title: "Duyệt Nạp Xu", url: "/admin/wallet", icon: Wallet },
+  { title: "Duyệt nạp xu", url: "/admin/wallet", icon: Wallet },
   { title: "Đối soát hoa hồng", url: "/admin/commissions", icon: DollarSign },
-  { title: "Trả thưởng & Giao hàng", url: "/admin/deliveries", icon: Package },
+  { title: "Trả thưởng và giao hàng", url: "/admin/deliveries", icon: Package },
   { title: "Bảo hành", url: "/admin/warranties", icon: ShieldAlert },
-  { title: "Đổi/Trả (RMA)", url: "/admin/returns", icon: Package },
+  { title: "Đổi trả (RMA)", url: "/admin/returns", icon: Package },
   { title: "Đánh giá", url: "/admin/reviews", icon: Star },
 ];
 
 const productGroup = [
   { title: "Sản phẩm", url: "/admin/products", icon: Package },
-  { title: "Quản lý Combo", url: "/admin/combos", icon: Layers },
+  { title: "Quản lý combo", url: "/admin/combos", icon: Layers },
   { title: "Kho hàng", url: "/admin/inventory", icon: Package },
   { title: "Danh mục", url: "/admin/categories", icon: ListTree },
 ];
 
 const marketingGroup = [
-  { title: "Sự kiện & Minigame", url: "/admin/events", icon: Trophy },
+  { title: "Sự kiện và minigame", url: "/admin/events", icon: Trophy },
   { title: "Mã giảm giá", url: "/admin/coupons", icon: Ticket },
-  { title: "Flash Sale", url: "/admin/flash-sales", icon: Zap },
-  { title: "Bài viết (Blog)", url: "/admin/articles", icon: BookOpen },
+  { title: "Flash sale", url: "/admin/flash-sales", icon: Zap },
+  { title: "Bài viết", url: "/admin/articles", icon: BookOpen },
 ];
 
 const reportGroup = [
@@ -77,7 +77,7 @@ const systemGroup = [
   { title: "Yêu cầu hỗ trợ", url: "/admin/support", icon: Mail },
   { title: "Nhật ký kiểm toán", url: "/admin/audit", icon: ScrollText },
   { title: "Khách hàng", url: "/admin/users", icon: Users },
-  { title: "Quản trị Admin", url: "/admin/admins", icon: ShieldCheck },
+  { title: "Quản trị viên", url: "/admin/admins", icon: ShieldCheck },
   { title: "Cài đặt", url: "/admin/settings", icon: Settings },
 ];
 
@@ -89,8 +89,8 @@ export function AppSidebar({ role = "ADMIN" }: { role?: string }) {
     items.filter((item) => canAccessAdminPath(role, item.url));
 
   const renderGroup = (label: string, items: typeof overviewGroup) => (
-    <SidebarGroup>
-      <SidebarGroupLabel>{label}</SidebarGroupLabel>
+    <SidebarGroup className="py-1">
+      <SidebarGroupLabel className="px-3 text-xs font-bold text-neutral-400">{label}</SidebarGroupLabel>
       <SidebarGroupContent>
         <SidebarMenu>
           {items.map((item) => {
@@ -102,7 +102,7 @@ export function AppSidebar({ role = "ADMIN" }: { role?: string }) {
                 <Link href={item.url} className="w-full block" onClick={() => setOpenMobile(false)}>
                   <SidebarMenuButton
                     isActive={isActive}
-                    className={`flex items-center gap-2 w-full font-medium transition-all ${
+                    className={`h-10 w-full gap-2.5 rounded-lg px-3 font-medium transition-all ${
                       isActive
                         ? "text-[#FF5722] bg-orange-50 hover:bg-orange-100 hover:text-[#FF5722]"
                         : "text-neutral-600 hover:text-[#FF5722] hover:bg-orange-50/50"
@@ -138,25 +138,25 @@ export function AppSidebar({ role = "ADMIN" }: { role?: string }) {
         </Link>
       </SidebarHeader>
 
-      <SidebarContent className="py-4">
-        {permitted(overviewGroup).length > 0 && renderGroup("Dữ liệu", permitted(overviewGroup))}
-        <div className="px-4 py-2 opacity-50">
+      <SidebarContent className="py-3">
+        {permitted(overviewGroup).length > 0 && renderGroup("Điều hành", permitted(overviewGroup))}
+        <div className="px-4 py-1 opacity-50">
           <SidebarSeparator />
         </div>
         {permitted(salesGroup).length > 0 && renderGroup("Bán hàng", permitted(salesGroup))}
-        <div className="px-4 py-2 opacity-50">
+        <div className="px-4 py-1 opacity-50">
           <SidebarSeparator />
         </div>
-        {permitted(productGroup).length > 0 && renderGroup("Kho hàng", permitted(productGroup))}
-        <div className="px-4 py-2 opacity-50">
+        {permitted(productGroup).length > 0 && renderGroup("Sản phẩm và kho", permitted(productGroup))}
+        <div className="px-4 py-1 opacity-50">
           <SidebarSeparator />
         </div>
         {permitted(marketingGroup).length > 0 && renderGroup("Tiếp thị", permitted(marketingGroup))}
-        <div className="px-4 py-2 opacity-50">
+        <div className="px-4 py-1 opacity-50">
           <SidebarSeparator />
         </div>
         {permitted(reportGroup).length > 0 && renderGroup("Báo cáo", permitted(reportGroup))}
-        <div className="px-4 py-2 opacity-50">
+        <div className="px-4 py-1 opacity-50">
           <SidebarSeparator />
         </div>
         {permitted(systemGroup).length > 0 && renderGroup("Hệ thống", permitted(systemGroup))}
@@ -169,7 +169,7 @@ export function AppSidebar({ role = "ADMIN" }: { role?: string }) {
             className="inline-flex items-center justify-start whitespace-nowrap rounded-md text-sm font-medium transition-colors border border-orange-200 bg-white hover:bg-orange-100 text-orange-700 h-9 px-4 py-2 w-full gap-2 shadow-sm"
           >
             <ArrowLeft className="h-4 w-4" />
-            Về Cửa Hàng
+            Về cửa hàng
           </Link>
           <Button
             variant="ghost"

@@ -163,7 +163,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
         </Button>
       </div>
 
-      <div className="bg-white rounded-sm border border-neutral-200 shadow-sm overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
             <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 border-b border-neutral-200">
@@ -195,7 +195,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
                       <td className="px-6 py-4">
                         <div className="font-bold text-neutral-800 flex items-center gap-2">
                           {prize.name}
-                          {prize.isJackpot && <span className="bg-yellow-400 text-yellow-900 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-black">Jackpot</span>}
+                          {prize.isJackpot && <span className="rounded-full bg-yellow-400 px-2 py-0.5 text-[10px] font-black tracking-wider text-yellow-900">Giải đặc biệt</span>}
                         </div>
                       </td>
                       <td className="px-6 py-4">
@@ -267,7 +267,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
               />
             </div>
             
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-2">
               {event.type === "POINT_EXCHANGE" ? (
                 <div className="grid gap-2">
                   <Label>Giá đổi (Xu)</Label>
@@ -302,9 +302,9 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
             <div className="p-4 bg-orange-50 border border-orange-100 rounded-lg space-y-4">
               <p className="text-sm font-bold text-orange-800">Phần thưởng (Chọn 1 trong 2)</p>
               
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid gap-4 sm:grid-cols-2">
               <div className="grid gap-2">
-                <Label>Quà Thực tế (Sản phẩm trong Shop)</Label>
+                <Label>Quà thực tế (sản phẩm trong cửa hàng)</Label>
                 <select 
                   className="flex h-10 w-full items-center justify-between rounded-md border border-input bg-background px-3 py-2 text-sm"
                   value={formData.productId}
@@ -354,7 +354,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
                 onChange={(e) => setFormData({...formData, isJackpot: e.target.checked})}
                 className="w-4 h-4 text-orange-600 rounded"
               />
-              <Label htmlFor="isJackpot" className="cursor-pointer font-bold text-yellow-600">Đánh dấu đây là Ô JACKPOT (Nổ pháo hoa lớn)</Label>
+              <Label htmlFor="isJackpot" className="cursor-pointer font-bold text-yellow-600">Đánh dấu là giải đặc biệt (hiển thị hiệu ứng pháo hoa)</Label>
             </div>
           </div>
           <DialogFooter>

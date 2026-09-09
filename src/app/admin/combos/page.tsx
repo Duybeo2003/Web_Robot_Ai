@@ -5,7 +5,7 @@ import { deleteProduct } from "@/actions/product";
 import { DeleteButton } from "@/components/delete-button";
 
 export const metadata = {
-  title: "Quản lý Combo - Admin",
+  title: "Quản lý combo - Admin",
 };
 
 export default async function AdminCombosPage({
@@ -54,22 +54,22 @@ export default async function AdminCombosPage({
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
         <div>
           <h2 className="text-2xl font-bold tracking-tight text-indigo-700">
-            Gói Combo
+            Gói combo
           </h2>
           <p className="text-muted-foreground">
-            Quản lý các Gói Combo bán gộp đồ chơi.
+            Quản lý các gói sản phẩm bán cùng nhau.
           </p>
         </div>
         <Link
           href="/admin/combos/new"
-          className="bg-indigo-600 text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 hover:bg-indigo-700 transition-colors"
+          className="flex h-10 items-center gap-2 rounded-lg bg-indigo-600 px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-indigo-700"
         >
           <Plus className="w-4 h-4" />
-          Tạo Gói Combo
+          Tạo gói combo
         </Link>
       </div>
 
-      <div className="bg-white rounded-lg border border-indigo-100 shadow-sm">
+      <div className="overflow-hidden rounded-2xl border border-indigo-100 bg-white shadow-sm">
         <div className="p-4 border-b border-indigo-50 flex items-center gap-4">
           <form className="relative flex-1 max-w-sm">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
@@ -77,8 +77,8 @@ export default async function AdminCombosPage({
               type="text"
               name="q"
               defaultValue={query}
-              placeholder="Tìm kiếm Gói Combo..."
-              className="w-full pl-9 pr-4 py-2 text-sm border border-indigo-100 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500/20 focus:border-indigo-500"
+              placeholder="Tìm kiếm gói combo..."
+              className="w-full rounded-lg border border-indigo-100 py-2 pl-9 pr-4 text-sm focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20"
             />
           </form>
         </div>
@@ -87,11 +87,11 @@ export default async function AdminCombosPage({
           <table className="w-full text-sm text-left">
             <thead className="bg-indigo-50/50 text-indigo-800 font-semibold border-b border-indigo-100">
               <tr>
-                <th className="px-4 py-3">Tên Gói Combo</th>
-                <th className="px-4 py-3">Thành phần</th>
-                <th className="px-4 py-3 text-right">Tổng giá rời</th>
-                <th className="px-4 py-3 text-right">Giá bán Combo</th>
-                <th className="px-4 py-3 text-right">Tiết kiệm</th>
+                <th className="px-4 py-3">Gói combo</th>
+                <th className="hidden px-4 py-3 md:table-cell">Thành phần</th>
+                <th className="hidden px-4 py-3 text-right lg:table-cell">Tổng giá rời</th>
+                <th className="hidden px-4 py-3 text-right md:table-cell">Giá bán combo</th>
+                <th className="hidden px-4 py-3 text-right xl:table-cell">Tiết kiệm</th>
                 <th className="px-4 py-3 text-right">Thao tác</th>
               </tr>
             </thead>
@@ -104,7 +104,7 @@ export default async function AdminCombosPage({
                   >
                     <div className="flex flex-col items-center justify-center gap-2">
                       <Layers className="w-8 h-8 text-indigo-200" />
-                      <span>Chưa có Gói Combo nào</span>
+                      <span>Chưa có gói combo nào</span>
                     </div>
                   </td>
                 </tr>
@@ -128,12 +128,31 @@ export default async function AdminCombosPage({
                     >
                       <td className="px-4 py-4">
                         <div className="flex items-center gap-3">
-                          <div className="font-bold text-indigo-700 line-clamp-2">
+                          <div className="line-clamp-2 font-bold text-indigo-700">
                             {combo.title}
                           </div>
                         </div>
+                        <div className="mt-2 space-y-1 md:hidden">
+                          {combo.comboItems.slice(0, 2).map((item) => (
+                            <div key={item.id} className="truncate text-xs text-neutral-600">
+                              <span className="font-semibold text-neutral-800">{item.quantity}×</span>{" "}
+                              {item.product?.title || "Sản phẩm"}
+                            </div>
+                          ))}
+                          {combo.comboItems.length > 2 && (
+                            <div className="text-xs text-neutral-500">+{combo.comboItems.length - 2} sản phẩm khác</div>
+                          )}
+                          <div className="flex flex-wrap items-center gap-2 pt-1">
+                            <span className="font-bold text-red-600">{formatPrice(currentPrice)}</span>
+                            {discountPercent > 0 && (
+                              <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-700">
+                                Tiết kiệm {discountPercent}%
+                              </span>
+                            )}
+                          </div>
+                        </div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="hidden px-4 py-4 md:table-cell">
                         <div className="text-xs text-neutral-600 space-y-1">
                           {combo.comboItems.length > 0 ? (
                             combo.comboItems.map((item, idx) => (
@@ -159,20 +178,20 @@ export default async function AdminCombosPage({
                           )}
                         </div>
                       </td>
-                      <td className="px-4 py-4 text-right font-medium text-neutral-500 line-through">
+                      <td className="hidden px-4 py-4 text-right font-medium text-neutral-500 line-through lg:table-cell">
                         {retailPrice > 0 ? formatPrice(retailPrice) : "-"}
                       </td>
-                      <td className="px-4 py-4 text-right font-bold text-red-600">
+                      <td className="hidden px-4 py-4 text-right font-bold text-red-600 md:table-cell">
                         {formatPrice(currentPrice)}
                       </td>
-                      <td className="px-4 py-4 text-right">
+                      <td className="hidden px-4 py-4 text-right xl:table-cell">
                         {savings > 0 ? (
                           <div className="flex flex-col items-end">
                             <span className="font-bold text-emerald-600">
                               -{formatPrice(savings)}
                             </span>
-                            <span className="text-[10px] bg-emerald-100 text-emerald-700 px-1.5 rounded-sm">
-                              {discountPercent}% OFF
+                            <span className="rounded-full bg-emerald-100 px-2 py-0.5 text-xs text-emerald-700">
+                              Giảm {discountPercent}%
                             </span>
                           </div>
                         ) : (
@@ -210,7 +229,7 @@ export default async function AdminCombosPage({
 
         {/* Pagination */}
         {totalPages > 1 && (
-          <div className="p-4 border-t flex items-center justify-between">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <span className="text-sm text-muted-foreground">
               Hiển thị {(currentPage - 1) * itemsPerPage + 1} -{" "}
               {Math.min(currentPage * itemsPerPage, totalCount)} trên{" "}

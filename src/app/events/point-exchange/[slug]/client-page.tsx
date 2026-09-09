@@ -42,7 +42,7 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
     }
     
     if (balance < pointCost) {
-      toast.error(`Bạn không đủ Xu. Cần thêm ${pointCost - balance} Xu!`);
+      toast.error(`Bạn không đủ xu. Cần thêm ${pointCost - balance} xu!`);
       return;
     }
 
@@ -75,6 +75,7 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
               src={event.bannerUrl} 
               alt={event.name} 
               fill
+              sizes="(max-width: 1023px) 100vw, 1024px"
               className="object-cover"
             />
           </div>
@@ -91,12 +92,12 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
 
         {/* User Balance */}
         {userId && (
-          <div className="flex justify-center mb-8">
-            <div className="bg-white/80 backdrop-blur border border-orange-200 px-6 py-3 rounded-full flex items-center gap-3 shadow-sm">
+          <div className="mb-8 flex justify-center">
+            <div className="flex flex-col items-center gap-2 rounded-2xl border border-orange-200 bg-white/80 px-6 py-3 shadow-sm backdrop-blur sm:flex-row sm:gap-3 sm:rounded-full">
               <span className="text-neutral-600 font-medium">Số dư hiện tại:</span>
               <div className="flex items-center gap-1.5 font-bold text-orange-600 text-xl">
                 <Coins className="w-5 h-5" />
-                {balance.toLocaleString('vi-VN')} Xu
+                {balance.toLocaleString('vi-VN')} xu
               </div>
             </div>
           </div>
@@ -105,14 +106,14 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Main Content (Prizes) */}
           <div className="lg:col-span-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 items-stretch gap-4 sm:grid-cols-2">
               {event.prizes.map(prize => {
                 const isOutOfStock = prize.stock !== null && prize.stock <= 0;
                 
                 return (
                   <div 
                     key={prize.id}
-                    className={`bg-white rounded-xl p-5 border-2 transition-all ${
+                    className={`flex h-full flex-col rounded-xl border-2 bg-white p-5 transition-all ${
                       isOutOfStock ? 'border-neutral-200 opacity-60' : 'border-orange-100 hover:border-orange-300 hover:shadow-md'
                     }`}
                   >
@@ -132,7 +133,7 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
                       </div>
                     </div>
 
-                    <div className="flex items-center justify-between mt-6">
+                    <div className="mt-auto flex items-center justify-between gap-3 pt-6">
                       <div className="flex items-center gap-1 font-black text-orange-600 text-xl">
                         <Coins className="w-5 h-5" />
                         {prize.pointCost.toLocaleString('vi-VN')}
@@ -156,7 +157,7 @@ export default function PointExchangeClientPage({ event, initialBalance, userId 
             <div className="bg-white rounded-xl shadow-sm border border-neutral-200 p-6 sticky top-6">
               <h2 className="text-xl font-bold flex items-center gap-2 mb-4 text-neutral-800">
                 <AlertTriangle className="w-5 h-5 text-orange-500" />
-                Thể Lệ Sự Kiện
+                Thể lệ sự kiện
               </h2>
               <div className="prose prose-sm text-neutral-600 max-w-none">
                 {event.rules ? (

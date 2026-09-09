@@ -50,9 +50,9 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
 
   const getStatusBadge = (status: string) => {
     switch (status) {
-      case "PENDING": return <span className="bg-yellow-100 text-yellow-800 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 w-fit"><Clock className="w-3 h-3"/> Chờ xử lý</span>;
-      case "SHIPPED": return <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 w-fit"><Truck className="w-3 h-3"/> Đang giao</span>;
-      case "DELIVERED": return <span className="bg-green-100 text-green-800 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 w-fit"><CheckCircle2 className="w-3 h-3"/> Đã nhận</span>;
+      case "PENDING": return <span className="flex w-fit items-center gap-1 rounded-full bg-yellow-100 px-2 py-1 text-xs font-bold text-yellow-800"><Clock className="w-3 h-3"/> Chờ xử lý</span>;
+      case "SHIPPED": return <span className="flex w-fit items-center gap-1 rounded-full bg-blue-100 px-2 py-1 text-xs font-bold text-blue-800"><Truck className="w-3 h-3"/> Đang giao</span>;
+      case "DELIVERED": return <span className="flex w-fit items-center gap-1 rounded-full bg-green-100 px-2 py-1 text-xs font-bold text-green-800"><CheckCircle2 className="w-3 h-3"/> Đã nhận</span>;
       case "REJECTED":
       case "CANCELLED": return <span className="bg-red-100 text-red-800 px-2 py-1 rounded text-xs font-bold flex items-center gap-1 w-fit"><XCircle className="w-3 h-3"/> Đã hủy</span>;
       default: return <span className="bg-neutral-100 text-neutral-800 px-2 py-1 rounded text-xs font-bold w-fit">{status}</span>;
@@ -61,20 +61,20 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-heading font-bold text-foreground">Quản lý Giao Hàng (Trả Thưởng)</h1>
+      <div>
+        <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Quản lý giao hàng và trả thưởng</h1>
       </div>
 
-      <div className="bg-white rounded-sm border border-neutral-200 shadow-sm overflow-hidden">
+      <div className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
         <div className="overflow-x-auto">
           <table className="w-full text-sm text-left">
-            <thead className="text-xs text-neutral-500 uppercase bg-neutral-50 border-b border-neutral-200">
+            <thead className="border-b border-neutral-200 bg-neutral-50 text-xs text-neutral-500">
               <tr>
-                <th className="px-6 py-4 font-bold">Mã YC / Ngày</th>
-                <th className="px-6 py-4 font-bold">Thông tin nhận hàng</th>
-                <th className="px-6 py-4 font-bold">Vật phẩm (Quà)</th>
-                <th className="px-6 py-4 font-bold">Trạng thái</th>
-                <th className="px-6 py-4 font-bold text-right">Thao tác</th>
+                <th className="px-4 py-4 font-bold sm:px-6">Yêu cầu giao hàng</th>
+                <th className="hidden px-6 py-4 font-bold md:table-cell">Thông tin nhận hàng</th>
+                <th className="hidden px-6 py-4 font-bold lg:table-cell">Vật phẩm</th>
+                <th className="hidden px-6 py-4 font-bold md:table-cell">Trạng thái</th>
+                <th className="px-4 py-4 text-right font-bold sm:px-6">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-neutral-200">
@@ -88,36 +88,47 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
               ) : (
                 deliveries.map((delivery) => (
                   <tr key={delivery.id} className="hover:bg-neutral-50 transition-colors">
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-neutral-800 uppercase text-xs">{delivery.id.slice(-6)}</div>
+                    <td className="min-w-0 px-4 py-4 sm:px-6">
+                      <div className="text-xs font-bold text-neutral-800">{delivery.id.slice(-6).toUpperCase()}</div>
                       <div className="text-xs text-neutral-500 mt-1">
                         {new Date(delivery.createdAt).toLocaleString('vi-VN')}
                       </div>
+                      <div className="mt-2 space-y-1 md:hidden">
+                        <div className="font-semibold text-neutral-800">{delivery.recipientName}</div>
+                        <div className="text-xs text-neutral-600">{delivery.phoneNumber}</div>
+                        <div className="line-clamp-2 text-xs text-neutral-600">{delivery.address}</div>
+                        <div className="truncate text-xs font-medium text-blue-700">{delivery.inventoryItem.product.title}</div>
+                        <div className="text-xs text-neutral-500">
+                          Phí giao hàng: <span className="font-semibold text-orange-600">{delivery.shippingFee === 0 ? "Miễn phí" : `${delivery.shippingFee.toLocaleString("vi-VN")} đ`}</span>
+                        </div>
+                        <div className="pt-1">{getStatusBadge(delivery.status)}</div>
+                        {delivery.trackingCode && <div className="text-xs text-neutral-500">Mã vận đơn: {delivery.trackingCode}</div>}
+                      </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="hidden px-6 py-4 md:table-cell">
                       <div className="font-bold text-neutral-800">{delivery.recipientName} - {delivery.phoneNumber}</div>
                       <div className="text-xs text-neutral-600 mt-1 max-w-[250px] line-clamp-2">{delivery.address}</div>
                       {delivery.notes && (
                         <div className="text-xs text-orange-600 mt-1 italic">Ghi chú: {delivery.notes}</div>
                       )}
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="hidden px-6 py-4 lg:table-cell">
                       <div className="font-medium text-blue-600 max-w-[200px] truncate" title={delivery.inventoryItem.product.title}>
                         {delivery.inventoryItem.product.title}
                       </div>
                       <div className="text-xs text-neutral-500 mt-1">
-                        Phí Ship: <span className="font-bold text-orange-500">{delivery.shippingFee === 0 ? "Freeship" : `${delivery.shippingFee.toLocaleString()}đ`}</span>
+                        Phí giao hàng: <span className="font-bold text-orange-500">{delivery.shippingFee === 0 ? "Miễn phí" : `${delivery.shippingFee.toLocaleString("vi-VN")} đ`}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4">
+                    <td className="hidden px-6 py-4 md:table-cell">
                       {getStatusBadge(delivery.status)}
                       {delivery.trackingCode && (
                         <div className="text-xs text-neutral-500 mt-1 font-mono bg-neutral-100 px-2 py-0.5 rounded w-fit">
-                          Mã VĐ: {delivery.trackingCode}
+                          Mã vận đơn: {delivery.trackingCode}
                         </div>
                       )}
                     </td>
-                    <td className="px-6 py-4 text-right">
+                    <td className="px-4 py-4 text-right sm:px-6">
                       {delivery.status === "PENDING" && (
                         <div className="flex justify-end gap-2">
                           <Button 
@@ -179,7 +190,7 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
               <Input 
                 id="tracking-code"
                 required
-                placeholder="VD: GHTK123456789"
+                placeholder="Ví dụ: GHTK123456789"
                 value={trackingCode}
                 onChange={(e) => setTrackingCode(e.target.value)}
               />
@@ -197,7 +208,7 @@ export default function AdminDeliveriesClientPage({ deliveries: initialDeliverie
               disabled={loading || !selectedDelivery || trackingCode.trim().length < 3}
               className="bg-blue-600 hover:bg-blue-700 text-white"
             >
-              Xác nhận Giao
+              Xác nhận giao
             </Button>
           </DialogFooter>
         </DialogContent>

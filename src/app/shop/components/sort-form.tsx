@@ -29,11 +29,12 @@ export function SortForm({
         name="sort"
         defaultValue={sortOption}
         onChange={(e) => e.target.form?.submit()}
-        className="h-10 pl-3 pr-8 text-sm border border-neutral-200 rounded-sm focus:outline-none focus:border-[#FF5722] bg-white appearance-none cursor-pointer hover:bg-neutral-50 transition-colors"
+        aria-label="Sắp xếp sản phẩm"
+        className="h-10 cursor-pointer appearance-none rounded-lg border border-neutral-200 bg-white pl-3 pr-9 text-sm font-medium outline-none transition-colors hover:bg-neutral-50 focus:border-primary focus:ring-3 focus:ring-primary/10"
       >
         <option value="newest">Mới nhất</option>
-        <option value="price_asc">Giá: Thấp đến Cao</option>
-        <option value="price_desc">Giá: Cao đến Thấp</option>
+        <option value="price_asc">Giá: thấp đến cao</option>
+        <option value="price_desc">Giá: cao đến thấp</option>
       </select>
       <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-2 text-neutral-500">
         <svg

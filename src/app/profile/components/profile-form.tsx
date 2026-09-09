@@ -35,9 +35,9 @@ export function ProfileForm({ initialData }: { initialData: any }) {
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="space-y-4">
         {/* Read-only email or phone if email doesn't exist */}
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label className="text-right text-neutral-500">Tên đăng nhập</Label>
-          <div className="col-span-2">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:items-center sm:gap-4">
+          <Label className="text-neutral-600 sm:text-right">Tên đăng nhập</Label>
+          <div className="sm:col-span-2">
             <span className="text-sm font-medium">
               {initialData?.email ||
                 initialData?.phoneNumber ||
@@ -46,11 +46,11 @@ export function ProfileForm({ initialData }: { initialData: any }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label htmlFor="name" className="text-right text-neutral-500">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:items-center sm:gap-4">
+          <Label htmlFor="name" className="text-neutral-600 sm:text-right">
             Tên
           </Label>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <Input
               id="name"
               value={formData.name}
@@ -63,11 +63,11 @@ export function ProfileForm({ initialData }: { initialData: any }) {
           </div>
         </div>
 
-        <div className="grid grid-cols-3 items-center gap-4">
-          <Label htmlFor="phoneNumber" className="text-right text-neutral-500">
+        <div className="grid grid-cols-1 gap-2 sm:grid-cols-3 sm:items-center sm:gap-4">
+          <Label htmlFor="phoneNumber" className="text-neutral-600 sm:text-right">
             Số điện thoại
           </Label>
-          <div className="col-span-2">
+          <div className="sm:col-span-2">
             <Input
               id="phoneNumber"
               value={formData.phoneNumber}
@@ -81,12 +81,12 @@ export function ProfileForm({ initialData }: { initialData: any }) {
         </div>
       </div>
 
-      <div className="grid grid-cols-3 items-center gap-4 pt-4">
-        <div className="col-start-2 col-span-2">
+      <div className="grid grid-cols-1 gap-4 pt-2 sm:grid-cols-3">
+        <div className="sm:col-span-2 sm:col-start-2">
           <Button
             type="submit"
             disabled={loading}
-            className="bg-[#FF5722] hover:bg-[#E64A19] text-white px-8"
+            className="w-full px-8 sm:w-auto"
           >
             {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
             Lưu

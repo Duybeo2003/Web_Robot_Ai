@@ -67,26 +67,42 @@ export function InventoryTable({
   };
 
   return (
-    <div className="rounded-md border border-neutral-200 overflow-hidden">
+    <div className="overflow-hidden rounded-xl border border-neutral-200">
       <Table>
         <TableHeader className="bg-neutral-50">
           <TableRow>
-            <TableHead>Ngày GD</TableHead>
-            <TableHead>Biến động</TableHead>
-            <TableHead>Sản phẩm</TableHead>
-            <TableHead className="text-right">Số lượng</TableHead>
-            <TableHead className="text-right">Giá vốn (Nhập)</TableHead>
-            <TableHead>Tham chiếu</TableHead>
-            <TableHead>Người thực hiện</TableHead>
+            <TableHead>Giao dịch kho</TableHead>
+            <TableHead className="hidden md:table-cell">Biến động</TableHead>
+            <TableHead className="hidden md:table-cell">Sản phẩm</TableHead>
+            <TableHead className="hidden text-right lg:table-cell">Số lượng</TableHead>
+            <TableHead className="hidden text-right xl:table-cell">Giá vốn nhập</TableHead>
+            <TableHead className="hidden lg:table-cell">Tham chiếu</TableHead>
+            <TableHead className="hidden xl:table-cell">Người thực hiện</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {transactions.map((tx) => (
             <TableRow key={tx.id}>
-              <TableCell className="font-medium whitespace-nowrap">
-                {format(new Date(tx.createdAt), "dd/MM/yyyy HH:mm")}
+              <TableCell className="min-w-0 font-medium">
+                <span>{format(new Date(tx.createdAt), "dd/MM/yyyy HH:mm")}</span>
+                <div className="mt-2 space-y-1 md:hidden">
+                  <div className="line-clamp-2 text-sm font-semibold">{tx.product.title}</div>
+                  <div className="text-xs text-muted-foreground">SKU: {tx.variant?.sku || tx.product.sku || "Chưa cập nhật"}</div>
+                  <div className="flex flex-wrap items-center gap-2 pt-1">
+                    <Badge variant="outline" className={tx.type === "IN" ? "border-green-200 bg-green-50 text-green-700" : "border-orange-200 bg-orange-50 text-orange-700"}>
+                      {tx.type === "IN" ? "Nhập kho" : "Xuất kho"}
+                    </Badge>
+                    <strong className={tx.type === "IN" ? "text-green-600" : "text-orange-600"}>
+                      {tx.type === "IN" ? "+" : "-"}{tx.quantity}
+                    </strong>
+                    <span className="text-xs text-muted-foreground">{sourceLabels[tx.source]}</span>
+                  </div>
+                  <div className="text-xs text-muted-foreground">
+                    {tx.orderId ? `Đơn ${tx.orderId.slice(0, 10).toUpperCase()}` : tx.reference || "Không có tham chiếu"}
+                  </div>
+                </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 {tx.type === "IN" ? (
                   <Badge
                     variant="outline"
@@ -106,13 +122,13 @@ export function InventoryTable({
                   {sourceLabels[tx.source]}
                 </span>
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden md:table-cell">
                 <div className="flex flex-col">
                   <span className="font-semibold text-sm line-clamp-1">
                     {tx.product.title}
                   </span>
                   <span className="text-xs text-muted-foreground">
-                    SKU: {tx.variant?.sku || tx.product.sku || "N/A"}
+                    SKU: {tx.variant?.sku || tx.product.sku || "Chưa cập nhật"}
                   </span>
                   {tx.variant && (
                     <span className="text-xs text-blue-700">
@@ -121,7 +137,7 @@ export function InventoryTable({
                   )}
                 </div>
               </TableCell>
-              <TableCell className="text-right font-bold text-base">
+              <TableCell className="hidden text-right font-bold text-base lg:table-cell">
                 <span
                   className={
                     tx.type === "IN" ? "text-green-600" : "text-orange-600"
@@ -131,10 +147,10 @@ export function InventoryTable({
                   {tx.quantity}
                 </span>
               </TableCell>
-              <TableCell className="text-right text-muted-foreground">
+              <TableCell className="hidden text-right text-muted-foreground xl:table-cell">
                 {tx.type === "IN" ? formatPrice(tx.costPrice) : "-"}
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden lg:table-cell">
                 {tx.orderId ? (
                   <Link
                     href={`/admin/orders?q=${encodeURIComponent(tx.orderId)}`}
@@ -146,9 +162,9 @@ export function InventoryTable({
                   <span className="text-sm">{tx.reference || "-"}</span>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="hidden xl:table-cell">
                 <div className="flex flex-col">
-                  <span className="text-sm">{tx.user?.name || "System"}</span>
+                  <span className="text-sm">{tx.user?.name || "Hệ thống"}</span>
                 </div>
               </TableCell>
             </TableRow>

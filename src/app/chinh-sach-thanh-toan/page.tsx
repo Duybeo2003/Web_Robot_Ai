@@ -43,14 +43,14 @@ export default function PaymentPolicyPage() {
           hủy và tồn kho được trả lại.
         </p>
         {bankConfigured ? (
-          <div className="rounded-sm border border-neutral-200 bg-neutral-50 p-4">
+          <div className="rounded-xl border border-neutral-200 bg-neutral-50 p-4">
             <p><strong>Ngân hàng:</strong> {bankId.toUpperCase()}</p>
             <p><strong>Chủ tài khoản:</strong> {accountName}</p>
             <p><strong>Số tài khoản:</strong> {accountNo}</p>
             <p><strong>Nội dung:</strong> RoboEQ [MÃ ĐƠN HÀNG]</p>
           </div>
         ) : (
-          <p className="rounded-sm border border-amber-200 bg-amber-50 p-4 text-amber-900">
+          <p className="rounded-xl border border-amber-200 bg-amber-50 p-4 text-amber-900">
             Kênh chuyển khoản hiện chưa được cấu hình. Website sẽ không cho tạo đơn mới bằng phương thức này.
           </p>
         )}

@@ -44,7 +44,7 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <div>
           <h2 className="text-2xl font-bold tracking-tight">
             Danh mục sản phẩm
@@ -55,27 +55,27 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
         </div>
 
         <Dialog>
-          <DialogTrigger className="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:pointer-events-none disabled:opacity-50 h-9 px-4 py-2 bg-[#FF5722] hover:bg-[#E64A19] text-white shadow">
+          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-[#FF5722] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E64A19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5722]/30">
             <Plus className="mr-2 h-4 w-4" />
             Thêm danh mục
           </DialogTrigger>
           <DialogContent>
             <DialogHeader>
-              <DialogTitle>Thêm Danh mục mới</DialogTitle>
+              <DialogTitle>Thêm danh mục mới</DialogTitle>
             </DialogHeader>
             <CategoryForm />
           </DialogContent>
         </Dialog>
       </div>
 
-      <div className="rounded-md border bg-white">
+      <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Tên danh mục</TableHead>
-              <TableHead>Mô tả</TableHead>
-              <TableHead>Ngày tạo</TableHead>
-              <TableHead>Số sản phẩm</TableHead>
+              <TableHead className="hidden sm:table-cell">Mô tả</TableHead>
+              <TableHead className="hidden lg:table-cell">Ngày tạo</TableHead>
+              <TableHead className="hidden md:table-cell">Số sản phẩm</TableHead>
               <TableHead className="text-right">Hành động</TableHead>
             </TableRow>
           </TableHeader>
@@ -89,14 +89,22 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
             ) : (
               categories.map((category) => (
                 <TableRow key={category.id}>
-                  <TableCell className="font-medium">{category.name}</TableCell>
-                  <TableCell className="max-w-[200px] truncate text-muted-foreground">
+                  <TableCell className="min-w-0 font-medium">
+                    <span className="block truncate">{category.name}</span>
+                    <span className="mt-1 block max-w-52 truncate text-xs font-normal text-muted-foreground sm:hidden">
+                      {category.description || "Chưa có mô tả"}
+                    </span>
+                    <span className="mt-1 block text-xs font-normal text-muted-foreground md:hidden">
+                      {category._count.products} sản phẩm
+                    </span>
+                  </TableCell>
+                  <TableCell className="hidden max-w-[200px] truncate text-muted-foreground sm:table-cell">
                     {category.description || "-"}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="hidden lg:table-cell">
                     {format(new Date(category.createdAt), "dd/MM/yyyy")}
                   </TableCell>
-                  <TableCell>{category._count.products}</TableCell>
+                  <TableCell className="hidden md:table-cell">{category._count.products}</TableCell>
                   <TableCell className="text-right">
                     <CategoryActions category={category} />
                   </TableCell>
@@ -106,7 +114,7 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
           </TableBody>
         </Table>
         {totalPages > 1 && (
-          <div className="flex items-center justify-between p-4 border-t">
+          <div className="flex flex-col gap-3 border-t p-4 sm:flex-row sm:items-center sm:justify-between">
             <p className="text-sm text-muted-foreground">
               Trang {currentPage} / {totalPages} (Tổng: {totalCount})
             </p>
