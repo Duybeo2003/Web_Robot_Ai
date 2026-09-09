@@ -15,8 +15,18 @@ import { Loader2 } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
 
+type LowStockItem = {
+  id: string;
+  productId: string;
+  title: string;
+  sku: string | null;
+  imageUrl: string | null;
+  inventoryCount: number;
+  variantLabel: string | null;
+};
+
 export function LowStockTable() {
-  const [products, setProducts] = useState<any[]>([]);
+  const [products, setProducts] = useState<LowStockItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
@@ -25,7 +35,7 @@ export function LowStockTable() {
       try {
         const res = await getLowStockProducts(10);
         if (res.success) {
-          setProducts(res.data);
+          setProducts(res.data || []);
         } else {
           setError("Failed to load low stock products");
         }
@@ -77,7 +87,7 @@ export function LowStockTable() {
             <TableRow key={p.id}>
               <TableCell>
                 <Link
-                  href={`/admin/products/${p.id}`}
+                  href={`/admin/products/${p.productId}`}
                   className="flex items-center gap-2 group"
                 >
                   <div className="w-10 h-10 relative bg-white border border-neutral-100 rounded-sm overflow-hidden shrink-0">
@@ -99,6 +109,11 @@ export function LowStockTable() {
                     <span className="text-xs text-muted-foreground">
                       SKU: {p.sku || "N/A"}
                     </span>
+                    {p.variantLabel && (
+                      <span className="text-xs text-blue-700">
+                        {p.variantLabel}
+                      </span>
+                    )}
                   </div>
                 </Link>
               </TableCell>

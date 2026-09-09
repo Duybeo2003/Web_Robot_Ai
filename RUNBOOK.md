@@ -29,6 +29,15 @@ curl --fail https://<domain>/api/health
 
 Pipeline chỉ xuất bản image sau khi npm audit, Prisma validate, toàn bộ migration trên MySQL sạch, ESLint, TypeScript, Next.js build và Playwright E2E đều đạt. Mỗi image có tag SHA để rollback chính xác.
 
+Sau lần triển khai đầu tiên, tạo quản trị viên ban đầu bằng quy trình một lần trong `CAM_NANG_QUAN_TRI.md`. Lệnh bootstrap chỉ chạy khi chưa có admin hoạt động; mọi tài khoản nhân viên tiếp theo phải được tạo trong trang quản trị.
+
+## Đối soát đơn hàng và tồn kho
+
+- Liên kết tra cứu dành cho khách chưa đăng nhập có hiệu lực 24 giờ. Khi liên kết hết hạn, nhân viên hỗ trợ tra cứu đơn trong trang quản trị sau khi xác minh khách hàng; không kéo dài hạn bằng cách sửa trực tiếp database.
+- Các biến động do bán hàng, hủy đơn và nhập lại hàng đổi trả được ghi tự động với nguồn `SALE`, `CANCELLATION` và `RETURN`. Nhập/xuất thủ công phải thực hiện trong trang Kho hàng, chọn đúng phân loại và điền mã tham chiếu chứng từ.
+- Tồn kho đang có tại thời điểm áp dụng migration là số dư đầu kỳ. Sổ biến động tự động bắt đầu từ migration `202609090007_inventory_ledger`; lưu biên bản kiểm kê tại thời điểm triển khai để làm mốc đối soát.
+- Đối chiếu hằng ngày các đơn đã hủy/đổi trả với sổ kho và điều tra ngay mọi biến động không có đơn hàng, yêu cầu đổi trả hoặc chứng từ nhập/xuất tương ứng.
+
 ## Đối soát ví Xu và sự kiện
 
 - Chỉ duyệt yêu cầu nạp Xu sau khi khớp số tiền, nội dung chuyển khoản và người gửi trên sao kê. Mã đối soát ngân hàng là bắt buộc và không được dùng lại.

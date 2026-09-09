@@ -2,12 +2,13 @@ import "server-only";
 
 import type { OrderStatus, Prisma } from "@prisma/client";
 import { lockOrderRow } from "@/lib/orders/lock-order";
+import { inventoryMovementKey } from "@/lib/inventory-ledger";
 
 export async function cancelOrderAndRestoreInventory(
   tx: Prisma.TransactionClient,
   orderId: string,
   allowedStatuses: OrderStatus[] = ["PENDING"],
-  options: { allowPaid?: boolean } = {},
+  options: { allowPaid?: boolean; actorId?: string } = {},
 ) {
   await lockOrderRow(tx, orderId);
   const order = await tx.order.findUnique({
@@ -41,7 +42,7 @@ export async function cancelOrderAndRestoreInventory(
 
   for (const item of order.items) {
     if (item.variantId) {
-      await tx.productVariant.updateMany({
+      await tx.productVariant.update({
         where: { id: item.variantId },
         data: { inventoryCount: { increment: item.quantity } },
       });
@@ -64,6 +65,26 @@ export async function cancelOrderAndRestoreInventory(
         },
       });
     }
+
+    await tx.inventoryTransaction.create({
+      data: {
+        productId: item.productId,
+        variantId: item.variantId,
+        orderId,
+        type: "IN",
+        source: "CANCELLATION",
+        quantity: item.quantity,
+        reference: orderId,
+        note: "Hoàn kho do hủy đơn hàng.",
+        idempotencyKey: inventoryMovementKey(
+          "CANCELLATION",
+          orderId,
+          item.productId,
+          item.variantId,
+        ),
+        userId: options.actorId,
+      },
+    });
   }
 
   if (order.pointsUsed > 0 && !order.pointsRestoredAt) {

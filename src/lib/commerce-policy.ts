@@ -1,6 +1,7 @@
 export const RETURN_WINDOW_DAYS = 7;
 export const PAYMENT_RESERVATION_HOURS = 24;
 export const VNPAY_RESERVATION_MINUTES = 30;
+export const GUEST_ORDER_ACCESS_HOURS = 24;
 export const POLICY_EFFECTIVE_DATE = "08/09/2026";
 export const POLICY_VERSION = "2026-09-08";
 

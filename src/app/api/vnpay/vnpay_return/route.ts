@@ -1,6 +1,9 @@
 import { revalidatePath } from "next/cache";
 import { NextResponse } from "next/server";
-import { createGuestOrderToken } from "@/lib/order-access";
+import {
+  createGuestOrderToken,
+  verifyActiveGuestOrderToken,
+} from "@/lib/order-access";
 import { prisma } from "@/lib/prisma";
 import { verifyVnPayReturn } from "@/lib/vnpay";
 import { settleVnPayPayment } from "@/lib/payments/vnpay-settlement";
@@ -12,11 +15,18 @@ type ReturnOrder = {
   id: string;
   idempotencyKey: string | null;
   guestAccessTokenHash: string | null;
+  guestAccessExpiresAt: Date | null;
 };
 
 function guestTokenFor(order: ReturnOrder) {
-  return order.guestAccessTokenHash && order.idempotencyKey
-    ? createGuestOrderToken(order.idempotencyKey)
+  if (!order.guestAccessTokenHash || !order.idempotencyKey) return undefined;
+  const token = createGuestOrderToken(order.idempotencyKey);
+  return verifyActiveGuestOrderToken(
+    token,
+    order.guestAccessTokenHash,
+    order.guestAccessExpiresAt,
+  )
+    ? token
     : undefined;
 }
 
@@ -46,7 +56,12 @@ export async function GET(request: Request) {
       orderBy: { createdAt: "desc" },
       select: {
         order: {
-          select: { id: true, idempotencyKey: true, guestAccessTokenHash: true },
+          select: {
+            id: true,
+            idempotencyKey: true,
+            guestAccessTokenHash: true,
+            guestAccessExpiresAt: true,
+          },
         },
       },
     });

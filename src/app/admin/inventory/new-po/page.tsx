@@ -28,8 +28,15 @@ export default async function NewInventoryTransactionPage() {
       title: true,
       sku: true,
       inventoryCount: true,
-      price: true,
-      imageUrl: true,
+      variants: {
+        select: {
+          id: true,
+          sku: true,
+          attributes: true,
+          inventoryCount: true,
+        },
+        orderBy: { createdAt: "asc" },
+      },
     },
     orderBy: { title: "asc" },
   });

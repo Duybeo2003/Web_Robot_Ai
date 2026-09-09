@@ -37,6 +37,7 @@ npm run test:e2e
 - `src/lib`: xác thực quyền, thanh toán, tồn kho, rate limit và hạ tầng.
 - `prisma/schema.prisma`: mô hình dữ liệu MySQL.
 - `prisma/migrations`: thay đổi cơ sở dữ liệu có phiên bản.
+- `scripts/bootstrap-admin.mjs`: tạo duy nhất quản trị viên đầu tiên bằng biến môi trường dùng một lần.
 - `RUNBOOK.md`: triển khai, giám sát, sao lưu và xử lý sự cố.
 - `SECURITY.md`: cách báo cáo lỗ hổng và yêu cầu bảo mật.
 
@@ -51,3 +52,5 @@ Thông tin pháp nhân và kênh hỗ trợ hiển thị trong điều khoản �
 Các liên kết Facebook, Shopee, TikTok và Zalo là cấu hình server qua nhóm biến `SOCIAL_*`. Chỉ liên kết HTTPS hợp lệ mới được hiển thị; có thể để trống kênh chưa sử dụng.
 
 Ảnh sản phẩm và ảnh minh chứng production được lưu trên Cloudinary. Cấu hình đủ `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY` và `CLOUDINARY_API_SECRET`; production sẽ không ghi upload vào filesystem tạm của container.
+
+Liên kết đơn hàng dành cho khách chưa đăng nhập hết hạn sau 24 giờ. Mọi lần xuất kho do bán hàng và hoàn kho do hủy/đổi trả được ghi trong sổ kho theo đơn và phân loại để nhân viên đối soát tại trang quản trị.

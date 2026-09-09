@@ -16,13 +16,40 @@ import {
 } from "@/components/ui/select";
 import { Loader2 } from "lucide-react";
 
-export function NewPoForm({ products }: { products: any[] }) {
+type InventoryProduct = {
+  id: string;
+  title: string;
+  sku: string | null;
+  inventoryCount: number;
+  variants: {
+    id: string;
+    sku: string | null;
+    attributes: unknown;
+    inventoryCount: number;
+  }[];
+};
+
+function variantLabel(attributes: unknown) {
+  if (!attributes || typeof attributes !== "object" || Array.isArray(attributes)) {
+    return "Phân loại";
+  }
+  return (
+    Object.values(attributes)
+      .filter((value): value is string | number =>
+        typeof value === "string" || typeof value === "number",
+      )
+      .join(" - ") || "Phân loại"
+  );
+}
+
+export function NewPoForm({ products }: { products: InventoryProduct[] }) {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   const [formData, setFormData] = useState({
     productId: "",
+    variantId: "",
     type: "IN" as "IN" | "OUT",
     quantity: 1,
     costPrice: "",
@@ -36,13 +63,23 @@ export function NewPoForm({ products }: { products: any[] }) {
       setError("Vui lòng chọn sản phẩm");
       return;
     }
+    const selectedProduct = products.find(
+      (product) => product.id === formData.productId,
+    );
+    if (selectedProduct?.variants.length && !formData.variantId) {
+      setError("Vui lòng chọn phân loại kho");
+      return;
+    }
     setLoading(true);
     setError("");
 
     try {
       const res = await createInventoryTransaction({
         ...formData,
-        costPrice: Number(formData.costPrice),
+        variantId: formData.variantId || undefined,
+        costPrice: formData.costPrice ? Number(formData.costPrice) : undefined,
+        reference: formData.reference.trim() || undefined,
+        note: formData.note.trim() || undefined,
         quantity: Number(formData.quantity),
       });
 
@@ -53,11 +90,15 @@ export function NewPoForm({ products }: { products: any[] }) {
         setError(res.error || "Có lỗi xảy ra");
         setLoading(false);
       }
-    } catch (err: any) {
-      setError(err.message || "Lỗi hệ thống");
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err.message : "Lỗi hệ thống");
       setLoading(false);
     }
   };
+
+  const selectedProduct = products.find(
+    (product) => product.id === formData.productId,
+  );
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -88,7 +129,11 @@ export function NewPoForm({ products }: { products: any[] }) {
         <Select
           value={formData.productId}
           onValueChange={(val) =>
-            setFormData({ ...formData, productId: val || "" })
+            setFormData({
+              ...formData,
+              productId: val || "",
+              variantId: "",
+            })
           }
         >
           <SelectTrigger>
@@ -97,12 +142,41 @@ export function NewPoForm({ products }: { products: any[] }) {
           <SelectContent>
             {products.map((p) => (
               <SelectItem key={p.id} value={p.id}>
-                {p.title} (Tồn: {p.inventoryCount})
+                {p.title} (Tồn: {p.variants.length
+                  ? p.variants.reduce(
+                      (total, variant) => total + variant.inventoryCount,
+                      0,
+                    )
+                  : p.inventoryCount})
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
+
+      {selectedProduct && selectedProduct.variants.length > 0 && (
+        <div className="space-y-3">
+          <Label>Phân loại kho</Label>
+          <Select
+            value={formData.variantId}
+            onValueChange={(value) =>
+              setFormData({ ...formData, variantId: value || "" })
+            }
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Chọn phân loại" />
+            </SelectTrigger>
+            <SelectContent>
+              {selectedProduct.variants.map((variant) => (
+                <SelectItem key={variant.id} value={variant.id}>
+                  {variantLabel(variant.attributes)} · Tồn {variant.inventoryCount}
+                  {variant.sku ? ` · SKU ${variant.sku}` : ""}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-3">
@@ -110,6 +184,7 @@ export function NewPoForm({ products }: { products: any[] }) {
           <Input
             type="number"
             min="1"
+            max="1000000"
             required
             value={formData.quantity}
             onChange={(e) =>
@@ -127,6 +202,7 @@ export function NewPoForm({ products }: { products: any[] }) {
             <Input
               type="number"
               min="0"
+              max="1000000000"
               placeholder="Ví dụ: 150000"
               value={formData.costPrice}
               onChange={(e) =>

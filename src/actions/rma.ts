@@ -8,6 +8,7 @@ import { recordAudit } from "@/lib/audit";
 import { RETURN_WINDOW_DAYS } from "@/lib/commerce-policy";
 import { Prisma } from "@prisma/client";
 import { isAllowedImageUrl } from "@/lib/media-url";
+import { inventoryMovementKey } from "@/lib/inventory-ledger";
 
 const returnRequestSchema = z.object({
   orderId: z.string().min(1).max(191),
@@ -127,7 +128,7 @@ export async function updateReturnRequestStatus(
       if (restockReturnedItems) {
         for (const item of returnRequest.order.items) {
           if (item.variantId) {
-            await tx.productVariant.updateMany({
+            await tx.productVariant.update({
               where: { id: item.variantId },
               data: { inventoryCount: { increment: item.quantity } },
             });
@@ -137,6 +138,25 @@ export async function updateReturnRequestStatus(
               data: { inventoryCount: { increment: item.quantity } },
             });
           }
+          await tx.inventoryTransaction.create({
+            data: {
+              productId: item.productId,
+              variantId: item.variantId,
+              orderId: returnRequest.orderId,
+              type: "IN",
+              source: "RETURN",
+              quantity: item.quantity,
+              reference: returnRequest.id,
+              note: "Nhập lại hàng sau khi hoàn tất yêu cầu đổi trả.",
+              idempotencyKey: inventoryMovementKey(
+                "RETURN",
+                returnRequest.id,
+                item.productId,
+                item.variantId,
+              ),
+              userId: operator.id,
+            },
+          });
         }
       }
 

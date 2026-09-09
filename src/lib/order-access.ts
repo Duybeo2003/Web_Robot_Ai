@@ -22,7 +22,22 @@ export function hashGuestOrderToken(token: string) {
 }
 
 export function verifyGuestOrderToken(token: string, expectedHash: string) {
+  if (!/^[a-f0-9]{64}$/i.test(token) || !/^[a-f0-9]{64}$/i.test(expectedHash)) {
+    return false;
+  }
   const actual = Buffer.from(hashGuestOrderToken(token), "hex");
   const expected = Buffer.from(expectedHash, "hex");
   return actual.length === expected.length && crypto.timingSafeEqual(actual, expected);
+}
+
+export function verifyActiveGuestOrderToken(
+  token: string,
+  expectedHash: string,
+  expiresAt: Date | null,
+) {
+  return Boolean(
+    expiresAt &&
+      expiresAt.getTime() > Date.now() &&
+      verifyGuestOrderToken(token, expectedHash),
+  );
 }

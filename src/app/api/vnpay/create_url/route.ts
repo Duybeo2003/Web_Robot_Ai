@@ -2,7 +2,7 @@ import crypto from "node:crypto";
 import { isIP } from "node:net";
 import { NextResponse } from "next/server";
 import { auth } from "@/auth";
-import { verifyGuestOrderToken } from "@/lib/order-access";
+import { verifyActiveGuestOrderToken } from "@/lib/order-access";
 import { lockOrderRow } from "@/lib/orders/lock-order";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
@@ -24,7 +24,11 @@ export async function GET(request: Request) {
 
   const accessOrder = await prisma.order.findUnique({
     where: { id: orderId },
-    select: { userId: true, guestAccessTokenHash: true },
+    select: {
+      userId: true,
+      guestAccessTokenHash: true,
+      guestAccessExpiresAt: true,
+    },
   });
   if (!accessOrder) {
     return NextResponse.json({ error: "Đơn hàng không tồn tại" }, { status: 404 });
@@ -33,7 +37,11 @@ export async function GET(request: Request) {
   const hasGuestAccess = Boolean(
     guestToken &&
       accessOrder.guestAccessTokenHash &&
-      verifyGuestOrderToken(guestToken, accessOrder.guestAccessTokenHash),
+      verifyActiveGuestOrderToken(
+        guestToken,
+        accessOrder.guestAccessTokenHash,
+        accessOrder.guestAccessExpiresAt,
+      ),
   );
   if (!ownsOrder && !hasGuestAccess) {
     return NextResponse.json({ error: "Unauthorized" }, { status: 403 });

@@ -280,8 +280,9 @@ model ProductVariant {
   sku            String?
   imageUrl       String?  @db.Text
 
-  cartItems  CartItem[]
-  orderItems OrderItem[]
+  cartItems             CartItem[]
+  orderItems            OrderItem[]
+  inventoryTransactions InventoryTransaction[]
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
@@ -342,6 +343,7 @@ model Order {
   // Makes checkout retries safe and gives guest orders a scoped access token.
   idempotencyKey         String?   @unique
   guestAccessTokenHash   String?
+  guestAccessExpiresAt   DateTime?
   inventoryReservedUntil DateTime?
   termsVersion           String?
   termsAcceptedAt        DateTime?
@@ -363,10 +365,11 @@ model Order {
   discountAmount   Decimal     @default(0) @db.Decimal(18, 2) // Tiền giảm do coupon + points
   status           OrderStatus @default(PENDING)
 
-  items               OrderItem[]
-  returnRequests      ReturnRequest[]
-  commissions         Commission[]
-  paymentTransactions PaymentTransaction[]
+  items                 OrderItem[]
+  returnRequests        ReturnRequest[]
+  commissions           Commission[]
+  paymentTransactions   PaymentTransaction[]
+  inventoryTransactions InventoryTransaction[]
 
   createdAt DateTime  @default(now())
   updatedAt DateTime  @updatedAt
@@ -587,21 +590,37 @@ enum InventoryTransactionType {
   OUT
 }
 
+enum InventoryTransactionSource {
+  MANUAL
+  SALE
+  CANCELLATION
+  RETURN
+}
+
 model InventoryTransaction {
-  id        String                   @id @default(cuid())
-  productId String
-  product   Product                  @relation(fields: [productId], references: [id])
-  type      InventoryTransactionType
-  quantity  Int
-  costPrice Decimal?                 @db.Decimal(18, 2)
-  reference String? // E.g., PO number or Order ID
-  note      String?                  @db.Text
-  userId    String?
-  user      User?                    @relation(fields: [userId], references: [id])
-  createdAt DateTime                 @default(now())
+  id             String                     @id @default(cuid())
+  productId      String
+  product        Product                    @relation(fields: [productId], references: [id])
+  variantId      String?
+  variant        ProductVariant?            @relation(fields: [variantId], references: [id], onDelete: SetNull)
+  orderId        String?
+  order          Order?                     @relation(fields: [orderId], references: [id], onDelete: SetNull)
+  type           InventoryTransactionType
+  source         InventoryTransactionSource @default(MANUAL)
+  quantity       Int
+  costPrice      Decimal?                   @db.Decimal(18, 2)
+  reference      String? // E.g., PO number or Order ID
+  note           String?                    @db.Text
+  idempotencyKey String?                    @unique
+  userId         String?
+  user           User?                      @relation(fields: [userId], references: [id])
+  createdAt      DateTime                   @default(now())
 
   @@index([productId])
+  @@index([variantId])
+  @@index([orderId])
   @@index([type])
+  @@index([source, createdAt])
   @@index([createdAt])
 }
 

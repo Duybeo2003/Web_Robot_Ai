@@ -14,6 +14,7 @@ test("an admin cancels a paid order and records one refund without restoring poi
   const customerId = `e2e-customer-${unique}`;
   const affiliateId = `e2e-affiliate-${unique}`;
   const productId = `e2e-refund-product-${unique}`;
+  const variantId = `e2e-refund-variant-${unique}`;
   const couponId = `e2e-coupon-${unique}`;
   const couponCode = `E2E${unique.replaceAll("-", "").slice(-16)}`.toUpperCase();
   const orderId = `e2e-paid-order-${unique}`;
@@ -47,7 +48,16 @@ test("an admin cancels a paid order and records one refund without restoring poi
         sku: `E2E-REFUND-${unique}`,
         description: "Sản phẩm tạm để kiểm chứng huỷ đơn và hoàn tiền.",
         price: productPrice,
-        inventoryCount: 4,
+        inventoryCount: 0,
+        variants: {
+          create: {
+            id: variantId,
+            attributes: { "Màu sắc": "Cam E2E" },
+            sku: `E2E-REFUND-VARIANT-${unique}`,
+            price: productPrice,
+            inventoryCount: 4,
+          },
+        },
       },
     });
     await prisma.coupon.create({
@@ -83,6 +93,7 @@ test("an admin cancels a paid order and records one refund without restoring poi
         items: {
           create: {
             productId,
+            variantId,
             quantity: 1,
             priceAtPurchase: productPrice,
           },
@@ -102,6 +113,17 @@ test("an admin cancels a paid order and records one refund without restoring poi
             affiliateUserId: affiliateId,
             amount: 25_000_000,
             status: "PENDING",
+          },
+        },
+        inventoryTransactions: {
+          create: {
+            productId,
+            variantId,
+            type: "OUT",
+            source: "SALE",
+            quantity: 1,
+            reference: orderId,
+            idempotencyKey: `e2e-inventory-sale:${unique}`,
           },
         },
       },
@@ -135,21 +157,31 @@ test("an admin cancels a paid order and records one refund without restoring poi
 
     await expect
       .poll(async () => {
-        const [order, product, customer, coupon, commission] = await Promise.all([
+        const [order, variant, customer, coupon, commission, movements] = await Promise.all([
           prisma.order.findUnique({ where: { id: orderId } }),
-          prisma.product.findUnique({ where: { id: productId } }),
+          prisma.productVariant.findUnique({ where: { id: variantId } }),
           prisma.user.findUnique({ where: { id: customerId } }),
           prisma.coupon.findUnique({ where: { id: couponId } }),
           prisma.commission.findFirst({ where: { orderId } }),
+          prisma.inventoryTransaction.findMany({
+            where: { orderId },
+            orderBy: { createdAt: "asc" },
+          }),
         ]);
         return {
           orderStatus: order?.status,
           paymentStatus: order?.paymentStatus,
           pointsRestored: Boolean(order?.pointsRestoredAt),
-          inventoryCount: product?.inventoryCount,
+          inventoryCount: variant?.inventoryCount,
           customerPoints: customer?.points,
           couponUsage: coupon?.usageCount,
           commissionStatus: commission?.status,
+          movements: movements.map((movement) => ({
+            type: movement.type,
+            source: movement.source,
+            quantity: movement.quantity,
+            variantId: movement.variantId,
+          })),
         };
       })
       .toEqual({
@@ -160,6 +192,10 @@ test("an admin cancels a paid order and records one refund without restoring poi
         customerPoints: 100,
         couponUsage: 0,
         commissionStatus: "CANCELLED",
+        movements: [
+          { type: "OUT", source: "SALE", quantity: 1, variantId },
+          { type: "IN", source: "CANCELLATION", quantity: 1, variantId },
+        ],
       });
 
     await page.reload();
@@ -203,6 +239,7 @@ test("an admin cancels a paid order and records one refund without restoring poi
       },
     });
     await prisma.commission.deleteMany({ where: { orderId } });
+    await prisma.inventoryTransaction.deleteMany({ where: { orderId } });
     await prisma.order.deleteMany({ where: { id: orderId } });
     await prisma.product.deleteMany({ where: { id: productId } });
     await prisma.coupon.deleteMany({ where: { id: couponId } });

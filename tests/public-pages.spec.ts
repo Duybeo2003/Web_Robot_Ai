@@ -154,7 +154,11 @@ test.describe("Public commercial pages", () => {
       const [order, product, remainingOtps] = await Promise.all([
         prisma.order.findUnique({
           where: { id: orderId },
-          include: { items: true, paymentTransactions: true },
+          include: {
+            items: true,
+            paymentTransactions: true,
+            inventoryTransactions: true,
+          },
         }),
         prisma.product.findUnique({ where: { id: productId } }),
         prisma.otpCode.count({ where: { phoneNumber: normalizedPhone } }),
@@ -169,6 +173,7 @@ test.describe("Public commercial pages", () => {
       expect(order?.termsAcceptedAt).not.toBeNull();
       expect(order?.termsVersion).toBeTruthy();
       expect(order?.guestAccessTokenHash).toBeTruthy();
+      expect(order?.guestAccessExpiresAt?.getTime()).toBeGreaterThan(Date.now());
       expect(order?.items).toHaveLength(1);
       expect(Number(order?.items[0]?.priceAtPurchase)).toBe(price);
       expect(order?.paymentTransactions).toHaveLength(1);
@@ -177,12 +182,35 @@ test.describe("Public commercial pages", () => {
         status: "PENDING",
       });
       expect(Number(order?.paymentTransactions[0]?.amount)).toBe(price);
+      expect(order?.inventoryTransactions).toHaveLength(1);
+      expect(order?.inventoryTransactions[0]).toMatchObject({
+        productId,
+        variantId: null,
+        type: "OUT",
+        source: "SALE",
+        quantity: 1,
+      });
+      expect(order?.inventoryTransactions[0]?.idempotencyKey).toBeTruthy();
       expect(product?.inventoryCount).toBe(4);
       expect(remainingOtps).toBe(0);
+
+      await prisma.order.update({
+        where: { id: orderId },
+        data: { guestAccessExpiresAt: new Date(Date.now() - 1_000) },
+      });
+      const expiredPage = await page.request.get(successUrl.toString());
+      expect(expiredPage.status()).toBe(404);
+      const expiredPaymentAccess = await page.request.get(
+        `/api/vnpay/create_url?orderId=${encodeURIComponent(orderId)}&token=${encodeURIComponent(
+          successUrl.searchParams.get("token") || "",
+        )}`,
+      );
+      expect(expiredPaymentAccess.status()).toBe(403);
     } finally {
       await prisma.otpCode.deleteMany({
         where: { phoneNumber: normalizedPhone || "__none__" },
       });
+      await prisma.inventoryTransaction.deleteMany({ where: { productId } });
       if (orderId) {
         await prisma.order.deleteMany({ where: { id: orderId } });
       } else {

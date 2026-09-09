@@ -1,6 +1,6 @@
 import { auth } from "@/auth";
 import { Button } from "@/components/ui/button";
-import { verifyGuestOrderToken } from "@/lib/order-access";
+import { verifyActiveGuestOrderToken } from "@/lib/order-access";
 import { prisma } from "@/lib/prisma";
 import { ArrowRight, CheckCircle2, Clock3, Package } from "lucide-react";
 import Link from "next/link";
@@ -41,7 +41,11 @@ export default async function CheckoutSuccessPage({
     : Boolean(
         token &&
           order.guestAccessTokenHash &&
-          verifyGuestOrderToken(token, order.guestAccessTokenHash),
+          verifyActiveGuestOrderToken(
+            token,
+            order.guestAccessTokenHash,
+            order.guestAccessExpiresAt,
+          ),
       );
   if (!canView) notFound();
 

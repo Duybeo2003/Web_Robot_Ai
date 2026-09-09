@@ -1,92 +1,37 @@
-# Cẩm Nang Vận Hành & Quản Trị Web Robot AI
+# Cẩm nang quản trị RoboEQ
 
-Tài liệu này tổng hợp toàn bộ vòng đời phát triển và quản trị của hệ thống, giúp bạn dễ dàng làm chủ quy trình từ máy cá nhân (Local) lên máy chủ (Server) và ngược lại.
+`RUNBOOK.md` là tài liệu chuẩn cho triển khai, migration, sao lưu, phục hồi, giám sát, cron và xử lý sự cố. Không chạy các script sao chép dữ liệu cũ hoặc chỉnh trực tiếp database production.
 
-## 1. Quy trình Đẩy Code (Local ➡️ Server)
+## Phát hành phiên bản
 
-Mỗi khi bạn (hoặc tôi) code xong một tính năng mới ở máy tính cá nhân (Local), hãy làm theo các bước sau để cập nhật lên Server:
+1. Tạo pull request và chỉ hợp nhất khi workflow CI đạt đầy đủ.
+2. Chọn image theo tag SHA do workflow Docker phát hành và đặt vào `ROBOEQ_IMAGE`.
+3. Làm theo mục **Triển khai** trong `RUNBOOK.md`, áp dụng schema rồi kiểm tra `/api/health`.
+4. Kiểm tra nhanh đăng nhập, tìm kiếm sản phẩm, checkout, trang quản trị đơn hàng và trang kho trên production.
 
-### Bước 1: Đẩy Code từ Local lên Github
-Mở Terminal ở máy cá nhân (trong VS Code) và chạy 3 lệnh:
+## Tạo quản trị viên đầu tiên
+
+Chỉ thực hiện sau khi schema đã được áp dụng và khi hệ thống chưa có quản trị viên hoạt động. Nhập bí mật trong phiên shell riêng để mật khẩu không nằm trong lịch sử lệnh:
+
 ```bash
-git add .
-git commit -m "Cập nhật tính năng mới"
-git push origin main
+read -r -p "Email quản trị: " BOOTSTRAP_ADMIN_EMAIL
+read -r -s -p "Mật khẩu quản trị (tối thiểu 16 ký tự): " BOOTSTRAP_ADMIN_PASSWORD
+echo
+export BOOTSTRAP_ADMIN_EMAIL BOOTSTRAP_ADMIN_PASSWORD
+export BOOTSTRAP_ADMIN_CONFIRM=CREATE_INITIAL_ADMIN
+docker compose exec \
+  -e BOOTSTRAP_ADMIN_EMAIL \
+  -e BOOTSTRAP_ADMIN_PASSWORD \
+  -e BOOTSTRAP_ADMIN_CONFIRM \
+  web npm run bootstrap:admin
+unset BOOTSTRAP_ADMIN_EMAIL BOOTSTRAP_ADMIN_PASSWORD BOOTSTRAP_ADMIN_CONFIRM
 ```
 
-### Bước 2: Kéo Code về Server và Cập nhật
-Mở Terminal trên Server (SSH bằng tài khoản root) và chạy lần lượt:
-```bash
-# 1. Di chuyển vào thư mục dự án
-cd /var/www/web_robot_ai
+Lệnh tự từ chối khi đã có một admin hoạt động và ghi sự kiện bootstrap vào audit log. Các tài khoản nhân viên tiếp theo phải được tạo trong **Quản trị → Nhân sự quản trị** để giữ đúng phân quyền và lịch sử kiểm toán.
 
-# 2. Kéo code mới nhất về
-git pull origin main
+## Công việc hằng ngày
 
-# 3. Đóng gói Code mới vào Docker (Có thể tốn 1-2 phút)
-docker compose build web
-
-# 4. Khởi động lại trang web ngầm
-docker compose up -d
-```
-
-> **💡 TIP - Khi nào cần chạy lệnh Database?**
-> Nếu trong lần cập nhật code đó có sự thay đổi về cấu trúc Database (thêm bảng mới, cột mới), bạn CẦN CHẠY THÊM lệnh sau. Còn nếu chỉ sửa giao diện thì BỎ QUA lệnh này:
-> ```bash
-> docker exec -it -u root RoboEQ-web npx prisma db push
-> ```
-
-## 2. Quy trình Sao lưu & Phục hồi Dữ liệu trên Server
-
-Dữ liệu (Sản phẩm, Danh mục, Đơn hàng...) luôn là thứ quan trọng nhất. Hãy thường xuyên Backup.
-
-### Bước 1: Sao lưu (Backup) dữ liệu ra file
-Chạy lệnh này trên Server để gom toàn bộ dữ liệu lưu vào file `backup.json`:
-```bash
-# Chạy script gom dữ liệu
-docker compose exec -u root web npx tsx scripts/export.ts
-
-# Copy file dữ liệu đó từ bên trong Docker ra ngoài ổ cứng của Server
-docker cp RoboEQ-web:/app/backup.json ./backup.json
-```
-
-### Bước 2: Phục hồi (Restore) dữ liệu
-Nếu một ngày đẹp trời Server bị lỗi, hoặc bạn lỡ tay xóa DB, đây là "thuốc giải":
-```bash
-# 1. Đưa file backup vào lại Docker
-docker cp backup.json RoboEQ-web:/app/backup.json
-
-# 2. Chạy lệnh phục hồi
-docker compose exec -u root web npx tsx scripts/import.ts
-```
-
-## 3. Quy trình Cấp lại quyền Admin (Sau khi mất dữ liệu)
-
-Khi phục hồi dữ liệu từ số 0, toàn bộ tài khoản người dùng sẽ bị bay màu (vì file backup.json hiện tại chỉ lưu Sản phẩm/Danh mục).
-
-1. Mở trang web và **Đăng nhập bằng Google** bằng tài khoản muốn làm Admin.
-2. Lên Terminal Server chạy lệnh:
-```bash
-docker compose exec -u root web node make_admin.js
-```
-3. Đăng xuất và đăng nhập lại trên trang web.
-
-## 4. Quy trình Đồng bộ Dữ liệu (Server ➡️ Local)
-
-Đôi khi bạn muốn copy dữ liệu (các sản phẩm bạn đã đăng trên web thật) về máy cá nhân (Local) để test cho chuẩn:
-
-### Bước 1: Backup trên Server
-Làm y chang **Mục 2. Bước 1** để tạo ra file `backup.json` mới nhất trên Server.
-
-### Bước 2: Tải file về máy cá nhân
-Bạn có thể dùng phần mềm WinSCP, FileZilla hoặc MobaXterm để đăng nhập vào Server (thông tin giống như đăng nhập Putty).
-Sau đó vào đường dẫn `/var/www/web_robot_ai`, tìm file `backup.json` và kéo thả tải về máy tính.
-
-### Bước 3: Nạp vào máy cá nhân (Local)
-Copy file `backup.json` vừa tải về, ném thẳng vào thư mục `Web_Robot_Ai` trong VS Code (ngang hàng với `package.json`).
-Sau đó chạy lệnh sau ở Terminal của VS Code:
-```bash
-npm run db:import
-```
-
-🎉 Hoàn tất! Máy tính Local của bạn đã có 100% dữ liệu giống như web thật.
+- Đối soát thanh toán, hoàn tiền, hoa hồng, ví Xu và biến động kho theo chứng từ.
+- Xử lý yêu cầu hỗ trợ, bảo hành, đổi trả và đánh giá đang chờ.
+- Theo dõi cảnh báo health, HTTP 5xx, checkout, IPN, database và Redis.
+- Xác nhận bản sao lưu hằng ngày và diễn tập phục hồi theo lịch trong `RUNBOOK.md`.

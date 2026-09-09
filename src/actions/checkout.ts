@@ -10,13 +10,19 @@ import {
 } from "@/lib/email";
 import { logger } from "@/lib/logger";
 import { checkRateLimit } from "@/lib/rate-limit";
-import { createGuestOrderToken, hashGuestOrderToken } from "@/lib/order-access";
+import {
+  createGuestOrderToken,
+  hashGuestOrderToken,
+  verifyActiveGuestOrderToken,
+} from "@/lib/order-access";
 import { z } from "zod";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { getRequestFingerprint } from "@/lib/request-fingerprint";
 import { hashOtp } from "@/lib/otp";
+import { inventoryMovementKey } from "@/lib/inventory-ledger";
 import {
   PAYMENT_RESERVATION_HOURS,
+  GUEST_ORDER_ACCESS_HOURS,
   POLICY_VERSION,
   VNPAY_RESERVATION_MINUTES,
 } from "@/lib/commerce-policy";
@@ -111,6 +117,7 @@ export async function processCheckout(data: {
       id: true,
       userId: true,
       guestAccessTokenHash: true,
+      guestAccessExpiresAt: true,
       amountDue: true,
       paymentStatus: true,
     },
@@ -118,8 +125,14 @@ export async function processCheckout(data: {
   if (existingOrder) {
     const canReuse = userId
       ? existingOrder.userId === userId
-      : existingOrder.guestAccessTokenHash ===
-        hashGuestOrderToken(guestAccessToken!);
+      : Boolean(
+          existingOrder.guestAccessTokenHash &&
+            verifyActiveGuestOrderToken(
+              guestAccessToken!,
+              existingOrder.guestAccessTokenHash,
+              existingOrder.guestAccessExpiresAt,
+            ),
+        );
     if (!canReuse) return { error: "Yêu cầu đặt hàng không hợp lệ." };
     return {
       success: true,
@@ -430,6 +443,9 @@ export async function processCheckout(data: {
           guestAccessTokenHash: guestAccessToken
             ? hashGuestOrderToken(guestAccessToken)
             : null,
+          guestAccessExpiresAt: guestAccessToken
+            ? new Date(Date.now() + GUEST_ORDER_ACCESS_HOURS * 60 * 60 * 1_000)
+            : null,
           termsVersion: POLICY_VERSION,
           termsAcceptedAt: new Date(),
           inventoryReservedUntil:
@@ -468,6 +484,25 @@ export async function processCheckout(data: {
             include: { product: { select: { title: true } } },
           },
         },
+      });
+
+      await tx.inventoryTransaction.createMany({
+        data: orderItemsData.map((item) => ({
+          productId: item.productId,
+          variantId: item.variantId,
+          orderId: newOrder.id,
+          type: "OUT" as const,
+          source: "SALE" as const,
+          quantity: item.quantity,
+          reference: newOrder.id,
+          note: "Xuất kho khi tạo đơn hàng.",
+          idempotencyKey: inventoryMovementKey(
+            "SALE",
+            newOrder.id,
+            item.productId,
+            item.variantId,
+          ),
+        })),
       });
 
       // 4. Create Commission if applicable
@@ -546,10 +581,23 @@ export async function processCheckout(data: {
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       const racedOrder = await prisma.order.findUnique({
         where: { idempotencyKey: data.idempotencyKey },
-        select: { id: true, userId: true, guestAccessTokenHash: true, amountDue: true },
+        select: {
+          id: true,
+          userId: true,
+          guestAccessTokenHash: true,
+          guestAccessExpiresAt: true,
+          amountDue: true,
+        },
       });
       const ownsRacedOrder = racedOrder && (isGuestCheckout
-        ? racedOrder.guestAccessTokenHash === hashGuestOrderToken(guestAccessToken!)
+        ? Boolean(
+            racedOrder.guestAccessTokenHash &&
+              verifyActiveGuestOrderToken(
+                guestAccessToken!,
+                racedOrder.guestAccessTokenHash,
+                racedOrder.guestAccessExpiresAt,
+              ),
+          )
         : racedOrder.userId === session?.user?.id);
       if (racedOrder && ownsRacedOrder) {
         return {

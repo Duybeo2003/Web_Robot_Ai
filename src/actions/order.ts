@@ -70,7 +70,7 @@ export async function updateOrderStatus(
           tx,
           order.id,
           ["PENDING", "PROCESSING"],
-          { allowPaid: operator.role === "ADMIN" },
+          { allowPaid: operator.role === "ADMIN", actorId: operator.id },
         );
         if (!cancelled) {
           throw new Error("Không thể hủy đơn ở trạng thái hiện tại.");
@@ -234,7 +234,9 @@ export async function cancelOrder(orderId: string) {
     }
 
     const cancelled = await prisma.$transaction((tx) =>
-      cancelOrderAndRestoreInventory(tx, orderId),
+      cancelOrderAndRestoreInventory(tx, orderId, ["PENDING"], {
+        actorId: user.id,
+      }),
     );
     if (!cancelled) {
       return { success: false, error: "Đơn hàng đã thay đổi trạng thái. Vui lòng tải lại trang." };

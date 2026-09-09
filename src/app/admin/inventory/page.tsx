@@ -39,12 +39,22 @@ export default async function AdminInventoryPage() {
     where: { deletedAt: null },
   });
 
-  const lowStockCount = await prisma.product.count({
-    where: {
-      inventoryCount: { lte: 10 },
-      deletedAt: null,
-    },
-  });
+  const [baseLowStockCount, variantLowStockCount] = await Promise.all([
+    prisma.product.count({
+      where: {
+        inventoryCount: { lte: 10 },
+        deletedAt: null,
+        variants: { none: {} },
+      },
+    }),
+    prisma.productVariant.count({
+      where: {
+        inventoryCount: { lte: 10 },
+        product: { deletedAt: null },
+      },
+    }),
+  ]);
+  const lowStockCount = baseLowStockCount + variantLowStockCount;
 
   const recentTransactions = await prisma.inventoryTransaction.findMany({
     take: 50,
@@ -55,6 +65,9 @@ export default async function AdminInventoryPage() {
       },
       user: {
         select: { name: true, email: true },
+      },
+      variant: {
+        select: { sku: true, attributes: true },
       },
     },
   });
@@ -111,7 +124,7 @@ export default async function AdminInventoryPage() {
               {lowStockCount}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              Sản phẩm có tồn kho &lt;= 10
+              Vị trí kho có tồn kho &lt;= 10
             </p>
           </CardContent>
         </Card>
