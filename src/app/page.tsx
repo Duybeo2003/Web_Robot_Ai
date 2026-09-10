@@ -1,8 +1,10 @@
 import { unstable_cache } from "next/cache";
 import type { Prisma } from "@prisma/client";
+import { Suspense } from "react";
 import { auth } from "@/auth";
 import { FlashSaleCarousel } from "@/components/ui/flash-sale-carousel";
 import { HeroCarousel } from "@/components/ui/hero-carousel";
+import { PageLoading } from "@/components/ui/page-loading";
 import { ProductCarousel } from "@/components/ui/product-carousel";
 import { prisma } from "@/lib/prisma";
 
@@ -69,7 +71,7 @@ const getCachedProducts = unstable_cache(
   { revalidate: 60, tags: ["products"] },
 );
 
-export default async function Home() {
+async function HomeContent() {
   const session = await auth();
   const userId = session?.user?.id;
   const [catalog, wishlistItems] = await Promise.all([
@@ -112,5 +114,13 @@ export default async function Home() {
         userWishlistIds={userWishlistIds}
       />
     </div>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense fallback={<PageLoading />}>
+      <HomeContent />
+    </Suspense>
   );
 }

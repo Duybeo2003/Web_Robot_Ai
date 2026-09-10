@@ -28,19 +28,16 @@ export const metadata: Metadata = {
       "Cửa hàng RoboEQ chuyên cung cấp đồ chơi công nghệ, kit Arduino, robot giáo dục STEM.",
     url: "/",
     siteName: "RoboEQ",
-    images: [
-      {
-        url: "/images/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "RoboEQ - Đồ chơi Công nghệ",
-      },
-    ],
     locale: "vi_VN",
     type: "website",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "RoboEQ - Đồ chơi Công nghệ & Giáo dục STEM",
+    description:
+      "Robot giáo dục, bộ kit STEM và đồ chơi tư duy giúp trẻ học qua trải nghiệm.",
+  },
 };
-
 
 export default function RootLayout({
   children,

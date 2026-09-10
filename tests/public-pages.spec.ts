@@ -7,6 +7,33 @@ import { normalizeVietnamPhone } from "../src/lib/phone";
 loadEnvConfig(process.cwd());
 
 test.describe("Public commercial pages", () => {
+  test("publishes a valid social preview and lets users pause hero motion", async ({
+    page,
+    request,
+  }) => {
+    await page.goto("/");
+
+    const autoplayControl = page.getByRole("button", { name: /banner$/i });
+    await expect(autoplayControl).toHaveAttribute("aria-pressed", "false");
+    await autoplayControl.click();
+    await expect(autoplayControl).toHaveAttribute("aria-pressed", "true");
+
+    const socialImageUrl = await page
+      .locator('meta[property="og:image"]')
+      .getAttribute("content");
+    expect(socialImageUrl).toBeTruthy();
+
+    const socialImage = await request.get(socialImageUrl!);
+    expect(socialImage.ok()).toBe(true);
+    expect(socialImage.headers()["content-type"]).toMatch(/^image\/png/);
+    expect((await socialImage.body()).byteLength).toBeGreaterThan(10_000);
+  });
+
+  test("keeps checkout pages out of search results", async ({ page }) => {
+    await page.goto("/checkout");
+    await expect(page.locator('meta[name="robots"]')).toHaveAttribute("content", /noindex/);
+  });
+
   test("shows payment terms without hard-coded account details", async ({ page }) => {
     await page.goto("/chinh-sach-thanh-toan");
     await expect(page.getByRole("heading", { name: "Chính sách thanh toán" })).toBeVisible();
