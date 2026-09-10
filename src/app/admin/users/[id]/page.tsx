@@ -64,6 +64,18 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
     EDITOR: "bg-purple-100 text-purple-800",
     USER: "bg-green-100 text-green-800",
   };
+  const roleLabels: Record<string, string> = {
+    ADMIN: "Quản trị viên",
+    STORE_MANAGER: "Quản lý cửa hàng",
+    EDITOR: "Biên tập viên",
+    USER: "Khách hàng",
+  };
+  const returnStatusLabels: Record<string, string> = {
+    PENDING: "Chờ xử lý",
+    APPROVED: "Đã duyệt",
+    REJECTED: "Từ chối",
+    COMPLETED: "Hoàn tất",
+  };
 
   const getOrderStatusBadge = (status: string) => {
     switch (status) {
@@ -84,15 +96,15 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center gap-4">
-        <Link href="/admin/users">
+      <div className="flex items-start gap-3 sm:gap-4">
+        <Link href="/admin/users" className="shrink-0">
           <Button variant="outline" size="icon">
             <ArrowLeft className="h-4 w-4" />
           </Button>
         </Link>
-        <div>
-          <h2 className="text-2xl font-bold tracking-tight">Chi tiết người dùng</h2>
-          <p className="text-muted-foreground">
+        <div className="min-w-0">
+          <h2 className="text-xl font-bold tracking-tight sm:text-2xl">Chi tiết người dùng</h2>
+          <p className="mt-1 text-sm text-muted-foreground sm:text-base">
             Thông tin chi tiết và lịch sử hoạt động của khách hàng.
           </p>
         </div>
@@ -114,21 +126,21 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
               </div>
               <h3 className="text-xl font-bold">{user.name || "Khách hàng"}</h3>
               <Badge className={`mt-2 ${roleColors[user.role]}`} variant="outline">
-                {user.role}
+                {roleLabels[user.role] || user.role}
               </Badge>
             </div>
             
             <div className="space-y-3 pt-4 border-t border-neutral-100">
-              <div className="flex items-center gap-3 text-sm">
-                <Mail className="h-4 w-4 text-neutral-500" />
-                <span>{user.email || "Chưa cập nhật"}</span>
+              <div className="flex min-w-0 items-start gap-3 text-sm">
+                <Mail className="mt-0.5 size-4 shrink-0 text-neutral-500" />
+                <span className="min-w-0 break-all">{user.email || "Chưa cập nhật"}</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <Phone className="h-4 w-4 text-neutral-500" />
+                <Phone className="size-4 shrink-0 text-neutral-500" />
                 <span>{user.phoneNumber || "Chưa cập nhật"}</span>
               </div>
               <div className="flex items-center gap-3 text-sm">
-                <Calendar className="h-4 w-4 text-neutral-500" />
+                <Calendar className="size-4 shrink-0 text-neutral-500" />
                 <span>Tham gia: {format(new Date(user.createdAt), "dd/MM/yyyy HH:mm")}</span>
               </div>
             </div>
@@ -137,26 +149,26 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
 
         {/* Stats & Activity */}
         <div className="md:col-span-2 space-y-6">
-          <div className="grid gap-4 sm:grid-cols-3">
+          <div className="grid grid-cols-3 gap-2 sm:gap-4">
             <Card className="shadow-sm border-neutral-200/60">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center">
-                <ShoppingBag className="h-8 w-8 text-blue-500 mb-2" />
-                <p className="text-sm font-medium text-muted-foreground">Đơn hàng</p>
-                <p className="text-3xl font-bold">{user._count.orders}</p>
+              <CardContent className="flex flex-col items-center justify-center p-3 text-center sm:p-6">
+                <ShoppingBag className="mb-2 size-6 text-blue-500 sm:size-8" />
+                <p className="text-xs font-medium text-muted-foreground sm:text-sm">Đơn hàng</p>
+                <p className="text-2xl font-bold sm:text-3xl">{user._count.orders}</p>
               </CardContent>
             </Card>
             <Card className="shadow-sm border-neutral-200/60">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center">
-                <Star className="h-8 w-8 text-amber-500 mb-2" />
-                <p className="text-sm font-medium text-muted-foreground">Đánh giá</p>
-                <p className="text-3xl font-bold">{user._count.reviews}</p>
+              <CardContent className="flex flex-col items-center justify-center p-3 text-center sm:p-6">
+                <Star className="mb-2 size-6 text-amber-500 sm:size-8" />
+                <p className="text-xs font-medium text-muted-foreground sm:text-sm">Đánh giá</p>
+                <p className="text-2xl font-bold sm:text-3xl">{user._count.reviews}</p>
               </CardContent>
             </Card>
             <Card className="shadow-sm border-neutral-200/60">
-              <CardContent className="p-6 flex flex-col items-center justify-center text-center">
-                <RotateCcw className="h-8 w-8 text-red-500 mb-2" />
-                <p className="text-sm font-medium text-muted-foreground">Hoàn trả</p>
-                <p className="text-3xl font-bold">{user._count.returnRequests}</p>
+              <CardContent className="flex flex-col items-center justify-center p-3 text-center sm:p-6">
+                <RotateCcw className="mb-2 size-6 text-red-500 sm:size-8" />
+                <p className="text-xs font-medium text-muted-foreground sm:text-sm">Hoàn trả</p>
+                <p className="text-2xl font-bold sm:text-3xl">{user._count.returnRequests}</p>
               </CardContent>
             </Card>
           </div>
@@ -166,40 +178,43 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
               <CardTitle className="text-lg">Lịch sử hoạt động</CardTitle>
               <CardDescription>Các hoạt động gần đây nhất của người dùng</CardDescription>
             </CardHeader>
-            <CardContent>
-              <Tabs defaultValue="orders" className="w-full">
-                <TabsList className="grid w-full grid-cols-3 mb-4">
-                  <TabsTrigger value="orders">Đơn hàng</TabsTrigger>
-                  <TabsTrigger value="reviews">Đánh giá</TabsTrigger>
-                  <TabsTrigger value="returns">Đổi/trả</TabsTrigger>
+            <CardContent className="px-3 sm:px-6">
+              <Tabs defaultValue="orders" className="min-w-0 !w-full">
+                <TabsList className="mb-4 !grid !h-10 !w-full grid-cols-3">
+                  <TabsTrigger value="orders" className="min-w-0 px-1 text-xs sm:text-sm">Đơn hàng</TabsTrigger>
+                  <TabsTrigger value="reviews" className="min-w-0 px-1 text-xs sm:text-sm">Đánh giá</TabsTrigger>
+                  <TabsTrigger value="returns" className="min-w-0 px-1 text-xs sm:text-sm">Đổi/trả</TabsTrigger>
                 </TabsList>
                 
-                <TabsContent value="orders">
+                <TabsContent value="orders" className="min-w-0 !w-full">
                   {user.orders.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground text-sm">
                       Người dùng chưa có đơn hàng nào.
                     </div>
                   ) : (
-                    <Table>
+                    <Table className="table-fixed sm:table-auto">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Mã đơn</TableHead>
-                          <TableHead>Ngày đặt</TableHead>
-                          <TableHead>Giá trị</TableHead>
-                          <TableHead>Trạng thái</TableHead>
+                          <TableHead className="hidden sm:table-cell">Ngày đặt</TableHead>
+                          <TableHead className="hidden sm:table-cell">Giá trị</TableHead>
+                          <TableHead className="w-24 px-2 text-right sm:w-auto sm:px-4 sm:text-left">Trạng thái</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {user.orders.map((order) => (
                           <TableRow key={order.id}>
-                            <TableCell className="font-medium">
+                            <TableCell className="min-w-0 whitespace-normal font-medium">
                               <Link href={`/admin/orders?q=${encodeURIComponent(order.id)}`} className="text-blue-600 hover:underline">
                                 #{order.id.slice(-6).toUpperCase()}
                               </Link>
+                              <span className="mt-1 block text-xs font-normal text-muted-foreground sm:hidden">
+                                {format(new Date(order.createdAt), "dd/MM/yyyy")} · {formatCurrency(Number(order.totalAmount))}
+                              </span>
                             </TableCell>
-                            <TableCell>{format(new Date(order.createdAt), "dd/MM/yyyy")}</TableCell>
-                            <TableCell>{formatCurrency(Number(order.totalAmount))}</TableCell>
-                            <TableCell>{getOrderStatusBadge(order.status)}</TableCell>
+                            <TableCell className="hidden sm:table-cell">{format(new Date(order.createdAt), "dd/MM/yyyy")}</TableCell>
+                            <TableCell className="hidden sm:table-cell">{formatCurrency(Number(order.totalAmount))}</TableCell>
+                            <TableCell className="w-24 px-2 text-right sm:w-auto sm:px-4 sm:text-left">{getOrderStatusBadge(order.status)}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -212,25 +227,28 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
                   )}
                 </TabsContent>
 
-                <TabsContent value="reviews">
+                <TabsContent value="reviews" className="min-w-0 !w-full">
                   {user.reviews.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground text-sm">
                       Người dùng chưa có đánh giá nào.
                     </div>
                   ) : (
-                    <Table>
+                    <Table className="table-fixed sm:table-auto">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Sản phẩm</TableHead>
                           <TableHead>Đánh giá</TableHead>
-                          <TableHead>Ngày đánh giá</TableHead>
+                          <TableHead className="hidden sm:table-cell">Ngày đánh giá</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {user.reviews.map((review) => (
                           <TableRow key={review.id}>
-                            <TableCell className="max-w-[200px] truncate" title={review.product.title}>
-                              {review.product.title}
+                            <TableCell className="min-w-0 whitespace-normal" title={review.product.title}>
+                              <span className="block truncate">{review.product.title}</span>
+                              <span className="mt-1 block text-xs text-muted-foreground sm:hidden">
+                                {format(new Date(review.createdAt), "dd/MM/yyyy")}
+                              </span>
                             </TableCell>
                             <TableCell>
                               <div className="flex items-center">
@@ -238,7 +256,7 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
                                 <Star className="h-3 w-3 text-amber-500 fill-current" />
                               </div>
                             </TableCell>
-                            <TableCell>{format(new Date(review.createdAt), "dd/MM/yyyy")}</TableCell>
+                            <TableCell className="hidden sm:table-cell">{format(new Date(review.createdAt), "dd/MM/yyyy")}</TableCell>
                           </TableRow>
                         ))}
                       </TableBody>
@@ -246,36 +264,39 @@ export default async function AdminUserDetailsPage(props: { params: Promise<{ id
                   )}
                 </TabsContent>
 
-                <TabsContent value="returns">
+                <TabsContent value="returns" className="min-w-0 !w-full">
                   {user.returnRequests.length === 0 ? (
                     <div className="text-center py-8 text-muted-foreground text-sm">
                       Người dùng chưa có yêu cầu hoàn trả nào.
                     </div>
                   ) : (
-                    <Table>
+                    <Table className="table-fixed sm:table-auto">
                       <TableHeader>
                         <TableRow>
                           <TableHead>Mã yêu cầu</TableHead>
-                          <TableHead>Đơn hàng</TableHead>
-                          <TableHead>Lý do</TableHead>
-                          <TableHead>Trạng thái</TableHead>
+                          <TableHead className="hidden sm:table-cell">Đơn hàng</TableHead>
+                          <TableHead className="hidden sm:table-cell">Lý do</TableHead>
+                          <TableHead className="w-24 px-2 text-right sm:w-auto sm:px-4 sm:text-left">Trạng thái</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {user.returnRequests.map((req) => (
                           <TableRow key={req.id}>
-                            <TableCell className="font-medium">#{req.id.slice(-6).toUpperCase()}</TableCell>
-                            <TableCell>
+                            <TableCell className="min-w-0 whitespace-normal font-medium">
+                              #{req.id.slice(-6).toUpperCase()}
+                              <span className="mt-1 block truncate text-xs font-normal text-muted-foreground sm:hidden">{req.reason}</span>
+                            </TableCell>
+                            <TableCell className="hidden sm:table-cell">
                               <Link href={`/admin/orders?q=${encodeURIComponent(req.order.id)}`} className="text-blue-600 hover:underline">
                                 #{req.order.id.slice(-6).toUpperCase()}
                               </Link>
                             </TableCell>
-                            <TableCell className="max-w-[200px] truncate" title={req.reason}>
+                            <TableCell className="hidden max-w-[200px] truncate sm:table-cell" title={req.reason}>
                               {req.reason}
                             </TableCell>
-                            <TableCell>
+                            <TableCell className="w-24 px-2 text-right sm:w-auto sm:px-4 sm:text-left">
                               <Badge variant={req.status === "APPROVED" ? "default" : req.status === "REJECTED" ? "destructive" : "secondary"}>
-                                {req.status}
+                                {returnStatusLabels[req.status] || req.status}
                               </Badge>
                             </TableCell>
                           </TableRow>

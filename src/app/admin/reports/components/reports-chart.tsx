@@ -12,7 +12,7 @@ import {
 export function ReportsChart({ data }: { data: { name: string; revenue: number }[] }) {
   if (data.length === 0) {
     return (
-      <div className="flex h-[350px] items-center justify-center text-muted-foreground">
+      <div className="flex h-48 items-center justify-center rounded-xl bg-neutral-50 px-4 text-center text-sm text-muted-foreground sm:h-[350px]">
         Chưa có dữ liệu doanh thu.
       </div>
     );

@@ -54,7 +54,7 @@ export default async function AdminUsersPage(props: { searchParams: Promise<{ pa
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <Table className="table-fixed md:table-auto">
-          <TableHeader>
+          <TableHeader className="hidden md:table-header-group">
             <TableRow>
               <TableHead>Khách hàng</TableHead>
               <TableHead className="hidden md:table-cell">Số điện thoại</TableHead>
@@ -74,18 +74,25 @@ export default async function AdminUsersPage(props: { searchParams: Promise<{ pa
             ) : (
               users.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="min-w-0 font-medium">
-                    <span className="block truncate">{user.name || "Khách hàng"}</span>
-                    <span className="mt-1 block text-xs font-normal text-muted-foreground md:hidden">
-                      {user.phoneNumber || "Chưa cập nhật số điện thoại"}
-                    </span>
-                    <span className="mt-1 block text-xs font-normal text-muted-foreground lg:hidden">
-                      Tham gia {format(new Date(user.createdAt), "dd/MM/yyyy")}
-                    </span>
-                    <span className="mt-2 flex flex-wrap items-center gap-2 text-xs font-normal sm:hidden">
-                      <span>{user._count.orders} đơn hàng</span>
-                      <Badge variant="secondary">Khách hàng</Badge>
-                    </span>
+                  <TableCell className="min-w-0 whitespace-normal font-medium">
+                    <div className="flex items-start justify-between gap-3">
+                      <div className="min-w-0">
+                        <span className="block truncate">{user.name || "Khách hàng"}</span>
+                        <span className="mt-1 block truncate text-xs font-normal text-muted-foreground md:hidden">
+                          {user.phoneNumber || "Chưa cập nhật số điện thoại"}
+                        </span>
+                        <span className="mt-1 block text-xs font-normal text-muted-foreground lg:hidden">
+                          Tham gia {format(new Date(user.createdAt), "dd/MM/yyyy")}
+                        </span>
+                        <span className="mt-2 flex flex-wrap items-center gap-2 text-xs font-normal sm:hidden">
+                          <span>{user._count.orders} đơn hàng</span>
+                          <Badge variant="secondary">Khách hàng</Badge>
+                        </span>
+                      </div>
+                      <div className="shrink-0 md:hidden">
+                        <UserActions userId={user.id} currentRole={user.role} />
+                      </div>
+                    </div>
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{user.phoneNumber || "—"}</TableCell>
                   <TableCell className="hidden lg:table-cell">
@@ -99,7 +106,7 @@ export default async function AdminUsersPage(props: { searchParams: Promise<{ pa
               Khách hàng
                     </Badge>
                   </TableCell>
-                  <TableCell className="w-20 text-right">
+                  <TableCell className="hidden w-20 text-right md:table-cell">
                     <UserActions userId={user.id} currentRole={user.role} />
                   </TableCell>
                 </TableRow>

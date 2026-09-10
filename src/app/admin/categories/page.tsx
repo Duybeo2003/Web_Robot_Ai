@@ -69,14 +69,14 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
       </div>
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-        <Table>
+        <Table className="table-fixed sm:table-auto">
           <TableHeader>
             <TableRow>
               <TableHead>Tên danh mục</TableHead>
               <TableHead className="hidden sm:table-cell">Mô tả</TableHead>
               <TableHead className="hidden lg:table-cell">Ngày tạo</TableHead>
               <TableHead className="hidden md:table-cell">Số sản phẩm</TableHead>
-              <TableHead className="text-right">Hành động</TableHead>
+              <TableHead className="w-16 px-2 text-right sm:w-auto sm:px-4">Thao tác</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -89,7 +89,7 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
             ) : (
               categories.map((category) => (
                 <TableRow key={category.id}>
-                  <TableCell className="min-w-0 font-medium">
+                  <TableCell className="min-w-0 whitespace-normal font-medium">
                     <span className="block truncate">{category.name}</span>
                     <span className="mt-1 block max-w-52 truncate text-xs font-normal text-muted-foreground sm:hidden">
                       {category.description || "Chưa có mô tả"}
@@ -105,7 +105,7 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
                     {format(new Date(category.createdAt), "dd/MM/yyyy")}
                   </TableCell>
                   <TableCell className="hidden md:table-cell">{category._count.products}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="w-16 px-2 text-right sm:w-auto sm:px-4">
                     <CategoryActions category={category} />
                   </TableCell>
                 </TableRow>

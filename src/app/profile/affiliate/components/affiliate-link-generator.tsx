@@ -35,12 +35,12 @@ export function AffiliateLinkGenerator({
     <div className="space-y-4">
       <div>
         <label className="block text-sm font-medium mb-2 text-neutral-700">Chọn sản phẩm giới thiệu:</label>
-        <select 
+        <select
           value={selectedProductSlug}
           onChange={(e) => setSelectedProductSlug(e.target.value)}
-          className="w-full h-10 border border-neutral-300 rounded-md px-3 text-sm focus:ring-2 focus:ring-[#FF5722] outline-none"
+          className="h-10 w-full rounded-lg border border-neutral-300 px-3 text-sm outline-none focus:ring-2 focus:ring-[#FF5722]"
         >
-          <option value="">-- Trang chủ (Toàn cửa hàng) --</option>
+          <option value="">Trang chủ (toàn cửa hàng)</option>
           {products.map(p => (
             <option key={p.id} value={p.slug}>
               {p.title} (Hoa hồng: {p.commissionRate || 10}%)
@@ -49,14 +49,15 @@ export function AffiliateLinkGenerator({
         </select>
       </div>
 
-      <div className="flex gap-2">
+      <div className="flex flex-col gap-2 sm:flex-row">
         <input 
           type="text" 
           readOnly 
           value={generatedLink}
-          className="flex-1 h-10 bg-neutral-50 border border-neutral-300 rounded-md px-3 text-sm text-neutral-600 outline-none"
+          aria-label="Liên kết giới thiệu"
+          className="h-10 min-w-0 flex-1 rounded-lg border border-neutral-300 bg-neutral-50 px-3 text-sm text-neutral-600 outline-none"
         />
-        <Button onClick={handleCopy} className="gap-2 bg-[#FF5722] hover:bg-[#E64A19] text-white">
+        <Button onClick={handleCopy} className="w-full gap-2 bg-[#FF5722] text-white hover:bg-[#E64A19] sm:w-auto">
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           {copied ? "Đã chép" : "Sao chép"}
         </Button>

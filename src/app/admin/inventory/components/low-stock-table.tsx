@@ -74,21 +74,21 @@ export function LowStockTable() {
   }
 
   return (
-    <div className="rounded-md border border-neutral-200 overflow-hidden">
-      <Table>
+    <div className="overflow-hidden rounded-xl border border-neutral-200">
+      <Table className="table-fixed">
         <TableHeader className="bg-neutral-50">
           <TableRow>
             <TableHead>Sản phẩm</TableHead>
-            <TableHead className="text-right">Tồn kho</TableHead>
+            <TableHead className="w-16 px-2 text-right sm:w-20 sm:px-4">Tồn kho</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {products.map((p) => (
             <TableRow key={p.id}>
-              <TableCell>
+              <TableCell className="min-w-0 pr-1 sm:pr-4">
                 <Link
                   href={`/admin/products/${p.productId}`}
-                  className="flex items-center gap-2 group"
+                  className="group flex min-w-0 items-center gap-2"
                 >
                   <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-lg border border-neutral-100 bg-white">
                     <Package className="absolute left-1/2 top-1/2 h-5 w-5 -translate-x-1/2 -translate-y-1/2 text-neutral-300" aria-hidden="true" />
@@ -105,11 +105,11 @@ export function LowStockTable() {
                       />
                     )}
                   </div>
-                  <div className="flex flex-col">
-                    <span className="text-sm font-medium line-clamp-1 group-hover:text-blue-600 transition-colors">
+                  <div className="flex min-w-0 flex-col">
+                    <span className="truncate text-sm font-medium transition-colors group-hover:text-blue-600">
                       {p.title}
                     </span>
-                    <span className="text-xs text-muted-foreground">
+                    <span className="truncate text-xs text-muted-foreground">
                       SKU: {p.sku || "Chưa cập nhật"}
                     </span>
                     {p.variantLabel && (
@@ -120,7 +120,7 @@ export function LowStockTable() {
                   </div>
                 </Link>
               </TableCell>
-              <TableCell className="text-right">
+              <TableCell className="px-2 text-right sm:px-4">
                 <Badge variant="destructive" className="font-bold">
                   {p.inventoryCount}
                 </Badge>

@@ -85,9 +85,7 @@ export function Footer() {
                 title="Zalo"
                 aria-label="Zalo RoboEQ"
               >
-                <svg viewBox="0 0 24 24" width="16" height="16" className="fill-current" aria-hidden="true">
-                  <path d="M21.4 12.86c0-3.66-3.47-6.62-7.75-6.62-4.28 0-7.75 2.96-7.75 6.62 0 3.66 3.47 6.62 7.75 6.62 1.34 0 2.61-.28 3.73-.78l3.1.91-.71-2.48c1.15-1.12 1.88-2.62 1.88-4.27z" />
-                </svg>
+                <span className="text-[10px] font-extrabold" aria-hidden="true">Zalo</span>
               </Link>}
             </div>
           </div>

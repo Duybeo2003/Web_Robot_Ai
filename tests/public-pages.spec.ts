@@ -75,7 +75,7 @@ test.describe("Public commercial pages", () => {
       await page.goto(`/shop?q=${encodeURIComponent(title)}`);
       await page.getByRole("button", { name: "Thêm vào giỏ hàng" }).click();
       await page.goto("/cart");
-      const checkoutLink = page.getByRole("link", { name: /Tiến hành Thanh toán/ });
+      const checkoutLink = page.getByRole("link", { name: /Tiến hành thanh toán/i });
       await expect(checkoutLink).toHaveAttribute("href", "/checkout");
       await checkoutLink.click();
 

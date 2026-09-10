@@ -13,11 +13,11 @@ export default async function ProfileLayout({ children }: { children: React.Reac
   }
 
   const navigation = [
-    { href: "/profile", label: "Tài khoản của tôi", icon: User },
+    { href: "/profile", label: "Tài khoản", icon: User },
     { href: "/profile/orders", label: "Đơn mua", icon: Package },
-    { href: "/profile/wishlist", label: "Sản phẩm yêu thích", icon: Heart },
+    { href: "/profile/wishlist", label: "Yêu thích", icon: Heart },
     { href: "/profile/wallet", label: "Ví RoboCoin", icon: Wallet },
-    { href: "/profile/inventory", label: "Túi đồ sự kiện", icon: Gift },
+    { href: "/profile/inventory", label: "Túi đồ", icon: Gift },
     { href: "/profile/affiliate", label: "Tiếp thị liên kết", icon: User },
   ];
 
@@ -43,12 +43,12 @@ export default async function ProfileLayout({ children }: { children: React.Reac
               </div>
             </div>
 
-            <nav className="-mx-1 flex gap-2 overflow-x-auto px-1 pb-1 lg:mx-0 lg:block lg:space-y-1 lg:overflow-visible lg:px-0" aria-label="Điều hướng tài khoản">
+            <nav className="grid grid-cols-2 gap-2 lg:block lg:space-y-1" aria-label="Điều hướng tài khoản">
               {navigation.map(({ href, label, icon: Icon }) => (
                 <Link
                   key={href}
                   href={href}
-                  className="flex h-11 shrink-0 items-center gap-2.5 whitespace-nowrap rounded-xl px-3 text-sm font-medium text-neutral-700 transition-colors hover:bg-primary/10 hover:text-primary lg:w-full"
+                  className="flex min-h-11 min-w-0 items-center gap-2.5 rounded-xl px-3 py-2 text-sm font-medium text-neutral-700 transition-colors hover:bg-primary/10 hover:text-primary lg:w-full"
                 >
                   <Icon className="size-5 shrink-0 text-neutral-400" aria-hidden="true" />
                   {label}

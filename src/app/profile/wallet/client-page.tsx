@@ -101,7 +101,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
               <span className="text-5xl font-black">{wallet.balance.toLocaleString('vi-VN')}</span>
             <span className="text-xl font-bold text-orange-100">xu</span>
             </div>
-            <p className="text-sm text-orange-100">1 Xu = 1 VNĐ. Dùng để tham gia sự kiện và vòng quay may mắn.</p>
+            <p className="text-sm text-orange-100">1 xu = 1 VNĐ. Dùng để tham gia sự kiện và vòng quay may mắn.</p>
           </div>
           
           <Button 
@@ -180,7 +180,7 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
       <Dialog open={isTopupOpen} onOpenChange={setIsTopupOpen}>
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
-            <DialogTitle>Nạp Robo Xu</DialogTitle>
+            <DialogTitle>Nạp RoboCoin</DialogTitle>
             <DialogDescription>
               Nhập số xu bạn muốn nạp (1 xu = 1 VNĐ). Tối thiểu 10.000 xu.
             </DialogDescription>
@@ -225,9 +225,9 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
       <Dialog open={!!activeTransaction} onOpenChange={(open) => !open && setActiveTransaction(null)}>
         <DialogContent className="sm:max-w-[550px] overflow-hidden">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl text-[#FF5722]">Thanh toán đơn nạp Xu</DialogTitle>
+            <DialogTitle className="text-center text-xl text-[#FF5722]">Thanh toán yêu cầu nạp xu</DialogTitle>
             <DialogDescription className="text-center">
-              Quét mã QR dưới đây bằng ứng dụng ngân hàng của bạn để hoàn tất nạp <strong>{activeTransaction?.amount.toLocaleString('vi-VN')} Xu</strong>.
+              Quét mã QR bằng ứng dụng ngân hàng để hoàn tất nạp <strong>{activeTransaction?.amount.toLocaleString('vi-VN')} xu</strong>.
             </DialogDescription>
           </DialogHeader>
           

@@ -90,6 +90,10 @@ export function OrderStatusUpdater({
           Tiến trình giao hàng
         </label>
         <Select
+          items={statusOptions.map((option) => ({
+            value: option,
+            label: statusLabels[option] || option,
+          }))}
           value={status}
           onValueChange={(value) => value && void update(value as OrderStatus, payStatus)}
           disabled={loading}

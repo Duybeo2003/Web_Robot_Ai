@@ -111,6 +111,10 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
       <div className="space-y-3">
         <Label>Loại giao dịch</Label>
         <Select
+          items={[
+            { value: "IN", label: "Nhập kho" },
+            { value: "OUT", label: "Xuất kho" },
+          ]}
           value={formData.type}
           onValueChange={(val) => setFormData({ ...formData, type: (val as "IN" | "OUT") || "IN" })}
         >
@@ -127,6 +131,7 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
       <div className="space-y-3">
         <Label>Sản phẩm</Label>
         <Select
+          items={products.map((product) => ({ value: product.id, label: product.title }))}
           value={formData.productId}
           onValueChange={(val) =>
             setFormData({
@@ -158,6 +163,10 @@ export function NewPoForm({ products }: { products: InventoryProduct[] }) {
         <div className="space-y-3">
           <Label>Phân loại kho</Label>
           <Select
+            items={selectedProduct.variants.map((variant) => ({
+              value: variant.id,
+              label: variantLabel(variant.attributes),
+            }))}
             value={formData.variantId}
             onValueChange={(value) =>
               setFormData({ ...formData, variantId: value || "" })

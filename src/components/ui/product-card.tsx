@@ -14,11 +14,13 @@ export function ProductCard({
   action,
   isWished = false,
   eager = false,
+  wideDesktopMedia = false,
 }: {
   product: Product;
   action?: React.ReactNode;
   isWished?: boolean;
   eager?: boolean;
+  wideDesktopMedia?: boolean;
 }) {
   const currentPrice = Number(product.price);
   const originalPrice = product.originalPrice ? Number(product.originalPrice) : null;
@@ -57,7 +59,7 @@ export function ProductCard({
 
       <Link
         href={`/shop/${product.slug}`}
-        className="relative block aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-b from-neutral-50 to-white"
+        className={`relative block aspect-square w-full shrink-0 overflow-hidden bg-gradient-to-b from-neutral-50 to-white ${wideDesktopMedia ? "lg:aspect-[4/3]" : ""}`}
         aria-label={`Xem ${product.title}`}
       >
         {product.imageUrl ? (

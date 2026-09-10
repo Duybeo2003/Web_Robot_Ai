@@ -74,14 +74,14 @@ export default async function AdminFlashSalesPage() {
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <table className="w-full table-fixed text-left text-sm md:table-auto">
             <thead className="bg-neutral-50 text-neutral-500 border-b">
               <tr>
-                <th className="px-4 py-4 font-medium sm:px-6">Sản phẩm hoặc combo</th>
+                <th className="px-3 py-4 font-medium sm:px-6">Sản phẩm hoặc combo</th>
                 <th className="hidden px-6 py-4 font-medium md:table-cell">Giá ưu đãi</th>
                 <th className="hidden px-6 py-4 font-medium lg:table-cell">Kết thúc</th>
                 <th className="hidden px-6 py-4 font-medium md:table-cell">Số lượng</th>
-                <th className="px-4 py-4 text-right font-medium sm:px-6">Thao tác</th>
+                <th className="w-20 px-2 py-4 text-right font-medium sm:w-24 sm:px-4 md:w-auto md:px-6">Thao tác</th>
               </tr>
             </thead>
             <tbody className="divide-y">
@@ -100,8 +100,8 @@ export default async function AdminFlashSalesPage() {
               ) : (
                 flashSales.map((item) => (
                   <tr key={item.id} className="hover:bg-neutral-50">
-                    <td className="min-w-0 px-4 py-4 sm:px-6">
-                      <div className="flex items-center gap-4">
+                    <td className="min-w-0 px-3 py-4 sm:px-6">
+                      <div className="flex min-w-0 items-center gap-3 sm:gap-4">
                         <div className="w-12 h-12 relative rounded bg-neutral-100 flex-shrink-0 overflow-hidden">
                           {item.imageUrl ? (
                             <Image
@@ -152,8 +152,8 @@ export default async function AdminFlashSalesPage() {
                     <td className="hidden px-6 py-4 whitespace-nowrap text-neutral-600 md:table-cell">
                       <span className="font-medium">{item.flashSaleStock || 0}</span> suất
                     </td>
-                    <td className="px-4 py-4 whitespace-nowrap text-right sm:px-6">
-                      <div className="flex items-center justify-end gap-2">
+                    <td className="w-20 px-1 py-4 text-right sm:w-24 sm:px-3 md:w-auto md:px-6">
+                      <div className="flex items-center justify-end gap-1 sm:gap-2">
                         <Link
                           href={item.isCombo ? `/admin/combos/${item.id}` : `/admin/products/${item.id}`}
                           className="flex size-9 items-center justify-center rounded-lg text-blue-600 transition-colors hover:bg-blue-50"

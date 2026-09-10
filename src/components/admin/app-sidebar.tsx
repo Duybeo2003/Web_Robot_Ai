@@ -65,7 +65,7 @@ const productGroup = [
 const marketingGroup = [
   { title: "Sự kiện và minigame", url: "/admin/events", icon: Trophy },
   { title: "Mã giảm giá", url: "/admin/coupons", icon: Ticket },
-  { title: "Flash sale", url: "/admin/flash-sales", icon: Zap },
+  { title: "Ưu đãi nhanh", url: "/admin/flash-sales", icon: Zap },
   { title: "Bài viết", url: "/admin/articles", icon: BookOpen },
 ];
 

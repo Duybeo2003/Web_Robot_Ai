@@ -258,7 +258,7 @@ export default async function ShopPage({
                     <ProductCard
                       key={product.id}
                       product={product}
-                      eager={index === 0}
+                      eager={index < 3}
                       isWished={userWishlistIds.includes(product.id)}
                       action={
                         <AddToCartButton

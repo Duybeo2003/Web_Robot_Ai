@@ -24,5 +24,7 @@ export default async function AdminEventConfigPage({ params }: { params: Promise
     price: Number(p.price)
   }));
 
-  return <EventConfigClientPage event={event} products={serializedProducts} />;
+  const serializedEvent = JSON.parse(JSON.stringify(event));
+
+  return <EventConfigClientPage event={serializedEvent} products={serializedProducts} />;
 }

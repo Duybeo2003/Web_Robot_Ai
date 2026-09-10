@@ -125,13 +125,18 @@ export function AddAdminModal() {
             <div className="grid gap-2">
               <Label htmlFor="role">Quyền hạn</Label>
               <Select 
+                items={[
+                  { value: "EDITOR", label: "Biên tập viên" },
+                  { value: "STORE_MANAGER", label: "Quản lý cửa hàng" },
+                  { value: "ADMIN", label: "Quản trị viên" },
+                ]}
                 value={formData.role} 
                 onValueChange={(val) => setFormData({
                   ...formData,
                   role: (val as "ADMIN" | "STORE_MANAGER" | "EDITOR") || "STORE_MANAGER",
                 })}
               >
-                <SelectTrigger>
+                <SelectTrigger className="w-full">
                   <SelectValue placeholder="Chọn quyền" />
                 </SelectTrigger>
                 <SelectContent>

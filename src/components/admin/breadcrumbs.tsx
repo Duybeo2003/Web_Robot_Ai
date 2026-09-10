@@ -14,7 +14,7 @@ const labels: Record<string, string> = {
   coupons: "Mã giảm giá",
   deliveries: "Trả thưởng và giao hàng",
   events: "Sự kiện",
-  "flash-sales": "Flash sale",
+  "flash-sales": "Ưu đãi nhanh",
   inventory: "Kho hàng",
   orders: "Đơn hàng",
   products: "Sản phẩm",
@@ -38,18 +38,24 @@ export default function Breadcrumbs() {
     const label = labels[part] || (index === parts.length - 1 ? "Chi tiết" : part);
     return { href, label };
   });
-  const allCrumbs = [{ href: "/admin", label: "Tổng quan" }, ...crumbs];
+  const visibleCrumbs = crumbs.length > 0 ? crumbs : [{ href: "/admin", label: "Tổng quan" }];
 
   return (
     <nav
       className="flex shrink-0 items-center gap-1 overflow-x-auto border-b border-neutral-200 bg-white px-4 py-2.5 text-sm sm:px-6"
       aria-label="Đường dẫn quản trị"
     >
-      <Home className="mr-1 size-4 shrink-0 text-neutral-400" aria-hidden="true" />
-      {allCrumbs.map((crumb, idx) => (
+      <Link
+        href="/admin"
+        className="mr-1 shrink-0 rounded-md text-neutral-400 transition-colors hover:text-primary focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30"
+        aria-label="Về tổng quan"
+      >
+        <Home className="size-4" aria-hidden="true" />
+      </Link>
+      {visibleCrumbs.map((crumb, idx) => (
         <span key={crumb.href} className="flex shrink-0 items-center">
-          {idx > 0 && <ChevronRight className="mx-1 size-4 text-neutral-300" aria-hidden="true" />}
-          {idx === allCrumbs.length - 1 ? (
+          <ChevronRight className="mx-1 size-4 text-neutral-300" aria-hidden="true" />
+          {idx === visibleCrumbs.length - 1 ? (
             <span className="font-semibold text-foreground" aria-current="page">{crumb.label}</span>
           ) : (
             <Link href={crumb.href} className="text-neutral-500 transition-colors hover:text-primary">

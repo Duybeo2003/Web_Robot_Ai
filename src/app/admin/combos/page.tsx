@@ -84,7 +84,7 @@ export default async function AdminCombosPage({
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-sm text-left">
+          <table className="w-full table-fixed text-left text-sm md:table-auto">
             <thead className="bg-indigo-50/50 text-indigo-800 font-semibold border-b border-indigo-100">
               <tr>
                 <th className="px-4 py-3">Gói combo</th>
@@ -92,7 +92,7 @@ export default async function AdminCombosPage({
                 <th className="hidden px-4 py-3 text-right lg:table-cell">Tổng giá rời</th>
                 <th className="hidden px-4 py-3 text-right md:table-cell">Giá bán combo</th>
                 <th className="hidden px-4 py-3 text-right xl:table-cell">Tiết kiệm</th>
-                <th className="px-4 py-3 text-right">Thao tác</th>
+                <th className="hidden px-4 py-3 text-right md:table-cell">Thao tác</th>
               </tr>
             </thead>
             <tbody>
@@ -126,10 +126,28 @@ export default async function AdminCombosPage({
                       key={combo.id}
                       className="border-b border-neutral-100 last:border-0 hover:bg-indigo-50/30"
                     >
-                      <td className="px-4 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="line-clamp-2 font-bold text-indigo-700">
+                      <td className="min-w-0 px-4 py-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="min-w-0 line-clamp-2 font-bold text-indigo-700">
                             {combo.title}
+                          </div>
+                          <div className="flex shrink-0 items-center gap-1 md:hidden">
+                            <Link
+                              href={`/admin/combos/${combo.id}`}
+                              className="flex size-9 items-center justify-center rounded-lg border border-indigo-100 text-indigo-500 transition-colors hover:bg-indigo-50 hover:text-indigo-700"
+                              title="Sửa combo"
+                              aria-label={`Sửa ${combo.title}`}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Link>
+                            <form
+                              action={async () => {
+                                "use server";
+                                await deleteProduct(combo.id);
+                              }}
+                            >
+                              <DeleteButton />
+                            </form>
                           </div>
                         </div>
                         <div className="mt-2 space-y-1 md:hidden">
@@ -200,7 +218,7 @@ export default async function AdminCombosPage({
                           </span>
                         )}
                       </td>
-                      <td className="px-4 py-4 text-right">
+                      <td className="hidden px-4 py-4 text-right md:table-cell">
                         <div className="flex items-center justify-end gap-2">
                           <Link
                             href={`/admin/combos/${combo.id}`}

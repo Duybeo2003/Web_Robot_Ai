@@ -37,6 +37,15 @@ export function ProductCarousel({
 
   if (!products || products.length === 0) return null;
 
+  const desktopItemWidth =
+    products.length === 1
+      ? "lg:basis-full"
+      : products.length === 2
+        ? "lg:basis-1/2"
+        : products.length === 3
+          ? "lg:basis-1/3"
+          : "lg:basis-1/4";
+
   return (
     <section className="relative mt-3 w-full bg-white py-8 sm:py-10">
       <div className="container mx-auto px-4">
@@ -75,25 +84,29 @@ export function ProductCarousel({
             }}
             className="w-full"
           >
-            <CarouselContent className={`-ml-3 sm:-ml-4 ${products.length < 4 ? "lg:justify-center" : ""}`}>
-              {products.map((product) => (
+            <CarouselContent className="-ml-3 sm:-ml-4">
+              {products.map((product, index) => (
                 <CarouselItem
                   key={product.id}
-                  className="flex basis-1/2 pl-3 sm:basis-1/3 sm:pl-4 lg:basis-1/4"
+                  className={`flex basis-1/2 pl-3 sm:basis-1/3 sm:pl-4 ${desktopItemWidth}`}
                 >
                   <div className="flex w-full py-1">
                     <ProductCard
                       product={product}
                       isWished={userWishlistIds.includes(product.id)}
+                      wideDesktopMedia={products.length === 3}
+                      eager={index === 0}
                     />
                   </div>
                 </CarouselItem>
               ))}
             </CarouselContent>
-            <div className="hidden sm:block">
-              <CarouselPrevious className="left-0 z-10 size-10 border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50" />
-              <CarouselNext className="right-0 z-10 size-10 border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50" />
-            </div>
+            {products.length > 3 && (
+              <div className={products.length <= 4 ? "hidden sm:block lg:hidden" : "hidden sm:block"}>
+                <CarouselPrevious className="left-0 z-10 size-10 border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50" />
+                <CarouselNext className="right-0 z-10 size-10 border border-neutral-200 bg-white text-neutral-800 shadow-md transition-all hover:bg-neutral-50" />
+              </div>
+            )}
           </Carousel>
         </div>
       </div>

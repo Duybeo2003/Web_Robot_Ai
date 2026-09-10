@@ -10,6 +10,7 @@ export default async function NewComboPage() {
     prisma.category.findMany({ orderBy: { name: "asc" } }),
     prisma.product.findMany({
       where: { isCombo: false }, // Only allow selecting non-combo products as items
+      select: { id: true, title: true, price: true, imageUrl: true },
       orderBy: { title: "asc" },
     }),
   ]);

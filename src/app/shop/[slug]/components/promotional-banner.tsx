@@ -51,7 +51,7 @@ export function PromotionalBanner({
       <div className="flex flex-col justify-between gap-2 rounded-xl bg-gradient-to-r from-[#E30019] to-primary p-3 text-white shadow-sm sm:flex-row sm:items-center">
         <div className="flex items-center gap-2 text-sm font-bold">
           <Flame className="w-5 h-5 text-yellow-300" />
-          <span>Flash sale đang diễn ra</span>
+          <span>Ưu đãi nhanh đang diễn ra</span>
         </div>
         <div className="flex items-center gap-2 text-sm font-medium">
           <span className="opacity-90">Kết thúc sau:</span>
@@ -76,7 +76,7 @@ export function PromotionalBanner({
           <Flame className="w-4 h-4" aria-hidden="true" />
           <span>
             Còn <strong className="text-sm text-red-700">{stock}</strong> sản phẩm
-            trong chương trình flash sale
+            trong chương trình ưu đãi nhanh
           </span>
         </div>
       )}

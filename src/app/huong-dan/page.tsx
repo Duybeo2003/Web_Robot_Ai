@@ -139,7 +139,7 @@ export default async function GuidesPage({
 
       <div className="container mx-auto px-4 -mt-8 relative z-20">
         {/* Categories Pills */}
-        <nav className="animate-in -mx-4 mb-12 flex gap-2 overflow-x-auto px-4 pb-2 pt-1 zoom-in-95 duration-500 fill-mode-both sm:mx-0 sm:justify-center sm:px-0" aria-label="Loại tài liệu">
+        <nav className="animate-in mb-8 flex flex-wrap justify-center gap-2 pt-1 zoom-in-95 duration-500 fill-mode-both sm:mb-12" aria-label="Loại tài liệu">
           {categories.map((category) => (
             <Link
               key={category.value}

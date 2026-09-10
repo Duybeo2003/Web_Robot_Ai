@@ -157,22 +157,22 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
   };
 
   return (
-    <div className="space-y-4 border p-4 rounded-md bg-neutral-50/50">
-      <div className="flex justify-between items-center">
-        <Label className="text-base font-bold text-neutral-900">Phân loại sản phẩm (Tùy chọn)</Label>
-        <Button type="button" variant="outline" size="sm" onClick={addOptionGroup}>
+    <div className="space-y-4 rounded-xl border border-neutral-200 bg-neutral-50/70 p-4">
+      <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <Label className="text-base font-bold text-neutral-900">Phân loại sản phẩm (tùy chọn)</Label>
+        <Button type="button" variant="outline" size="sm" className="w-full sm:w-auto" onClick={addOptionGroup}>
           <Plus className="w-4 h-4 mr-2" />
-          Thêm Nhóm Phân loại
+          Thêm nhóm phân loại
         </Button>
       </div>
-      <p className="text-sm text-neutral-500">Thêm các phân loại như Màu sắc, Kích cỡ, Phiên bản... để thiết lập Giá và Kho riêng.</p>
+      <p className="text-sm leading-6 text-neutral-500">Thêm các lựa chọn như màu sắc, kích cỡ hoặc phiên bản để thiết lập giá và tồn kho riêng.</p>
 
       {optionGroups.length > 0 && (
-        <div className="space-y-4 bg-white p-4 border rounded-md shadow-sm">
+        <div className="space-y-4 rounded-xl border border-neutral-200 bg-white p-3 shadow-sm sm:p-4">
           {optionGroups.map((group, idx) => (
             <div key={idx} className="flex flex-col sm:flex-row items-start gap-4">
               <div className="flex-1 flex flex-col justify-end gap-2">
-                <Label>Tên Phân Loại</Label>
+                <Label>Tên phân loại</Label>
                 <Input 
                   placeholder="VD: Màu sắc" 
                   value={group.name} 
@@ -180,8 +180,8 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
                 />
               </div>
               <div className="flex-[2] flex flex-col justify-end gap-2">
-                <Label>Giá trị (Cách nhau bằng dấu phẩy)</Label>
-                <div className="flex items-center gap-2">
+                <Label>Giá trị (cách nhau bằng dấu phẩy)</Label>
+                <div className="flex min-w-0 items-center gap-2">
                   <Input 
                     placeholder="VD: Đỏ, Xanh, Vàng" 
                     value={group.rawValues}
@@ -196,13 +196,97 @@ export function VariantManager({ variants, onChange, basePrice }: VariantManager
           ))}
           <Button type="button" variant="secondary" className="w-full mt-2 border border-neutral-300" onClick={generateVariants}>
             <RefreshCw className="w-4 h-4 mr-2" />
-            Tạo / Cập nhật Danh sách Biến thể
+            Tạo danh sách phân loại
           </Button>
         </div>
       )}
 
       {variants.length > 0 && (
-        <div className="mt-4 border rounded-md overflow-x-auto bg-white shadow-sm">
+        <div className="grid gap-3 md:hidden">
+          {variants.map((v, idx) => (
+            <article key={idx} className="rounded-xl border border-neutral-200 bg-white p-3 shadow-sm">
+              <div className="mb-3 flex items-center justify-between gap-3 border-b border-neutral-100 pb-3">
+                <p className="min-w-0 truncate text-sm font-bold text-indigo-700">
+                  {Object.values(v.attributes).join(" · ")}
+                </p>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon-sm"
+                  aria-label="Xóa phân loại"
+                  onClick={() => removeVariant(idx)}
+                >
+                  <Trash2 className="w-4 h-4 text-red-500" />
+                </Button>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Giá gốc (VNĐ)</Label>
+                  <Input
+                    type="number"
+                    value={v.originalPrice || ""}
+                    onChange={(e) => updateVariant(idx, "originalPrice", e.target.value ? Number(e.target.value) : null)}
+                    placeholder="Không"
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Giá bán (VNĐ)</Label>
+                  <Input
+                    type="number"
+                    value={v.price}
+                    onChange={(e) => updateVariant(idx, "price", Number(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Tồn kho</Label>
+                  <Input
+                    type="number"
+                    value={v.inventoryCount}
+                    onChange={(e) => updateVariant(idx, "inventoryCount", Number(e.target.value))}
+                  />
+                </div>
+                <div className="space-y-1.5">
+                  <Label className="text-xs">Mã SKU</Label>
+                  <Input
+                    value={v.sku || ""}
+                    onChange={(e) => updateVariant(idx, "sku", e.target.value)}
+                    placeholder="SKU-001"
+                  />
+                </div>
+              </div>
+
+              <div className="mt-3 flex items-center gap-3 rounded-lg bg-neutral-50 p-2">
+                <div className="relative size-10 shrink-0 overflow-hidden rounded-lg border bg-white">
+                  {v.imageUrl ? (
+                    <Image src={v.imageUrl} alt="Ảnh phân loại" fill className="object-cover" sizes="40px" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-neutral-300">
+                      <ImageIcon className="w-4 h-4" />
+                    </div>
+                  )}
+                </div>
+                <label className="relative flex h-9 flex-1 cursor-pointer items-center justify-center rounded-lg border border-neutral-200 bg-white px-3 text-sm font-semibold text-neutral-700 transition-colors hover:border-primary hover:text-primary">
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    className="absolute inset-0 h-full w-full cursor-pointer opacity-0"
+                    onChange={(e) => {
+                      if (e.target.files?.[0]) {
+                        handleVariantImageUpload(idx, e.target.files[0]);
+                      }
+                    }}
+                  />
+                  Chọn ảnh
+                </label>
+              </div>
+            </article>
+          ))}
+        </div>
+      )}
+
+      {variants.length > 0 && (
+        <div className="mt-4 hidden overflow-x-auto rounded-xl border border-neutral-200 bg-white shadow-sm md:block">
           <table className="w-full text-sm text-left">
             <thead className="bg-neutral-100 text-neutral-600">
               <tr>

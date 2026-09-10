@@ -55,7 +55,7 @@ export function FlashSaleCarousel({
             className="w-full"
           >
             <CarouselContent className="-ml-2 md:-ml-4">
-              {products.map((product) => (
+              {products.map((product, index) => (
                 <CarouselItem
                   key={`flash-${product.id}`}
                   className="flex basis-1/2 pl-3 sm:basis-1/3 sm:pl-4 lg:basis-1/4"
@@ -64,6 +64,7 @@ export function FlashSaleCarousel({
                     <ProductCard
                       product={product}
                       isWished={userWishlistIds.includes(product.id)}
+                      eager={index === 0}
                     />
                   </div>
                 </CarouselItem>
