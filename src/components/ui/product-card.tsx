@@ -80,15 +80,20 @@ export function ProductCard({
       
       <div className="flex flex-grow flex-col border-t border-neutral-100 p-3 sm:p-4">
         <Link href={`/shop/${product.slug}`} className="rounded-lg focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
-          <h3 className="line-clamp-2 min-h-10 text-[13px] font-semibold leading-5 text-neutral-800 transition-colors group-hover:text-primary sm:min-h-11 sm:text-sm sm:leading-[1.375rem]">
+          <h3 className="line-clamp-2 min-h-9 text-[13px] font-semibold leading-[1.125rem] text-neutral-800 transition-colors group-hover:text-primary sm:min-h-10 sm:text-sm sm:leading-5 lg:min-h-0">
             {product.title}
           </h3>
         </Link>
-        <div className="mt-auto pt-3">
-          <p className={`h-4 text-[11px] leading-4 text-neutral-400 line-through sm:text-xs ${hasDiscount ? "" : "invisible"}`}>
-            {hasDiscount ? currency.format(originalPrice) : "0 ₫"}
-          </p>
-          <p className="mt-0.5 whitespace-nowrap text-base font-extrabold leading-6 text-[#d92d20] sm:text-lg">
+        <div
+          data-ui="product-price-row"
+          className="mt-auto flex min-h-7 items-baseline gap-1 overflow-hidden pt-2 sm:gap-2"
+        >
+          {hasDiscount && (
+            <p className="min-w-0 shrink truncate whitespace-nowrap text-[10px] font-medium leading-4 text-neutral-400 line-through sm:text-xs">
+              {currency.format(originalPrice)}
+            </p>
+          )}
+          <p className="shrink-0 whitespace-nowrap text-[13px] font-extrabold leading-6 tabular-nums text-[#d92d20] sm:text-lg">
             {currency.format(currentPrice)}
           </p>
         </div>

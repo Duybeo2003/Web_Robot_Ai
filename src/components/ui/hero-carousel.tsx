@@ -2,7 +2,6 @@
 
 import * as React from "react";
 import { getImageProps } from "next/image";
-import { Pause, Play } from "lucide-react";
 import Autoplay from "embla-carousel-autoplay";
 import {
   Carousel,
@@ -74,16 +73,9 @@ function ResponsiveHeroImage({
 
 export function HeroCarousel() {
   const plugin = React.useMemo(
-    () => Autoplay({ delay: 6000, stopOnInteraction: false }),
+    () => Autoplay({ delay: 6000, stopOnInteraction: true }),
     [],
   );
-  const [paused, setPaused] = React.useState(false);
-
-  const toggleAutoplay = () => {
-    if (paused) plugin.play();
-    else plugin.stop();
-    setPaused((current) => !current);
-  };
 
   return (
     <section className="w-full bg-white py-4 sm:py-5" aria-label="Nổi bật tại RoboEQ">
@@ -92,12 +84,8 @@ export function HeroCarousel() {
           <div className="w-full lg:flex-[7]">
             <Carousel
               plugins={[plugin]}
-              onMouseEnter={() => {
-                if (!paused) plugin.stop();
-              }}
-              onMouseLeave={() => {
-                if (!paused) plugin.play();
-              }}
+              onMouseEnter={plugin.stop}
+              onMouseLeave={plugin.reset}
               opts={{ align: "start", loop: true }}
               className="relative h-full w-full overflow-hidden rounded-xl"
               aria-label="Chương trình nổi bật"
@@ -133,16 +121,6 @@ export function HeroCarousel() {
               </CarouselContent>
               <CarouselPrevious className="absolute left-4 top-1/2 hidden -translate-y-1/2 opacity-80 hover:opacity-100 md:flex" />
               <CarouselNext className="absolute right-4 top-1/2 hidden -translate-y-1/2 opacity-80 hover:opacity-100 md:flex" />
-              <button
-                type="button"
-                onClick={toggleAutoplay}
-                className="absolute bottom-3 right-3 z-20 inline-flex min-h-10 items-center gap-2 rounded-full border border-white/60 bg-neutral-950/70 px-3 text-xs font-semibold text-white shadow-lg backdrop-blur-sm transition-colors hover:bg-neutral-950 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-                aria-label={paused ? "Tiếp tục tự động chuyển banner" : "Tạm dừng tự động chuyển banner"}
-                aria-pressed={paused}
-              >
-                {paused ? <Play className="size-4" aria-hidden="true" /> : <Pause className="size-4" aria-hidden="true" />}
-                <span className="hidden sm:inline">{paused ? "Tiếp tục" : "Tạm dừng"}</span>
-              </button>
             </Carousel>
           </div>
 

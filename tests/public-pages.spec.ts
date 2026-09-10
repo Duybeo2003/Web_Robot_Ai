@@ -7,16 +7,11 @@ import { normalizeVietnamPhone } from "../src/lib/phone";
 loadEnvConfig(process.cwd());
 
 test.describe("Public commercial pages", () => {
-  test("publishes a valid social preview and lets users pause hero motion", async ({
+  test("publishes a valid social preview", async ({
     page,
     request,
   }) => {
     await page.goto("/");
-
-    const autoplayControl = page.getByRole("button", { name: /banner$/i });
-    await expect(autoplayControl).toHaveAttribute("aria-pressed", "false");
-    await autoplayControl.click();
-    await expect(autoplayControl).toHaveAttribute("aria-pressed", "true");
 
     const socialImageUrl = await page
       .locator('meta[property="og:image"]')
