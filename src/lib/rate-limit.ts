@@ -1,4 +1,5 @@
 import { redis } from "./redis";
+import { logger } from "./logger";
 
 export interface RateLimitResult {
   success: boolean;
@@ -49,8 +50,8 @@ export async function checkRateLimit(
 
     return { success, limit, remaining, reset };
   } catch (error) {
-    console.error("Rate limiting error:", error);
-    // If Redis fails, we default to allowing the request so the app stays up.
+    logger.error("rate_limit.redis_error", { key, error });
+    // If Redis fails, allow the request so the app stays up.
     return {
       success: !options.failClosed,
       limit,

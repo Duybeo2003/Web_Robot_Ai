@@ -362,13 +362,20 @@ export async function processCheckout(data: {
             discountAmount += Number(coupon.discountValue);
           }
           
-          // C2 Fix: Atomic increment - prevents race condition on usage
-          const updatedCoupon = await tx.coupon.update({
-            where: { id: coupon.id },
-            data: { usageCount: { increment: 1 } },
-          });
-          if (coupon.usageLimit && updatedCoupon.usageCount > coupon.usageLimit) {
-            throw new CheckoutError("Mã giảm giá đã hết lượt sử dụng.");
+          // Atomic claim: only increments if count < limit (prevents race condition)
+          if (coupon.usageLimit) {
+            const claimed = await tx.coupon.updateMany({
+              where: { id: coupon.id, usageCount: { lt: coupon.usageLimit } },
+              data: { usageCount: { increment: 1 } },
+            });
+            if (claimed.count === 0) {
+              throw new CheckoutError("Mã giảm giá đã hết lượt sử dụng.");
+            }
+          } else {
+            await tx.coupon.update({
+              where: { id: coupon.id },
+              data: { usageCount: { increment: 1 } },
+            });
           }
         } else {
            throw new CheckoutError("Mã giảm giá không tồn tại hoặc đã ngừng hoạt động.");

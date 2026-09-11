@@ -1,4 +1,5 @@
 import Redis from "ioredis";
+import { logger } from "./logger";
 
 // Use environment variable or default to localhost for local dev outside docker
 const redisUrl = process.env.REDIS_URL || "redis://localhost:6379";
@@ -19,9 +20,9 @@ export const redis =
 
 if (process.env.NODE_ENV !== "production") globalForRedis.redis = redis;
 
-// Add error listener to prevent uncaught exceptions when Redis is down
-redis.on("error", (err: any) => {
+// Suppress uncaught exceptions when Redis is unavailable
+redis.on("error", (err: NodeJS.ErrnoException) => {
   if (err.code !== "ECONNREFUSED") {
-    console.error("Redis Client Error", err);
+    logger.error("redis.error", { code: err.code, message: err.message });
   }
 });

@@ -15,6 +15,7 @@ import { getBusinessIdentity } from "@/lib/commerce-policy";
 import { AuthModalLauncher } from "@/components/auth-modal-launcher";
 
 const AuthModal = dynamicImport(() => import("@/components/auth-modal").then((mod) => mod.AuthModal));
+const AIChatbot = dynamicImport(() => import("@/components/ui/ai-chatbot").then((mod) => mod.AIChatbot));
 
 export const metadata: Metadata = {
   metadataBase: new URL(process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000"),
@@ -67,6 +68,7 @@ export default function RootLayout({
           <main className="flex-1 flex flex-col">{children}</main>
           <StoreWrapper>
             <Footer />
+            <AIChatbot />
             <AuthModal
               googleEnabled={Boolean(
                 process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,

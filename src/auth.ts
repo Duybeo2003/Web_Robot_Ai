@@ -160,21 +160,31 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
     }),
   ],
   callbacks: {
-    async jwt({ token, user }) {
+    async jwt({ token, user, trigger }) {
       if (user) {
+        // Initial sign-in: populate token from DB (runs once per login)
+        const dbUser = await prisma.user.findFirst({
+          where: { id: user.id, deletedAt: null },
+          select: { role: true, points: true, phoneNumber: true },
+        });
+        if (!dbUser) return token; // account deleted before token issued
         token.id = user.id;
-      }
-      if (token.id) {
-        const currentUser = await prisma.user.findFirst({
+        token.role = dbUser.role;
+        token.points = dbUser.points;
+        token.phoneNumber = dbUser.phoneNumber;
+      } else if (trigger === "update" && token.id) {
+        // Explicit session.update() call — refresh from DB (e.g. after purchase)
+        const dbUser = await prisma.user.findFirst({
           where: { id: token.id as string, deletedAt: null },
           select: { role: true, points: true, phoneNumber: true },
         });
-        if (currentUser) {
-          token.role = currentUser.role;
-          token.points = currentUser.points;
-          token.phoneNumber = currentUser.phoneNumber;
+        if (dbUser) {
+          token.role = dbUser.role;
+          token.points = dbUser.points;
+          token.phoneNumber = dbUser.phoneNumber;
+        } else {
+          token.id = ""; // account deleted
         }
-        else token.id = "";
       }
       return token;
     },

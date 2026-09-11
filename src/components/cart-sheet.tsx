@@ -87,7 +87,6 @@ export function CartSheet() {
                               src={item.imageUrl}
                               alt={item.title}
                               fill
-                              unoptimized
                               className="object-contain p-1"
                               sizes="80px"
                             />
