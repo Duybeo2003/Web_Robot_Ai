@@ -53,8 +53,8 @@ test.describe("Storefront", () => {
     const chatButton = page.locator("button:has-text('Chat AI')");
     await expect(chatButton).toBeVisible({ timeout: 5000 });
     await chatButton.click();
-    // Chat window should appear
-    await expect(page.locator("text=RoboBot")).toBeVisible({ timeout: 3000 });
+    // Chat header should appear — use exact match to avoid strict mode violation
+    await expect(page.getByText("RoboBot", { exact: true }).first()).toBeVisible({ timeout: 3000 });
   });
 
   test("events page loads", async ({ page }) => {
@@ -63,13 +63,11 @@ test.describe("Storefront", () => {
     await page.waitForLoadState("networkidle");
   });
 
-  test("checkout redirects to login when not authenticated", async ({ page }) => {
+  test("checkout page is accessible and renders for unauthenticated users", async ({ page }) => {
     await page.goto("/checkout");
     await page.waitForLoadState("networkidle");
-    // Should redirect to login or show login modal
-    const url = page.url();
-    const body = await page.locator("body").textContent();
-    // Either redirected or shows auth modal/prompt
-    expect(url.includes("login") || url.includes("auth") || body?.toLowerCase().includes("đăng nhập")).toBeTruthy();
+    // Checkout supports guest flow via OTP — page must render (not redirect)
+    await expect(page).toHaveURL(/checkout/);
+    await expect(page.locator("body")).not.toBeEmpty();
   });
 });
