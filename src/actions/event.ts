@@ -13,7 +13,13 @@ function isConfiguredForPublicPlay(event: {
   type: "LUCKY_WHEEL" | "MYSTERY_BOX" | "POINT_EXCHANGE";
   prizes: EventPrize[];
 }) {
-  if (event.type === "MYSTERY_BOX" || event.prizes.length === 0) return false;
+  if (event.prizes.length === 0) return false;
+  if (event.type === "MYSTERY_BOX") {
+    const available = event.prizes.filter(
+      (prize) => prize.probability > 0 && (prize.stock === null || prize.stock > 0),
+    );
+    return available.length > 0;
+  }
   if (event.type === "POINT_EXCHANGE") {
     return event.prizes.every(
       (prize) => prize.pointCost > 0 && Boolean(prize.productId || prize.rewardPoints > 0),
@@ -30,7 +36,7 @@ export async function getActiveEvents() {
   const events = await prisma.event.findMany({
     where: {
       isActive: true,
-      type: { in: ["LUCKY_WHEEL", "POINT_EXCHANGE"] },
+      type: { in: ["LUCKY_WHEEL", "POINT_EXCHANGE", "MYSTERY_BOX"] },
       startDate: { lte: now },
       endDate: { gte: now },
     },
@@ -249,6 +255,53 @@ export async function exchangePoints(rawEventId: string, rawPrizeId: string) {
       },
     });
     await grantPrize(tx, user.id, wallet.id, event.id, event.name, prize, prize.pointCost);
+    return prize;
+  });
+}
+
+export async function openMysteryBox(rawEventId: string) {
+  const user = await requireUser();
+  const eventId = idSchema.parse(rawEventId);
+  const rateLimit = await checkRateLimit(`rl:mysterybox:${user.id}`, 20, 60, {
+    failClosed: true,
+  });
+  if (!rateLimit.success) throw new Error("Bạn thao tác quá nhanh. Vui lòng chậm lại.");
+
+  return prisma.$transaction(async (tx) => {
+    const now = new Date();
+    const event = await tx.event.findFirst({
+      where: { id: eventId, isActive: true, startDate: { lte: now }, endDate: { gte: now } },
+      include: {
+        prizes: {
+          where: {
+            OR: [
+              { productId: null },
+              { product: { deletedAt: null, supplyType: { not: "AFFILIATE_SELL" } } },
+            ],
+          },
+        },
+      },
+    });
+    if (!event || event.type !== "MYSTERY_BOX") throw new Error("Sự kiện không khả dụng.");
+    const prize = choosePrize(event.prizes);
+    const wallet = await tx.userWallet.findUnique({ where: { userId: user.id } });
+    if (!wallet) throw new Error("Không tìm thấy ví Xu.");
+
+    const charged = await tx.userWallet.updateMany({
+      where: { id: wallet.id, balance: { gte: event.pricePerPlay } },
+      data: { balance: { decrement: event.pricePerPlay } },
+    });
+    if (charged.count === 0) throw new Error("Số dư Xu không đủ.");
+    await tx.walletTransaction.create({
+      data: {
+        walletId: wallet.id,
+        amount: event.pricePerPlay,
+        type: "SPEND",
+        status: "COMPLETED",
+        description: `Mở hộp bí ẩn: ${event.name}`,
+      },
+    });
+    await grantPrize(tx, user.id, wallet.id, event.id, event.name, prize, event.pricePerPlay);
     return prize;
   });
 }
