@@ -7,6 +7,7 @@ export function createVnPayUrl(
   amount: number,
   ipAddr: string = "127.0.0.1",
   orderId: string = transactionReference,
+  overrideReturnUrl?: string,
 ) {
   if (!Number.isSafeInteger(amount) || amount <= 0) {
     throw new Error("Invalid VNPay amount");
@@ -14,7 +15,7 @@ export function createVnPayUrl(
   const tmnCode = process.env.VNP_TMN_CODE || "";
   const secretKey = process.env.VNP_HASH_SECRET || "";
   const vnpUrl = process.env.VNP_URL || "https://sandbox.vnpayment.vn/paymentv2/vpcpay.html";
-  const returnUrl = process.env.VNP_RETURN_URL || "";
+  const returnUrl = overrideReturnUrl || process.env.VNP_RETURN_URL || "";
   if (!tmnCode || !secretKey || !returnUrl) {
     throw new Error("VNPay is not configured");
   }

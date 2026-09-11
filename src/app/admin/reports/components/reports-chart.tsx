@@ -3,48 +3,67 @@
 import {
   Bar,
   BarChart,
+  CartesianGrid,
   ResponsiveContainer,
   XAxis,
   YAxis,
   Tooltip,
 } from "recharts";
 
-export function ReportsChart({ data }: { data: { name: string; revenue: number }[] }) {
-  if (data.length === 0) {
+interface ReportsChartProps {
+  data: { name: string; revenue: number }[];
+}
+
+export function ReportsChart({ data }: ReportsChartProps) {
+  if (data.length === 0 || data.every((d) => d.revenue === 0)) {
     return (
-      <div className="flex h-48 items-center justify-center rounded-xl bg-neutral-50 px-4 text-center text-sm text-muted-foreground sm:h-[350px]">
+      <div className="flex h-[280px] items-center justify-center rounded-xl bg-neutral-50 text-sm text-muted-foreground">
         Chưa có dữ liệu doanh thu.
       </div>
     );
   }
 
   return (
-    <ResponsiveContainer width="100%" height={350}>
-      <BarChart data={data}>
+    <ResponsiveContainer width="100%" height={280}>
+      <BarChart data={data} barSize={28}>
+        <CartesianGrid strokeDasharray="3 3" stroke="#f0f0f0" vertical={false} />
         <XAxis
           dataKey="name"
-          stroke="#888888"
+          stroke="#9ca3af"
           fontSize={12}
           tickLine={false}
           axisLine={false}
         />
         <YAxis
-          stroke="#888888"
-          fontSize={12}
+          stroke="#9ca3af"
+          fontSize={11}
           tickLine={false}
           axisLine={false}
-          tickFormatter={(value) => `${value / 1000000}M`}
+          tickFormatter={(value) => {
+            if (value >= 1_000_000_000) return `${(value / 1_000_000_000).toFixed(1)}B`;
+            if (value >= 1_000_000) return `${(value / 1_000_000).toFixed(0)}M`;
+            if (value >= 1_000) return `${(value / 1_000).toFixed(0)}K`;
+            return String(value);
+          }}
         />
         <Tooltip
-          formatter={(value: any) =>
+          cursor={{ fill: "#f3f4f6", radius: 6 }}
+          formatter={(value: number) => [
             new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",
-            }).format(Number(value))
-          }
-          labelStyle={{ color: "black" }}
+              maximumFractionDigits: 0,
+            }).format(value),
+            "Doanh thu",
+          ]}
+          contentStyle={{
+            borderRadius: "8px",
+            border: "1px solid #e5e7eb",
+            boxShadow: "0 4px 6px -1px rgba(0,0,0,0.1)",
+            fontSize: 12,
+          }}
         />
-        <Bar dataKey="revenue" fill="#3b82f6" radius={[4, 4, 0, 0]} />
+        <Bar dataKey="revenue" fill="#6366f1" radius={[6, 6, 0, 0]} />
       </BarChart>
     </ResponsiveContainer>
   );

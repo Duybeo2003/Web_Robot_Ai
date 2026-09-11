@@ -128,6 +128,66 @@ export async function sendAdminNewOrderNotification(orderId: string, totalAmount
   });
 }
 
+export async function sendOrderShippedEmail(
+  userEmail: string,
+  orderId: string,
+  trackingCode?: string | null,
+  provider?: string | null,
+) {
+  return deliverEmail("order_shipped", orderId, {
+    to: userEmail,
+    subject: `Đơn hàng #${orderId} đang được giao đến bạn`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <h2 style="color:#ff5722">🚚 Đơn hàng đang trên đường đến bạn!</h2>
+        <p>Đơn hàng <strong>#${escapeHtml(orderId)}</strong> đã được bàn giao cho đơn vị vận chuyển${provider ? ` <strong>${escapeHtml(provider)}</strong>` : ""} và đang trên đường giao đến địa chỉ của bạn.</p>
+        ${trackingCode ? `<p><strong>Mã vận đơn:</strong> <code style="background:#f5f5f5;padding:2px 6px;border-radius:4px">${escapeHtml(trackingCode)}</code></p>` : ""}
+        <p>Bạn có thể theo dõi tình trạng tại <a href="${appUrl()}/profile/orders">trang đơn hàng</a>.</p>
+        <p>Trân trọng,<br><strong>Đội ngũ RoboEQ</strong></p>
+      </div>`,
+  });
+}
+
+export async function sendOrderCompletedEmail(
+  userEmail: string,
+  orderId: string,
+  pointsEarned?: number,
+) {
+  return deliverEmail("order_completed", orderId, {
+    to: userEmail,
+    subject: `Đơn hàng #${orderId} đã giao thành công ✅`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <h2 style="color:#2e7d32">✅ Giao hàng thành công!</h2>
+        <p>Đơn hàng <strong>#${escapeHtml(orderId)}</strong> đã được giao thành công. Cảm ơn bạn đã mua sắm tại RoboEQ!</p>
+        ${pointsEarned && pointsEarned > 0 ? `<p>🎁 Bạn đã nhận được <strong style="color:#ff5722">${pointsEarned.toLocaleString("vi-VN")} điểm tích lũy</strong> từ đơn hàng này.</p>` : ""}
+        <p>Hãy chia sẻ cảm nhận của bạn để giúp những khách hàng khác nhé! <a href="${appUrl()}/profile/orders">Đánh giá sản phẩm</a></p>
+        <p>Trân trọng,<br><strong>Đội ngũ RoboEQ</strong></p>
+      </div>`,
+  });
+}
+
+export async function sendRmaStatusEmail(
+  userEmail: string,
+  rmaId: string,
+  status: "APPROVED" | "REJECTED",
+  reason?: string | null,
+) {
+  const isApproved = status === "APPROVED";
+  return deliverEmail("rma_status_update", rmaId, {
+    to: userEmail,
+    subject: `Yêu cầu đổi/trả #${rmaId} ${isApproved ? "đã được duyệt" : "bị từ chối"}`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <h2 style="color:${isApproved ? "#2e7d32" : "#c62828"}">${isApproved ? "✅ Yêu cầu đổi/trả được duyệt" : "❌ Yêu cầu đổi/trả bị từ chối"}</h2>
+        <p>Yêu cầu đổi/trả hàng <strong>#${escapeHtml(rmaId)}</strong> của bạn đã được xem xét.</p>
+        ${reason ? `<p><strong>${isApproved ? "Ghi chú" : "Lý do từ chối"}:</strong> ${escapeHtml(reason)}</p>` : ""}
+        ${isApproved ? `<p>Vui lòng gửi hàng về địa chỉ kho của chúng tôi. Chúng tôi sẽ liên hệ hướng dẫn thêm qua số điện thoại đã đăng ký.</p>` : `<p>Nếu bạn có thắc mắc, vui lòng liên hệ hỗ trợ tại <a href="${appUrl()}/lien-he">trang liên hệ</a>.</p>`}
+        <p>Trân trọng,<br><strong>Đội ngũ RoboEQ</strong></p>
+      </div>`,
+  });
+}
+
 export async function sendSupportRequestNotification(request: {
   id: string;
   name: string;

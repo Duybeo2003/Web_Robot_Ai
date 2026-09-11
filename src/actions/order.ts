@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { recordAudit } from "@/lib/audit";
 import { lockOrderRow } from "@/lib/orders/lock-order";
 import { z } from "zod";
+import { sendOrderShippedEmail, sendOrderCompletedEmail } from "@/lib/email";
 
 const ORDER_STATUSES: OrderStatus[] = [
   "PENDING",
@@ -204,6 +205,28 @@ export async function updateOrderStatus(
 
     revalidatePath("/admin/orders");
     revalidatePath("/profile/orders");
+
+    // Send email notifications for key status transitions (fire-and-forget)
+    if (result.previousStatus !== result.status) {
+      const order = await prisma.order.findUnique({
+        where: { id: orderId },
+        select: {
+          user: { select: { email: true } },
+          trackingCode: true,
+          logisticsProvider: true,
+          pointsEarned: true,
+        },
+      });
+      const userEmail = order?.user?.email;
+      if (userEmail) {
+        if (result.status === "SHIPPED") {
+          sendOrderShippedEmail(userEmail, orderId, order?.trackingCode, order?.logisticsProvider).catch(() => null);
+        } else if (result.status === "COMPLETED") {
+          sendOrderCompletedEmail(userEmail, orderId, order?.pointsEarned ?? 0).catch(() => null);
+        }
+      }
+    }
+
     return { success: true, status: result.status, paymentStatus: result.paymentStatus };
   } catch (error) {
     console.error("[UPDATE_ORDER_ERROR]", error);

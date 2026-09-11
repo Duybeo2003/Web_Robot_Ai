@@ -5,8 +5,17 @@ import { UserWallet, WalletTransaction } from "@prisma/client";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Wallet, Plus, Clock, ArrowDownRight, ArrowUpRight, QrCode } from "lucide-react";
-import { createTopupRequest } from "@/actions/wallet";
+import {
+  Wallet,
+  Plus,
+  Clock,
+  ArrowDownRight,
+  ArrowUpRight,
+  QrCode,
+  CreditCard,
+  Zap,
+} from "lucide-react";
+import { createTopupRequest, createVnPayWalletTopup } from "@/actions/wallet";
 import { toast } from "sonner";
 import {
   Dialog,
@@ -16,37 +25,55 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/components/ui/dialog";
+import { useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 
 interface WalletClientPageProps {
   wallet: UserWallet;
   transactions: WalletTransaction[];
   bankConfig: { bankId: string; accountNo: string; accountName: string };
+  vnpayConfigured: boolean;
 }
 
-export default function WalletClientPage({ wallet, transactions, bankConfig }: WalletClientPageProps) {
+const PRESET_AMOUNTS = [50_000, 100_000, 200_000, 500_000];
+
+export default function WalletClientPage({
+  wallet,
+  transactions,
+  bankConfig,
+  vnpayConfigured,
+}: WalletClientPageProps) {
   const [isTopupOpen, setIsTopupOpen] = useState(false);
   const [amount, setAmount] = useState<string>("");
   const [loading, setLoading] = useState(false);
   const [activeTransaction, setActiveTransaction] = useState<WalletTransaction | null>(null);
+  const searchParams = useSearchParams();
 
-  const handleTopup = async () => {
+  // Show success toast if redirected back from VNPay
+  useEffect(() => {
+    if (searchParams.get("payment") === "done") {
+      toast.success("Yêu cầu nạp xu đã được ghi nhận. Số dư sẽ cập nhật ngay sau khi VNPay xác nhận.");
+    }
+  }, [searchParams]);
+
+  const parsedAmount = parseInt(amount);
+  const isValidAmount = !isNaN(parsedAmount) && parsedAmount >= 10_000;
+
+  const handleBankTransfer = async () => {
+    if (!bankConfig.bankId || !bankConfig.accountNo) {
+      toast.error("Kênh nạp Xu bằng chuyển khoản chưa sẵn sàng.");
+      return;
+    }
+    if (!isValidAmount) {
+      toast.error("Số tiền tối thiểu là 10.000đ");
+      return;
+    }
     try {
-      if (!bankConfig.bankId || !bankConfig.accountNo || !bankConfig.accountName) {
-        toast.error("Kênh nạp Xu bằng chuyển khoản chưa sẵn sàng.");
-        return;
-      }
-      const parsedAmount = parseInt(amount);
-      if (isNaN(parsedAmount) || parsedAmount < 10000) {
-        toast.error("Số tiền tối thiểu là 10.000đ");
-        return;
-      }
-
       setLoading(true);
       const transaction = await createTopupRequest(parsedAmount);
       setActiveTransaction(transaction);
       setIsTopupOpen(false);
       setAmount("");
-      toast.success("Đã tạo yêu cầu nạp Xu. Vui lòng chuyển khoản!");
     } catch (err: unknown) {
       toast.error((err as Error).message || "Có lỗi xảy ra");
     } finally {
@@ -54,119 +81,152 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
     }
   };
 
-  const getTransactionIcon = (type: string) => {
-    switch (type) {
-      case "TOPUP":
-      case "REWARD":
-      case "REFUND":
-        return <ArrowDownRight className="w-5 h-5 text-green-600" />;
-      case "SPEND":
-        return <ArrowUpRight className="w-5 h-5 text-red-600" />;
-      default:
-        return <Clock className="w-5 h-5 text-neutral-400" />;
+  const handleVnPay = async () => {
+    if (!isValidAmount) {
+      toast.error("Số tiền tối thiểu là 10.000đ");
+      return;
+    }
+    try {
+      setLoading(true);
+      const result = await createVnPayWalletTopup(parsedAmount);
+      // Redirect to VNPay payment gateway
+      window.location.href = result.paymentUrl;
+    } catch (err: unknown) {
+      toast.error((err as Error).message || "Có lỗi xảy ra khi tạo thanh toán VNPay");
+      setLoading(false);
     }
   };
 
+  const getTransactionIcon = (type: string) => {
+    if (type === "SPEND") return <ArrowUpRight className="h-5 w-5 text-red-600" />;
+    return <ArrowDownRight className="h-5 w-5 text-green-600" />;
+  };
+
   const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "COMPLETED":
-        return <span className="rounded-full bg-green-100 px-2.5 py-1 text-xs font-bold text-green-700">Thành công</span>;
-      case "PENDING":
-        return <span className="rounded-full bg-amber-100 px-2.5 py-1 text-xs font-bold text-amber-700">Đang chờ duyệt</span>;
-      case "REJECTED":
-        return <span className="rounded-full bg-red-100 px-2.5 py-1 text-xs font-bold text-red-700">Thất bại</span>;
-      default:
-        return null;
-    }
+    const map: Record<string, string> = {
+      COMPLETED: "bg-green-100 text-green-700",
+      PENDING: "bg-amber-100 text-amber-700",
+      REJECTED: "bg-red-100 text-red-700",
+    };
+    const labels: Record<string, string> = {
+      COMPLETED: "Thành công",
+      PENDING: "Đang chờ",
+      REJECTED: "Thất bại",
+    };
+    const cls = map[status] || "bg-neutral-100 text-neutral-700";
+    return (
+      <span className={`rounded-full px-2.5 py-1 text-xs font-bold ${cls}`}>
+        {labels[status] || status}
+      </span>
+    );
+  };
+
+  const getTypeName = (type: string) => {
+    const names: Record<string, string> = {
+      TOPUP: "Nạp xu",
+      SPEND: "Tiêu xu",
+      REWARD: "Phần thưởng",
+      REFUND: "Hoàn xu",
+    };
+    return names[type] || type;
   };
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-bold text-foreground">Ví RoboCoin</h1>
-      </div>
+      <h1 className="text-2xl font-bold">Ví RoboCoin</h1>
 
       {/* Balance Card */}
-      <div className="bg-gradient-to-r from-orange-500 to-[#FF5722] p-8 rounded-xl shadow-lg text-white relative overflow-hidden">
-        <div className="absolute top-0 right-0 -mt-8 -mr-8 w-48 h-48 bg-white opacity-10 rounded-full blur-2xl"></div>
-        <div className="absolute bottom-0 left-0 -mb-8 -ml-8 w-32 h-32 bg-white opacity-10 rounded-full blur-xl"></div>
-        
-        <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-orange-500 to-[#FF5722] p-8 text-white shadow-xl">
+        <div className="pointer-events-none absolute -right-10 -top-10 h-52 w-52 rounded-full bg-white/10 blur-2xl" />
+        <div className="pointer-events-none absolute -bottom-10 -left-10 h-40 w-40 rounded-full bg-white/10 blur-xl" />
+
+        <div className="relative z-10 flex flex-col gap-6 md:flex-row md:items-center md:justify-between">
           <div className="space-y-2">
-            <p className="text-orange-100 font-medium flex items-center gap-2">
-              <Wallet className="w-5 h-5" />
+            <p className="flex items-center gap-2 font-medium text-orange-100">
+              <Wallet className="h-5 w-5" />
               Số dư hiện tại
             </p>
             <div className="flex items-baseline gap-2">
-              <span className="text-5xl font-black">{wallet.balance.toLocaleString('vi-VN')}</span>
-            <span className="text-xl font-bold text-orange-100">xu</span>
+              <span className="text-5xl font-black">
+                {wallet.balance.toLocaleString("vi-VN")}
+              </span>
+              <span className="text-xl font-bold text-orange-100">xu</span>
             </div>
-            <p className="text-sm text-orange-100">1 xu = 1 VNĐ. Dùng để tham gia sự kiện và vòng quay may mắn.</p>
+            <p className="text-sm text-orange-100/80">
+              1 xu = 1 VNĐ · Dùng để tham gia sự kiện và vòng quay
+            </p>
           </div>
-          
-          <Button 
+
+          <Button
             onClick={() => setIsTopupOpen(true)}
             size="lg"
-            className="bg-white text-[#FF5722] hover:bg-orange-50 font-bold h-14 px-8 rounded-full shadow-md shrink-0"
+            className="h-14 shrink-0 rounded-full bg-white px-8 font-bold text-[#FF5722] shadow-md hover:bg-orange-50"
           >
-            <Plus className="w-5 h-5 mr-2" />
+            <Plus className="mr-2 h-5 w-5" />
             Nạp xu ngay
           </Button>
         </div>
       </div>
 
-      {/* Transactions List */}
+      {/* Transaction History */}
       <section className="overflow-hidden rounded-2xl border border-neutral-200 bg-white shadow-sm">
-        <div className="p-6 border-b border-neutral-100">
+        <div className="border-b border-neutral-100 p-6">
           <h2 className="text-lg font-bold">Lịch sử giao dịch</h2>
         </div>
         <div className="divide-y divide-neutral-100">
           {transactions.length === 0 ? (
-            <div className="p-8 text-center text-neutral-500">
-              <Clock className="w-8 h-8 mx-auto mb-3 text-neutral-300" />
-              Chưa có giao dịch nào
+            <div className="p-10 text-center text-neutral-400">
+              <Clock className="mx-auto mb-3 h-10 w-10 text-neutral-200" />
+              <p className="font-medium">Chưa có giao dịch nào</p>
             </div>
           ) : (
             transactions.map((tx) => (
-              <div key={tx.id} className="flex flex-col gap-4 p-4 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-center sm:justify-between sm:p-6">
+              <div
+                key={tx.id}
+                className="flex flex-col gap-3 p-4 transition-colors hover:bg-neutral-50 sm:flex-row sm:items-center sm:justify-between sm:p-5"
+              >
                 <div className="flex min-w-0 items-center gap-4">
-                  <div className={`w-10 h-10 rounded-full flex items-center justify-center shrink-0 ${
-                    tx.type === 'SPEND' ? 'bg-red-100' : 'bg-green-100'
-                  }`}>
+                  <div
+                    className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
+                      tx.type === "SPEND" ? "bg-red-50" : "bg-green-50"
+                    }`}
+                  >
                     {getTransactionIcon(tx.type)}
                   </div>
                   <div className="min-w-0">
-                    <p className="break-words font-bold text-neutral-800">{tx.description || tx.type}</p>
+                    <p className="font-bold text-neutral-800 break-words">
+                      {tx.description || getTypeName(tx.type)}
+                    </p>
                     <p className="text-sm text-neutral-500">
-                      {new Date(tx.createdAt).toLocaleString('vi-VN')}
+                      {new Date(tx.createdAt).toLocaleString("vi-VN")}
                     </p>
                     {tx.providerReference && (
-                      <p className="mt-1 text-xs font-mono text-neutral-500">
+                      <p className="mt-0.5 font-mono text-xs text-neutral-400">
                         Đối soát: {tx.providerReference}
                       </p>
                     )}
-                    <div className="mt-1 sm:hidden">
-                      {getStatusBadge(tx.status)}
-                    </div>
+                    <div className="mt-1 sm:hidden">{getStatusBadge(tx.status)}</div>
                   </div>
                 </div>
+
                 <div className="flex items-center justify-between gap-3 text-right sm:justify-end">
-                  <div className="hidden sm:block">
-                    {getStatusBadge(tx.status)}
-                  </div>
-                  <div>
-                    <p className={`font-black text-lg ${tx.type === 'SPEND' ? 'text-red-600' : 'text-green-600'}`}>
-                      {tx.type === 'SPEND' ? '-' : '+'}{tx.amount.toLocaleString('vi-VN')}
-                    </p>
-                  </div>
-                  {tx.status === "PENDING" && tx.type === "TOPUP" && (
-                    <Button 
-                      variant="outline" 
+                  <div className="hidden sm:block">{getStatusBadge(tx.status)}</div>
+                  <p
+                    className={`text-lg font-black ${
+                      tx.type === "SPEND" ? "text-red-600" : "text-green-600"
+                    }`}
+                  >
+                    {tx.type === "SPEND" ? "-" : "+"}
+                    {tx.amount.toLocaleString("vi-VN")}
+                  </p>
+                  {tx.status === "PENDING" && tx.type === "TOPUP" && !tx.providerReference && (
+                    <Button
+                      variant="outline"
                       size="sm"
                       onClick={() => setActiveTransaction(tx)}
-                      className="ml-2 border-orange-200 text-orange-600 hover:bg-orange-50"
+                      className="ml-1 border-orange-200 text-orange-600 hover:bg-orange-50"
                     >
-                      <QrCode className="w-4 h-4 mr-1" /> Thanh toán
+                      <QrCode className="mr-1 h-4 w-4" /> QR
                     </Button>
                   )}
                 </div>
@@ -178,102 +238,167 @@ export default function WalletClientPage({ wallet, transactions, bankConfig }: W
 
       {/* Topup Dialog */}
       <Dialog open={isTopupOpen} onOpenChange={setIsTopupOpen}>
-        <DialogContent className="sm:max-w-[425px]">
+        <DialogContent className="sm:max-w-[460px]">
           <DialogHeader>
             <DialogTitle>Nạp RoboCoin</DialogTitle>
             <DialogDescription>
-              Nhập số xu bạn muốn nạp (1 xu = 1 VNĐ). Tối thiểu 10.000 xu.
+              Nhập số xu muốn nạp (1 xu = 1 VNĐ). Tối thiểu 10.000 xu.
             </DialogDescription>
           </DialogHeader>
-          <div className="grid gap-4 py-4">
+
+          <div className="space-y-4 py-2">
             <div className="space-y-2">
               <Label htmlFor="amount">Số tiền nạp (VNĐ)</Label>
               <Input
                 id="amount"
                 type="number"
-                placeholder="Ví dụ: 50000"
+                placeholder="Ví dụ: 100000"
                 value={amount}
                 onChange={(e) => setAmount(e.target.value)}
                 className="h-12 text-lg font-bold"
               />
             </div>
-            
-            <div className="mt-2 grid grid-cols-2 gap-2">
-              {[50000, 100000, 200000, 500000].map((val) => (
+
+            <div className="grid grid-cols-4 gap-2">
+              {PRESET_AMOUNTS.map((val) => (
                 <Button
                   key={val}
                   type="button"
                   variant="outline"
-                  className={amount === val.toString() ? "border-[#FF5722] text-[#FF5722] bg-orange-50" : ""}
+                  className={`text-sm ${
+                    amount === val.toString()
+                      ? "border-[#FF5722] bg-orange-50 text-[#FF5722]"
+                      : ""
+                  }`}
                   onClick={() => setAmount(val.toString())}
                 >
-                  {val.toLocaleString('vi-VN')}
+                  {(val / 1000).toFixed(0)}K
                 </Button>
               ))}
             </div>
+
+            {isValidAmount && (
+              <p className="text-center text-sm text-muted-foreground">
+                Bạn sẽ nhận được{" "}
+                <strong className="text-[#FF5722]">
+                  {parsedAmount.toLocaleString("vi-VN")} xu
+                </strong>
+              </p>
+            )}
           </div>
-          <DialogFooter>
-            <Button variant="outline" onClick={() => setIsTopupOpen(false)}>Hủy</Button>
-            <Button onClick={handleTopup} disabled={loading || !amount} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
-              Tạo yêu cầu nạp
-            </Button>
-          </DialogFooter>
+
+          <div className="space-y-3 border-t pt-4">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">
+              Chọn phương thức nạp
+            </p>
+
+            {/* VNPay option */}
+            {vnpayConfigured && (
+              <Button
+                onClick={handleVnPay}
+                disabled={loading || !isValidAmount}
+                className="h-12 w-full bg-[#FF5722] font-bold text-white hover:bg-[#E64A19]"
+              >
+                <Zap className="mr-2 h-5 w-5" />
+                Nạp ngay qua VNPay (tự động)
+              </Button>
+            )}
+
+            {/* Bank transfer option */}
+            {bankConfig.bankId && (
+              <Button
+                onClick={handleBankTransfer}
+                disabled={loading || !isValidAmount}
+                variant="outline"
+                className="h-12 w-full font-medium"
+              >
+                <CreditCard className="mr-2 h-5 w-5" />
+                Chuyển khoản ngân hàng (thủ công)
+              </Button>
+            )}
+
+            {!vnpayConfigured && !bankConfig.bankId && (
+              <p className="rounded-lg bg-amber-50 p-3 text-center text-sm text-amber-600">
+                Hiện tại chưa có kênh nạp xu khả dụng. Vui lòng liên hệ admin.
+              </p>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
 
-      {/* QR Payment Dialog */}
-      <Dialog open={!!activeTransaction} onOpenChange={(open) => !open && setActiveTransaction(null)}>
-        <DialogContent className="sm:max-w-[550px] overflow-hidden">
+      {/* Bank QR Dialog */}
+      <Dialog
+        open={!!activeTransaction}
+        onOpenChange={(open) => !open && setActiveTransaction(null)}
+      >
+        <DialogContent className="overflow-hidden sm:max-w-[560px]">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl text-[#FF5722]">Thanh toán yêu cầu nạp xu</DialogTitle>
+            <DialogTitle className="text-center text-xl text-[#FF5722]">
+              Thanh toán qua chuyển khoản
+            </DialogTitle>
             <DialogDescription className="text-center">
-              Quét mã QR bằng ứng dụng ngân hàng để hoàn tất nạp <strong>{activeTransaction?.amount.toLocaleString('vi-VN')} xu</strong>.
+              Quét mã QR hoặc chuyển khoản thủ công để nạp{" "}
+              <strong>{activeTransaction?.amount.toLocaleString("vi-VN")} xu</strong>.
             </DialogDescription>
           </DialogHeader>
-          
-          {activeTransaction && (
-            <div className="flex flex-col md:flex-row gap-6 items-center md:items-start py-2">
-              <div className="flex flex-col items-center shrink-0">
-                <div className="bg-white p-3 rounded-xl shadow-sm border border-orange-200">
+
+          {activeTransaction && bankConfig.bankId && (
+            <div className="flex flex-col items-center gap-6 py-2 md:flex-row md:items-start">
+              <div className="flex shrink-0 flex-col items-center">
+                <div className="rounded-xl border border-orange-100 bg-white p-3 shadow-sm">
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={`https://img.vietqr.io/image/${encodeURIComponent(bankConfig.bankId)}-${encodeURIComponent(bankConfig.accountNo)}-compact2.png?amount=${encodeURIComponent(activeTransaction.amount)}&addInfo=${encodeURIComponent(`NAPXU ${activeTransaction.id.slice(-6).toUpperCase()}`)}&accountName=${encodeURIComponent(bankConfig.accountName)}`}
-                    alt="Mã VietQR để thanh toán"
-                    className="w-48 h-48 object-contain"
+                    alt="Mã VietQR"
+                    className="h-48 w-48 object-contain"
                   />
                 </div>
-                <p className="mt-2 text-center text-xs font-medium text-gray-500">Mở ứng dụng ngân hàng để quét mã</p>
+                <p className="mt-2 text-center text-xs text-neutral-400">
+                  Mở ứng dụng ngân hàng để quét
+                </p>
               </div>
 
-              <div className="w-full flex flex-col space-y-3">
-                <div className="bg-orange-50 border border-orange-100 p-4 rounded-lg space-y-3 shadow-sm">
-                  <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
-                    <span className="text-orange-800/70">Số tiền:</span>
-                    <span className="font-bold text-[#E30019] text-lg">{activeTransaction.amount.toLocaleString('vi-VN')} VNĐ</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
-                    <span className="text-orange-800/70">Ngân hàng:</span>
-                    <span className="font-bold text-gray-800">{bankConfig.bankId.toUpperCase()}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm border-b border-orange-200/50 pb-2">
-                    <span className="text-orange-800/70">Số tài khoản:</span>
-                    <span className="font-bold text-gray-800">{bankConfig.accountNo}</span>
-                  </div>
-                  <div className="flex justify-between items-center text-sm">
-                    <span className="text-orange-800/70">Nội dung:</span>
-                    <span className="font-mono font-bold text-[#FF5722]">NAPXU {activeTransaction.id.slice(-6).toUpperCase()}</span>
-                  </div>
+              <div className="w-full space-y-3">
+                <div className="space-y-2.5 rounded-xl border border-orange-100 bg-orange-50 p-4 shadow-sm">
+                  {[
+                    ["Số tiền", `${activeTransaction.amount.toLocaleString("vi-VN")} VNĐ`],
+                    ["Ngân hàng", bankConfig.bankId.toUpperCase()],
+                    ["Số tài khoản", bankConfig.accountNo],
+                    ["Chủ tài khoản", bankConfig.accountName],
+                    ["Nội dung CK", `NAPXU ${activeTransaction.id.slice(-6).toUpperCase()}`],
+                  ].map(([label, value]) => (
+                    <div
+                      key={label}
+                      className="flex items-center justify-between gap-2 border-b border-orange-200/50 pb-2 last:border-0 last:pb-0 text-sm"
+                    >
+                      <span className="text-orange-800/60">{label}</span>
+                      <span
+                        className={`font-bold ${
+                          label === "Nội dung CK"
+                            ? "font-mono text-[#FF5722]"
+                            : "text-neutral-800"
+                        }`}
+                      >
+                        {value}
+                      </span>
+                    </div>
+                  ))}
                 </div>
 
-                <div className="bg-blue-50 text-blue-800 p-2.5 rounded-lg text-xs text-center border border-blue-100 shadow-sm leading-relaxed">
-                  Xu được cộng sau khi nhân viên đối soát khoản chuyển trong giờ làm việc.
-                </div>
+                <p className="rounded-lg bg-blue-50 px-3 py-2.5 text-center text-xs leading-relaxed text-blue-700">
+                  Xu được cộng sau khi nhân viên đối soát (thường trong giờ làm việc).
+                </p>
               </div>
             </div>
           )}
-          
+
           <DialogFooter className="sm:justify-center">
-            <Button onClick={() => setActiveTransaction(null)} className="w-full sm:w-auto">Đã chuyển khoản xong</Button>
+            <Button
+              onClick={() => setActiveTransaction(null)}
+              className="w-full sm:w-auto"
+            >
+              Đã chuyển khoản
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

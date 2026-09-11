@@ -35,6 +35,7 @@ npm run check            # Chạy tuần tự: lint + typecheck + build (dùng t
 ```bash
 npm run test:e2e         # Playwright E2E (yêu cầu server đang chạy tại localhost:3000)
 npm run test:migrations  # Kiểm tra tất cả Prisma migration có áp dụng được không
+# E2E tests nằm tại: tests/e2e/auth.spec.ts, shop.spec.ts, admin.spec.ts
 ```
 
 ### Database

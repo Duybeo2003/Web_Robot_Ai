@@ -9,6 +9,7 @@ import { RETURN_WINDOW_DAYS } from "@/lib/commerce-policy";
 import { Prisma } from "@prisma/client";
 import { isAllowedImageUrl } from "@/lib/media-url";
 import { inventoryMovementKey } from "@/lib/inventory-ledger";
+import { sendRmaStatusEmail } from "@/lib/email";
 
 const returnRequestSchema = z.object({
   orderId: z.string().min(1).max(191),
@@ -193,6 +194,19 @@ export async function updateReturnRequestStatus(
 
     revalidatePath("/admin/returns");
     revalidatePath("/profile/orders");
+
+    // Send email notification for APPROVED/REJECTED (fire-and-forget)
+    if (status === "APPROVED" || status === "REJECTED") {
+      const rma = await prisma.returnRequest.findUnique({
+        where: { id: requestId },
+        include: { order: { include: { user: { select: { email: true } } } } },
+      });
+      const userEmail = rma?.order?.user?.email;
+      if (userEmail) {
+        sendRmaStatusEmail(userEmail, requestId, status).catch(() => null);
+      }
+    }
+
     return { success: true };
   } catch (error) {
     console.error("[UPDATE_RMA_ERROR]", error);
