@@ -82,15 +82,13 @@ export function AIChatbot() {
       setMessages((prev) => [...prev, { id: assistantId, role: "assistant" as const, content: "" }]);
 
       if (reader) {
-        let accumulated = "";
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           const chunk = decoder.decode(value, { stream: true });
-          accumulated += chunk;
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantId ? { ...m, content: accumulated } : m,
+              m.id === assistantId ? { ...m, content: m.content + chunk } : m,
             ),
           );
         }
