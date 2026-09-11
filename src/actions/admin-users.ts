@@ -8,7 +8,7 @@ import { requireRole } from "@/lib/authz";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 import { recordAudit } from "@/lib/audit";
-import { actionError } from "@/actions/admin-products";
+import { actionError } from "@/lib/action-error";
 
 const idSchema = z.string().min(1).max(191);
 

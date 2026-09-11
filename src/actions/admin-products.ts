@@ -3,11 +3,12 @@
 import { Prisma } from "@prisma/client";
 import { revalidatePath } from "next/cache";
 import { z } from "zod";
-import { AuthorizationError, requireRole } from "@/lib/authz";
+import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/utils";
 import { recordAudit } from "@/lib/audit";
 import { isAllowedImageUrl, isAllowedVideoUrl } from "@/lib/media-url";
+import { actionError } from "@/lib/action-error";
 
 const idSchema = z.string().min(1).max(191);
 
@@ -121,26 +122,6 @@ const productSchema = z
   });
 
 export type ProductData = z.input<typeof productSchema>;
-
-export function actionError(error: unknown, fallback: string) {
-  console.error(`[ADMIN_ACTION_ERROR] ${fallback}`, error);
-  if (error instanceof AuthorizationError) {
-    return { success: false as const, error: "Bạn không có quyền thực hiện thao tác này." };
-  }
-  if (error instanceof z.ZodError) {
-    return { success: false as const, error: error.issues[0]?.message || "Dữ liệu không hợp lệ." };
-  }
-  if (error instanceof Prisma.PrismaClientKnownRequestError) {
-    return {
-      success: false as const,
-      error: error.code === "P2002" ? "Dữ liệu bị trùng với bản ghi hiện có." : fallback,
-    };
-  }
-  if (error instanceof Prisma.PrismaClientValidationError || error instanceof Prisma.PrismaClientInitializationError) {
-    return { success: false as const, error: fallback };
-  }
-  return { success: false as const, error: error instanceof Error ? error.message : fallback };
-}
 
 export async function upsertProduct(input: unknown, productId?: string) {
   try {

@@ -50,26 +50,6 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
-      // Long-term cache for immutable static assets (_next/static)
-      {
-        source: "/_next/static/(.*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=31536000, immutable",
-          },
-        ],
-      },
-      // Cache optimized images for 7 days
-      {
-        source: "/_next/image(.*)",
-        headers: [
-          {
-            key: "Cache-Control",
-            value: "public, max-age=604800, stale-while-revalidate=86400",
-          },
-        ],
-      },
       // Security headers for all routes
       {
         source: "/(.*)",

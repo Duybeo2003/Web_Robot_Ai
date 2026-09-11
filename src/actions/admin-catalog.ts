@@ -6,7 +6,7 @@ import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { generateSlug } from "@/lib/utils";
 import { recordAudit } from "@/lib/audit";
-import { actionError } from "@/actions/admin-products";
+import { actionError } from "@/lib/action-error";
 
 const idSchema = z.string().min(1).max(191);
 const optionalText = (max: number) =>
