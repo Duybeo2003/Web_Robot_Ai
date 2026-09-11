@@ -48,12 +48,12 @@ export function ReportsChart({ data }: ReportsChartProps) {
         />
         <Tooltip
           cursor={{ fill: "#f3f4f6", radius: 6 }}
-          formatter={(value: number) => [
+          formatter={(value) => [
             new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",
               maximumFractionDigits: 0,
-            }).format(value),
+            }).format(Number(value)),
             "Doanh thu",
           ]}
           contentStyle={{

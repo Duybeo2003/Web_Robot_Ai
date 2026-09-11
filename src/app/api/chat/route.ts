@@ -118,7 +118,7 @@ export async function POST(req: Request) {
       .map((p) => {
         const parts: string[] = [`- ${p.title}`];
         if (p.category?.name) parts.push(`(${p.category.name})`);
-        parts.push(`- Giá: ${p.price.toLocaleString("vi-VN")}đ`);
+        parts.push(`- Giá: ${Number(p.price).toLocaleString("vi-VN")}đ`);
         if (p.originalPrice && p.originalPrice > p.price) {
           parts.push(`(giảm từ ${Number(p.originalPrice).toLocaleString("vi-VN")}đ)`);
         }

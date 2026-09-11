@@ -41,12 +41,12 @@ export function CategoryRevenueChart({ data }: CategoryRevenueChartProps) {
           ))}
         </Pie>
         <Tooltip
-          formatter={(value: number) =>
+          formatter={(value) =>
             new Intl.NumberFormat("vi-VN", {
               style: "currency",
               currency: "VND",
               maximumFractionDigits: 0,
-            }).format(value)
+            }).format(Number(value))
           }
           contentStyle={{
             borderRadius: "8px",
