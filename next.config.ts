@@ -20,7 +20,9 @@ const contentSecurityPolicy = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
-  output: "standalone",
+  // standalone output is required for Docker — set BUILD_STANDALONE=true in Dockerfile
+  // Vercel does NOT support standalone and will fail if this is set
+  output: process.env.BUILD_STANDALONE === "true" ? "standalone" : undefined,
   poweredByHeader: false,
   compress: true,
   turbopack: {},

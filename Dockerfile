@@ -20,6 +20,7 @@ RUN npx prisma generate
 # Actual DB connection happens at runtime via docker-compose env vars.
 ENV NEXT_TELEMETRY_DISABLED=1
 ENV DATABASE_URL="mysql://placeholder:placeholder@localhost:3306/placeholder"
+ENV BUILD_STANDALONE=true
 RUN npm run build
 
 # Step 2. Production image, copy all the files and run next
