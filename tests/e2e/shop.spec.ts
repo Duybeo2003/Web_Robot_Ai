@@ -18,21 +18,22 @@ test.describe("Storefront", () => {
   });
 
   test("product detail page loads for valid slug", async ({ page }) => {
-    // First get a product slug from the shop listing
     await page.goto("/shop");
     await page.waitForLoadState("networkidle");
 
-    const productLink = page.locator("a[href^='/shop/']").first();
-    const href = await productLink.getAttribute("href").catch(() => null);
-
-    if (href) {
-      await page.goto(href);
-      await expect(page.locator("body")).not.toBeEmpty();
-      await page.waitForLoadState("networkidle");
-    } else {
-      // No products yet — skip gracefully
+    // Count immediately — no waiting, avoids 30s timeout when DB is empty
+    const count = await page.locator("a[href^='/shop/']").count();
+    if (count === 0) {
       test.skip();
+      return;
     }
+
+    const href = await page.locator("a[href^='/shop/']").first().getAttribute("href");
+    if (!href) { test.skip(); return; }
+
+    await page.goto(href);
+    await page.waitForLoadState("networkidle");
+    await expect(page.locator("body")).not.toBeEmpty();
   });
 
   test("cart sheet opens when clicking cart button", async ({ page }) => {
