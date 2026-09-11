@@ -84,7 +84,9 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/web-robot-ai:${{ github.sha }}
+          tags: |
+            ${{ secrets.DOCKER_USERNAME }}/web-robot-ai:${{ github.sha }}
+            ${{ secrets.DOCKER_USERNAME }}/web-robot-ai:latest
           provenance: mode=max
           sbom: true
           cache-from: type=gha
