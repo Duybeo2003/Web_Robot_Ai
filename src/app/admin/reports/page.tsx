@@ -11,7 +11,7 @@ import {
 } from "@/components/ui/card";
 import { ReportsChart } from "./components/reports-chart";
 import { CategoryRevenueChart } from "./components/category-revenue-chart";
-import { format, subMonths, startOfMonth } from "date-fns";
+import { format, subMonths, subDays, startOfMonth } from "date-fns";
 import {
   TrendingUp,
   ShoppingCart,
@@ -46,7 +46,7 @@ export default async function AdminReportsPage() {
   }
 
   const sixMonthsAgo = subMonths(startOfMonth(new Date()), 5);
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 24 * 60 * 60 * 1000);
+  const thirtyDaysAgo = subDays(new Date(), 30);
 
   // --- Run all queries in parallel ---
   const [

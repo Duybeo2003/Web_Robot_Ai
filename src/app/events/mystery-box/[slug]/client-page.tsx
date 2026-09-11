@@ -37,6 +37,16 @@ interface MysteryBoxClientPageProps {
   isLoggedIn: boolean;
 }
 
+// Deterministic star positions (avoids Math.random in render)
+const STAR_POSITIONS = Array.from({ length: 30 }, (_, i) => ({
+  width: ((i * 7919) % 30) / 10 + 1,
+  height: ((i * 6271) % 30) / 10 + 1,
+  top: (i * 3571) % 100,
+  left: (i * 4973) % 100,
+  duration: ((i * 2311) % 30) / 10 + 2,
+  delay: ((i * 1777) % 30) / 10,
+}));
+
 const BOX_COLORS = [
   { bg: "from-purple-600 to-indigo-700", glow: "rgba(139,92,246,0.6)", accent: "#a78bfa" },
   { bg: "from-rose-500 to-pink-700", glow: "rgba(244,63,94,0.6)", accent: "#fb7185" },
@@ -119,17 +129,17 @@ export default function MysteryBoxClientPage({
       {/* Animated starfield background */}
       <div className="pointer-events-none absolute inset-0 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_top,_#1a1030_0%,_#0a0a14_60%)]" />
-        {[...Array(30)].map((_, i) => (
+        {STAR_POSITIONS.map((star, i) => (
           <div
             key={i}
             className="absolute rounded-full bg-white opacity-60"
             style={{
-              width: Math.random() * 3 + 1 + "px",
-              height: Math.random() * 3 + 1 + "px",
-              top: Math.random() * 100 + "%",
-              left: Math.random() * 100 + "%",
-              animation: `pulse ${Math.random() * 3 + 2}s ease-in-out infinite`,
-              animationDelay: Math.random() * 3 + "s",
+              width: star.width + "px",
+              height: star.height + "px",
+              top: star.top + "%",
+              left: star.left + "%",
+              animation: `pulse ${star.duration}s ease-in-out infinite`,
+              animationDelay: star.delay + "s",
             }}
           />
         ))}

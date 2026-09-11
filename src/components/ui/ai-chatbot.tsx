@@ -51,7 +51,7 @@ export function AIChatbot() {
     if (!text.trim() || isLoading) return;
 
     const userMessage: ChatMessage = {
-      id: Date.now().toString(),
+      id: crypto.randomUUID(),
       role: "user",
       content: text.trim(),
     };
@@ -77,31 +77,27 @@ export function AIChatbot() {
 
       const reader = res.body?.getReader();
       const decoder = new TextDecoder();
+      const assistantId = crypto.randomUUID();
 
-      const assistantMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
-      };
-
-      setMessages((prev) => [...prev, assistantMessage]);
+      setMessages((prev) => [...prev, { id: assistantId, role: "assistant" as const, content: "" }]);
 
       if (reader) {
+        let accumulated = "";
         while (true) {
           const { done, value } = await reader.read();
           if (done) break;
           const chunk = decoder.decode(value, { stream: true });
-          assistantMessage.content += chunk;
+          accumulated += chunk;
           setMessages((prev) =>
             prev.map((m) =>
-              m.id === assistantMessage.id ? { ...m, content: assistantMessage.content } : m,
+              m.id === assistantId ? { ...m, content: accumulated } : m,
             ),
           );
         }
       }
     } catch (err: unknown) {
       const errorMessage: ChatMessage = {
-        id: (Date.now() + 1).toString(),
+        id: crypto.randomUUID(),
         role: "assistant",
         content: (err as Error).message || "Xin lỗi, đã có lỗi xảy ra. Vui lòng thử lại sau.",
       };
