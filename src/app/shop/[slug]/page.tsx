@@ -12,13 +12,20 @@ import { WishlistButton } from "@/components/ui/wishlist-button"
 export const revalidate = 3600; // ISR: revalidate product pages every hour
 
 export async function generateStaticParams() {
-  const products = await prisma.product.findMany({
-    where: { deletedAt: null },
-    select: { slug: true },
-    orderBy: { createdAt: "desc" },
-    take: 50,
-  });
-  return products.map((p) => ({ slug: p.slug }));
+  // The Docker build stage has no real database connection (see Dockerfile —
+  // it builds with a placeholder DATABASE_URL and connects at runtime), so
+  // this must degrade to fully on-demand ISR rather than fail the build.
+  try {
+    const products = await prisma.product.findMany({
+      where: { deletedAt: null },
+      select: { slug: true },
+      orderBy: { createdAt: "desc" },
+      take: 50,
+    });
+    return products.map((p) => ({ slug: p.slug }));
+  } catch {
+    return [];
+  }
 }
 
 const getProduct = cache(async (slug: string) => {
