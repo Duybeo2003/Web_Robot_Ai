@@ -37,14 +37,22 @@ function formatVariantAttributes(attributes: unknown) {
     .join(" - ");
 }
 
-export default async function OrdersPage() {
+const PAGE_SIZE = 10;
+
+export default async function OrdersPage({ searchParams }: { searchParams: Promise<{ page?: string }> }) {
   const session = await auth();
   if (!session?.user?.id) return null;
 
-  const [rawOrders, databaseClock] = await Promise.all([
+  const { page: rawPage } = await searchParams;
+  const currentPage = Math.max(1, parseInt(rawPage || "1", 10) || 1);
+  const skip = (currentPage - 1) * PAGE_SIZE;
+
+  const [rawOrders, totalCount, databaseClock] = await Promise.all([
     prisma.order.findMany({
     where: { userId: session.user.id },
     orderBy: { createdAt: "desc" },
+    skip,
+    take: PAGE_SIZE,
     select: {
       id: true,
       status: true,
@@ -75,11 +83,13 @@ export default async function OrdersPage() {
       },
     },
     }),
+    prisma.order.count({ where: { userId: session.user.id } }),
     prisma.$queryRaw<Array<{ currentTime: Date }>>`
       SELECT CURRENT_TIMESTAMP(3) AS currentTime
     `,
   ]);
   const currentTime = databaseClock[0].currentTime.getTime();
+  const totalPages = Math.ceil(totalCount / PAGE_SIZE);
   const orders = rawOrders.map((order) => ({
     ...order,
     totalAmount: Number(order.totalAmount),
@@ -278,6 +288,30 @@ export default async function OrdersPage() {
             );
           })}
         </div>
+      )}
+
+      {totalPages > 1 && (
+        <nav className="mt-8 flex items-center justify-center gap-2">
+          {currentPage > 1 && (
+            <Link
+              href={`/profile/orders?page=${currentPage - 1}`}
+              className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            >
+              ← Trước
+            </Link>
+          )}
+          <span className="text-sm text-neutral-500">
+            Trang {currentPage} / {totalPages}
+          </span>
+          {currentPage < totalPages && (
+            <Link
+              href={`/profile/orders?page=${currentPage + 1}`}
+              className="rounded-lg border border-neutral-200 bg-white px-4 py-2 text-sm font-medium text-neutral-700 hover:bg-neutral-50"
+            >
+              Tiếp →
+            </Link>
+          )}
+        </nav>
       )}
     </section>
   );
