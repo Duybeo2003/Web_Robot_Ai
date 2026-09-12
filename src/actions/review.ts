@@ -4,10 +4,16 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 export async function submitReview(rawProductId: string, formData: FormData) {
   try {
     const user = await requireUser();
+    const rateLimit = await checkRateLimit(`rl:review:${user.id}`, 5, 3600, { failClosed: true });
+    if (!rateLimit.success) {
+      return { success: false, error: "Bạn đã gửi quá nhiều đánh giá. Vui lòng thử lại sau." };
+    }
     const productId = z.string().min(1).max(191).parse(rawProductId);
     const input = z.object({
       rating: z.coerce.number().int().min(1).max(5),
@@ -28,7 +34,7 @@ export async function submitReview(rawProductId: string, formData: FormData) {
     revalidatePath("/shop/[slug]", "page");
     return { success: true };
   } catch (error) {
-    console.error("[SUBMIT_REVIEW_ERROR]", error);
+    logger.error("review.submit_failed", { error });
     if (
       typeof error === "object" &&
       error !== null &&

@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireRole, requireUser } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { recordAudit } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 import { RETURN_WINDOW_DAYS } from "@/lib/commerce-policy";
 import { Prisma } from "@prisma/client";
 import { isAllowedImageUrl } from "@/lib/media-url";
@@ -56,7 +57,7 @@ export async function createReturnRequest(input: unknown) {
     revalidatePath("/profile/orders");
     return { success: true };
   } catch (error) {
-    console.error("[CREATE_RMA_ERROR]", error);
+    logger.error("rma.create_failed", { error });
     return {
       error:
         error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"
@@ -209,7 +210,7 @@ export async function updateReturnRequestStatus(
 
     return { success: true };
   } catch (error) {
-    console.error("[UPDATE_RMA_ERROR]", error);
+    logger.error("rma.status_update_failed", { error });
     return {
       error: error instanceof Error ? error.message : "Không thể cập nhật yêu cầu đổi trả.",
     };

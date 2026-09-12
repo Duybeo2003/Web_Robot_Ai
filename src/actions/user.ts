@@ -6,6 +6,7 @@ import { requireUser } from "@/lib/authz";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 export async function updateUserProfile(input: unknown) {
   try {
@@ -25,7 +26,7 @@ export async function updateUserProfile(input: unknown) {
     revalidatePath("/profile");
     return { success: true };
   } catch (error) {
-    console.error("[UPDATE_PROFILE_ERROR]", error);
+    logger.error("user.update_profile_failed", { error });
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
       return { error: "Số điện thoại đã được dùng bởi tài khoản khác." };
     }

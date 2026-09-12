@@ -180,8 +180,11 @@ export async function spinWheel(rawEventId: string) {
     });
     if (!event || event.type !== "LUCKY_WHEEL") throw new Error("Sự kiện không khả dụng.");
     const prize = choosePrize(event.prizes);
-    const wallet = await tx.userWallet.findUnique({ where: { userId: user.id } });
-    if (!wallet) throw new Error("Không tìm thấy ví Xu.");
+    const wallet = await tx.userWallet.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id, balance: 0 },
+    });
 
     const charged = await tx.userWallet.updateMany({
       where: { id: wallet.id, balance: { gte: event.pricePerPlay } },
@@ -237,8 +240,11 @@ export async function exchangePoints(rawEventId: string, rawPrizeId: string) {
     if (prize.pointCost <= 0 || (!prize.productId && prize.rewardPoints <= 0)) {
       throw new Error("Phần thưởng chưa được cấu hình đầy đủ.");
     }
-    const wallet = await tx.userWallet.findUnique({ where: { userId: user.id } });
-    if (!wallet) throw new Error("Không tìm thấy ví Xu.");
+    const wallet = await tx.userWallet.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id, balance: 0 },
+    });
 
     const charged = await tx.userWallet.updateMany({
       where: { id: wallet.id, balance: { gte: prize.pointCost } },
@@ -284,8 +290,11 @@ export async function openMysteryBox(rawEventId: string) {
     });
     if (!event || event.type !== "MYSTERY_BOX") throw new Error("Sự kiện không khả dụng.");
     const prize = choosePrize(event.prizes);
-    const wallet = await tx.userWallet.findUnique({ where: { userId: user.id } });
-    if (!wallet) throw new Error("Không tìm thấy ví Xu.");
+    const wallet = await tx.userWallet.upsert({
+      where: { userId: user.id },
+      update: {},
+      create: { userId: user.id, balance: 0 },
+    });
 
     const charged = await tx.userWallet.updateMany({
       where: { id: wallet.id, balance: { gte: event.pricePerPlay } },

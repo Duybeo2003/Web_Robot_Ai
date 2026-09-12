@@ -1,4 +1,5 @@
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 import Link from "next/link";
 import { Prisma, AgeRange, PrimarySkill } from "@prisma/client";
 import { AddToCartButton } from "./components/add-to-cart-button";
@@ -183,12 +184,26 @@ export default async function ShopPage({
       userWishlistIds = wishlistItems.map((w) => w.productId);
     }
   } catch (error) {
-    console.error("[SHOP_QUERY_ERROR]", error);
+    logger.error("shop.query_failed", { error });
     throw error;
   }
 
   const totalPages = Math.ceil(totalCount / itemsPerPage);
 
+
+  function buildPageUrl(page: number) {
+    const params: Record<string, string> = {};
+    if (query) params.q = query;
+    if (typeFilter) params.type = typeFilter;
+    if (sortOption !== "newest") params.sort = sortOption;
+    if (skillFilter) params.skill = skillFilter;
+    if (minPrice !== undefined) params.minPrice = String(minPrice);
+    if (maxPrice !== undefined) params.maxPrice = String(maxPrice);
+    if (minAge !== undefined) params.minAge = String(minAge);
+    if (maxAge !== undefined) params.maxAge = String(maxAge);
+    if (page > 1) params.page = String(page);
+    return `/shop?${new URLSearchParams(params).toString()}`;
+  }
 
   return (
     <div className="container mx-auto min-h-screen flex-1 px-4 py-6 sm:py-10">
@@ -285,7 +300,7 @@ export default async function ShopPage({
                 <nav aria-label="Phân trang sản phẩm" className="flex flex-wrap items-center justify-center gap-2 pt-6 sm:pt-8">
                   {currentPage > 1 && (
                     <Link
-                      href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), page: (currentPage - 1).toString() }).toString()}`}
+                      href={buildPageUrl(currentPage - 1)}
                       className="inline-flex h-10 items-center rounded-lg border border-neutral-200 bg-white px-4 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
                     >
                       Trang trước
@@ -306,7 +321,7 @@ export default async function ShopPage({
                         return (
                           <Link
                             key={pageNum}
-                            href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), page: pageNum.toString() }).toString()}`}
+                            href={buildPageUrl(pageNum)}
                             className={`flex size-10 items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
                               isActive
                                 ? "bg-[#FF5722] text-white border border-[#FF5722]"
@@ -335,7 +350,7 @@ export default async function ShopPage({
 
                   {currentPage < totalPages && (
                     <Link
-                      href={`/shop?${new URLSearchParams({ ...(query && { q: query }), ...(typeFilter && { type: typeFilter }), page: (currentPage + 1).toString() }).toString()}`}
+                      href={buildPageUrl(currentPage + 1)}
                       className="inline-flex h-10 items-center rounded-lg border border-neutral-200 bg-white px-4 text-sm font-semibold transition-colors hover:border-primary hover:text-primary"
                     >
                       Trang sau

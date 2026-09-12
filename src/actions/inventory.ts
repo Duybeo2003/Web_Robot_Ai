@@ -5,6 +5,7 @@ import { z } from "zod";
 import { requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { recordAudit } from "@/lib/audit";
+import { logger } from "@/lib/logger";
 
 const inventorySchema = z.object({
   productId: z.string().min(1).max(191),
@@ -111,7 +112,7 @@ export async function createInventoryTransaction(input: unknown) {
     revalidatePath(`/admin/products/${data.productId}`);
     return { success: true, data: result };
   } catch (error) {
-    console.error("[INVENTORY_ERROR]", error);
+    logger.error("inventory.transaction_failed", { error });
     return {
       error: error instanceof Error ? error.message : "Không thể cập nhật kho.",
     };
