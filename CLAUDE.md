@@ -81,20 +81,30 @@ src/
 │   ├── (shop)/             # Storefront công khai (trang chủ, sản phẩm, checkout)
 │   ├── admin/              # Dashboard quản trị (role-gated)
 │   ├── auth/               # Trang đăng nhập / OTP
-│   ├── api/                # Route handlers chỉ cho webhook (VNPay IPN, cron)
+│   ├── api/                # Route handlers: webhook (VNPay IPN), cron, và các việc
+│   │                       # Server Action không làm được (streaming AI chat, upload
+│   │                       # multipart, health check, cart sync qua sendBeacon)
 │   ├── layout.tsx          # Root layout — Providers, AuthModal, CartSyncer
 │   ├── error.tsx           # Global error boundary
 │   └── not-found.tsx       # 404 page
 │
-├── actions/                # Server Actions — MỌI mutation đều đi qua đây
-│   ├── checkout.ts         # Luồng đặt hàng và thanh toán (618 dòng)
-│   ├── admin.ts            # CRUD toàn bộ admin panel (724 dòng)
-│   ├── order.ts            # Chuyển trạng thái đơn, hủy đơn (386 dòng)
-│   ├── inventory.ts        # Nhập/xuất kho, kiểm kho
-│   ├── event.ts            # Sự kiện gamification, vòng quay may mắn
-│   ├── wallet.ts           # Ví "Robo Xu" (tiền ảo)
+├── actions/                # Server Actions — MỌI mutation đều đi qua đây (25 file)
+│   ├── checkout.ts         # Luồng đặt hàng và thanh toán (625 dòng)
+│   ├── order.ts            # Chuyển trạng thái đơn, hủy đơn (412 dòng)
+│   ├── event.ts            # Sự kiện gamification, vòng quay may mắn (316 dòng)
+│   ├── admin-event.ts      # Quản trị sự kiện/flash sale (294 dòng)
+│   ├── admin-products.ts   # CRUD sản phẩm phía admin (232 dòng)
+│   ├── admin-catalog.ts    # Category, coupon, review, settings (223 dòng)
+│   ├── inventory.ts        # Nhập/xuất kho, kiểm kho (206 dòng)
 │   ├── rma.ts              # Trả hàng, bảo hành
-│   └── product.ts          # Quản lý sản phẩm, variants
+│   ├── admin-wallet.ts, admin-users.ts, admin-delivery.ts, admin-support.ts
+│   │                       # CRUD admin theo từng domain (tách nhỏ từ admin.ts cũ)
+│   ├── wallet.ts           # Ví "Robo Xu" (tiền ảo)
+│   ├── commission.ts       # Hoa hồng affiliate/CTV
+│   ├── article.ts, review.ts, coupon.ts, contact.ts, warranty.ts, wishlist.ts
+│   ├── user.ts, user-inventory.ts, auth.ts, shop.ts, product.ts
+│   └── admin.ts            # ⚠️ Deprecated — chỉ re-export từ các file admin-*.ts,
+│                            # KHÔNG thêm code mới vào đây, import trực tiếp từ file gốc
 │
 ├── lib/                    # Thư viện hạ tầng & tiện ích lõi
 │   ├── prisma.ts           # Singleton PrismaClient
@@ -132,6 +142,11 @@ src/
 │
 ├── hooks/                  # Custom React hooks
 ├── auth.ts                 # Cấu hình NextAuth (Credentials + Google + Facebook + OTP)
+├── proxy.ts                # Next.js 16: thay thế middleware.ts cũ. Route protection
+│                           # (session + RBAC qua canAccessAdminPath/adminLandingPage),
+│                           # rate limit in-memory, VÀ gate quyền xem đơn khách vãng lai
+│                           # cho /checkout/success/[id] (xem lý do ở mục 3) — sửa ở đây,
+│                           # KHÔNG tạo lại middleware.ts (không còn được Next.js dùng)
 └── instrumentation.ts      # Khởi động ứng dụng (chạy một lần khi server start)
 
 prisma/
@@ -144,7 +159,28 @@ scripts/                    # bootstrap-admin.mjs, verify-migrations.mjs, backup
 
 ---
 
-## 3. Quy chuẩn viết code
+## 3. Kiến trúc luồng đặt hàng & thanh toán
+
+Đây là luồng phức tạp nhất trong hệ thống, trải dài qua nhiều file — đọc phần này trước khi sửa bất kỳ thứ gì liên quan đến order/payment.
+
+**Vòng đời đơn hàng** (`processCheckout` trong `checkout.ts`):
+1. Validate Zod + rate limit (theo user/phone và theo IP fingerprint riêng biệt).
+2. Khách vãng lai (guest) được phép đặt hàng — xác thực bằng OTP số điện thoại thay vì `requireUser()` (xem ngoại lệ ở mục 5). Guest được cấp `guestAccessToken` (hash lưu DB) để tra cứu đơn sau này qua `order-access.ts`.
+3. Toàn bộ trong `prisma.$transaction`: trừ tồn kho bằng `updateMany` có điều kiện `inventoryCount: { gte: quantity }` (atomic, tránh oversell do race condition) — **không** đọc rồi ghi riêng lẻ.
+4. `idempotencyKey` (UUID từ client) là unique constraint trên `Order` — nếu request bị retry, code bắt lỗi Prisma `P2002` và trả về đơn đã tồn tại thay vì tạo trùng.
+5. Với đơn cần thanh toán, set `inventoryReservedUntil` (30 phút cho VNPay, 24h cho chuyển khoản — hằng số trong `commerce-policy.ts`) — cron `release-expired-orders` sẽ huỷ đơn hết hạn và hoàn kho.
+
+**Xác nhận thanh toán VNPay** (`settleVnPayPayment` trong `lib/payments/vnpay-settlement.ts`, gọi từ `/api/vnpay/ipn` và `/api/vnpay/vnpay_return`):
+- Luôn `lockOrderRow()` (`SELECT ... FOR UPDATE`) trước khi đọc/ghi Order trong transaction — bắt buộc vì IPN và return URL có thể tới gần như đồng thời.
+- Idempotent theo thiết kế: kiểm tra `paymentTransaction.status === "SUCCEEDED"` hoặc có sibling SUCCEEDED trước khi ghi — gọi lại nhiều lần không tạo side-effect kép.
+- Có nhánh xử lý riêng khi đơn đã bị hủy nhưng tiền vẫn về (`captured-after-cancellation`) — đánh dấu cần hoàn tiền thủ công qua `auditLog`, không tự động refund.
+- **Không sửa logic HMAC-SHA512 trong `vnpay.ts`** (đã ghi ở mục 5) — mọi thay đổi ở `verifyVnPayReturn`/`createVnPayUrl` ảnh hưởng trực tiếp đến việc xác thực callback từ VNPay.
+
+**Hủy đơn & hoàn kho** (`cancelOrderAndRestoreInventory` trong `lib/orders/cancel-order.ts`): hàm dùng chung cho mọi luồng hủy đơn (user tự hủy, admin hủy, cron hết hạn) — luôn `lockOrderRow()` trước, hoàn tồn kho + flash-sale stock, hoàn điểm thưởng đã dùng, giảm `usageCount` coupon, và hủy `Commission` đang `PENDING`. Khi cần thêm một luồng hủy đơn mới, **tái sử dụng hàm này** thay vì viết lại logic hoàn kho.
+
+**⚠️ `notFound()` không trả đúng status code nếu route nằm dưới `loading.tsx`** (kể cả `loading.tsx` gốc ở `src/app/`, áp dụng cho MỌI route không có `loading.tsx` riêng đè lên): route được bọc ngầm trong `<Suspense>`, response đã bắt đầu stream với status 200 trước khi phần thân trang (nơi gọi `notFound()`) chạy xong — nội dung hiển thị đúng "không tìm thấy" nhưng HTTP status vẫn là 200. Đây là hành vi App Router đã có từ lâu (không riêng Next 16), chỉ lộ ra khi có test kiểm tra status code thay vì nội dung. Đã gặp và sửa ở `checkout/success/[id]`: chuyển kiểm tra `guestAccessToken`/quyền xem đơn lên `proxy.ts` (chạy trước khi stream bắt đầu) — page vẫn giữ nguyên check của nó làm lớp phòng thủ thứ hai. Nếu thêm trang mới dùng `notFound()` để gate quyền truy cập (không chỉ để báo "record không tồn tại"), cân nhắc pattern tương tự hoặc ít nhất đừng giả định status code luôn đúng — test bằng nội dung trang, không chỉ bằng response status, trừ khi đã gate ở `proxy.ts`.
+
+## 4. Quy chuẩn viết code
 
 ### Đặt tên file
 
@@ -204,6 +240,8 @@ export async function actionName(input: unknown) {
 - Thành công: `{ success: true }` hoặc `{ success: true, data: ... }`
 - Thất bại: `{ success: false, error: string }`
 - **Không bao giờ throw từ Server Action** (người dùng sẽ thấy lỗi xấu)
+
+> Toàn bộ `src/actions/*.ts` đã được đồng bộ về đúng quy tắc `{ success: false, error }` / `{ success: true, ... }` ở trên (2026-09: đã sửa 6 file từng thiếu `success: false` — `checkout.ts`, `article.ts`, `inventory.ts`, `rma.ts`, `user.ts`, `warranty.ts`). **Ngoại lệ duy nhất còn lại:** `contact.ts` (`submitContactRequest`) dùng type riêng `ContactActionState = { success: true; message } | { success: false; message }` — có chủ đích, vì UI luôn hiển thị `state.message` (thành công lẫn thất bại) dạng một dòng trạng thái duy nhất, không phải action lỗi thời. Action MỚI vẫn nên theo `{ success, error }` chuẩn; chỉ dùng pattern `message` kiểu `contact.ts` khi thật sự cần "submit rồi hiển thị 1 thông báo trạng thái" giống vậy.
 
 ### Pattern Authorization
 
@@ -309,13 +347,13 @@ const phone = normalizeVietnamPhone("0912345678"); // → "+84912345678"
 
 ---
 
-## 4. Lưu ý và hạn chế cần tránh
+## 5. Lưu ý và hạn chế cần tránh
 
 ### Kiến trúc
 
-- **Không tạo REST API endpoint mới** cho business logic — dùng Server Actions. Route handlers (`/api/`) chỉ dành cho webhook (VNPay IPN, cron jobs) và các callback bên ngoài.
+- **Không tạo REST API endpoint mới** cho business logic — dùng Server Actions. Route handlers (`/api/`) chỉ dành cho webhook (VNPay IPN, cron jobs), callback bên ngoài, và các trường hợp Server Action không đáp ứng được (streaming response như `/api/chat`, upload multipart, health check, cart sync qua `sendBeacon`).
 - **Không import trực tiếp** `prisma` hay `redis` singleton trong Client Component — chỉ được dùng trong Server Component, Server Action, và Route Handler.
-- **Không bỏ qua** `requireUser()` / `requireRole()` trong bất kỳ Server Action nào — không có exception.
+- **Không bỏ qua** `requireUser()` / `requireRole()` trong bất kỳ Server Action nào có mutation gắn với một user đã đăng nhập. Ngoại lệ duy nhất đã biết: `processCheckout` trong `checkout.ts` cố tình cho phép khách vãng lai (guest) đặt hàng không cần đăng nhập — thay vào đó tự xác thực bằng OTP số điện thoại (`hashOtp`) + rate limit theo cả tài khoản lẫn địa chỉ IP. Nếu thêm luồng guest mới, làm theo đúng cơ chế xác thực thay thế này, đừng bỏ xác thực hoàn toàn.
 - **Không dùng `any` tường minh** nếu có thể tránh — ESLint tắt rule nhưng không có nghĩa là nên dùng.
 
 ### Database
@@ -353,7 +391,7 @@ const phone = normalizeVietnamPhone("0912345678"); // → "+84912345678"
 
 ---
 
-## 5. Biến môi trường quan trọng
+## 6. Biến môi trường quan trọng
 
 | Biến | Bắt buộc | Mô tả |
 |---|---|---|
