@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -42,6 +43,7 @@ export function CouponForm({
   onSuccess?: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema) as any,
@@ -69,6 +71,7 @@ export function CouponForm({
         toast.success(initialData ? "Đã cập nhật mã" : "Đã tạo mã giảm giá");
         if (onSuccess) onSuccess();
         if (!initialData) form.reset();
+        router.refresh();
       } else {
         toast.error(result.error || "Có lỗi xảy ra");
       }

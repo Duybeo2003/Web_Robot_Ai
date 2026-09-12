@@ -1,5 +1,8 @@
 import { test as setup, expect } from "@playwright/test";
 import path from "path";
+import { loadEnvConfig } from "@next/env";
+
+loadEnvConfig(process.cwd());
 
 const authFile = path.join(__dirname, "../../playwright/.auth/admin.json");
 

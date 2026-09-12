@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -31,6 +32,7 @@ export function CategoryForm({
   onSuccess?: () => void;
 }) {
   const [isLoading, setIsLoading] = useState(false);
+  const router = useRouter();
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -48,6 +50,7 @@ export function CategoryForm({
         toast.success(initialData ? "Đã cập nhật danh mục" : "Đã tạo danh mục");
         if (onSuccess) onSuccess();
         if (!initialData) form.reset();
+        router.refresh();
       } else {
         toast.error(result.error || "Có lỗi xảy ra");
       }

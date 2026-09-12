@@ -54,7 +54,7 @@ test.describe("Admin Products", () => {
   });
 });
 
-test.describe("Admin Categories CRUD", () => {
+test.describe.serial("Admin Categories CRUD", () => {
   test.beforeEach(skipIfNoCredentials);
 
   const testCategoryName = `E2E Test Category ${Date.now()}`;
@@ -81,10 +81,12 @@ test.describe("Admin Categories CRUD", () => {
     const submitBtn = page.locator("button[type='submit']:has-text('Lưu'), button[type='submit']:has-text('Tạo'), button[type='submit']:has-text('Thêm')").first();
     await submitBtn.click();
 
-    // Verify it appears in the list
-    await page.waitForLoadState("networkidle");
-    const body = await page.locator("body").textContent();
-    expect(body).toContain(testCategoryName);
+    // Wait for the dialog to close (mutation finished) then poll for the new
+    // row — router.refresh() is fire-and-forget, so the refreshed list can land
+    // slightly after the dialog closes. toContainText auto-retries instead of
+    // racing a one-shot textContent() read against that refetch.
+    await expect(page.locator('[role="dialog"]')).toHaveCount(0, { timeout: 10_000 });
+    await expect(page.locator("body")).toContainText(testCategoryName, { timeout: 10_000 });
     createdCategoryName = testCategoryName;
   });
 
@@ -102,18 +104,13 @@ test.describe("Admin Categories CRUD", () => {
       test.skip(true, "Test category row not found");
       return;
     }
-    const deleteBtn = row.locator("button:has-text('Xóa'), [aria-label*='xóa'], [aria-label*='delete']").first();
+    const deleteBtn = row.locator("button:has-text('Xóa'), [aria-label*='xóa' i], [aria-label*='delete' i]").first();
+    // Deletion is confirmed via a native window.confirm() dialog, not a DOM
+    // modal — Playwright auto-dismisses those unless a handler accepts it.
+    page.once("dialog", (dialog) => dialog.accept());
     await deleteBtn.click();
 
-    // Confirm deletion if there's a dialog
-    const confirmBtn = page.locator("button:has-text('Xác nhận'), button:has-text('Xóa'), [role='dialog'] button[type='submit']").last();
-    if (await confirmBtn.isVisible({ timeout: 2000 })) {
-      await confirmBtn.click();
-    }
-
-    await page.waitForLoadState("networkidle");
-    const body = await page.locator("body").textContent();
-    expect(body).not.toContain(createdCategoryName);
+    await expect(page.locator("body")).not.toContainText(createdCategoryName, { timeout: 10_000 });
   });
 });
 
@@ -155,7 +152,7 @@ test.describe("Admin Users", () => {
   });
 });
 
-test.describe("Admin Coupons CRUD", () => {
+test.describe.serial("Admin Coupons CRUD", () => {
   test.beforeEach(skipIfNoCredentials);
 
   const testCouponCode = `E2ETEST${Date.now()}`;
@@ -185,13 +182,14 @@ test.describe("Admin Coupons CRUD", () => {
 
     const submitBtn = page.locator("button[type='submit']:has-text('Lưu'), button[type='submit']:has-text('Tạo'), button[type='submit']:has-text('Thêm')").first();
     await submitBtn.click();
-    await page.waitForLoadState("networkidle");
 
-    const body = await page.locator("body").textContent();
-    if (body?.includes(testCouponCode)) {
-      couponCreated = true;
-      expect(body).toContain(testCouponCode);
-    }
+    // Wait for the dialog to close (mutation finished) then poll for the new
+    // row — router.refresh() is fire-and-forget, so the refreshed list can land
+    // slightly after the dialog closes. toContainText auto-retries instead of
+    // racing a one-shot textContent() read against that refetch.
+    await expect(page.locator('[role="dialog"]')).toHaveCount(0, { timeout: 10_000 });
+    await expect(page.locator("body")).toContainText(testCouponCode, { timeout: 10_000 });
+    couponCreated = true;
   });
 
   test("delete the test coupon", async ({ page }) => {
@@ -207,17 +205,13 @@ test.describe("Admin Coupons CRUD", () => {
       test.skip(true, "Test coupon row not found");
       return;
     }
-    const deleteBtn = row.locator("button:has-text('Xóa'), [aria-label*='xóa']").first();
+    const deleteBtn = row.locator("button:has-text('Xóa'), [aria-label*='xóa' i]").first();
+    // Deletion is confirmed via a native window.confirm() dialog, not a DOM
+    // modal — Playwright auto-dismisses those unless a handler accepts it.
+    page.once("dialog", (dialog) => dialog.accept());
     await deleteBtn.click();
 
-    const confirmBtn = page.locator("button:has-text('Xác nhận'), button:has-text('Xóa'), [role='dialog'] button[type='submit']").last();
-    if (await confirmBtn.isVisible({ timeout: 2000 })) {
-      await confirmBtn.click();
-    }
-
-    await page.waitForLoadState("networkidle");
-    const body = await page.locator("body").textContent();
-    expect(body).not.toContain(testCouponCode);
+    await expect(page.locator("body")).not.toContainText(testCouponCode, { timeout: 10_000 });
   });
 });
 

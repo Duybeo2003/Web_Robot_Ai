@@ -12,15 +12,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { CategoryActions } from "./components/category-actions";
-import { CategoryForm } from "./components/category-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { CreateCategoryDialog } from "./components/create-category-dialog";
 
 
 
@@ -55,18 +47,7 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
           </p>
         </div>
 
-        <Dialog>
-          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
-            <Plus className="mr-2 h-4 w-4" />
-            Thêm danh mục
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Thêm danh mục mới</DialogTitle>
-            </DialogHeader>
-            <CategoryForm />
-          </DialogContent>
-        </Dialog>
+        <CreateCategoryDialog />
       </div>
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">

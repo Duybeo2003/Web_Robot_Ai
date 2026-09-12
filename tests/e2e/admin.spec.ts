@@ -77,7 +77,7 @@ test.describe("API Health & Security", () => {
     const res = await request.get("/robots.txt");
     expect(res.status()).toBe(200);
     const body = await res.text();
-    expect(body).toContain("User-agent");
+    expect(body).toContain("User-Agent");
     expect(body).toContain("Disallow: /admin/");
   });
 });

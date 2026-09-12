@@ -12,15 +12,7 @@ import {
 } from "@/components/ui/table";
 import { format } from "date-fns";
 import { CouponActions } from "./components/coupon-actions";
-import { CouponForm } from "./components/coupon-form";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/components/ui/dialog";
-import { Plus } from "lucide-react";
+import { CreateCouponDialog } from "./components/create-coupon-dialog";
 import { Badge } from "@/components/ui/badge";
 
 
@@ -51,18 +43,7 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
           </p>
         </div>
 
-        <Dialog>
-          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
-            <Plus className="mr-2 h-4 w-4" />
-            Thêm khuyến mãi
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Thêm mã giảm giá mới</DialogTitle>
-            </DialogHeader>
-            <CouponForm />
-          </DialogContent>
-        </Dialog>
+        <CreateCouponDialog />
       </div>
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">

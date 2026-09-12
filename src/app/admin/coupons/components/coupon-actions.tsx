@@ -14,6 +14,7 @@ import { MoreHorizontal, Trash2, Edit } from "lucide-react";
 import { deleteCoupon } from "@/actions/admin";
 import { toast } from "sonner";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import { CouponForm } from "./coupon-form";
 import {
   Dialog,
@@ -37,6 +38,7 @@ export function CouponActions({
   const [isLoading, setIsLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [dropdownOpen, setDropdownOpen] = useState(false);
+  const router = useRouter();
 
   const handleDelete = async () => {
     if (!confirm("Bạn có chắc chắn muốn xóa mã giảm giá này?")) return;
@@ -45,6 +47,7 @@ export function CouponActions({
     setIsLoading(false);
     if (result.success) {
       toast.success("Đã xóa mã");
+      router.refresh();
     } else {
       toast.error(result.error || "Có lỗi xảy ra");
     }
@@ -57,6 +60,7 @@ export function CouponActions({
           <DialogTrigger
             className="p-1.5 text-gray-400 hover:text-blue-600 rounded-md hover:bg-blue-50 transition-colors"
             title="Sửa"
+            aria-label="Sửa"
           >
             <Edit className="w-4 h-4" />
           </DialogTrigger>
@@ -65,6 +69,7 @@ export function CouponActions({
             disabled={isLoading}
             className="p-1.5 text-gray-400 hover:text-red-600 rounded-md hover:bg-red-50 transition-colors disabled:opacity-50"
             title="Xóa"
+            aria-label="Xóa"
           >
             <Trash2 className="w-4 h-4" />
           </button>
