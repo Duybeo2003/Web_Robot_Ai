@@ -181,7 +181,7 @@ export default async function GuidesPage({
                 </p>
 
                 <div className="mt-auto flex items-center justify-between pt-6 border-t border-neutral-50">
-                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 group-hover:text-[#FF5722] transition-colors">
+                  <span className="text-xs font-bold uppercase tracking-wider text-neutral-400 group-hover:text-primary transition-colors">
                     {guide.type === "video"
                       ? "Video · 15:20"
                       : guide.type === "document"
@@ -208,7 +208,7 @@ export default async function GuidesPage({
         {/* Premium Need Help Section */}
         <section className="animate-in relative mx-auto mt-16 max-w-4xl overflow-hidden rounded-3xl border border-neutral-700 bg-gradient-to-br from-neutral-900 to-neutral-800 p-7 text-center shadow-2xl fade-in duration-1000 fill-mode-both sm:p-12 md:p-14">
           {/* Subtle glowing effect */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-[#FF5722]/20 blur-[100px] rounded-full pointer-events-none"></div>
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[80%] h-[80%] bg-primary/20 blur-[100px] rounded-full pointer-events-none"></div>
 
           <div className="relative z-10">
             <div className="mx-auto mb-6 flex size-16 items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-800 shadow-inner">

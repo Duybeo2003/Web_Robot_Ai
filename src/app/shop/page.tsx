@@ -324,7 +324,7 @@ export default async function ShopPage({
                             href={buildPageUrl(pageNum)}
                             className={`flex size-10 items-center justify-center rounded-lg text-sm font-semibold transition-colors ${
                               isActive
-                                ? "bg-[#FF5722] text-white border border-[#FF5722]"
+                                ? "bg-primary text-primary-foreground border border-primary"
                                 : "bg-white border border-neutral-200 hover:bg-neutral-50 text-neutral-600"
                             }`}
                           >

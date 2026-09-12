@@ -81,7 +81,7 @@ export default async function EducationBlogPage() {
                   <span className="text-sm font-medium text-neutral-700">
                     {article.author.name}
                   </span>
-                  <span className="text-sm font-bold text-[#FF5722] group-hover:underline">
+                  <span className="text-sm font-bold text-primary group-hover:underline">
                     Đọc tiếp <span aria-hidden="true">→</span>
                   </span>
                 </div>

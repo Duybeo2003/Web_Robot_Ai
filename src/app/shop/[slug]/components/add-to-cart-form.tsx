@@ -90,9 +90,9 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
                 disabled={isVariantOutOfStock}
                 className={cn(
                   "rounded-lg border px-4 py-2 text-sm font-medium transition-colors",
-                  isSelected 
-                    ? "border-[#FF5722] bg-orange-50 text-[#FF5722]" 
-                    : "border-neutral-200 hover:border-[#FF5722]",
+                  isSelected
+                    ? "border-primary bg-orange-50 text-primary"
+                    : "border-neutral-200 hover:border-primary",
                   isVariantOutOfStock ? "opacity-50 line-through bg-neutral-100 cursor-not-allowed" : ""
                 )}
               >
@@ -204,7 +204,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
                 !canAddToCart && hasVariants && !selectedVariant ? "bg-neutral-800" :
                 isOutOfStock ? "bg-gray-400 cursor-not-allowed" :
                 isPreOrder ? "bg-amber-500 hover:bg-amber-600 hover:-translate-y-0.5" :
-                "bg-[#FF5722] hover:bg-[#E64A19] hover:-translate-y-0.5"
+                "bg-primary hover:bg-primary/90 hover:-translate-y-0.5"
               )}
             >
               <ShoppingCart className="w-5 h-5" />

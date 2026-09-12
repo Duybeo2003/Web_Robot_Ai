@@ -316,7 +316,7 @@ export default function LuckyWheelClientPage({
             </div>
             
             <h3 className="text-2xl font-bold mb-2">Bạn đã quay trúng</h3>
-            <p className="text-3xl font-black text-[#FF5722] drop-shadow-md">{wonPrize?.name}</p>
+            <p className="text-3xl font-black text-primary drop-shadow-md">{wonPrize?.name}</p>
             
             {wonPrize?.productId ? (
               <p className="text-neutral-400 mt-4 text-sm">
@@ -334,7 +334,7 @@ export default function LuckyWheelClientPage({
               Quay tiếp
             </Button>
             <Link href="/profile/inventory" className="w-full">
-              <Button className="w-full bg-[#FF5722] hover:bg-[#E64A19] text-white font-bold">
+              <Button className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold">
                 Vào túi đồ
               </Button>
             </Link>

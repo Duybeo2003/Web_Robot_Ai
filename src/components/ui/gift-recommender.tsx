@@ -52,7 +52,7 @@ export function GiftRecommender() {
 
       <div className="relative z-10 mb-4 text-center">
         <h2 className="flex items-center justify-center gap-2 text-lg font-extrabold tracking-tight text-neutral-900 xl:text-xl">
-          <Smile className="text-[#FF5722]" size={22} /> Trợ lý chọn quà
+          <Smile className="text-primary" size={22} /> Trợ lý chọn quà
         </h2>
         <p className="mt-1 text-sm text-neutral-500">
           Tìm quà giáo dục phù hợp cho bé.
@@ -78,10 +78,10 @@ export function GiftRecommender() {
                 <button
                   type="button"
                   onClick={() => handleAgeSelect("AGE_3_5")}
-                  className="group flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white p-2.5 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:border-[#FF5722] hover:bg-orange-50/50 hover:shadow-md"
+                  className="group flex min-h-[112px] flex-col items-center justify-center gap-2 rounded-xl border border-neutral-200 bg-white p-2.5 text-center shadow-sm transition-all hover:-translate-y-0.5 hover:border-primary hover:bg-orange-50/50 hover:shadow-md"
                 >
                   <div className="flex size-10 items-center justify-center rounded-full bg-orange-50 transition-transform group-hover:scale-105">
-                    <Baby className="text-[#FF5722]" size={22} />
+                    <Baby className="text-primary" size={22} />
                   </div>
                   <span className="whitespace-nowrap text-[13px] font-semibold leading-5 text-neutral-700">
                     3–5 tuổi
@@ -212,7 +212,7 @@ export function GiftRecommender() {
 
               {loading ? (
                 <div className="flex justify-center items-center py-8">
-                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#FF5722]"></div>
+                  <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
                 </div>
               ) : (
                 <div className="space-y-3">
@@ -233,11 +233,11 @@ export function GiftRecommender() {
                           />
                         </div>
                         <div className="flex flex-col justify-between py-1 w-full min-w-0">
-                          <h4 className="font-bold text-neutral-800 truncate text-xs group-hover:text-[#FF5722] transition-colors">
+                          <h4 className="font-bold text-neutral-800 truncate text-xs group-hover:text-primary transition-colors">
                             {product.name}
                           </h4>
                           <div className="flex items-center justify-between mt-2">
-                            <span className="text-[#FF5722] font-black text-sm">
+                            <span className="text-primary font-black text-sm">
                               {product.price.toLocaleString("vi-VN")}đ
                             </span>
                             <span className="inline-flex h-8 items-center rounded-full bg-neutral-900 px-3 text-xs font-bold text-white shadow-sm transition-colors group-hover:bg-primary">

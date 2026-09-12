@@ -53,7 +53,7 @@ export default async function ArticleDetailPage({
     <main className="container mx-auto min-h-screen max-w-4xl px-4 py-10 sm:py-12">
       <Link
         href="/giao-duc"
-        className="inline-flex items-center text-[#FF5722] hover:underline mb-8 font-medium"
+        className="inline-flex items-center text-primary hover:underline mb-8 font-medium"
       >
         <ArrowLeft className="w-4 h-4 mr-2" /> Quay lại góc giáo dục
       </Link>

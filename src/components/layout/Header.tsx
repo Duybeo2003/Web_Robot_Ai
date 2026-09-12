@@ -41,7 +41,7 @@ function CartBadge() {
   if (!mounted || totalItems === 0) return null;
 
   return (
-    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#C86B5A] text-[10px] text-white font-bold animate-in zoom-in duration-300">
+    <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-primary text-[10px] text-primary-foreground font-bold animate-in zoom-in duration-300">
       {totalItems}
     </span>
   );
@@ -286,7 +286,7 @@ export function Header({
                 <Link
                   href="/shop?flashsale=true"
                   onClick={() => setOpenMobileMenu(false)}
-                  className="px-4 py-3 hover:bg-muted font-bold text-sm text-[#FF5722]"
+                  className="px-4 py-3 hover:bg-muted font-bold text-sm text-primary"
                 >
                   🔥 Khuyến mại nổi bật
                 </Link>

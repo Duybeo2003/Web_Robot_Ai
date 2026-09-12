@@ -128,7 +128,7 @@ export function ProductGallery({
                   : "border-border"
               }`}
             >
-              <PlayCircle className={`size-8 transition-colors ${activeMedia === "video" ? "text-[#FF5722]" : "text-white group-hover:text-[#FF5722]"}`} />
+              <PlayCircle className={`size-8 transition-colors ${activeMedia === "video" ? "text-primary" : "text-white group-hover:text-primary"}`} />
               <span className="mt-1 text-[10px] font-medium uppercase text-white">Video</span>
             </button>
           )}

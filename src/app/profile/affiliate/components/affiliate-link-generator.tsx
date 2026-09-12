@@ -57,7 +57,7 @@ export function AffiliateLinkGenerator({
           aria-label="Liên kết giới thiệu"
           className="h-10 min-w-0 flex-1 rounded-lg border border-neutral-300 bg-neutral-50 px-3 text-sm text-neutral-600 outline-none"
         />
-        <Button onClick={handleCopy} className="w-full gap-2 bg-[#FF5722] text-white hover:bg-[#E64A19] sm:w-auto">
+        <Button onClick={handleCopy} className="w-full gap-2 bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto">
           {copied ? <Check className="w-4 h-4" /> : <Copy className="w-4 h-4" />}
           {copied ? "Đã chép" : "Sao chép"}
         </Button>

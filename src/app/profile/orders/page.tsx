@@ -180,7 +180,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
             <Package className="size-10 text-neutral-400" />
           </div>
           <p className="mb-2 font-medium text-neutral-500">Chưa có đơn hàng</p>
-          <Link href="/shop" className="text-sm font-semibold text-[#FF5722] hover:underline">Khám phá sản phẩm</Link>
+          <Link href="/shop" className="text-sm font-semibold text-primary hover:underline">Khám phá sản phẩm</Link>
         </div>
       ) : (
         <div className="space-y-6">
@@ -241,13 +241,13 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
                           )}
                         </div>
                         <div className="min-w-0 flex-1">
-                          <Link href={`/shop/${item.product.slug}`} className="line-clamp-2 text-sm font-medium transition-colors hover:text-[#FF5722]">
+                          <Link href={`/shop/${item.product.slug}`} className="line-clamp-2 text-sm font-medium transition-colors hover:text-primary">
                             {item.product.title}
                           </Link>
                           {attributes && <p className="mt-1 text-xs font-medium text-blue-600">{attributes}</p>}
                           <p className="mt-1 text-xs text-neutral-500">Số lượng: {item.quantity}</p>
                         </div>
-                        <div className="text-right text-sm font-bold text-[#FF5722]">{currency.format(item.priceAtPurchase)}</div>
+                        <div className="text-right text-sm font-bold text-primary">{currency.format(item.priceAtPurchase)}</div>
                       </div>
                     );
                   })}
@@ -255,7 +255,7 @@ export default async function OrdersPage({ searchParams }: { searchParams: Promi
 
                 <footer className="flex flex-col gap-4 border-t border-neutral-200 bg-neutral-50 px-4 py-4 lg:flex-row lg:items-center lg:justify-between">
                   <dl className="flex flex-wrap items-center gap-x-5 gap-y-1 text-sm">
-                    <div className="flex items-center gap-2"><dt className="text-neutral-600">Tổng:</dt><dd className="text-xl font-bold text-[#FF5722]">{currency.format(order.totalAmount)}</dd></div>
+                    <div className="flex items-center gap-2"><dt className="text-neutral-600">Tổng:</dt><dd className="text-xl font-bold text-primary">{currency.format(order.totalAmount)}</dd></div>
                     {order.amountPaid > 0 && <div><dt className="inline text-neutral-500">Đã trả: </dt><dd className="inline font-semibold text-green-700">{currency.format(order.amountPaid)}</dd></div>}
                     {order.amountDue > 0 && <div><dt className="inline text-neutral-500">Còn lại: </dt><dd className="inline font-semibold text-red-600">{currency.format(order.amountDue)}</dd></div>}
                   </dl>

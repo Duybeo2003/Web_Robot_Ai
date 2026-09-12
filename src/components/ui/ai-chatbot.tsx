@@ -160,7 +160,7 @@ export function AIChatbot() {
             {messages.length === 0 && (
               <div className="flex flex-col items-center pt-4 text-center">
                 <div className="mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-gradient-to-br from-orange-100 to-orange-200">
-                  <Bot className="h-8 w-8 text-[#FF5722]" />
+                  <Bot className="h-8 w-8 text-primary" />
                 </div>
                 <p className="mb-1 text-base font-bold text-neutral-800">Xin chào! Tôi là RoboBot 👋</p>
                 <p className="mb-5 text-sm text-neutral-500">
@@ -193,7 +193,7 @@ export function AIChatbot() {
                 >
                   {m.role === "assistant" && (
                     <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-100">
-                      <Bot className="h-4 w-4 text-[#FF5722]" />
+                      <Bot className="h-4 w-4 text-primary" />
                     </div>
                   )}
 
@@ -219,7 +219,7 @@ export function AIChatbot() {
               {isLoading && (
                 <div className="flex justify-start gap-2">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-orange-100">
-                    <Bot className="h-4 w-4 text-[#FF5722]" />
+                    <Bot className="h-4 w-4 text-primary" />
                   </div>
                   <div className="flex items-center gap-1 rounded-2xl rounded-tl-none border border-neutral-200 bg-white px-4 py-3 shadow-sm">
                     {[0, 150, 300].map((delay) => (
@@ -264,7 +264,7 @@ export function AIChatbot() {
               <button
                 type="submit"
                 disabled={isLoading || !inputValue.trim()}
-                className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border-none bg-[#FF5722] text-white transition-all hover:bg-[#E64A19] disabled:cursor-not-allowed disabled:opacity-40"
+                className="flex h-10 w-10 shrink-0 cursor-pointer items-center justify-center rounded-xl border-none bg-primary text-primary-foreground transition-all hover:bg-primary/90 disabled:cursor-not-allowed disabled:opacity-40"
                 aria-label="Gửi"
               >
                 {isLoading ? (

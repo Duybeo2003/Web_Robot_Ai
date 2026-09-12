@@ -116,7 +116,7 @@ export default async function AffiliateDashboard() {
                       <div className="mt-2 space-y-1 font-sans md:hidden">
                         {c.order.items.map((item) => <div key={item.id} className="truncate text-sm text-neutral-700">• {item.product.title}</div>)}
                         <div className="flex flex-wrap items-center justify-between gap-2 pt-1">
-                          <strong className="text-[#FF5722]">+{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(c.amount))}</strong>
+                          <strong className="text-primary">+{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(c.amount))}</strong>
                           <span className={`rounded-full px-2 py-1 text-xs font-medium ${c.status === "PAID" ? "bg-green-100 text-green-700" : c.status === "PENDING" ? "bg-amber-100 text-amber-700" : "bg-red-100 text-red-700"}`}>
                             {{ PAID: "Đã chi", PENDING: "Đang chờ", CANCELLED: "Đã hủy", REVERSED: "Đã đảo do hoàn hàng" }[c.status]}
                           </span>
@@ -130,7 +130,7 @@ export default async function AffiliateDashboard() {
                         </div>
                       ))}
                     </td>
-                    <td className="hidden px-4 py-3 text-right font-bold text-[#FF5722] md:table-cell">
+                    <td className="hidden px-4 py-3 text-right font-bold text-primary md:table-cell">
                       +{new Intl.NumberFormat("vi-VN", { style: "currency", currency: "VND" }).format(Number(c.amount))}
                     </td>
                     <td className="hidden px-4 py-3 text-center lg:table-cell">

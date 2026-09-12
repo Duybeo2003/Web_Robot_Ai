@@ -45,7 +45,7 @@ export function ProductTabs({ product }: { product: any }) {
           onClick={() => setActiveTab("desc")}
           className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-4 text-center text-xs font-semibold transition-colors sm:gap-2 sm:text-sm ${
             activeTab === "desc"
-              ? "text-[#FF5722] border-b-2 border-[#FF5722] bg-orange-50/50"
+              ? "text-primary border-b-2 border-primary bg-orange-50/50"
               : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
           }`}
         >
@@ -56,7 +56,7 @@ export function ProductTabs({ product }: { product: any }) {
           onClick={() => setActiveTab("specs")}
           className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-4 text-center text-xs font-semibold transition-colors sm:gap-2 sm:text-sm ${
             activeTab === "specs"
-              ? "text-[#FF5722] border-b-2 border-[#FF5722] bg-orange-50/50"
+              ? "text-primary border-b-2 border-primary bg-orange-50/50"
               : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
           }`}
         >
@@ -67,7 +67,7 @@ export function ProductTabs({ product }: { product: any }) {
           onClick={() => setActiveTab("reviews")}
           className={`flex min-w-0 items-center justify-center gap-1.5 px-2 py-4 text-center text-xs font-semibold transition-colors sm:gap-2 sm:text-sm ${
             activeTab === "reviews"
-              ? "text-[#FF5722] border-b-2 border-[#FF5722] bg-orange-50/50"
+              ? "text-primary border-b-2 border-primary bg-orange-50/50"
               : "text-neutral-500 hover:text-neutral-700 hover:bg-neutral-50"
           }`}
         >
@@ -269,7 +269,7 @@ export function ProductTabs({ product }: { product: any }) {
                   <button
                     type="submit"
                     disabled={isPending}
-                    className="h-10 w-full rounded-lg bg-[#FF5722] font-medium text-white transition-colors hover:bg-[#E64A19] disabled:opacity-50"
+                    className="h-10 w-full rounded-lg bg-primary font-medium text-primary-foreground transition-colors hover:bg-primary/90 disabled:opacity-50"
                   >
                     {isPending ? "Đang gửi..." : "Gửi đánh giá"}
                   </button>

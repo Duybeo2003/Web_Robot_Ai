@@ -4,7 +4,7 @@ import { useCartStore } from "@/lib/store/cart";
 import Link from "next/link";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
-import { Trash2, Plus, Minus, ArrowRight } from "lucide-react";
+import { ShoppingCart, Trash2, Plus, Minus, ArrowRight } from "lucide-react";
 
 export default function CartPage() {
   const { items, removeItem, updateQuantity } = useCartStore();
@@ -24,7 +24,7 @@ export default function CartPage() {
     return (
       <main className="container mx-auto flex flex-1 flex-col items-center justify-center px-4 py-20 text-center">
         <div className="mb-6 flex size-24 items-center justify-center rounded-2xl bg-muted">
-          <Trash2 className="w-10 h-10 text-muted-foreground opacity-50" />
+          <ShoppingCart className="w-10 h-10 text-muted-foreground opacity-50" />
         </div>
         <h2 className="text-2xl font-bold mb-4">Giỏ hàng của bạn đang trống</h2>
         <p className="text-muted-foreground mb-8">
@@ -42,8 +42,7 @@ export default function CartPage() {
   return (
     <main className="container mx-auto flex-1 px-4 py-8 sm:py-12">
       <h1 className="mb-8 text-3xl font-extrabold tracking-tight">
-        Giỏ hàng ({items.reduce((acc, item) => acc + item.quantity, 0)} sản
-        phẩm)
+        Giỏ hàng ({items.reduce((acc, item) => acc + item.quantity, 0)} sản phẩm)
       </h1>
 
       <div className="grid grid-cols-1 gap-8 lg:grid-cols-[minmax(0,1fr)_360px]">

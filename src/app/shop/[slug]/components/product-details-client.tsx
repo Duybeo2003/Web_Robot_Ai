@@ -185,15 +185,15 @@ export function ProductDetailsClient({
         ) : (
           <div className="mt-7 grid grid-cols-3 gap-2 rounded-xl border border-neutral-100 bg-neutral-50 p-4 sm:p-5">
             <div className="flex flex-col items-center text-center space-y-2">
-              <ShieldCheck className="w-6 h-6 text-[#FF5722]" />
+              <ShieldCheck className="w-6 h-6 text-primary" />
               <span className="text-[11px] font-semibold leading-4 text-muted-foreground sm:text-xs">Bảo hành theo sản phẩm</span>
             </div>
             <div className="flex flex-col items-center text-center space-y-2 border-l border-r border-border/50 px-2">
-              <RefreshCcw className="w-6 h-6 text-[#FF5722]" />
+              <RefreshCcw className="w-6 h-6 text-primary" />
               <span className="text-[11px] font-semibold leading-4 text-muted-foreground sm:text-xs">Đổi trả theo điều kiện</span>
             </div>
             <div className="flex flex-col items-center text-center space-y-2">
-              <Wrench className="w-6 h-6 text-[#FF5722]" />
+              <Wrench className="w-6 h-6 text-primary" />
               <span className="text-[11px] font-semibold leading-4 text-muted-foreground sm:text-xs">Hỗ trợ kỹ thuật</span>
             </div>
           </div>

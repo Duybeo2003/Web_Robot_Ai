@@ -53,11 +53,11 @@ export function CartSheet() {
 
         {items.length === 0 ? (
           <div className="flex-1 flex flex-col items-center justify-center p-6 text-center space-y-6">
-            <div className="w-32 h-32 bg-orange-50 rounded-full flex items-center justify-center text-[#FF5722] mb-2 shadow-inner">
+            <div className="w-32 h-32 bg-orange-50 rounded-full flex items-center justify-center text-primary mb-2 shadow-inner">
               <ShoppingBag className="w-16 h-16 opacity-80" />
             </div>
             <div className="space-y-2">
-              <p className="text-xl font-bold text-gray-800">Giỏ hàng trống</p>
+              <p className="text-xl font-bold text-neutral-800">Giỏ hàng trống</p>
               <p className="text-muted-foreground text-sm max-w-[250px] mx-auto">
                 Chưa có sản phẩm nào trong giỏ hàng của bạn. Hãy khám phá các
                 robot giáo dục tuyệt vời của chúng tôi!
@@ -68,7 +68,7 @@ export function CartSheet() {
                 closeCart();
                 router.push("/shop");
               }}
-              className="mt-6 rounded-xl bg-[#FF5722] hover:bg-[#E64A19] text-white px-8 h-12 shadow-md transition-transform hover:-translate-y-0.5"
+              className="mt-6 rounded-xl bg-primary hover:bg-primary/90 text-primary-foreground px-8 h-12 shadow-md transition-transform hover:-translate-y-0.5"
             >
               Bắt đầu mua sắm
             </Button>
@@ -80,7 +80,7 @@ export function CartSheet() {
                 {items.map((item) => (
                   <div key={`${item.id}:${item.variantId || "base"}`} className="rounded-xl border border-neutral-100 p-3">
                     <div className="flex gap-3">
-                      <div className="size-20 shrink-0 overflow-hidden rounded-lg bg-gray-100">
+                      <div className="size-20 shrink-0 overflow-hidden rounded-lg bg-neutral-100">
                         {item.imageUrl ? (
                           <div className="relative h-full w-full">
                             <Image
@@ -92,7 +92,7 @@ export function CartSheet() {
                             />
                           </div>
                         ) : (
-                          <div className="flex h-full w-full items-center justify-center text-xs text-gray-400">
+                          <div className="flex h-full w-full items-center justify-center text-xs text-neutral-400">
                             Chưa có ảnh
                           </div>
                         )}
@@ -117,7 +117,7 @@ export function CartSheet() {
                           type="button"
                           aria-label={`Xóa ${item.title} khỏi giỏ hàng`}
                           onClick={() => removeItem(item.id, item.variantId)}
-                          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-gray-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                          className="flex size-8 shrink-0 items-center justify-center rounded-lg text-neutral-400 transition-colors hover:bg-red-50 hover:text-red-500"
                         >
                           <Trash2 className="size-4" />
                         </button>
@@ -132,7 +132,7 @@ export function CartSheet() {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity - 1, item.variantId)
                           }
-                          className="flex size-8 items-center justify-center rounded-l-lg transition-colors hover:bg-gray-100"
+                          className="flex size-8 items-center justify-center rounded-l-lg transition-colors hover:bg-neutral-100"
                         >
                           <Minus className="size-3.5" />
                         </button>
@@ -145,7 +145,7 @@ export function CartSheet() {
                           onClick={() =>
                             updateQuantity(item.id, item.quantity + 1, item.variantId)
                           }
-                          className="flex size-8 items-center justify-center rounded-r-lg transition-colors hover:bg-gray-100 disabled:cursor-not-allowed disabled:opacity-40"
+                          className="flex size-8 items-center justify-center rounded-r-lg transition-colors hover:bg-neutral-100 disabled:cursor-not-allowed disabled:opacity-40"
                           disabled={
                             item.quantity >= Math.min(99, item.inventoryCount ?? 99)
                           }
@@ -162,13 +162,13 @@ export function CartSheet() {
               </div>
             </ScrollArea>
 
-            <div className="p-6 border-t bg-gray-50/50">
+            <div className="p-6 border-t bg-neutral-50/50">
               <div className="bg-green-50 text-green-700 px-3 py-2.5 rounded-lg flex items-center justify-center gap-2 mb-4 text-sm font-medium border border-green-100">
                 <Truck className="w-4 h-4" />
                 Đơn hàng của bạn được miễn phí vận chuyển!
               </div>
               <div className="flex items-center justify-between mb-4">
-                <span className="font-semibold text-gray-600">
+                <span className="font-semibold text-neutral-600">
                   Tổng tạm tính
                 </span>
                 <span className="text-xl font-bold text-[#E30019]">
@@ -176,7 +176,7 @@ export function CartSheet() {
                 </span>
               </div>
               <Button
-                className="w-full h-14 rounded-xl text-base font-bold bg-[#FF5722] hover:bg-[#E64A19] text-white shadow-md transition-all hover:-translate-y-0.5"
+                className="w-full h-14 rounded-xl text-base font-bold bg-primary hover:bg-primary/90 text-primary-foreground shadow-md transition-all hover:-translate-y-0.5"
                 onClick={() => {
                   closeCart();
                   router.push("/checkout");

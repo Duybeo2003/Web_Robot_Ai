@@ -100,7 +100,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
           <PackageOpen className="w-16 h-16 text-neutral-300 mx-auto mb-4" />
           <h2 className="text-xl font-bold text-neutral-700 mb-2">Túi đồ trống</h2>
           <p className="text-neutral-500 mb-6">Bạn chưa có vật phẩm nào hoặc tất cả đã được xử lý.</p>
-          <Button onClick={() => router.push("/events")} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+          <Button onClick={() => router.push("/events")} className="bg-primary hover:bg-primary/90 text-primary-foreground">
             Đến khu sự kiện
           </Button>
         </div>
@@ -133,7 +133,7 @@ export default function InventoryClientPage({ inventory: initialInventory }: Inv
                   <div className="text-sm text-neutral-500 mb-4 line-clamp-1">{item.product.description}</div>
                   
                   <Button 
-                    className="w-full bg-[#FF5722] hover:bg-[#E64A19] text-white font-bold"
+                    className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-bold"
                     onClick={() => { setSelectedItem(item); setShowDeliveryForm(false); }}
                   >
                     Xử lý vật phẩm

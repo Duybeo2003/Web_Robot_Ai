@@ -464,15 +464,15 @@ export default function CheckoutClient({
               />
               <span>
                 Tôi đã đọc và đồng ý với{" "}
-                <Link className="font-semibold text-[#FF5722] hover:underline" href="/dieu-khoan-su-dung" target="_blank" rel="noopener noreferrer">
+                <Link className="font-semibold text-primary hover:underline" href="/dieu-khoan-su-dung" target="_blank" rel="noopener noreferrer">
                   điều khoản mua bán
                 </Link>
                 ,{" "}
-                <Link className="font-semibold text-[#FF5722] hover:underline" href="/chinh-sach-thanh-toan" target="_blank" rel="noopener noreferrer">
+                <Link className="font-semibold text-primary hover:underline" href="/chinh-sach-thanh-toan" target="_blank" rel="noopener noreferrer">
                   chính sách thanh toán
                 </Link>{" "}
                 và{" "}
-                <Link className="font-semibold text-[#FF5722] hover:underline" href="/chinh-sach-doi-tra" target="_blank" rel="noopener noreferrer">
+                <Link className="font-semibold text-primary hover:underline" href="/chinh-sach-doi-tra" target="_blank" rel="noopener noreferrer">
                   đổi trả
                 </Link>.
               </span>

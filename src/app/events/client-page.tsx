@@ -75,7 +75,7 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
                   {/* Floating Price Badge */}
                   <div className="absolute -top-6 right-6 bg-white p-2 rounded-lg shadow-xl border border-neutral-100 flex flex-col items-center justify-center min-w-[4rem]">
                     <span className="text-xs font-bold text-neutral-500">1 lượt</span>
-                    <span className="text-lg font-black text-[#FF5722] leading-none">{event.pricePerPlay}</span>
+                    <span className="text-lg font-black text-primary leading-none">{event.pricePerPlay}</span>
                     <span className="text-[10px] font-bold text-orange-500">xu</span>
                   </div>
 

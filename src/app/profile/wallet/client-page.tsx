@@ -160,7 +160,7 @@ export default function WalletClientPage({
           <Button
             onClick={() => setIsTopupOpen(true)}
             size="lg"
-            className="h-14 shrink-0 rounded-full bg-white px-8 font-bold text-[#FF5722] shadow-md hover:bg-orange-50"
+            className="h-14 shrink-0 rounded-full bg-white px-8 font-bold text-primary shadow-md hover:bg-orange-50"
           >
             <Plus className="mr-2 h-5 w-5" />
             Nạp xu ngay
@@ -267,7 +267,7 @@ export default function WalletClientPage({
                   variant="outline"
                   className={`text-sm ${
                     amount === val.toString()
-                      ? "border-[#FF5722] bg-orange-50 text-[#FF5722]"
+                      ? "border-primary bg-orange-50 text-primary"
                       : ""
                   }`}
                   onClick={() => setAmount(val.toString())}
@@ -280,7 +280,7 @@ export default function WalletClientPage({
             {isValidAmount && (
               <p className="text-center text-sm text-muted-foreground">
                 Bạn sẽ nhận được{" "}
-                <strong className="text-[#FF5722]">
+                <strong className="text-primary">
                   {parsedAmount.toLocaleString("vi-VN")} xu
                 </strong>
               </p>
@@ -297,7 +297,7 @@ export default function WalletClientPage({
               <Button
                 onClick={handleVnPay}
                 disabled={loading || !isValidAmount}
-                className="h-12 w-full bg-[#FF5722] font-bold text-white hover:bg-[#E64A19]"
+                className="h-12 w-full bg-primary font-bold text-primary-foreground hover:bg-primary/90"
               >
                 <Zap className="mr-2 h-5 w-5" />
                 Nạp ngay qua VNPay (tự động)
@@ -333,7 +333,7 @@ export default function WalletClientPage({
       >
         <DialogContent className="overflow-hidden sm:max-w-[560px]">
           <DialogHeader>
-            <DialogTitle className="text-center text-xl text-[#FF5722]">
+            <DialogTitle className="text-center text-xl text-primary">
               Thanh toán qua chuyển khoản
             </DialogTitle>
             <DialogDescription className="text-center">
@@ -375,7 +375,7 @@ export default function WalletClientPage({
                       <span
                         className={`font-bold ${
                           label === "Nội dung CK"
-                            ? "font-mono text-[#FF5722]"
+                            ? "font-mono text-primary"
                             : "text-neutral-800"
                         }`}
                       >

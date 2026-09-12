@@ -157,7 +157,7 @@ export function ShopSidebarFilters() {
                   onClick={() => updateParam("type", cat.value)}
                   className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
                     currentType === cat.value
-                      ? "bg-[#FF5722]/10 text-[#FF5722]"
+                      ? "bg-primary/10 text-primary"
                       : "text-neutral-600 hover:bg-neutral-50"
                   }`}
                 >
@@ -234,7 +234,7 @@ export function ShopSidebarFilters() {
                   onClick={() => updateParam("skill", skill.value)}
                   className={`rounded-lg px-3 py-2 text-left text-sm font-medium transition-colors ${
                     currentSkill === skill.value
-                      ? "bg-[#FF5722]/10 text-[#FF5722]"
+                      ? "bg-primary/10 text-primary"
                       : "text-neutral-600 hover:bg-neutral-50"
                   }`}
                 >

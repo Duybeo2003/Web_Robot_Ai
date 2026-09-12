@@ -81,7 +81,7 @@ export default async function CheckoutSuccessPage({
               <CheckCircle2 className="size-11 text-green-600" aria-hidden="true" />
             )}
           </div>
-          <h1 className="mb-3 text-3xl font-black text-[#FF5722]">Đặt hàng thành công</h1>
+          <h1 className="mb-3 text-3xl font-black text-primary">Đặt hàng thành công</h1>
           <p className="mx-auto mb-8 max-w-lg text-neutral-600">
             {requiresPrepayment
               ? "Đơn hàng đã được tạo và đang chờ xác nhận thanh toán."
@@ -186,7 +186,7 @@ export default async function CheckoutSuccessPage({
               </Button>
             </Link>
             <Link href="/shop">
-              <Button className="h-12 w-full bg-[#FF5722] px-7 text-white hover:bg-[#E64A19]">
+              <Button className="h-12 w-full bg-primary px-7 text-primary-foreground hover:bg-primary/90">
                 Tiếp tục mua sắm <ArrowRight className="size-4" aria-hidden="true" />
               </Button>
             </Link>

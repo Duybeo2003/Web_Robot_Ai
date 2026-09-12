@@ -134,9 +134,9 @@ const sanitizedProduct = {
       <div className="container mx-auto min-h-screen px-4 py-6 sm:px-6 sm:py-10">
         {/* Breadcrumbs */}
       <nav aria-label="Đường dẫn" className="mb-6 flex min-w-0 items-center gap-2 overflow-hidden text-sm text-muted-foreground sm:mb-8">
-        <Link href="/" className="hover:text-[#FF5722] transition-colors">Trang chủ</Link>
+        <Link href="/" className="hover:text-primary transition-colors">Trang chủ</Link>
         <span>/</span>
-        <Link href="/shop" className="hover:text-[#FF5722] transition-colors">Cửa hàng</Link>
+        <Link href="/shop" className="hover:text-primary transition-colors">Cửa hàng</Link>
         <span>/</span>
         <span className="text-foreground font-medium truncate">{product.title}</span>
       </nav>
@@ -150,7 +150,7 @@ const sanitizedProduct = {
         <section className="mt-14 sm:mt-20">
           <h2 className="mb-6 flex items-center justify-between border-b pb-4 text-xl font-extrabold sm:mb-8 sm:text-2xl">
             <span className="tracking-tight text-foreground">Sản phẩm liên quan</span>
-            <Link href={`/shop?type=${product.type}`} className="text-sm font-medium text-[#FF5722] hover:underline">
+            <Link href={`/shop?type=${product.type}`} className="text-sm font-medium text-primary hover:underline">
               Xem tất cả
             </Link>
           </h2>
