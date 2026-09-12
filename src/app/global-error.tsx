@@ -15,7 +15,6 @@ export default function GlobalError({
     if (process.env.NODE_ENV === "production") {
       const tryCapture = async () => {
         try {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
           const Sentry = await (Function('return import("@sentry/nextjs")')() as Promise<any>);
           Sentry?.captureException?.(error);
         } catch {
