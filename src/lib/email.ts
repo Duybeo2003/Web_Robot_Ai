@@ -274,3 +274,72 @@ export async function sendSupportRequestNotification(request: {
       </div>`,
   });
 }
+
+export async function sendAbandonedCartEmail(
+  userEmail: string,
+  userName: string | null,
+  cartId: string,
+  items: Array<{ title: string; price: number; quantity: number }>,
+  totalItemCount: number,
+) {
+  const name = escapeHtml(userName || "bạn");
+  const itemsHtml = items
+    .map(
+      (item) =>
+        `<li style="margin-bottom:8px;">${escapeHtml(item.title)} × ${item.quantity} — <strong>${item.price.toLocaleString("vi-VN")}đ</strong></li>`,
+    )
+    .join("");
+  const remaining = totalItemCount - items.length;
+  const moreText =
+    remaining > 0
+      ? `<p style="color:#888;font-size:13px;">... và ${remaining} sản phẩm khác</p>`
+      : "";
+
+  return deliverEmail("abandoned_cart", cartId, {
+    to: userEmail,
+    subject: "Bạn còn quên hàng trong giỏ! 🛒",
+    html: `
+      <div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif">
+        <h2 style="color:#ff5722;margin:0 0 16px;">🤖 RoboEQ — Giỏ hàng của bạn đang chờ</h2>
+        <p>Xin chào <strong>${name}</strong>,</p>
+        <p style="color:#555;line-height:1.6;">Bạn đã để lại một số sản phẩm trong giỏ hàng. Đừng để chúng chờ lâu nhé!</p>
+        <ul style="padding-left:20px;color:#333;">${itemsHtml}</ul>
+        ${moreText}
+        <div style="margin-top:24px;text-align:center;">
+          <a href="${appUrl()}/cart"
+             style="display:inline-block;background:#ff5722;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">
+            Quay lại giỏ hàng →
+          </a>
+        </div>
+        <p>Trân trọng,<br><strong>Đội ngũ RoboEQ</strong></p>
+      </div>`,
+  });
+}
+
+export async function sendReviewRequestEmail(
+  userEmail: string,
+  userName: string | null,
+  orderId: string,
+  productTitle: string,
+) {
+  const name = escapeHtml(userName || "bạn");
+  const title = escapeHtml(productTitle);
+  return deliverEmail("review_request", orderId, {
+    to: userEmail,
+    subject: `Bạn có hài lòng với ${productTitle}? ⭐`,
+    html: `
+      <div style="max-width:600px;margin:0 auto;font-family:Arial,sans-serif">
+        <h2 style="color:#ff5722;margin:0 0 16px;">🤖 RoboEQ — Đánh giá sản phẩm</h2>
+        <p>Xin chào <strong>${name}</strong>,</p>
+        <p style="color:#555;line-height:1.6;">Đã 7 ngày kể từ khi bạn nhận được <strong>${title}</strong> từ đơn hàng <strong>#${escapeHtml(orderId.slice(0, 8).toUpperCase())}</strong>.</p>
+        <p style="color:#555;line-height:1.6;">Bạn có hài lòng với sản phẩm không? Đánh giá của bạn giúp ích rất nhiều cho những người mua tiếp theo — chỉ mất 1 phút thôi!</p>
+        <div style="margin-top:24px;text-align:center;">
+          <a href="${appUrl()}/profile/orders"
+             style="display:inline-block;background:#ff5722;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">
+            Viết đánh giá ngay →
+          </a>
+        </div>
+        <p>Trân trọng,<br><strong>Đội ngũ RoboEQ</strong></p>
+      </div>`,
+  });
+}

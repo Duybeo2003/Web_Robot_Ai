@@ -5,6 +5,11 @@ export const GUEST_ORDER_ACCESS_HOURS = 24;
 export const POLICY_EFFECTIVE_DATE = "08/09/2026";
 export const POLICY_VERSION = "2026-09-08";
 
+// Marketing/lifecycle cron cadences — how long to wait before nudging a
+// customer, not customer-facing legal terms like the constants above.
+export const ABANDONED_CART_HOURS = 24;
+export const REVIEW_REQUEST_DELAY_DAYS = 7;
+
 function optionalHttpsUrl(value: string | undefined) {
   if (!value?.trim()) return "";
   try {

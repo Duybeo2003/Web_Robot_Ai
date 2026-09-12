@@ -11,16 +11,16 @@ export async function GET() {
   try {
     await prisma.$queryRaw`SELECT 1`;
     checks.database = { status: "ok", latencyMs: Date.now() - start };
-  } catch (e) {
-    checks.database = { status: "error", error: e instanceof Error ? e.message : String(e) };
+  } catch {
+    checks.database = { status: "error" };
   }
 
   const redisStart = Date.now();
   try {
     await redis.ping();
     checks.redis = { status: "ok", latencyMs: Date.now() - redisStart };
-  } catch (e) {
-    checks.redis = { status: "error", error: e instanceof Error ? e.message : String(e) };
+  } catch {
+    checks.redis = { status: "error" };
   }
 
   const allOk = Object.values(checks).every((c) => c.status === "ok");
@@ -32,6 +32,6 @@ export async function GET() {
       uptime: process.uptime(),
       checks,
     },
-    { status: allOk ? 200 : 503 },
+    { status: allOk ? 200 : 503, headers: { "Cache-Control": "no-store" } },
   );
 }
