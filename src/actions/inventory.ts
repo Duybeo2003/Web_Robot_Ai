@@ -114,6 +114,7 @@ export async function createInventoryTransaction(input: unknown) {
   } catch (error) {
     logger.error("inventory.transaction_failed", { error });
     return {
+      success: false,
       error: error instanceof Error ? error.message : "Không thể cập nhật kho.",
     };
   }
@@ -201,6 +202,6 @@ export async function getLowStockProducts(threshold = 10) {
     data.sort((left, right) => left.inventoryCount - right.inventoryCount);
     return { success: true, data };
   } catch {
-    return { error: "Không thể tải danh sách sắp hết hàng." };
+    return { success: false, error: "Không thể tải danh sách sắp hết hàng." };
   }
 }

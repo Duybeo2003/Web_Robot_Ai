@@ -28,11 +28,14 @@ export async function updateUserProfile(input: unknown) {
   } catch (error) {
     logger.error("user.update_profile_failed", { error });
     if (error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002") {
-      return { error: "Số điện thoại đã được dùng bởi tài khoản khác." };
+      return { success: false, error: "Số điện thoại đã được dùng bởi tài khoản khác." };
     }
     if (error instanceof Prisma.PrismaClientKnownRequestError) {
-      return { error: "Không thể cập nhật hồ sơ." };
+      return { success: false, error: "Không thể cập nhật hồ sơ." };
     }
-    return { error: error instanceof Error ? error.message : "Không thể cập nhật hồ sơ." };
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : "Không thể cập nhật hồ sơ.",
+    };
   }
 }

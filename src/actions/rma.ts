@@ -32,9 +32,9 @@ export async function createReturnRequest(input: unknown) {
       where: { id: data.orderId, userId: user.id },
       select: { id: true, status: true, completedAt: true, updatedAt: true },
     });
-    if (!order) return { error: "Không tìm thấy đơn hàng." };
+    if (!order) return { success: false, error: "Không tìm thấy đơn hàng." };
     if (order.status !== "COMPLETED") {
-      return { error: "Chỉ có thể yêu cầu đổi trả cho đơn hàng đã giao." };
+      return { success: false, error: "Chỉ có thể yêu cầu đổi trả cho đơn hàng đã giao." };
     }
     const completedAt = order.completedAt || order.updatedAt;
     const returnDeadline = new Date(
@@ -42,6 +42,7 @@ export async function createReturnRequest(input: unknown) {
     );
     if (returnDeadline.getTime() < Date.now()) {
       return {
+        success: false,
         error: `Đơn hàng đã quá thời hạn đổi trả ${RETURN_WINDOW_DAYS} ngày. Vui lòng liên hệ hỗ trợ nếu sản phẩm còn bảo hành.`,
       };
     }
@@ -49,7 +50,7 @@ export async function createReturnRequest(input: unknown) {
     const existing = await prisma.returnRequest.findFirst({
       where: { orderId: order.id },
     });
-    if (existing) return { error: "Đơn hàng này đã có yêu cầu đổi trả." };
+    if (existing) return { success: false, error: "Đơn hàng này đã có yêu cầu đổi trả." };
 
     await prisma.returnRequest.create({
       data: { ...data, userId: user.id, status: "PENDING" },
@@ -59,6 +60,7 @@ export async function createReturnRequest(input: unknown) {
   } catch (error) {
     logger.error("rma.create_failed", { error });
     return {
+      success: false,
       error:
         error instanceof Prisma.PrismaClientKnownRequestError && error.code === "P2002"
           ? "Đơn hàng này đã có yêu cầu đổi trả."
@@ -212,6 +214,7 @@ export async function updateReturnRequestStatus(
   } catch (error) {
     logger.error("rma.status_update_failed", { error });
     return {
+      success: false,
       error: error instanceof Error ? error.message : "Không thể cập nhật yêu cầu đổi trả.",
     };
   }

@@ -31,7 +31,7 @@ export async function getArticles(publishedOnly = true) {
     });
     return { success: true, data: articles };
   } catch {
-    return { error: "Không thể lấy danh sách bài viết." };
+    return { success: false, error: "Không thể lấy danh sách bài viết." };
   }
 }
 
@@ -42,11 +42,11 @@ export async function getArticleBySlug(slug: string) {
       where: { slug: safeSlug },
       include: { author: { select: { name: true, image: true } } },
     });
-    if (!article) return { error: "Không tìm thấy bài viết." };
+    if (!article) return { success: false, error: "Không tìm thấy bài viết." };
     if (!article.published) await requireRole("ADMIN", "EDITOR");
     return { success: true, data: article };
   } catch {
-    return { error: "Không tìm thấy bài viết." };
+    return { success: false, error: "Không tìm thấy bài viết." };
   }
 }
 
@@ -75,6 +75,7 @@ export async function createArticle(input: unknown) {
     return { success: true, data: article };
   } catch (error) {
     return {
+      success: false,
       error: error instanceof Error ? error.message : "Không thể tạo bài viết.",
     };
   }
@@ -101,6 +102,7 @@ export async function updateArticle(id: string, input: unknown) {
     return { success: true, data: article };
   } catch (error) {
     return {
+      success: false,
       error: error instanceof Error ? error.message : "Không thể cập nhật bài viết.",
     };
   }
@@ -124,6 +126,7 @@ export async function deleteArticle(id: string) {
     return { success: true };
   } catch (error) {
     return {
+      success: false,
       error: error instanceof Error ? error.message : "Không thể xóa bài viết.",
     };
   }

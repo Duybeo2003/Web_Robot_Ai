@@ -35,7 +35,7 @@ export async function lookupWarranty(input: string) {
       checkRateLimit(`rl:warranty:address:${fingerprint}`, 30, 60, { failClosed: true }),
     ]);
     if (!serialLimit.success || !addressLimit.success) {
-      return { error: "Bạn tra cứu quá nhanh. Vui lòng thử lại sau." };
+      return { success: false, error: "Bạn tra cứu quá nhanh. Vui lòng thử lại sau." };
     }
 
     const warranty = await prisma.warranty.findUnique({
@@ -49,7 +49,7 @@ export async function lookupWarranty(input: string) {
         user: { select: { name: true, phoneNumber: true } },
       },
     });
-    if (!warranty) return { error: "Không tìm thấy thông tin bảo hành." };
+    if (!warranty) return { success: false, error: "Không tìm thấy thông tin bảo hành." };
 
     return {
       success: true,
@@ -65,6 +65,6 @@ export async function lookupWarranty(input: string) {
     };
   } catch (error) {
     logger.error("warranty.lookup_failed", { error });
-    return { error: "Thông tin tra cứu không hợp lệ." };
+    return { success: false, error: "Thông tin tra cứu không hợp lệ." };
   }
 }

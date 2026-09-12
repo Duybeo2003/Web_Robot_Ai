@@ -83,25 +83,26 @@ export async function processCheckout(data: {
   const parsed = checkoutSchema.safeParse(data);
   if (!parsed.success) {
     return {
+      success: false,
       error: parsed.error.issues[0]?.message || "Dữ liệu đặt hàng không hợp lệ.",
     };
   }
   data = parsed.data;
   const normalizedPhone = normalizeVietnamPhone(data.receiverPhone);
-  if (!normalizedPhone) return { error: "Số điện thoại không hợp lệ." };
+  if (!normalizedPhone) return { success: false, error: "Số điện thoại không hợp lệ." };
   data.receiverPhone = normalizedPhone;
 
   if (
     data.paymentMethod === "VNPAY" &&
     (!process.env.VNP_TMN_CODE || !process.env.VNP_HASH_SECRET || !process.env.VNP_RETURN_URL)
   ) {
-    return { error: "Cổng VNPay chưa được cấu hình. Vui lòng chọn phương thức khác." };
+    return { success: false, error: "Cổng VNPay chưa được cấu hình. Vui lòng chọn phương thức khác." };
   }
   if (
     data.paymentMethod === "BANK_TRANSFER" &&
     (!process.env.BANK_ID || !process.env.BANK_ACCOUNT_NO || !process.env.BANK_ACCOUNT_NAME)
   ) {
-    return { error: "Tài khoản nhận chuyển khoản chưa được cấu hình. Vui lòng chọn phương thức khác." };
+    return { success: false, error: "Tài khoản nhận chuyển khoản chưa được cấu hình. Vui lòng chọn phương thức khác." };
   }
 
   const session = await auth();
@@ -133,7 +134,7 @@ export async function processCheckout(data: {
               existingOrder.guestAccessExpiresAt,
             ),
         );
-    if (!canReuse) return { error: "Yêu cầu đặt hàng không hợp lệ." };
+    if (!canReuse) return { success: false, error: "Yêu cầu đặt hàng không hợp lệ." };
     return {
       success: true,
       orderId: existingOrder.id,
@@ -144,7 +145,7 @@ export async function processCheckout(data: {
   }
 
   if (isGuestCheckout && !data.guestOtp) {
-    return { error: "Vui lòng xác thực số điện thoại trước khi đặt hàng." };
+    return { success: false, error: "Vui lòng xác thực số điện thoại trước khi đặt hàng." };
   }
 
   if (userId) {
@@ -153,7 +154,7 @@ export async function processCheckout(data: {
       select: { id: true },
     });
     if (!existingUser) {
-      return { error: "Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại." };
+      return { success: false, error: "Phiên đăng nhập không còn hợp lệ. Vui lòng đăng nhập lại." };
     }
   }
 
@@ -166,7 +167,7 @@ export async function processCheckout(data: {
     checkRateLimit(`rl:checkout:address:${fingerprint}`, 10, 60, { failClosed: true }),
   ]);
   if (!customerLimit.success || !addressLimit.success) {
-    return { error: "Bạn đã đặt quá nhiều đơn hàng trong thời gian ngắn. Vui lòng thử lại sau 1 phút." };
+    return { success: false, error: "Bạn đã đặt quá nhiều đơn hàng trong thời gian ngắn. Vui lòng thử lại sau 1 phút." };
   }
 
   try {
@@ -616,6 +617,7 @@ export async function processCheckout(data: {
       }
     }
     return {
+      success: false,
       error:
         error instanceof CheckoutError
           ? error.message
