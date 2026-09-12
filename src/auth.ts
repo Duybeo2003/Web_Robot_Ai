@@ -9,6 +9,7 @@ import { checkRateLimit } from "@/lib/rate-limit";
 import { normalizeVietnamPhone } from "@/lib/phone";
 import { hashOtp } from "@/lib/otp";
 import crypto from "node:crypto";
+import { sendWelcomeEmail } from "@/lib/email";
 
 const DUMMY_PASSWORD_HASH =
   "$2b$12$xbAK/AbrEZF182UB6/JuluJeJMPXbK2VJ0KviQKDzgMMiWTjgjNNa";
@@ -196,6 +197,12 @@ export const { handlers, signIn, signOut, auth } = NextAuth({
         session.user.phoneNumber = token.phoneNumber || null;
       }
       return session;
+    },
+  },
+  events: {
+    async createUser({ user }) {
+      // Fire-and-forget welcome email for OAuth signups that have an email address
+      sendWelcomeEmail({ email: user.email, name: user.name }).catch(() => null);
     },
   },
   pages: { signIn: "/login", error: "/login" },

@@ -188,6 +188,59 @@ export async function sendRmaStatusEmail(
   });
 }
 
+export async function sendWelcomeEmail(user: {
+  email?: string | null;
+  name?: string | null;
+}) {
+  if (!user.email) return;
+  const name = escapeHtml(user.name || "bạn");
+  const url = appUrl();
+  return deliverEmail("welcome", user.email, {
+    to: user.email,
+    subject: "Chào mừng bạn đến với RoboEQ! 🤖",
+    html: `
+<!DOCTYPE html><html lang="vi">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"></head>
+<body style="margin:0;padding:0;background:#f5f5f5;font-family:Arial,sans-serif;">
+  <div style="max-width:600px;margin:20px auto;background:#fff;border-radius:12px;overflow:hidden;">
+    <div style="background:#ff5722;padding:32px 24px;text-align:center;">
+      <h1 style="color:#fff;margin:0;font-size:28px;font-weight:800;">🤖 RoboEQ</h1>
+      <p style="color:rgba(255,255,255,0.9);margin:8px 0 0;font-size:14px;">Robot Giáo dục &amp; STEM</p>
+    </div>
+    <div style="padding:32px 24px;">
+      <h2 style="color:#1a1a1a;font-size:22px;margin:0 0 12px;">Chào mừng ${name}!</h2>
+      <p style="color:#555;line-height:1.6;margin:0 0 24px;">Cảm ơn bạn đã tham gia cộng đồng RoboEQ — nơi cung cấp robot giáo dục, kit STEM và đồ chơi tư duy logic chất lượng cao cho trẻ em Việt Nam.</p>
+      <div style="background:#fff8f5;border:1px solid #ffe5d9;border-radius:8px;padding:20px;margin-bottom:24px;">
+        <h3 style="color:#ff5722;margin:0 0 8px;font-size:16px;">🎁 Ưu đãi thành viên mới</h3>
+        <p style="color:#555;margin:0;line-height:1.6;">Khám phá các sản phẩm nổi bật và nhận ưu đãi đặc biệt trong lần mua đầu tiên!</p>
+      </div>
+      <div style="text-align:center;">
+        <a href="${url}/shop" style="display:inline-block;background:#ff5722;color:#fff;padding:14px 32px;border-radius:8px;text-decoration:none;font-weight:700;font-size:15px;">Khám phá sản phẩm ngay →</a>
+      </div>
+    </div>
+    <div style="background:#f9f9f9;padding:16px 24px;text-align:center;border-top:1px solid #eee;">
+      <p style="color:#999;font-size:12px;margin:0;">© ${new Date().getFullYear()} RoboEQ | <a href="${url}" style="color:#ff5722;text-decoration:none;">roboeq.vn</a></p>
+    </div>
+  </div>
+</body></html>`,
+  });
+}
+
+export async function sendOrderCancelledEmail(userEmail: string, orderId: string) {
+  return deliverEmail("order_cancelled", orderId, {
+    to: userEmail,
+    subject: `Đơn hàng #${orderId} đã được hủy`,
+    html: `
+      <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+        <h2 style="color:#c62828">❌ Đơn hàng đã bị hủy</h2>
+        <p>Đơn hàng <strong>#${escapeHtml(orderId)}</strong> của bạn đã được hủy thành công.</p>
+        <p>Nếu bạn thanh toán trước, số tiền sẽ được hoàn trả theo chính sách của chúng tôi.</p>
+        <p>Nếu có thắc mắc, vui lòng liên hệ hỗ trợ tại <a href="${appUrl()}/lien-he">trang liên hệ</a>.</p>
+        <p>Trân trọng,<br><strong>Đội ngũ RoboEQ</strong></p>
+      </div>`,
+  });
+}
+
 export async function sendSupportRequestNotification(request: {
   id: string;
   name: string;

@@ -8,7 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { recordAudit } from "@/lib/audit";
 import { lockOrderRow } from "@/lib/orders/lock-order";
 import { z } from "zod";
-import { sendOrderShippedEmail, sendOrderCompletedEmail } from "@/lib/email";
+import { sendOrderShippedEmail, sendOrderCompletedEmail, sendOrderCancelledEmail } from "@/lib/email";
 import { logger } from "@/lib/logger";
 
 const ORDER_STATUSES: OrderStatus[] = [
@@ -224,6 +224,8 @@ export async function updateOrderStatus(
           sendOrderShippedEmail(userEmail, orderId, order?.trackingCode, order?.logisticsProvider).catch(() => null);
         } else if (result.status === "COMPLETED") {
           sendOrderCompletedEmail(userEmail, orderId, order?.pointsEarned ?? 0).catch(() => null);
+        } else if (result.status === "CANCELLED") {
+          sendOrderCancelledEmail(userEmail, orderId).catch(() => null);
         }
       }
     }
