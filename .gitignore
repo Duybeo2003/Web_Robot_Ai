@@ -16,6 +16,7 @@
 /test-results/
 /.playwright-browsers/
 /.npm-cache/
+/playwright/.auth/*.json
 
 # next.js
 /.next/

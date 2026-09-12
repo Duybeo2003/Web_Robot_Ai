@@ -12,9 +12,26 @@ export default defineConfig({
     trace: "on-first-retry",
   },
   projects: [
+    // 1. Saves admin auth state — runs when E2E_ADMIN_EMAIL/PASSWORD are set
+    {
+      name: "admin-setup",
+      testMatch: "**/auth.setup.ts",
+    },
+    // 2. Standard tests (access control, static pages, shop, auth modal)
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
+      testIgnore: ["**/auth.setup.ts", "**/admin-crud.spec.ts"],
+    },
+    // 3. Admin CRUD tests — use auth state saved by admin-setup
+    {
+      name: "admin-crud",
+      use: {
+        ...devices["Desktop Chrome"],
+        storageState: "playwright/.auth/admin.json",
+      },
+      testMatch: "**/admin-crud.spec.ts",
+      dependencies: ["admin-setup"],
     },
   ],
   webServer: {

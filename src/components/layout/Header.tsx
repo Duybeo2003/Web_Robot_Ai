@@ -14,7 +14,7 @@ import {
   Phone,
   Trophy,
 } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useAuthModal } from "@/store/use-auth-modal";
 import { useCartUI } from "@/store/use-cart-ui";
 import { useCartStore } from "@/lib/store/cart";
@@ -31,12 +31,14 @@ import {
 import { useRouter } from "next/navigation";
 
 function CartBadge() {
+  const [mounted, setMounted] = useState(false);
   const totalItems = useCartStore((state) =>
     state.items.reduce((total, item) => total + item.quantity, 0),
   );
-  // Removed mounted state; component renders directly
+  // Delay render until after hydration to match server (no localStorage) output
+  useEffect(() => setMounted(true), []);
 
-  if (totalItems === 0) return null;
+  if (!mounted || totalItems === 0) return null;
 
   return (
     <span className="absolute -top-1 -right-1 flex h-4 w-4 items-center justify-center rounded-full bg-[#C86B5A] text-[10px] text-white font-bold animate-in zoom-in duration-300">
