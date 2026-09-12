@@ -43,7 +43,14 @@ COPY --from=builder /app/prisma ./prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.prisma ./node_modules/.prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/prisma ./node_modules/prisma
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/@prisma ./node_modules/@prisma
-COPY --from=builder --chown=nextjs:nodejs /app/node_modules/.bin/prisma ./node_modules/.bin/prisma
+# node_modules/.bin/prisma is a symlink to ../prisma/build/index.js on Linux;
+# copying it as a single file dereferences the symlink and physically
+# relocates the bundle to .bin/, breaking the relative path it uses to find
+# its own prisma_schema_build_bg.wasm. Recreate the symlink instead of
+# copying it, now that the real node_modules/prisma is in place.
+RUN mkdir -p node_modules/.bin \
+  && ln -s ../prisma/build/index.js node_modules/.bin/prisma \
+  && chown -h nextjs:nodejs node_modules/.bin/prisma
 # Scripts and their runtime dependencies (bcryptjs, @next/env not traced by standalone)
 COPY --from=builder --chown=nextjs:nodejs /app/scripts ./scripts
 COPY --from=builder --chown=nextjs:nodejs /app/node_modules/bcryptjs ./node_modules/bcryptjs
