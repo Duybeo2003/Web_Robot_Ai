@@ -36,7 +36,8 @@ function CartBadge() {
     state.items.reduce((total, item) => total + item.quantity, 0),
   );
   // Delay render until after hydration to match server (no localStorage) output
-  useEffect(() => setMounted(true), []);
+  // eslint-disable-next-line react-hooks/set-state-in-effect
+  useEffect(() => { setMounted(true); }, []);
 
   if (!mounted || totalItems === 0) return null;
 
