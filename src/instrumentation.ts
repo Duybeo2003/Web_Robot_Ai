@@ -24,13 +24,25 @@ const SOFT_REQUIRED = [
   "CLOUDINARY_API_SECRET",
 ] as const;
 
-export function register() {
+export async function register() {
   if (
     process.env.NEXT_RUNTIME !== "nodejs" ||
     process.env.NODE_ENV !== "production" ||
     process.env.NEXT_PHASE === "phase-production-build"
   ) {
     return;
+  }
+
+  // Sentry error tracking — only when DSN is configured (install @sentry/nextjs to enable)
+  if (process.env.SENTRY_DSN) {
+    // eslint-disable-next-line @typescript-eslint/no-require-imports
+    const tryRequire = (id: string) => { try { return require(id); } catch { return null; } };
+    const Sentry = tryRequire("@sentry/nextjs") as { init?: (opts: Record<string, unknown>) => void } | null;
+    Sentry?.init?.({
+      dsn: process.env.SENTRY_DSN,
+      tracesSampleRate: 0.1,
+      environment: process.env.NODE_ENV,
+    });
   }
 
   // --- Hard failures (auth / database) ---

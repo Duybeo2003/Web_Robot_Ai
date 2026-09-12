@@ -5,25 +5,33 @@ import { redis } from "@/lib/redis";
 export const dynamic = "force-dynamic";
 
 export async function GET() {
-  const startedAt = Date.now();
-  const checks = await Promise.allSettled([
-    prisma.$queryRaw`SELECT 1`,
-    redis.ping(),
-  ]);
-  const database = checks[0].status === "fulfilled";
-  const cache = checks[1].status === "fulfilled";
-  const healthy = database && cache;
+  const start = Date.now();
+  const checks: Record<string, { status: string; latencyMs?: number; error?: string }> = {};
+
+  try {
+    await prisma.$queryRaw`SELECT 1`;
+    checks.database = { status: "ok", latencyMs: Date.now() - start };
+  } catch (e) {
+    checks.database = { status: "error", error: e instanceof Error ? e.message : String(e) };
+  }
+
+  const redisStart = Date.now();
+  try {
+    await redis.ping();
+    checks.redis = { status: "ok", latencyMs: Date.now() - redisStart };
+  } catch (e) {
+    checks.redis = { status: "error", error: e instanceof Error ? e.message : String(e) };
+  }
+
+  const allOk = Object.values(checks).every((c) => c.status === "ok");
 
   return NextResponse.json(
     {
-      status: healthy ? "ok" : "degraded",
-      checks: { database, cache },
-      latencyMs: Date.now() - startedAt,
+      status: allOk ? "ok" : "degraded",
       timestamp: new Date().toISOString(),
+      uptime: process.uptime(),
+      checks,
     },
-    {
-      status: healthy ? 200 : 503,
-      headers: { "Cache-Control": "no-store" },
-    },
+    { status: allOk ? 200 : 503 },
   );
 }

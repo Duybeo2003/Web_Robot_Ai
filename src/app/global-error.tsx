@@ -11,7 +11,19 @@ export default function GlobalError({
   reset: () => void;
 }) {
   useEffect(() => {
-    console.error("[GLOBAL_ERROR]", error);
+    // Forward to Sentry when installed (npm install @sentry/nextjs)
+    if (process.env.NODE_ENV === "production") {
+      const tryCapture = async () => {
+        try {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          const Sentry = await (Function('return import("@sentry/nextjs")')() as Promise<any>);
+          Sentry?.captureException?.(error);
+        } catch {
+          // Sentry not installed — silent fallback
+        }
+      };
+      void tryCapture();
+    }
   }, [error]);
 
   return (
