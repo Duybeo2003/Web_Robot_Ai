@@ -57,7 +57,7 @@ export function ProfileForm({ initialData }: { initialData: any }) {
               onChange={(e) =>
                 setFormData({ ...formData, name: e.target.value })
               }
-              className="h-10 border-neutral-200 focus-visible:ring-[#FF5722]"
+              className="h-10 border-neutral-200 focus-visible:ring-primary"
               placeholder="Nhập họ và tên"
             />
           </div>
@@ -74,7 +74,7 @@ export function ProfileForm({ initialData }: { initialData: any }) {
               onChange={(e) =>
                 setFormData({ ...formData, phoneNumber: e.target.value })
               }
-              className="h-10 border-neutral-200 focus-visible:ring-[#FF5722]"
+              className="h-10 border-neutral-200 focus-visible:ring-primary"
               placeholder="Nhập số điện thoại"
             />
           </div>

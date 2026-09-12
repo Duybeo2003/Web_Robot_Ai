@@ -124,7 +124,7 @@ export function ProductGallery({
               aria-pressed={activeMedia === "video"}
               className={`group relative flex size-20 flex-col items-center justify-center overflow-hidden rounded-lg border bg-neutral-900 ${
                 activeMedia === "video"
-                  ? "border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20"
+                  ? "border-primary shadow-sm ring-2 ring-primary/20"
                   : "border-border"
               }`}
             >
@@ -142,7 +142,7 @@ export function ProductGallery({
               aria-pressed={activeMedia === imageUrl}
               className={`relative size-20 overflow-hidden rounded-lg border bg-muted ${
                 activeMedia === imageUrl
-                  ? "border-[#FF5722] shadow-sm ring-2 ring-[#FF5722]/20"
+                  ? "border-primary shadow-sm ring-2 ring-primary/20"
                   : "border-border"
               }`}
             >

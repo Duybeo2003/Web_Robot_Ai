@@ -245,7 +245,7 @@ export function ProductTabs({ product }: { product: any }) {
                     <select
                       name="rating"
                       required
-                      className="h-10 w-full rounded-lg border px-3 text-sm focus:border-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF5722]/15"
+                      className="h-10 w-full rounded-lg border px-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     >
                       <option value="5">5 Sao - Tuyệt vời</option>
                       <option value="4">4 Sao - Rất tốt</option>
@@ -263,7 +263,7 @@ export function ProductTabs({ product }: { product: any }) {
                       required
                       minLength={5}
                       placeholder="Chia sẻ cảm nhận của bạn về sản phẩm..."
-                      className="min-h-[100px] w-full rounded-lg border p-3 text-sm focus:border-[#FF5722] focus:outline-none focus:ring-2 focus:ring-[#FF5722]/15"
+                      className="min-h-[100px] w-full rounded-lg border p-3 text-sm focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/15"
                     ></textarea>
                   </div>
                   <button

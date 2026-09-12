@@ -259,7 +259,7 @@ export function AIChatbot() {
                 onChange={(e) => setInputValue(e.target.value)}
                 placeholder="Hỏi về sản phẩm hoặc STEM..."
                 disabled={isLoading}
-                className="h-10 flex-1 rounded-xl border border-neutral-200 bg-neutral-50 px-3 text-sm outline-none transition-all focus:border-[#FF5722] focus:bg-white focus:ring-2 focus:ring-[#FF5722]/15 disabled:opacity-50"
+                className="h-10 flex-1 rounded-xl border border-neutral-200 bg-neutral-50 px-3 text-sm outline-none transition-all focus:border-primary focus:bg-white focus:ring-2 focus:ring-primary/15 disabled:opacity-50"
               />
               <button
                 type="submit"

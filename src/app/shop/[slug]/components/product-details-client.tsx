@@ -57,7 +57,7 @@ export function ProductDetailsClient({
           <h1 className="text-2xl font-extrabold leading-tight tracking-tight text-foreground sm:text-3xl xl:text-4xl">
             {product.title}
           </h1>
-          <div className="shrink-0 flex items-center justify-center p-2 rounded-full border border-neutral-200 ml-4 relative hover:border-[#FF5722] transition-colors">
+          <div className="shrink-0 flex items-center justify-center p-2 rounded-full border border-neutral-200 ml-4 relative hover:border-primary transition-colors">
             <div className="absolute inset-0"></div>
             <WishlistButton productId={product.id} initiallyWished={isWished} />
           </div>

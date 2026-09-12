@@ -38,7 +38,7 @@ export function AffiliateLinkGenerator({
         <select
           value={selectedProductSlug}
           onChange={(e) => setSelectedProductSlug(e.target.value)}
-          className="h-10 w-full rounded-lg border border-neutral-300 px-3 text-sm outline-none focus:ring-2 focus:ring-[#FF5722]"
+          className="h-10 w-full rounded-lg border border-neutral-300 px-3 text-sm outline-none focus:ring-2 focus:ring-primary"
         >
           <option value="">Trang chủ (toàn cửa hàng)</option>
           {products.map(p => (

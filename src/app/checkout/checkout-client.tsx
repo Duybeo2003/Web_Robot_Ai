@@ -292,7 +292,7 @@ export default function CheckoutClient({
                   onChange={(e) =>
                     setFormData({ ...formData, receiverName: e.target.value })
                   }
-                  className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
+                  className="h-12 border-neutral-200 focus-visible:ring-primary"
                 />
               </div>
 
@@ -320,7 +320,7 @@ export default function CheckoutClient({
                       setOtpCountdown(0);
                     }
                   }}
-                  className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
+                  className="h-12 border-neutral-200 focus-visible:ring-primary"
                 />
                 {!customer && (
                   <div className="space-y-2 rounded-xl border border-blue-100 bg-blue-50/60 p-4">
@@ -384,7 +384,7 @@ export default function CheckoutClient({
                       shippingAddress: e.target.value,
                     })
                   }
-                  className="h-12 border-neutral-200 focus-visible:ring-[#FF5722]"
+                  className="h-12 border-neutral-200 focus-visible:ring-primary"
                 />
               </div>
             </div>
@@ -460,7 +460,7 @@ export default function CheckoutClient({
                 required
                 checked={acceptedTerms}
                 onChange={(event) => setAcceptedTerms(event.target.checked)}
-                className="mt-1 size-4 accent-[#FF5722]"
+                className="mt-1 size-4 accent-primary"
               />
               <span>
                 Tôi đã đọc và đồng ý với{" "}
