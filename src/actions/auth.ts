@@ -6,6 +6,7 @@ import { normalizeVietnamPhone } from "@/lib/phone";
 import { hashOtp } from "@/lib/otp";
 import { getRequestFingerprint } from "@/lib/request-fingerprint";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 async function sendOtp(phoneNumber: string, code: string) {
   const webhookUrl = process.env.SMS_WEBHOOK_URL;
@@ -75,7 +76,7 @@ export async function generateOtp(rawPhoneNumber: string) {
     }
     return { success: true };
   } catch (error) {
-    console.error("[GENERATE_OTP_ERROR]", error);
+    logger.error("auth.generate_otp_failed", { error });
     return {
       success: false,
       error: "Không thể gửi mã xác thực lúc này. Vui lòng thử lại sau.",

@@ -9,6 +9,7 @@ import { recordAudit } from "@/lib/audit";
 import { lockOrderRow } from "@/lib/orders/lock-order";
 import { z } from "zod";
 import { sendOrderShippedEmail, sendOrderCompletedEmail } from "@/lib/email";
+import { logger } from "@/lib/logger";
 
 const ORDER_STATUSES: OrderStatus[] = [
   "PENDING",
@@ -229,7 +230,7 @@ export async function updateOrderStatus(
 
     return { success: true, status: result.status, paymentStatus: result.paymentStatus };
   } catch (error) {
-    console.error("[UPDATE_ORDER_ERROR]", error);
+    logger.error("order.update_status_failed", { error });
     const message =
       error instanceof AuthorizationError
         ? "Bạn không có quyền thực hiện thao tác này."
@@ -278,7 +279,7 @@ export async function cancelOrder(orderId: string) {
     revalidatePath("/admin/orders");
     return { success: true };
   } catch (error) {
-    console.error("[CANCEL_ORDER_ERROR]", error);
+    logger.error("order.cancel_failed", { error });
     return {
       success: false,
       error:
@@ -391,7 +392,7 @@ export async function confirmOrderRefund(rawOrderId: string, rawReference: strin
     revalidatePath("/profile/orders");
     return { success: true as const };
   } catch (error) {
-    console.error("[CONFIRM_REFUND_ERROR]", error);
+    logger.error("order.confirm_refund_failed", { error });
     return {
       success: false as const,
       error:

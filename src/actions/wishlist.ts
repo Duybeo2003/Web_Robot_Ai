@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { z } from "zod";
 import { requireUser } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
+import { logger } from "@/lib/logger";
 
 export async function toggleWishlist(input: string) {
   try {
@@ -27,7 +28,7 @@ export async function toggleWishlist(input: string) {
     revalidatePath("/profile/wishlist");
     return { success: true, isWished: !existing };
   } catch (error) {
-    console.error("[WISHLIST_ERROR]", error);
+    logger.error("wishlist.toggle_failed", { error });
     return { success: false, error: "Không thể cập nhật danh sách yêu thích." };
   }
 }

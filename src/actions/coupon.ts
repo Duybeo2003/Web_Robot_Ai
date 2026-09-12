@@ -4,6 +4,7 @@ import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getRequestFingerprint } from "@/lib/request-fingerprint";
+import { logger } from "@/lib/logger";
 
 const couponCodeSchema = z
   .string()
@@ -70,7 +71,7 @@ export async function validateCoupon(code: string, rawSubtotal: number) {
       isFreeship: coupon.isFreeship || false,
     };
   } catch (error) {
-    console.error("Coupon validation error:", error);
+    logger.error("coupon.validate_failed", { error });
     return { success: false, error: "Có lỗi xảy ra khi kiểm tra mã." };
   }
 }

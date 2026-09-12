@@ -6,6 +6,7 @@ import { recordAudit } from "@/lib/audit";
 import { AuthorizationError, requireRole } from "@/lib/authz";
 import { prisma } from "@/lib/prisma";
 import { Prisma } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 const payoutSchema = z.object({
   commissionId: z.string().min(1).max(191),
@@ -69,7 +70,7 @@ export async function confirmCommissionPayout(rawCommissionId: string, rawRefere
     revalidatePath("/profile/affiliate");
     return { success: true as const };
   } catch (error) {
-    console.error("[COMMISSION_PAYOUT_ERROR]", error);
+    logger.error("commission.payout_failed", { error });
     return {
       success: false as const,
       error:

@@ -5,6 +5,7 @@ import type { WarrantyStatus } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { getRequestFingerprint } from "@/lib/request-fingerprint";
+import { logger } from "@/lib/logger";
 
 function maskName(name: string | null) {
   if (!name) return "Khách hàng RoboEQ";
@@ -63,7 +64,7 @@ export async function lookupWarranty(input: string) {
       } satisfies WarrantySummary,
     };
   } catch (error) {
-    console.error("[WARRANTY_LOOKUP_ERROR]", error);
+    logger.error("warranty.lookup_failed", { error });
     return { error: "Thông tin tra cứu không hợp lệ." };
   }
 }

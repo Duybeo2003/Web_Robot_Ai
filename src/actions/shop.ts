@@ -1,7 +1,7 @@
 "use server";
 
 import { prisma } from "@/lib/prisma";
-
+import { logger } from "@/lib/logger";
 import { z } from "zod";
 
 const recommendationSchema = z.object({
@@ -57,9 +57,7 @@ export async function getGiftRecommendations(age: string, skill: string) {
       name: p.title,
       slug: p.slug,
       price: Number(p.price),
-      image:
-        p.imageUrl ||
-        "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=200&auto=format&fit=crop",
+      image: p.imageUrl || null,
       skillTag:
         p.primarySkill === "LOGIC"
           ? "Tư duy Logic"
@@ -73,7 +71,7 @@ export async function getGiftRecommendations(age: string, skill: string) {
       isCombo: p.isCombo,
     }));
   } catch (error) {
-    console.error("Failed to fetch gift recommendations:", error);
+    logger.error("shop.gift_recommendations_failed", { error });
     return [];
   }
 }

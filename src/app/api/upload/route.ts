@@ -3,6 +3,7 @@ import cloudinary from "@/lib/cloudinary";
 import { AuthorizationError, requireRole } from "@/lib/authz";
 import type { UploadApiResponse } from "cloudinary";
 import { checkRateLimit } from "@/lib/rate-limit";
+import { logger } from "@/lib/logger";
 
 // Allowed MIME types (images and videos)
 const ALLOWED_MIME_TYPES = [
@@ -167,7 +168,7 @@ export async function POST(request: Request) {
         { status: error.message === "Forbidden" ? 403 : 401 },
       );
     }
-    console.error("Upload Error:", error);
+    logger.error("upload.failed", { error });
     return NextResponse.json(
       { success: false, error: "Upload failed" },
       { status: 500 },

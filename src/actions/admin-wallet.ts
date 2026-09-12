@@ -7,6 +7,7 @@ import { recordAudit } from "@/lib/audit";
 import { z } from "zod";
 import { AuthorizationError } from "@/lib/authz";
 import { Prisma } from "@prisma/client";
+import { logger } from "@/lib/logger";
 
 const idSchema = z.string().min(1).max(191);
 
@@ -92,7 +93,7 @@ export async function approveTopup(transactionId: string, rawReference: string) 
     revalidatePath("/profile/wallet");
     return { success: true as const };
   } catch (error) {
-    console.error("[APPROVE_TOPUP_ERROR]", error);
+    logger.error("wallet.approve_topup_failed", { error });
     return {
       success: false as const,
       error:
@@ -132,7 +133,7 @@ export async function rejectTopup(transactionId: string) {
     revalidatePath("/profile/wallet");
     return { success: true as const };
   } catch (error) {
-    console.error("[REJECT_TOPUP_ERROR]", error);
+    logger.error("wallet.reject_topup_failed", { error });
     return {
       success: false as const,
       error:

@@ -5,6 +5,7 @@ import { prisma } from "@/lib/prisma";
 import { checkRateLimit } from "@/lib/rate-limit";
 import { readJsonBody, RequestBodyError } from "@/lib/read-json-body";
 import { getRequestFingerprint } from "@/lib/request-fingerprint";
+import { logger } from "@/lib/logger";
 
 const cartSyncSchema = z.object({
   mode: z.enum(["merge", "replace"]).default("replace"),
@@ -192,7 +193,7 @@ export async function POST(request: Request) {
     if (error instanceof RequestBodyError) {
       return NextResponse.json({ error: error.message }, { status: error.status });
     }
-    console.error("[CART_SYNC_ERROR]", error);
+    logger.error("cart.sync_failed", { error });
     return NextResponse.json({ error: "Internal error" }, { status: 500 });
   }
 }
