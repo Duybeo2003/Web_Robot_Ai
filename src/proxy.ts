@@ -2,6 +2,8 @@ import { auth } from "@/auth";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { adminLandingPage, canAccessAdminPath } from "@/lib/rbac";
+import { prisma } from "@/lib/prisma";
+import { verifyActiveGuestOrderToken } from "@/lib/order-access";
 
 const rateLimitMap = new Map<string, { count: number; lastReset: number }>();
 
@@ -51,7 +53,7 @@ function checkRateLimitSync(request: NextRequest): NextResponse | null {
   return null;
 }
 
-export default auth((req) => {
+export default auth(async (req) => {
   const rlResponse = checkRateLimitSync(req);
   if (rlResponse) return rlResponse;
 
@@ -74,6 +76,38 @@ export default auth((req) => {
   }
 
   const pathname = req.nextUrl.pathname;
+
+  // Checkout success reads `notFound()` from a page nested under `loading.tsx`
+  // (this one and the inherited root one), so the stream has already committed
+  // a 200 by the time the page's own check runs. Gate access here instead,
+  // before any streaming starts, so an invalid/expired guest token yields a
+  // real 404 rather than a 200 with "not found" markup. Page keeps its own
+  // check too — this is a pre-render gate, not the only line of defense.
+  const checkoutSuccessMatch = pathname.match(/^\/checkout\/success\/([^/]+)$/);
+  if (checkoutSuccessMatch) {
+    const orderId = decodeURIComponent(checkoutSuccessMatch[1]);
+    const token = req.nextUrl.searchParams.get("token");
+    const order = await prisma.order.findUnique({
+      where: { id: orderId },
+      select: { userId: true, guestAccessTokenHash: true, guestAccessExpiresAt: true },
+    });
+    const canView = Boolean(
+      order &&
+        (isAuth
+          ? order.userId === req.auth?.user?.id
+          : token &&
+            order.guestAccessTokenHash &&
+            verifyActiveGuestOrderToken(
+              token,
+              order.guestAccessTokenHash,
+              order.guestAccessExpiresAt,
+            )),
+    );
+    if (!canView) {
+      return NextResponse.rewrite(new URL("/__order_access_denied__", req.url));
+    }
+  }
+
   if (pathname.startsWith("/profile") && !isAuth) {
     const loginUrl = new URL("/", req.url);
     loginUrl.searchParams.set("login", "true");
