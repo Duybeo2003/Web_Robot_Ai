@@ -36,8 +36,8 @@ async function main() {
   if (email.length > 254 || !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
     throw new Error("BOOTSTRAP_ADMIN_EMAIL must be a valid email address.");
   }
-  if (password.length < 16 || password.length > 128) {
-    throw new Error("BOOTSTRAP_ADMIN_PASSWORD must contain 16 to 128 characters.");
+  if (password.length < 8 || password.length > 128) {
+    throw new Error("BOOTSTRAP_ADMIN_PASSWORD must contain 8 to 128 characters.");
   }
   if (name.length < 2 || name.length > 100) {
     throw new Error("BOOTSTRAP_ADMIN_NAME must contain 2 to 100 characters.");
