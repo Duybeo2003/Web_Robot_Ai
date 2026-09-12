@@ -243,7 +243,7 @@ export default function CheckoutClient({
   if (items.length === 0) {
     return (
       <main className="container mx-auto flex flex-col items-center px-4 py-20 text-center">
-        <div className="mb-6 flex size-24 items-center justify-center rounded-2xl bg-gray-100 text-gray-400">
+        <div className="mb-6 flex size-24 items-center justify-center rounded-2xl bg-neutral-100 text-neutral-400">
           <ShoppingBag className="w-12 h-12" />
         </div>
         <h1 className="text-3xl font-bold mb-4">Giỏ hàng trống</h1>
@@ -449,7 +449,7 @@ export default function CheckoutClient({
             </div>
 
             {error && (
-              <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-[#E30019]">
+              <div className="rounded-xl border border-red-100 bg-red-50 p-4 text-sm font-medium text-red-600" role="alert" aria-live="polite">
                 {error}
               </div>
             )}
@@ -544,7 +544,7 @@ export default function CheckoutClient({
                       <span className="text-foreground">{item.quantity}</span>
                     </p>
                   </div>
-                  <div className="flex items-center whitespace-nowrap text-sm font-bold text-[#E30019]">
+                  <div className="flex items-center whitespace-nowrap text-sm font-bold text-primary">
                     {formatPrice(item.price * item.quantity)}
                   </div>
                 </div>
@@ -652,7 +652,7 @@ export default function CheckoutClient({
               </div>
               <div className="flex justify-between gap-4 border-t border-neutral-100 pt-4 text-xl font-bold">
                 <span>Tổng giá trị đơn hàng</span>
-                <span className="text-[#E30019]">
+                <span className="text-primary">
                   {formatPrice(payableTotal)}
                 </span>
               </div>

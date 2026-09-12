@@ -171,14 +171,14 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
           <div className="flex flex-col sm:flex-row gap-4">
             {/* Quantity Selector */}
             <div className={cn(
-              "flex items-center justify-between border-2 border-gray-200 rounded-2xl p-1 h-14 w-full sm:w-36 bg-background",
+              "flex items-center justify-between border-2 border-neutral-200 rounded-2xl p-1 h-14 w-full sm:w-36 bg-background",
               !canAddToCart ? "opacity-50 pointer-events-none" : ""
             )}>
               <button
                 type="button"
                 aria-label="Giảm số lượng"
                 onClick={() => setQuantity(Math.max(1, quantity - 1))}
-                className="p-3 hover:bg-gray-100 rounded-xl transition-colors text-gray-600"
+                className="p-3 hover:bg-neutral-100 rounded-xl transition-colors text-neutral-600"
                 disabled={!canAddToCart}
               >
                 <Minus className="w-4 h-4" />
@@ -188,7 +188,7 @@ export function AddToCartForm({ product, selectedVariant, setSelectedVariant }: 
                 type="button"
                 aria-label="Tăng số lượng"
                 onClick={() => setQuantity(Math.min(maxQuantity, quantity + 1))}
-                className="p-3 hover:bg-gray-100 rounded-xl transition-colors text-gray-600"
+                className="p-3 hover:bg-neutral-100 rounded-xl transition-colors text-neutral-600"
                 disabled={!canAddToCart || quantity >= maxQuantity}
               >
                 <Plus className="w-4 h-4" />

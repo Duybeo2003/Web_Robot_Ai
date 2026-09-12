@@ -48,7 +48,7 @@ export function PromotionalBanner({
   return (
     <div className="flex flex-col gap-3 mb-3 w-full">
       {/* Flash Sale Header */}
-      <div className="flex flex-col justify-between gap-2 rounded-xl bg-gradient-to-r from-[#E30019] to-primary p-3 text-white shadow-sm sm:flex-row sm:items-center">
+      <div className="flex flex-col justify-between gap-2 rounded-xl bg-gradient-to-r from-red-600 to-primary p-3 text-white shadow-sm sm:flex-row sm:items-center">
         <div className="flex items-center gap-2 text-sm font-bold">
           <Flame className="w-5 h-5 text-yellow-300" />
           <span>Ưu đãi nhanh đang diễn ra</span>
@@ -56,15 +56,15 @@ export function PromotionalBanner({
         <div className="flex items-center gap-2 text-sm font-medium">
           <span className="opacity-90">Kết thúc sau:</span>
           <div className="flex items-center gap-1 font-mono font-bold">
-            <span className="rounded-md bg-white px-1.5 py-0.5 text-[#E30019] shadow-sm">
+            <span className="rounded-md bg-white px-1.5 py-0.5 text-primary shadow-sm">
               {hours.toString().padStart(2, "0")}
             </span>
             <span>:</span>
-            <span className="rounded-md bg-white px-1.5 py-0.5 text-[#E30019] shadow-sm">
+            <span className="rounded-md bg-white px-1.5 py-0.5 text-primary shadow-sm">
               {minutes.toString().padStart(2, "0")}
             </span>
             <span>:</span>
-            <span className="rounded-md bg-white px-1.5 py-0.5 text-[#E30019] shadow-sm">
+            <span className="rounded-md bg-white px-1.5 py-0.5 text-primary shadow-sm">
               {seconds.toString().padStart(2, "0")}
             </span>
           </div>

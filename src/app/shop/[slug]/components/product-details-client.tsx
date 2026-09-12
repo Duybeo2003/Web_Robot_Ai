@@ -75,7 +75,7 @@ export function ProductDetailsClient({
               return (
                 <svg
                   key={star}
-                  className={`w-4 h-4 ${star <= Math.round(avgRating) ? "fill-current" : "text-gray-300"}`}
+                  className={`w-4 h-4 ${star <= Math.round(avgRating) ? "fill-current" : "text-neutral-300"}`}
                   xmlns="http://www.w3.org/2000/svg"
                   viewBox="0 0 24 24"
                   fill="none"
@@ -109,7 +109,7 @@ export function ProductDetailsClient({
         />
 
         <div className="mb-4 flex flex-wrap items-end gap-2 md:gap-3">
-          <div className="text-3xl font-extrabold text-[#d92d20]">
+          <div className="text-3xl font-extrabold text-primary">
             {formatPrice(currentPrice)}
           </div>
           {currentOriginalPrice && currentOriginalPrice > currentPrice && (
@@ -117,7 +117,7 @@ export function ProductDetailsClient({
               <div className="text-base md:text-lg text-neutral-400 line-through mb-1 font-medium">
                 {formatPrice(currentOriginalPrice)}
               </div>
-              <div className="mb-1.5 rounded-md bg-[#d92d20] px-2 py-1 text-xs font-bold text-white shadow-sm">
+              <div className="mb-1.5 rounded-md bg-red-600 px-2 py-1 text-xs font-bold text-white shadow-sm">
                 Giảm {discountPercent}%
               </div>
             </>

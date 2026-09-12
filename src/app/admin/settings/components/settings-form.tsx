@@ -89,7 +89,7 @@ export function SettingsForm({ initialSettings }: { initialSettings: Record<stri
           />
         </div>
       </div>
-      <Button type="submit" disabled={isLoading} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+      <Button type="submit" disabled={isLoading} className="bg-primary hover:bg-primary/90 text-white">
         <Save className="w-4 h-4 mr-2" />
         Lưu cấu hình
       </Button>

@@ -192,7 +192,7 @@ export function AuthModal({
                   <div className="space-y-2">
                     <Label
                       htmlFor="phone"
-                      className="text-sm font-medium text-[#2C2C2C]"
+                      className="text-sm font-medium text-foreground"
                     >
                       Số điện thoại
                     </Label>
@@ -223,7 +223,7 @@ export function AuthModal({
                   <div className="space-y-2">
                     <Label
                       htmlFor="email"
-                      className="text-sm font-medium text-[#2C2C2C]"
+                      className="text-sm font-medium text-foreground"
                     >
                       Email hoặc số điện thoại
                     </Label>
@@ -240,7 +240,7 @@ export function AuthModal({
                   <div className="space-y-2">
                     <Label
                       htmlFor="password"
-                      className="text-sm font-medium text-[#2C2C2C]"
+                      className="text-sm font-medium text-foreground"
                     >
                       Mật khẩu
                     </Label>
@@ -382,21 +382,21 @@ export function AuthModal({
                   <button
                     type="button"
                     onClick={() => setStep(1)}
-                    className="flex items-center text-[#2C2C2C]/70 hover:text-[#2C2C2C] transition-colors py-2 px-1"
+                    className="flex items-center text-neutral-500 hover:text-foreground transition-colors py-2 px-1"
                     disabled={isLoading}
                   >
                     <ArrowLeft className="w-4 h-4 mr-1.5" /> Quay lại
                   </button>
 
                   {countdown > 0 ? (
-                    <span className="text-[#2C2C2C]/50 px-2">
+                    <span className="text-neutral-400 px-2">
                       Gửi lại sau {countdown}s
                     </span>
                   ) : (
                     <button
                       type="button"
                       onClick={() => handleSendOtp()}
-                      className="text-[#C86B5A] hover:text-[#C86B5A]/80 transition-colors py-2 px-1 font-medium"
+                      className="text-primary hover:text-primary/80 transition-colors py-2 px-1 font-medium"
                       disabled={isLoading}
                     >
                       Gửi lại mã

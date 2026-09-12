@@ -105,7 +105,7 @@ export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClie
                       </div>
                       <div className="mt-3 space-y-2 md:hidden">
                         <div className="flex flex-wrap items-center justify-between gap-2">
-                          <span className="text-lg font-black text-[#E30019]">+{tx.amount.toLocaleString("vi-VN")} xu</span>
+                          <span className="text-lg font-black text-primary">+{tx.amount.toLocaleString("vi-VN")} xu</span>
                           <span className="rounded-lg bg-neutral-100 px-2 py-1 font-mono text-xs font-bold text-neutral-700">NAPXU {tx.id.slice(-6).toUpperCase()}</span>
                         </div>
                         <p className="text-xs text-neutral-500">{new Date(tx.createdAt).toLocaleString("vi-VN")}</p>
@@ -129,7 +129,7 @@ export default function AdminWalletClientPage({ pendingTopups }: AdminWalletClie
                       </div>
                     </td>
                     <td className="hidden px-6 py-4 md:table-cell">
-                      <div className="font-black text-[#E30019] text-lg">
+                      <div className="font-black text-primary text-lg">
                         +{tx.amount.toLocaleString('vi-VN')}
                       </div>
                     </td>

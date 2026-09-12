@@ -265,7 +265,7 @@ export function OrdersTableClient({
                   <TableCell className="hidden text-sm lg:table-cell">
                     {format(new Date(order.createdAt), "dd/MM/yyyy HH:mm")}
                   </TableCell>
-                  <TableCell className="hidden font-semibold text-[#FF5722] md:table-cell">
+                  <TableCell className="hidden font-semibold text-primary md:table-cell">
                     {new Intl.NumberFormat("vi-VN", {
                       style: "currency",
                       currency: "VND",

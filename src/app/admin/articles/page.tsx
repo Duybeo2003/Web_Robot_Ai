@@ -64,7 +64,7 @@ export default async function AdminArticlesPage(props: { searchParams: Promise<{
             href="/admin/articles/new"
             className={cn(
               buttonVariants({ variant: "default" }),
-              "bg-[#FF5722] hover:bg-[#E64A19]",
+              "bg-primary hover:bg-primary/90",
             )}
           >
             Viết bài mới

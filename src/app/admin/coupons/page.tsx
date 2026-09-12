@@ -52,7 +52,7 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
         </div>
 
         <Dialog>
-          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-[#FF5722] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E64A19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5722]/30">
+          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
             <Plus className="mr-2 h-4 w-4" />
             Thêm khuyến mãi
           </DialogTrigger>
@@ -97,7 +97,7 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
                   <TableRow key={coupon.id}>
                     <TableCell className="min-w-0 font-bold font-mono">
                       <span className="block truncate">{coupon.code}</span>
-                      <span className="mt-1 block font-sans text-sm font-bold text-[#E30019] md:hidden">
+                      <span className="mt-1 block font-sans text-sm font-bold text-primary md:hidden">
                         Giảm {coupon.discountPercent}%
                       </span>
                       <span className="mt-1 block font-sans text-xs font-normal text-muted-foreground md:hidden">
@@ -109,7 +109,7 @@ export default async function AdminCouponsPage(props: { searchParams: Promise<{ 
                         </Badge>
                       </span>
                     </TableCell>
-                    <TableCell className="hidden text-[#E30019] font-bold md:table-cell">
+                    <TableCell className="hidden text-primary font-bold md:table-cell">
                       {coupon.discountPercent}%
                     </TableCell>
                     <TableCell className="hidden md:table-cell">{coupon.usageCount}</TableCell>

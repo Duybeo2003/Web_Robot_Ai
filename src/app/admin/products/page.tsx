@@ -57,7 +57,7 @@ export default async function AdminProductsPage({
         </div>
         <Link
           href="/admin/products/new"
-          className="bg-[#FF5722] text-white px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 hover:bg-[#E64A19] transition-colors"
+          className="bg-primary text-primary-foreground px-4 py-2 rounded-md font-medium text-sm flex items-center gap-2 hover:bg-primary/90 transition-colors"
         >
           <Plus className="w-4 h-4" />
           Thêm sản phẩm
@@ -73,7 +73,7 @@ export default async function AdminProductsPage({
               name="q"
               defaultValue={query}
               placeholder="Tìm kiếm sản phẩm..."
-              className="w-full pl-9 pr-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-[#FF5722]/20 focus:border-[#FF5722]"
+              className="w-full pl-9 pr-4 py-2 text-sm border rounded-md focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
             />
           </form>
         </div>
@@ -223,7 +223,7 @@ export default async function AdminProductsPage({
                   href={`/admin/products?${new URLSearchParams({ ...(query && { q: query }), page: (i + 1).toString() }).toString()}`}
                   className={`w-8 h-8 flex items-center justify-center rounded-md text-sm font-medium ${
                     currentPage === i + 1
-                      ? "bg-[#FF5722] text-white"
+                      ? "bg-primary text-primary-foreground"
                       : "hover:bg-gray-100 text-gray-600"
                   }`}
                 >

@@ -99,7 +99,7 @@ export default async function CheckoutSuccessPage({
             </div>
             <div className="flex justify-between gap-4 py-4">
               <dt className="text-sm text-neutral-500">Tổng đơn hàng</dt>
-              <dd className="text-right text-lg font-bold text-[#E30019]">
+              <dd className="text-right text-lg font-bold text-primary">
                 {currency.format(Number(order.totalAmount))}
               </dd>
             </div>
@@ -114,7 +114,7 @@ export default async function CheckoutSuccessPage({
             {paymentNow < Number(order.totalAmount) && requiresPrepayment && (
               <div className="flex justify-between gap-4 py-4">
                 <dt className="text-sm text-neutral-500">Cần thanh toán trước</dt>
-                <dd className="text-right font-bold text-[#E30019]">{currency.format(paymentNow)}</dd>
+                <dd className="text-right font-bold text-primary">{currency.format(paymentNow)}</dd>
               </div>
             )}
           </dl>
@@ -136,7 +136,7 @@ export default async function CheckoutSuccessPage({
                   <div><dt className="text-orange-700">Ngân hàng</dt><dd className="font-semibold">{bankId.toUpperCase()}</dd></div>
                   <div><dt className="text-orange-700">Chủ tài khoản</dt><dd className="font-semibold">{bankAccountName}</dd></div>
                   <div><dt className="text-orange-700">Số tài khoản</dt><dd className="font-mono text-lg font-bold">{bankAccountNo}</dd></div>
-                  <div><dt className="text-orange-700">Số tiền</dt><dd className="text-lg font-bold text-[#E30019]">{currency.format(paymentNow)}</dd></div>
+                  <div><dt className="text-orange-700">Số tiền</dt><dd className="text-lg font-bold text-primary">{currency.format(paymentNow)}</dd></div>
                   <div><dt className="text-orange-700">Nội dung</dt><dd className="break-all rounded bg-white p-2 font-mono font-bold">RoboEQ {order.id.toUpperCase()}</dd></div>
                 </dl>
               </div>

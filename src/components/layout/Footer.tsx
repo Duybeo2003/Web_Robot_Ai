@@ -9,7 +9,7 @@ export function Footer() {
   const phoneHref = business.supportPhone.replace(/[^\d+]/g, "");
 
   return (
-    <footer className="mt-4 w-full bg-[#111827] pb-6 pt-12 text-white sm:pt-14">
+    <footer className="mt-4 w-full bg-neutral-900 pb-6 pt-12 text-white sm:pt-14">
       <div className="container mx-auto px-4 sm:px-6">
         <div className="grid grid-cols-1 gap-x-10 gap-y-10 sm:grid-cols-2 lg:grid-cols-4">
           <div className="space-y-4">

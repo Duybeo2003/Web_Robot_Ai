@@ -295,7 +295,7 @@ export function OrderDetailsModal({
                       SL: {item.quantity}
                     </p>
                   </div>
-                  <p className="font-semibold text-[#FF5722] shrink-0">
+                  <p className="font-semibold text-primary shrink-0">
                     {new Intl.NumberFormat("vi-VN", {
                       style: "currency",
                       currency: "VND",
@@ -305,7 +305,7 @@ export function OrderDetailsModal({
               ))}
               <div className="flex justify-between items-center pt-3 mt-3 border-t-2 border-primary/20">
                 <p className="font-bold text-base">Tổng tiền:</p>
-                <p className="font-bold text-xl text-[#FF5722]">
+                <p className="font-bold text-xl text-primary">
                   {new Intl.NumberFormat("vi-VN", {
                     style: "currency",
                     currency: "VND",

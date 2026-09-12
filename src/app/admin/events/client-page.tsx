@@ -141,7 +141,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
     <div className="space-y-6">
       <div className="flex flex-col items-start justify-between gap-4 sm:flex-row sm:items-center">
         <h1 className="text-2xl font-bold text-foreground sm:text-3xl">Quản lý sự kiện và minigame</h1>
-        <Button onClick={() => handleOpenModal()} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+        <Button onClick={() => handleOpenModal()} className="bg-primary hover:bg-primary/90 text-primary-foreground">
           <Plus className="w-4 h-4 mr-2" />
           Tạo sự kiện
         </Button>
@@ -352,7 +352,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Hủy</Button>
-            <Button onClick={handleSave} disabled={loading || !formData.name} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+            <Button onClick={handleSave} disabled={loading || !formData.name} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               {loading ? "Đang lưu..." : "Lưu sự kiện"}
             </Button>
           </DialogFooter>

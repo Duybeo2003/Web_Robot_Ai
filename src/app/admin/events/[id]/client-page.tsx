@@ -156,7 +156,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
         <Button
           onClick={() => handleOpenModal()}
           disabled={event.isActive}
-          className="w-full bg-[#FF5722] text-white hover:bg-[#E64A19] sm:w-auto"
+          className="w-full bg-primary text-primary-foreground hover:bg-primary/90 sm:w-auto"
         >
           <Plus className="w-4 h-4 mr-2" />
           Thêm ô thưởng
@@ -411,7 +411,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsModalOpen(false)}>Hủy</Button>
-            <Button onClick={handleSave} disabled={loading || !formData.name} className="bg-[#FF5722] hover:bg-[#E64A19] text-white">
+            <Button onClick={handleSave} disabled={loading || !formData.name} className="bg-primary hover:bg-primary/90 text-primary-foreground">
               {loading ? "Đang lưu..." : "Lưu ô thưởng"}
             </Button>
           </DialogFooter>

@@ -65,7 +65,7 @@ export default async function AdminCommissionsPage() {
                     <div className="mt-2 space-y-1 md:hidden">
                       <div className="flex flex-wrap items-center justify-between gap-2">
                         <code className="max-w-40 truncate text-xs">{commission.order.id.toUpperCase()}</code>
-                        <strong className="text-[#FF5722]">{money.format(Number(commission.amount))}</strong>
+                        <strong className="text-primary">{money.format(Number(commission.amount))}</strong>
                       </div>
                       <div className="text-xs text-neutral-600">{statusLabels[commission.status]} · {format(commission.createdAt, "dd/MM/yyyy HH:mm")}</div>
                       <div className="pt-2">
@@ -82,7 +82,7 @@ export default async function AdminCommissionsPage() {
                     </div>
                   </td>
                   <td className="hidden px-4 py-3 font-mono text-xs md:table-cell">{commission.order.id.toUpperCase()}</td>
-                  <td className="hidden px-4 py-3 text-right font-bold text-[#FF5722] md:table-cell">{money.format(Number(commission.amount))}</td>
+                  <td className="hidden px-4 py-3 text-right font-bold text-primary md:table-cell">{money.format(Number(commission.amount))}</td>
                   <td className="hidden px-4 py-3 lg:table-cell">{statusLabels[commission.status]}</td>
                   <td className="hidden px-4 py-3 text-xs xl:table-cell">
                     <div>{format(commission.createdAt, "dd/MM/yyyy HH:mm")}</div>

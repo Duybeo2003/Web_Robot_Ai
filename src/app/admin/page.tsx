@@ -233,7 +233,7 @@ export default async function AdminDashboardPage() {
                       </p>
                       <p className="text-xs text-neutral-500 mt-1">
                         Đã bán:{" "}
-                        <span className="font-bold text-[#FF5722]">
+                        <span className="font-bold text-primary">
                           {product.sold}
                         </span>{" "}
                         chiếc

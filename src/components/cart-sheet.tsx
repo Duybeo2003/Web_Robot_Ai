@@ -171,7 +171,7 @@ export function CartSheet() {
                 <span className="font-semibold text-neutral-600">
                   Tổng tạm tính
                 </span>
-                <span className="text-xl font-bold text-[#E30019]">
+                <span className="text-xl font-bold text-primary">
                   {formatPrice(totalPrice)}
                 </span>
               </div>
