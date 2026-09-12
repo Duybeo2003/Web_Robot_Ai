@@ -296,7 +296,7 @@ export default function AdminEventsClientPage({ events: initialEvents }: AdminEv
                 >
                   <option value="LUCKY_WHEEL">Vòng quay may mắn</option>
                   <option value="POINT_EXCHANGE">Tích điểm đổi quà</option>
-                  <option value="MYSTERY_BOX" disabled>Hộp mù (chưa hỗ trợ)</option>
+                  <option value="MYSTERY_BOX">Hộp mù</option>
                 </select>
               </div>
             </div>

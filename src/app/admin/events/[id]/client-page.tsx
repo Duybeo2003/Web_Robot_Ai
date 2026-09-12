@@ -43,7 +43,7 @@ export default function EventConfigClientPage({ event, products }: EventConfigCl
   });
 
   const totalProbability = prizes.reduce((sum, p) => sum + Number(p.probability), 0);
-  const isWheel = event.type === "LUCKY_WHEEL";
+  const isWheel = event.type === "LUCKY_WHEEL" || event.type === "MYSTERY_BOX";
   const probabilityReady = !isWheel || Math.abs(totalProbability - 100) < 0.000_001;
 
   const handleOpenModal = (prize?: EventPrize) => {

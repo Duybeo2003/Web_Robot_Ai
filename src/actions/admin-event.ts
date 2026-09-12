@@ -44,10 +44,6 @@ const eventSchema = z
   })
   .refine((data) => data.endDate > data.startDate, {
     message: "Ngày kết thúc phải sau ngày bắt đầu.",
-  })
-  .refine((data) => !(data.isActive && data.type === "MYSTERY_BOX"), {
-    message: "Hộp mù chưa có luồng vận hành nên chưa thể kích hoạt.",
-    path: ["isActive"],
   });
 const prizeSchema = z
   .object({
@@ -90,9 +86,6 @@ async function assertEventReady(
   eventId: string,
   type: "LUCKY_WHEEL" | "MYSTERY_BOX" | "POINT_EXCHANGE",
 ) {
-  if (type === "MYSTERY_BOX") {
-    throw new Error("Hộp mù chưa có luồng vận hành nên chưa thể kích hoạt.");
-  }
   const prizes = await tx.eventPrize.findMany({
     where: { eventId },
     include: { product: { select: { deletedAt: true, supplyType: true } } },
@@ -110,7 +103,7 @@ async function assertEventReady(
     throw new Error("Sự kiện có sản phẩm thưởng không còn khả dụng để RoboEQ giao hàng.");
   }
 
-  if (type === "LUCKY_WHEEL") {
+  if (type === "LUCKY_WHEEL" || type === "MYSTERY_BOX") {
     const available = prizes.filter((prize) => prize.stock === null || prize.stock > 0);
     const totalProbability = available.reduce((sum, prize) => sum + prize.probability, 0);
     if (
