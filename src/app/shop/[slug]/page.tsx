@@ -9,6 +9,18 @@ import { ProductDetailsClient } from "./components/product-details-client"
 import { auth } from "@/auth"
 import { WishlistButton } from "@/components/ui/wishlist-button"
 
+export const revalidate = 3600; // ISR: revalidate product pages every hour
+
+export async function generateStaticParams() {
+  const products = await prisma.product.findMany({
+    where: { deletedAt: null },
+    select: { slug: true },
+    orderBy: { createdAt: "desc" },
+    take: 50,
+  });
+  return products.map((p) => ({ slug: p.slug }));
+}
+
 const getProduct = cache(async (slug: string) => {
   return prisma.product.findFirst({
     where: { slug, deletedAt: null },
@@ -35,15 +47,30 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
   const title = `${product.title} - RoboEQ`;
   const description = product.description.substring(0, 160);
 
+  const baseUrl = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
+  const productUrl = `${baseUrl}/shop/${product.slug}`;
+
   return {
     title,
     description,
     openGraph: {
       title,
       description,
-      images: product.imageUrl ? [product.imageUrl] : [],
+      url: productUrl,
+      siteName: "RoboEQ",
+      locale: "vi_VN",
       type: "website",
-    }
+      images: product.imageUrl
+        ? [{ url: product.imageUrl, width: 800, height: 800, alt: product.title }]
+        : [],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title,
+      description,
+      images: product.imageUrl ? [product.imageUrl] : [],
+    },
+    alternates: { canonical: productUrl },
   }
 }
 

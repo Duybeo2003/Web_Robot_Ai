@@ -25,9 +25,16 @@ function boundedNumber(
 }
 
 export const metadata = {
-  title: "Cửa hàng - RoboEQ",
+  title: "Cửa hàng Robot Giáo dục & STEM | RoboEQ",
   description:
-    "Khám phá các sản phẩm Robot giáo dục, Kit Arduino và đồ chơi STEM của chúng tôi.",
+    "Mua sắm Robot giáo dục, Kit Arduino, đồ chơi STEM và bộ combo tiết kiệm tại RoboEQ. Phát triển tư duy logic và kỹ năng lập trình cho trẻ từ 3–15 tuổi.",
+  openGraph: {
+    title: "Cửa hàng Robot Giáo dục & STEM | RoboEQ",
+    description: "Robot giáo dục, Kit Arduino, đồ chơi STEM chính hãng. Giao hàng toàn quốc.",
+    type: "website",
+    locale: "vi_VN",
+    siteName: "RoboEQ",
+  },
 };
 
 export default async function ShopPage({

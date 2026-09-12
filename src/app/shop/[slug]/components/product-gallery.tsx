@@ -104,9 +104,9 @@ export function ProductGallery({
             src={activeMedia}
             alt={title}
             fill
-            loading="eager"
+            priority
             className="object-contain transition-transform duration-700 ease-out group-hover:scale-105"
-            sizes="(max-width: 768px) 100vw, 50vw"
+            sizes="(max-width: 768px) 100vw, (max-width: 1200px) 50vw, 540px"
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center font-heading text-lg font-medium text-muted-foreground">

@@ -1,4 +1,10 @@
+import type { Metadata } from "next";
 import Link from "next/link";
+
+export const metadata: Metadata = {
+  title: "404 – Không tìm thấy trang | RoboEQ",
+  description: "Trang bạn tìm kiếm không tồn tại hoặc đã được chuyển đi nơi khác.",
+};
 
 export default function NotFound() {
   return (
