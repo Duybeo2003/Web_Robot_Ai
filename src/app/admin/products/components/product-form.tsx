@@ -928,7 +928,7 @@ export function ProductForm({
         <Button
           type="submit"
           disabled={loading}
-          className="bg-[#FF5722] hover:bg-[#E64A19] text-white"
+          className="bg-primary hover:bg-primary/90 text-primary-foreground"
         >
           {loading && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
           {initialData ? "Cập nhật" : "Tạo sản phẩm"}

@@ -56,7 +56,7 @@ export default async function AdminCategoriesPage(props: { searchParams: Promise
         </div>
 
         <Dialog>
-          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-[#FF5722] px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-[#E64A19] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#FF5722]/30">
+          <DialogTrigger className="inline-flex h-10 items-center justify-center whitespace-nowrap rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white shadow-sm transition-colors hover:bg-primary/90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/30">
             <Plus className="mr-2 h-4 w-4" />
             Thêm danh mục
           </DialogTrigger>

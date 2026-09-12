@@ -115,7 +115,7 @@ export function ArticleForm({
           onChange={(e) =>
             setFormData({ ...formData, published: e.target.checked })
           }
-          className="w-4 h-4 text-[#FF5722] rounded border-neutral-300 focus:ring-[#FF5722]"
+          className="w-4 h-4 text-primary rounded border-neutral-300 focus:ring-[#FF5722]"
         />
         <Label htmlFor="published">Xuất bản ngay (hiển thị cho khách)</Label>
       </div>
@@ -124,7 +124,7 @@ export function ArticleForm({
         <Button
           type="submit"
           disabled={loading}
-          className="w-full sm:w-auto bg-[#FF5722] hover:bg-[#E64A19]"
+          className="w-full sm:w-auto bg-primary hover:bg-primary/90"
         >
           {loading ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
           Lưu bài viết

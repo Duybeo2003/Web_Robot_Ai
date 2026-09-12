@@ -147,7 +147,7 @@ export default async function GuidesPage({
               className={`shrink-0 rounded-full px-5 py-2.5 text-sm font-bold shadow-sm transition-all duration-300 ${
                 activeType === category.value
                   ? "bg-primary text-white shadow-lg shadow-primary/20"
-                  : "bg-white text-neutral-600 hover:text-[#005BAA] hover:shadow-md border border-neutral-100"
+                  : "bg-white text-neutral-600 hover:text-primary hover:shadow-md border border-neutral-100"
               }`}
             >
               {category.label}
@@ -171,7 +171,7 @@ export default async function GuidesPage({
                   >
                     <Icon className="w-8 h-8" />
                   </div>
-                  <h2 className="text-xl font-bold leading-tight text-neutral-800 transition-colors group-hover:text-[#005BAA]">
+                  <h2 className="text-xl font-bold leading-tight text-neutral-800 transition-colors group-hover:text-primary">
                     {guide.title}
                   </h2>
                 </div>

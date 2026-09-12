@@ -64,7 +64,7 @@ export default function EventsClientPage({ events }: EventsClientPageProps) {
                     </div>
                   )}
                   {/* Badge */}
-                  <div className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-[#E30019] px-3 py-1.5 text-xs font-black text-white shadow-lg">
+                  <div className="absolute left-4 top-4 flex items-center gap-1 rounded-full bg-red-600 px-3 py-1.5 text-xs font-black text-white shadow-lg">
                     <Zap className="w-3 h-3 fill-current" />
                     Nổi bật
                   </div>
