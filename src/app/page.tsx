@@ -83,7 +83,7 @@ async function HomeContent() {
   const userWishlistIds = wishlistItems.map((item) => item.productId);
 
   return (
-    <div className="flex flex-1 flex-col overflow-hidden bg-[#F5F5F5]">
+    <div className="flex flex-1 flex-col overflow-hidden bg-neutral-100">
       <HeroCarousel />
       <FlashSaleCarousel
         products={catalog.flashSaleProducts}
