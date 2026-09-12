@@ -1,3 +1,4 @@
+export const dynamic = "force-dynamic";
 import { getAdminEventById } from "@/actions/admin-event";
 import { notFound } from "next/navigation";
 import EventConfigClientPage from "./client-page";

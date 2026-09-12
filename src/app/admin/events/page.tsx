@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { getAdminEvents } from "@/actions/admin-event";
 import AdminEventsClientPage from "./client-page";
 

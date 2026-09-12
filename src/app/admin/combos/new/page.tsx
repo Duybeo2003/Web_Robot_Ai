@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { ProductForm } from "@/app/admin/products/components/product-form";
 import { prisma } from "@/lib/prisma";
 

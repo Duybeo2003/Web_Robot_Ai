@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { getAdminDeliveries } from "@/actions/admin-delivery";
 import AdminDeliveriesClientPage from "./client-page";
 

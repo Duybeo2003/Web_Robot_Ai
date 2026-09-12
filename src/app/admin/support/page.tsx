@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { format } from "date-fns";
 import { updateContactRequestStatus } from "@/actions/admin-support";
 import { Button } from "@/components/ui/button";

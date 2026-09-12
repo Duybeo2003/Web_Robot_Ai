@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { getPendingTopups } from "@/actions/admin-wallet";
 import AdminWalletClientPage from "./client-page";
 

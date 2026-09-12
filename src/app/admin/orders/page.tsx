@@ -1,3 +1,4 @@
+﻿export const dynamic = "force-dynamic";
 import { prisma } from "@/lib/prisma";
 import { OrdersTableClient } from "./components/orders-table-client";
 import { Prisma } from "@prisma/client";
