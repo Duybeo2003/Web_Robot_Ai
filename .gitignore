@@ -56,3 +56,6 @@ Web_Robot_Ai.zip
 next-env.d.ts
 
 /src/generated/prisma
+
+# Local uploaded files (served from /uploads — use Docker volume in production)
+/public/uploads/

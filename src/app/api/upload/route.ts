@@ -104,32 +104,25 @@ export async function POST(request: Request) {
         process.env.CLOUDINARY_API_SECRET,
     );
     if (!cloudinaryConfigured) {
-      if (process.env.NODE_ENV === "production") {
-        return NextResponse.json(
-          { success: false, error: "Dịch vụ lưu trữ tệp chưa được cấu hình." },
-          { status: 503 },
-        );
-      }
-      // Fallback to local storage for development
-      const { writeFile } = await import("fs/promises");
+      // Fallback: save to public/uploads/ (served as static files by Next.js)
+      // Mount public/uploads as a Docker volume so files survive container rebuilds
+      const { writeFile, mkdir } = await import("fs/promises");
       const path = await import("path");
-      const fs = await import("fs");
       const crypto = await import("crypto");
 
-      const uploadDir = path.default.join(process.cwd(), "public", "uploads");
-      if (!fs.default.existsSync(uploadDir)) {
-        fs.default.mkdirSync(uploadDir, { recursive: true });
-      }
-      const ext =
-        file.type.split("/")[1] === "jpeg"
-          ? ".jpg"
-          : `.${file.type.split("/")[1]}`;
-      const safeFilename = `${Date.now()}-${crypto.default.randomUUID()}${ext}`;
+      const now = new Date();
+      const subDir = `${now.getFullYear()}/${String(now.getMonth() + 1).padStart(2, "0")}`;
+      const uploadDir = path.default.join(process.cwd(), "public", "uploads", subDir);
+      await mkdir(uploadDir, { recursive: true });
+
+      const ext = file.type === "image/jpeg" ? ".jpg" : `.${file.type.split("/")[1]}`;
+      const safeFilename = `${Date.now()}-${crypto.default.randomUUID().slice(0, 8)}${ext}`;
       const filepath = path.default.join(uploadDir, safeFilename);
       await writeFile(filepath, buffer);
+
       return NextResponse.json({
         success: true,
-        url: `/uploads/${safeFilename}`,
+        url: `/uploads/${subDir}/${safeFilename}`,
       });
     }
 

@@ -72,12 +72,17 @@ services:
       # AI chatbot (optional)
       - OPENROUTER_API_KEY=${OPENROUTER_API_KEY:-}
       - OPENROUTER_MODEL=${OPENROUTER_MODEL:-}
-      # Cloudinary image storage (required for product image upload)
+      # Cloudinary image storage (optional — falls back to local /uploads volume if not set)
       - CLOUDINARY_CLOUD_NAME=${CLOUDINARY_CLOUD_NAME:-}
       - CLOUDINARY_API_KEY=${CLOUDINARY_API_KEY:-}
       - CLOUDINARY_API_SECRET=${CLOUDINARY_API_SECRET:-}
+      # Analytics & monitoring (optional)
+      - NEXT_PUBLIC_GA_MEASUREMENT_ID=${NEXT_PUBLIC_GA_MEASUREMENT_ID:-}
+      - SENTRY_DSN=${SENTRY_DSN:-}
       # Security
       - AUTH_TRUST_HOST=true
+    volumes:
+      - uploads_data:/app/public/uploads
     init: true
     security_opt:
       - no-new-privileges:true
@@ -108,3 +113,4 @@ services:
 volumes:
   redis_data:
   mysql_data:
+  uploads_data:
