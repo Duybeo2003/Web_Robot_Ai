@@ -414,6 +414,7 @@ model OrderItem {
   variant         ProductVariant? @relation(fields: [variantId], references: [id])
   quantity        Int             @default(1)
   priceAtPurchase Decimal         @db.Decimal(18, 2)
+  wasFlashSale    Boolean         @default(false) // true if this item's flashSaleStock was decremented at purchase — restore only that stock on cancellation, not whatever sale happens to be running later
 
   @@index([orderId])
   @@index([productId])

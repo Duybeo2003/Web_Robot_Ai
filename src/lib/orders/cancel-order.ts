@@ -48,22 +48,24 @@ export async function cancelOrderAndRestoreInventory(
       });
     }
 
-    const product = await tx.product.findUnique({
-      where: { id: item.productId },
-      select: { flashSaleStock: true },
-    });
-    if (product) {
-      await tx.product.update({
+    const productUpdate: Prisma.ProductUpdateInput = {};
+    if (!item.variantId) {
+      productUpdate.inventoryCount = { increment: item.quantity };
+    }
+    if (item.wasFlashSale) {
+      // Restore to the flash sale this item was actually bought under, not
+      // whatever sale (if any) happens to be running at cancellation time —
+      // flashSaleStock may be null now if that sale already ended.
+      const product = await tx.product.findUnique({
         where: { id: item.productId },
-        data: {
-          ...(!item.variantId
-            ? { inventoryCount: { increment: item.quantity } }
-            : {}),
-          ...(product.flashSaleStock !== null
-            ? { flashSaleStock: { increment: item.quantity } }
-            : {}),
-        },
+        select: { flashSaleStock: true },
       });
+      if (product?.flashSaleStock !== null) {
+        productUpdate.flashSaleStock = { increment: item.quantity };
+      }
+    }
+    if (Object.keys(productUpdate).length > 0) {
+      await tx.product.update({ where: { id: item.productId }, data: productUpdate });
     }
 
     await tx.inventoryTransaction.create({

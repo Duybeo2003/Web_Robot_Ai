@@ -336,6 +336,7 @@ export async function processCheckout(data: {
           variantId: cartItem.variantId || null,
           quantity: cartItem.quantity,
           priceAtPurchase: currentPrice, // mapping database price (CRITICAL)
+          wasFlashSale: flashSaleIsActive,
         });
       }
 
