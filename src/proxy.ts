@@ -45,9 +45,21 @@ function checkRateLimitSync(request: NextRequest): NextResponse | null {
         rateLimitMap.delete(key);
       }
     }
-    // Hard cap: if still too large, clear entirely
+    // Still over cap after evicting expired entries: evict only the
+    // least-recently-reset entries down to the cap. Never clear() the
+    // whole map — that would reset every client's counter at once, so
+    // anyone able to inflate the map past 10000 keys (e.g. by cycling
+    // spoofed X-Forwarded-For values) could reset rate limits for
+    // everybody simultaneously.
     if (rateLimitMap.size > 10000) {
-      rateLimitMap.clear();
+      const overflow = rateLimitMap.size - 10000;
+      const oldestKeys = [...rateLimitMap.entries()]
+        .sort((a, b) => a[1].lastReset - b[1].lastReset)
+        .slice(0, overflow)
+        .map(([key]) => key);
+      for (const key of oldestKeys) {
+        rateLimitMap.delete(key);
+      }
     }
   }
   return null;
