@@ -49,8 +49,21 @@ export async function settleVnPayPayment(
     });
     if (siblingSuccess) return "already-confirmed";
 
+    if (order.status === "COMPLETED" || order.status === "RETURNED") {
+      return "order-unavailable";
+    }
+
     const receivedAmount = Number(params.vnp_Amount || 0) / 100;
     if (!Number.isSafeInteger(receivedAmount) || receivedAmount !== Number(payment.amount)) {
+      await tx.paymentTransaction.updateMany({
+        where: { id: payment.id, status: "PENDING" },
+        data: {
+          status: "FAILED",
+          providerTransactionId: params.vnp_TransactionNo || undefined,
+          rawResponse: params as Prisma.InputJsonValue,
+          processedAt: new Date(),
+        },
+      });
       return "amount-mismatch";
     }
 
@@ -84,13 +97,13 @@ export async function settleVnPayPayment(
       if (captured.count === 0) return "already-confirmed";
 
       const amountPaid = Number(order.amountPaid) + receivedAmount;
+      const amountDue = Math.max(0, Number(order.totalAmount) - amountPaid);
       await tx.order.update({
         where: { id: order.id },
         data: {
           amountPaid,
-          amountDue: 0,
-          paymentStatus:
-            amountPaid >= Number(order.totalAmount) ? "PAID" : "PARTIALLY_PAID",
+          amountDue,
+          paymentStatus: amountDue === 0 ? "PAID" : "PARTIALLY_PAID",
           inventoryReservedUntil: null,
         },
       });
