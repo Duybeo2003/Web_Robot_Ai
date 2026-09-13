@@ -35,6 +35,15 @@ RUN adduser --system --uid 1001 nextjs
 
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
 
+# public/uploads is gitignored (local-storage fallback for uploads when
+# Cloudinary isn't configured — see src/app/api/upload/route.ts) so it
+# doesn't exist in the image yet. Pre-create it owned by nextjs so that
+# when docker-compose's uploads_data volume is mounted here for the first
+# time, Docker copies this directory's ownership into the new volume —
+# otherwise the mount point defaults to root, and the nextjs user (this
+# image never runs as root) can't write to it.
+RUN mkdir -p public/uploads && chown -R nextjs:nodejs public/uploads
+
 # Automatically leverage output traces to reduce image size
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
