@@ -9,7 +9,13 @@ import { ProductDetailsClient } from "./components/product-details-client"
 import { auth } from "@/auth"
 import { WishlistButton } from "@/components/ui/wishlist-button"
 
-export const revalidate = 3600; // ISR: revalidate product pages every hour
+// NOT ISR (no `revalidate` export): this page calls auth() below to
+// personalize the wishlist button, and a dynamic (cookie-reading) API used
+// inside a route that also declares `revalidate` throws
+// DYNAMIC_SERVER_USAGE in a real production build — Next.js can't statically
+// cache a page whose output depends on the request's cookies. Dev mode
+// doesn't enforce this, so the crash only appears once actually deployed.
+export const dynamic = "force-dynamic";
 
 export async function generateStaticParams() {
   // The Docker build stage has no real database connection (see Dockerfile —
