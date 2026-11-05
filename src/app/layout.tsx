@@ -84,6 +84,7 @@ export default function RootLayout({
           <StoreWrapper>
             <Footer />
             <AIChatbot />
+            <Suspense fallback={null}>
             <AuthModal
               googleEnabled={Boolean(
                 process.env.GOOGLE_CLIENT_ID && process.env.GOOGLE_CLIENT_SECRET,
@@ -92,6 +93,7 @@ export default function RootLayout({
                 process.env.FACEBOOK_CLIENT_ID && process.env.FACEBOOK_CLIENT_SECRET,
               )}
             />
+            </Suspense>
             <CartSheet />
             <CartSyncer />
           </StoreWrapper>

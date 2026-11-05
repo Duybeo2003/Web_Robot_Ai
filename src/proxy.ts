@@ -1,4 +1,5 @@
 import { auth } from "@/auth";
+import { safeMobileReturnPath } from "@/lib/mobile/return-path";
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 import { adminLandingPage, canAccessAdminPath } from "@/lib/rbac";
@@ -76,6 +77,8 @@ export default auth(async (req) => {
 
   if (isAuthPage) {
     if (isAuth) {
+      const mobileReturn = safeMobileReturnPath(req.nextUrl.searchParams.get("callbackUrl"));
+      if (mobileReturn) return NextResponse.redirect(new URL(mobileReturn, req.url));
       if (req.auth?.user?.role && req.auth.user.role !== "USER") {
         return NextResponse.redirect(
           new URL(adminLandingPage(req.auth.user.role), req.url),

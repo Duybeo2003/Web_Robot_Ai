@@ -20,7 +20,8 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { Loader2, ArrowLeft } from "lucide-react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { safeMobileReturnPath } from "@/lib/mobile/return-path";
 
 export function AuthModal({
   googleEnabled,
@@ -30,6 +31,8 @@ export function AuthModal({
   facebookEnabled: boolean;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const returnPath = safeMobileReturnPath(searchParams.get("callbackUrl"));
   const { isOpen, closeModal } = useAuthModal();
 
   const [step, setStep] = useState<1 | 2>(1);
@@ -119,14 +122,15 @@ export function AuthModal({
     } else {
       await update();
       closeModal();
-      router.refresh();
+      if (returnPath) router.replace(returnPath);
+      else router.refresh();
     }
   };
 
   const handleSocialLogin = async (provider: "google" | "facebook") => {
     setIsLoading(true);
     try {
-      const res = await signIn(provider, { redirect: false });
+      const res = await signIn(provider, { redirect: false, ...(returnPath ? { redirectTo: returnPath } : {}) });
       if (res?.error) {
         setError(`Lỗi: ${res.error}`);
         setIsLoading(false);
@@ -160,7 +164,8 @@ export function AuthModal({
     } else {
       await update();
       closeModal();
-      router.refresh();
+      if (returnPath) router.replace(returnPath);
+      else router.refresh();
     }
   };
 
