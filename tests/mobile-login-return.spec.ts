@@ -6,7 +6,8 @@ import bcrypt from 'bcryptjs';
 
 loadEnvConfig(process.cwd());
 
-test('a deleted website User with a valid cookie reaches login instead of looping to mobile authorize', async ({ request }) => {
+test('a deleted website User with a valid cookie reaches login instead of looping to mobile authorize', async ({ page }) => {
+  const request = page.request;
   const databaseUrl = process.env.DATABASE_URL;
   const database = databaseUrl ? new URL(databaseUrl) : null;
   if (!database || database.protocol !== 'mysql:' || database.hostname !== '127.0.0.1' ||
@@ -41,6 +42,9 @@ test('a deleted website User with a valid cookie reaches login instead of loopin
     expect(destination.pathname).toBe('/');
     expect(destination.searchParams.get('login')).toBe('true');
     expect(destination.searchParams.get('callbackUrl')).toBe(returnPath);
+    await page.goto(loginPath);
+    await expect(page).toHaveURL((url) => url.pathname === '/' && url.searchParams.get('callbackUrl') === returnPath);
+    await expect(page.getByRole('dialog')).toBeVisible();
   } finally {
     await prisma.user.deleteMany({ where: { id, email } });
     await prisma.$disconnect();

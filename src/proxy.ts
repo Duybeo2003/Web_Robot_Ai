@@ -76,17 +76,21 @@ export default auth(async (req) => {
     req.nextUrl.pathname.startsWith("/register");
 
   if (isAuthPage) {
+    const mobileReturn = safeMobileReturnPath(req.nextUrl.searchParams.get("callbackUrl"));
+    if (mobileReturn) {
+      const userId = req.auth?.user?.id;
+      const currentUser = userId ? await prisma.user.findFirst({
+        where: { id: userId, deletedAt: null }, select: { id: true },
+      }) : null;
+      if (currentUser) return NextResponse.redirect(new URL(mobileReturn, req.url));
+      // Keep the mobile login return an HTTP redirect, including when the
+      // async login page would otherwise stream its redirect after a loading boundary.
+      const login = new URL("/", req.url);
+      login.searchParams.set("login", "true");
+      login.searchParams.set("callbackUrl", mobileReturn);
+      return NextResponse.redirect(login);
+    }
     if (isAuth) {
-      const mobileReturn = safeMobileReturnPath(req.nextUrl.searchParams.get("callbackUrl"));
-      if (mobileReturn) {
-        const userId = req.auth?.user?.id;
-        const currentUser = userId ? await prisma.user.findFirst({
-          where: { id: userId, deletedAt: null }, select: { id: true },
-        }) : null;
-        if (currentUser) return NextResponse.redirect(new URL(mobileReturn, req.url));
-        // A stale JWT must reach the sign-in modal with the callback intact.
-        return null;
-      }
       if (req.auth?.user?.role && req.auth.user.role !== "USER") {
         return NextResponse.redirect(
           new URL(adminLandingPage(req.auth.user.role), req.url),
