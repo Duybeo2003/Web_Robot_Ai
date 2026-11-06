@@ -78,7 +78,15 @@ export default auth(async (req) => {
   if (isAuthPage) {
     if (isAuth) {
       const mobileReturn = safeMobileReturnPath(req.nextUrl.searchParams.get("callbackUrl"));
-      if (mobileReturn) return NextResponse.redirect(new URL(mobileReturn, req.url));
+      if (mobileReturn) {
+        const userId = req.auth?.user?.id;
+        const currentUser = userId ? await prisma.user.findFirst({
+          where: { id: userId, deletedAt: null }, select: { id: true },
+        }) : null;
+        if (currentUser) return NextResponse.redirect(new URL(mobileReturn, req.url));
+        // A stale JWT must reach the sign-in modal with the callback intact.
+        return null;
+      }
       if (req.auth?.user?.role && req.auth.user.role !== "USER") {
         return NextResponse.redirect(
           new URL(adminLandingPage(req.auth.user.role), req.url),
